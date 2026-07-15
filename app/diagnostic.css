@@ -1,0 +1,148 @@
+/* ELITE Performance Diagnostic — samostatný vizuální okruh (Apple HIG) */
+
+.diag-root {
+  min-height: 100vh;
+  background: var(--wm-bg, #f2f2f7);
+  color: var(--wm-text, #1d1d1f);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01" on;
+}
+
+.diag-container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.diag-card {
+  background: var(--wm-surface, #fff);
+  border-radius: 20px;
+  border: 1px solid var(--wm-border-light, #e5e5ea);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* jemné vstupy */
+.diag-input {
+  width: 100%;
+  border: 1px solid var(--wm-border-light, #e5e5ea);
+  background: var(--wm-surface, #fff);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 15px;
+  outline: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.diag-input:focus {
+  border-color: var(--wm-blue, #007aff);
+  box-shadow: 0 0 0 3px var(--wm-tint-blue, rgba(0, 122, 255, 0.1));
+}
+
+/* škálové tlačítko 1–5 */
+.diag-scale-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--wm-border, #c6c6c8);
+  background: var(--wm-surface, #fff);
+  color: var(--wm-text-2, #6e6e73);
+  font-size: 15px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.diag-scale-btn:hover {
+  border-color: var(--wm-blue, #007aff);
+  color: var(--wm-blue, #007aff);
+}
+.diag-scale-btn[data-selected="true"] {
+  background: var(--wm-brand, #1d1d1f);
+  border-color: var(--wm-brand, #1d1d1f);
+  color: #fff;
+  transform: scale(1.06);
+}
+
+/* segmentový přepínač jazyka */
+.diag-segment {
+  display: inline-flex;
+  background: var(--wm-fill-4, rgba(116, 116, 128, 0.08));
+  border-radius: 10px;
+  padding: 2px;
+  gap: 2px;
+}
+.diag-segment button {
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--wm-text-2, #6e6e73);
+  transition: all 0.15s ease;
+}
+.diag-segment button[data-active="true"] {
+  background: var(--wm-surface, #fff);
+  color: var(--wm-text, #1d1d1f);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* pásma */
+.diag-band-priority { --band: #ff3b30; --band-bg: #fff1f0; }
+.diag-band-stabilization { --band: #ff9500; --band-bg: #fff5e6; }
+.diag-band-strong { --band: #007aff; --band-bg: #ebf5ff; }
+.diag-band-elite { --band: #30d158; --band-bg: #e8f9ed; }
+
+.diag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--band);
+  background: var(--band-bg);
+  white-space: nowrap;
+}
+.diag-chip::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: var(--band);
+}
+
+.diag-bar-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--wm-fill-4, rgba(116, 116, 128, 0.08));
+  overflow: hidden;
+}
+.diag-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--band);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* tisk */
+@media print {
+  .diag-no-print {
+    display: none !important;
+  }
+  .diag-root {
+    background: #fff;
+  }
+  .diag-card {
+    border: 1px solid #e5e5ea;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+  .diag-print-break {
+    break-before: page;
+  }
+  @page {
+    margin: 14mm;
+  }
+}

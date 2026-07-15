@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Winning Minds — brand a Apple HIG barevné tokeny (světlý / tmavý režim) */
+:root {
+  --wm-bg: #f2f2f7;
+  --wm-surface: #ffffff;
+  --wm-surface-2: #f2f2f7;
+  --wm-text: #1d1d1f;
+  --wm-text-2: #6e6e73;
+  --wm-text-3: #8e8e93;
+  --wm-border: #c6c6c8;
+  --wm-border-light: #e5e5ea;
+  --wm-brand: #1d1d1f;
+  --wm-blue: #007aff;
+  --wm-blue-light: #ebf5ff;
+  --wm-blue-dark: #0056cc;
+  --wm-green: #30d158;
+  --wm-green-light: #e8f9ed;
+  --wm-red: #ff3b30;
+  --wm-red-light: #fff1f0;
+  --wm-orange: #ff9500;
+  --wm-orange-light: #fff5e6;
+  --wm-gray: #8e8e93;
+  --wm-fill-4: rgba(116, 116, 128, 0.08);
+  --wm-tint-blue: rgba(0, 122, 255, 0.1);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --wm-bg: #000000;
+    --wm-surface: #1c1c1e;
+    --wm-surface-2: #2c2c2e;
+    --wm-text: #f5f5f7;
+    --wm-text-2: #ababae;
+    --wm-text-3: #8e8e93;
+    --wm-border: #48484a;
+    --wm-border-light: #3a3a3c;
+    --wm-brand: #f5f5f7;
+    --wm-blue: #0a84ff;
+    --wm-blue-light: rgba(10, 132, 255, 0.14);
+    --wm-blue-dark: #409cff;
+    --wm-green: #30d158;
+    --wm-green-light: rgba(48, 209, 88, 0.14);
+    --wm-red: #ff453a;
+    --wm-red-light: rgba(255, 69, 58, 0.14);
+    --wm-orange: #ff9f0a;
+    --wm-orange-light: rgba(255, 159, 10, 0.14);
+    --wm-gray: #636366;
+    --wm-fill-4: rgba(116, 116, 128, 0.16);
+    --wm-tint-blue: rgba(10, 132, 255, 0.16);
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  background: var(--wm-bg);
+  color: var(--wm-text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
