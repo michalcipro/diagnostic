@@ -21,7 +21,7 @@ export function isRemoteEnabled(): boolean {
  * Vytáhne srozumitelnou hlášku z chyby Convexu.
  *
  * Convex v produkci běžné chyby skrývá a klientovi pošle jen „Server Error";
- * text projde pouze u ConvexError, kde dorazí v poli `data`.
+ * text projde pouze u ConvexError, kde dorrazí v poli `data`.
  */
 export function chybaText(err: unknown, nahradni: string): string {
   // Začerněnou hlášku Convex posílá jako ConvexError s daty „Server Error".
@@ -172,7 +172,7 @@ export async function revokeInvite(sessionToken: string, id: string): Promise<vo
   await c.mutation(revokeInviteRef, { sessionToken, id })
 }
 
-// ── Účty a přihlášení ──────────────────────────────────────────────────────
+// ── Účty a přihlášení ────────────────────────────────────────────
 
 export interface CoachIdentity {
   name: string
@@ -187,16 +187,16 @@ export interface CoachRow extends CoachIdentity {
   lastLoginAt?: number
 }
 
-/** Je potřeba teprve založit master účet? */
-export async function needsSetup(): Promise<{ needsSetup: boolean; setupTokenReady: boolean }> {
+/** Označení verze frontendu — drží krok s VERZE_BACKENDU v convex/sessions.ts. */
+export const VERZE_FRONTENDU = "3"
+
+/** Je potřeba teprve založit master účet? Vrací i verzi nasazeného backendu. */
+export async function needsSetup(): Promise<{ needsSetup: boolean; verze: string }> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  const res = (await c.query(setupStatusRef, {})) as {
-    needsSetup: boolean
-    setupTokenReady?: boolean
-  }
-  // Starší nasazení backendu pole ještě nevrací — pak ho nepředstíráme jako chybu.
-  return { needsSetup: res.needsSetup, setupTokenReady: res.setupTokenReady !== false }
+  const res = (await c.query(setupStatusRef, {})) as { needsSetup: boolean; verze?: string }
+  // Starší nasazení backendu verzi ještě neposílá — pak to nepředstíráme.
+  return { needsSetup: res.needsSetup, verze: res.verze ?? "≤2" }
 }
 
 /** Založí master účet přes jednorázový zakládací odkaz. */
