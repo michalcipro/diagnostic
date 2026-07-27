@@ -233,12 +233,12 @@ export function ReportView({
             const content = getDimensionContent(d.id)
             return (
               <article key={d.id} className="diag-card p-7">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
                     <h3 className="text-[19px] font-bold tracking-tight">{content.name[lang]}</h3>
                     <p className="mt-1 text-[13px] text-[var(--wm-text-2)]">{vt(content.tagline, variant, lang)}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="shrink-0 text-right">
                     <div className="text-[22px] font-bold tabular-nums">{d.raw}</div>
                     <div className="text-[12px] text-[var(--wm-text-3)]">
                       {d.min}–{d.max} · {d.percent} %

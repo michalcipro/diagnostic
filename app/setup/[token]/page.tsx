@@ -16,6 +16,7 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
   const router = useRouter()
 
   const [state, setState] = useState<"checking" | "ready" | "done" | "unavailable">("checking")
+  const [tokenReady, setTokenReady] = useState(true)
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -30,7 +31,11 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
     }
     let active = true
     needsSetup()
-      .then((need) => active && setState(need ? "ready" : "done"))
+      .then((stav) => {
+        if (!active) return
+        setTokenReady(stav.setupTokenReady)
+        setState(stav.needsSetup ? "ready" : "done")
+      })
       .catch(() => active && setState("unavailable"))
     return () => {
       active = false
@@ -57,7 +62,7 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
       setError(
         chybaText(
           err,
-          "Účet se nepodařilo založit. Zkontroluj, že je v Convexu nastavená proměnná SETUP_TOKEN — a to i v produkčním prostředí.",
+          "Účet se nepodařilo založit a server neposlal důvod. Podrobnosti najdeš v Convexu v záložce Logs u funkce auth:createMaster.",
         ),
       )
     } finally {
@@ -102,6 +107,19 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
           Tímto odkazem vznikne jediný správcovský účet aplikace. Po odeslání formuláře odkaz
           nadobro přestane platit a další účty budeš moci přidat už jen ty sám z přehledu.
         </p>
+
+        {!tokenReady && (
+          <div className="mt-5 rounded-xl bg-[var(--wm-orange-light)] p-4 text-[13px] leading-relaxed text-[var(--wm-caution-fg)]">
+            <p className="font-semibold">Na serveru chybí proměnná SETUP_TOKEN.</p>
+            <p className="mt-1.5">
+              Dokud ji nedoplníš do produkčního prostředí Convexu, účet se založit nepodaří.
+              V terminálu v projektu:
+            </p>
+            <code className="mt-2 block overflow-x-auto rounded-lg bg-[var(--wm-surface-2)] px-3 py-2 font-mono text-[12px] text-[var(--wm-text-2)]">
+              npx convex env set SETUP_TOKEN {token} --prod
+            </code>
+          </div>
+        )}
 
         <div className="mt-6 flex flex-col gap-4">
           <label className="block">

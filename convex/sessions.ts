@@ -46,13 +46,19 @@ export const whoAmI = internalQuery({
   },
 })
 
-/** Zjistí, jestli je potřeba založit master účet (veřejné, bez dat). */
+/**
+ * Zjistí, jestli je potřeba založit master účet (veřejné, bez dat).
+ *
+ * Vrací i to, zda je na serveru vůbec nastavený SETUP_TOKEN — jen ano/ne,
+ * samotná hodnota ven nejde. Bez toho se chybějící proměnná pozná až po
+ * odeslání formuláře a vypadá to jako nevysvětlitelná chyba serveru.
+ */
 export const setupStatus = query({
   args: {},
-  returns: v.object({ needsSetup: v.boolean() }),
+  returns: v.object({ needsSetup: v.boolean(), setupTokenReady: v.boolean() }),
   handler: async (ctx) => {
     const first = await ctx.db.query("coaches").first()
-    return { needsSetup: first === null }
+    return { needsSetup: first === null, setupTokenReady: !!process.env.SETUP_TOKEN }
   },
 })
 

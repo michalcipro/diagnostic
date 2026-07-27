@@ -24,11 +24,22 @@ export function isRemoteEnabled(): boolean {
  * text projde pouze u ConvexError, kde dorazí v poli `data`.
  */
 export function chybaText(err: unknown, nahradni: string): string {
-  const data = (err as { data?: unknown })?.data
-  if (typeof data === "string" && data.trim()) return data
-  const msg = String((err as { message?: unknown })?.message ?? err)
-  if (!msg || /server error/i.test(msg)) return nahradni
-  return msg.replace(/^\[?CONVEX[^\]]*\]?\s*/i, "").replace(/^Error:\s*/, "").trim() || nahradni
+  // Začerněnou hlášku Convex posílá jako ConvexError s daty „Server Error".
+  // Uživateli to nic neřekne, takže v takovém případě sáhneme po náhradě.
+  const uklid = (s: string) =>
+    s
+      .replace(/\[Request ID:[^\]]*\]/gi, "")
+      .replace(/\[CONVEX[^\]]*\]/gi, "")
+      .replace(/^(Convex)?Error:\s*/i, "")
+      .trim()
+
+  const kandidati = [(err as { data?: unknown })?.data, (err as { message?: unknown })?.message, err]
+  for (const k of kandidati) {
+    if (typeof k !== "string" && !(k instanceof Error)) continue
+    const text = uklid(typeof k === "string" ? k : k.message)
+    if (text && !/^server error\.?$/i.test(text)) return text
+  }
+  return nahradni
 }
 
 const submitRef = makeFunctionReference<"mutation">("eliteDiagnostic:submitWithInvite")
@@ -177,11 +188,15 @@ export interface CoachRow extends CoachIdentity {
 }
 
 /** Je potřeba teprve založit master účet? */
-export async function needsSetup(): Promise<boolean> {
+export async function needsSetup(): Promise<{ needsSetup: boolean; setupTokenReady: boolean }> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  const res = (await c.query(setupStatusRef, {})) as { needsSetup: boolean }
-  return res.needsSetup
+  const res = (await c.query(setupStatusRef, {})) as {
+    needsSetup: boolean
+    setupTokenReady?: boolean
+  }
+  // Starší nasazení backendu pole ještě nevrací — pak ho nepředstíráme jako chybu.
+  return { needsSetup: res.needsSetup, setupTokenReady: res.setupTokenReady !== false }
 }
 
 /** Založí master účet přes jednorázový zakládací odkaz. */

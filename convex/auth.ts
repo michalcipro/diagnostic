@@ -52,6 +52,21 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase()
 }
 
+/**
+ * Convex v produkci nahrazuje text obyčejné chyby hláškou „Server Error".
+ * Tenhle obal proto každou chybu převede na ConvexError ještě uvnitř akce,
+ * takže se skutečná příčina ke klientovi dostane.
+ */
+async function sConvexChybou<T>(jmeno: string, fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn()
+  } catch (e) {
+    if (e instanceof ConvexError) throw e
+    const detail = e instanceof Error ? e.message : String(e)
+    throw new ConvexError(`Chyba při volání ${jmeno}: ${detail}`)
+  }
+}
+
 function validatePassword(password: string) {
   if (password.length < 10) {
     throw new ConvexError("Heslo musí mít alespoň 10 znaků.")
@@ -73,40 +88,45 @@ export const createMaster = action({
     password: v.string(),
   },
   returns: v.object({ sessionToken: v.string(), name: v.string(), role: v.string() }),
-  handler: async (ctx, args): Promise<Prihlaseni> => {
-    const expected = process.env.SETUP_TOKEN
-    if (!expected) {
-      throw new ConvexError("Na serveru není nastavený SETUP_TOKEN. Doplň ho v nastavení Convexu.")
-    }
-    if (!safeEqual(args.setupToken, expected)) {
-      throw new ConvexError("Neplatný zakládací odkaz.")
-    }
-    const exists: boolean = await ctx.runQuery(internal.authInternal.anyCoachExists, {})
-    if (exists) {
-      throw new ConvexError("Master účet už existuje. Tento odkaz je neplatný.")
-    }
-    validatePassword(args.password)
-    const email = normalizeEmail(args.email)
-    if (!email.includes("@")) throw new ConvexError("Zadej platný e-mail.")
-    if (args.name.trim().length < 2) throw new ConvexError("Zadej své jméno.")
+  handler: async (ctx, args): Promise<Prihlaseni> =>
+    sConvexChybou("createMaster", async () => {
+      const expected = process.env.SETUP_TOKEN
+      if (!expected) {
+        throw new ConvexError(
+          "Na serveru chybí proměnná SETUP_TOKEN. Doplň ji v Convexu — v produkčním prostředí, ne jen ve vývojovém.",
+        )
+      }
+      if (!safeEqual(args.setupToken, expected)) {
+        throw new ConvexError(
+          "Zakládací odkaz nesouhlasí s hodnotou SETUP_TOKEN na serveru. Zkontroluj, že se shodují znak po znaku.",
+        )
+      }
+      const exists: boolean = await ctx.runQuery(internal.authInternal.anyCoachExists, {})
+      if (exists) {
+        throw new ConvexError("Master účet už existuje. Tento odkaz je neplatný.")
+      }
+      validatePassword(args.password)
+      const email = normalizeEmail(args.email)
+      if (!email.includes("@")) throw new ConvexError("Zadej platný e-mail.")
+      if (args.name.trim().length < 2) throw new ConvexError("Zadej své jméno.")
 
-    const salt = crypto.randomBytes(16).toString("hex")
-    const coachId: Id<"coaches"> = await ctx.runMutation(internal.authInternal.insertCoach, {
-      email,
-      name: args.name.trim(),
-      passwordHash: hashPassword(args.password, salt),
-      salt,
-      role: "master",
-    })
+      const salt = crypto.randomBytes(16).toString("hex")
+      const coachId: Id<"coaches"> = await ctx.runMutation(internal.authInternal.insertCoach, {
+        email,
+        name: args.name.trim(),
+        passwordHash: hashPassword(args.password, salt),
+        salt,
+        role: "master",
+      })
 
-    const sessionToken = newToken()
-    await ctx.runMutation(internal.authInternal.openSession, {
-      coachId,
-      token: sessionToken,
-      days: SESSION_DAYS,
-    })
-    return { sessionToken, name: args.name.trim(), role: "master" }
-  },
+      const sessionToken = newToken()
+      await ctx.runMutation(internal.authInternal.openSession, {
+        coachId,
+        token: sessionToken,
+        days: SESSION_DAYS,
+      })
+      return { sessionToken, name: args.name.trim(), role: "master" }
+    }),
 })
 
 /** Přihlášení e-mailem a heslem. */
