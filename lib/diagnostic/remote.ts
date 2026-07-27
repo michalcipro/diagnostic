@@ -21,7 +21,7 @@ export function isRemoteEnabled(): boolean {
  * Vytáhne srozumitelnou hlášku z chyby Convexu.
  *
  * Convex v produkci běžné chyby skrývá a klientovi pošle jen „Server Error";
- * text projde pouze u ConvexError, kde dorrazí v poli `data`.
+ * text projde pouze u ConvexError, kde dorazí v poli `data`.
  */
 export function chybaText(err: unknown, nahradni: string): string {
   // Začerněnou hlášku Convex posílá jako ConvexError s daty „Server Error".
