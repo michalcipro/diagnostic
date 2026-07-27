@@ -176,7 +176,7 @@ export default function CoachPage() {
           <button
             type="submit"
             disabled={checking || password.length === 0}
-            className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-[var(--wm-brand)] text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-40"
+            className="diag-press mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-[var(--wm-brand)] text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-40"
           >
             {checking ? "…" : t.coachEnter}
           </button>
@@ -194,7 +194,7 @@ export default function CoachPage() {
           <button
             type="button"
             onClick={() => setDetail(null)}
-            className="inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
+            className="diag-press inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
           >
             ← {t.coachBack}
           </button>
@@ -203,7 +203,7 @@ export default function CoachPage() {
             <button
               type="button"
               onClick={() => window.print()}
-              className="inline-flex h-9 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
+              className="diag-press inline-flex h-9 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
             >
               {t.printButton}
             </button>
@@ -233,7 +233,7 @@ export default function CoachPage() {
           <button
             type="button"
             onClick={signOut}
-            className="inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
+            className="diag-press inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
           >
             {t.coachLogout}
           </button>
@@ -265,7 +265,7 @@ export default function CoachPage() {
                 setFormOpen(true)
                 setNewLink(null)
               }}
-              className="inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
+              className="diag-press inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
             >
               + {t.newInvite}
             </button>
@@ -308,7 +308,7 @@ export default function CoachPage() {
                 <button
                   type="submit"
                   disabled={creating}
-                  className="inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-40"
+                  className="diag-press inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-40"
                 >
                   {creating ? "…" : t.inviteCreate}
                 </button>
@@ -332,7 +332,7 @@ export default function CoachPage() {
                     <button
                       type="button"
                       onClick={() => copy(newLink)}
-                      className="inline-flex h-10 shrink-0 items-center rounded-full bg-[var(--wm-blue)] px-5 text-[14px] font-semibold text-white transition-opacity hover:opacity-85"
+                      className="diag-press inline-flex h-10 shrink-0 items-center rounded-full bg-[var(--wm-blue)] px-5 text-[14px] font-semibold text-white transition-opacity hover:opacity-85"
                     >
                       {copied ? t.inviteCopied : t.inviteCopy}
                     </button>
@@ -351,7 +351,7 @@ export default function CoachPage() {
               </div>
             ) : (
               invites.map((iv) => (
-                <article key={iv.id} className="diag-card flex flex-wrap items-center gap-4 p-5">
+                <article key={iv.id} className="diag-card diag-card-hover flex flex-wrap items-center gap-4 p-5">
                   <div className="min-w-[180px] flex-1">
                     <h3 className="text-[16px] font-semibold tracking-tight">
                       {iv.clientName || "—"}
@@ -376,14 +376,14 @@ export default function CoachPage() {
                       <button
                         type="button"
                         onClick={() => copy(inviteUrl(iv.token))}
-                        className="inline-flex h-10 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
+                        className="diag-press inline-flex h-10 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
                       >
                         {t.inviteCopy}
                       </button>
                       <button
                         type="button"
                         onClick={() => revoke(iv.id)}
-                        className="inline-flex h-10 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text-2)] transition-colors hover:bg-[var(--wm-fill-4)] hover:text-[var(--wm-red)]"
+                        className="diag-press inline-flex h-10 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text-2)] transition-colors hover:bg-[var(--wm-fill-4)] hover:text-[var(--wm-red)]"
                       >
                         {t.inviteRevoke}
                       </button>
@@ -407,7 +407,7 @@ export default function CoachPage() {
           {rows.map((r) => {
             const structure = getStructure(parseTestId(r.testId)!.model)
             return (
-              <article key={r.id} className="diag-card flex flex-wrap items-center gap-4 p-5">
+              <article key={r.id} className="diag-card diag-card-hover flex flex-wrap items-center gap-4 p-5">
                 <div className="min-w-[180px] flex-1">
                   <h2 className="text-[17px] font-semibold tracking-tight">{r.personName || "—"}</h2>
                   <p className="mt-0.5 text-[13px] text-[var(--wm-text-2)]">
@@ -423,7 +423,7 @@ export default function CoachPage() {
                   <button
                     type="button"
                     onClick={() => open(r.id)}
-                    className="inline-flex h-10 items-center rounded-full bg-[var(--wm-brand)] px-5 text-[14px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
+                    className="diag-press inline-flex h-10 items-center rounded-full bg-[var(--wm-brand)] px-5 text-[14px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
                   >
                     {t.coachOpen}
                   </button>

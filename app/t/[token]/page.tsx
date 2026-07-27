@@ -279,7 +279,7 @@ function Questionnaire({
               type="button"
               disabled={session.person.name.trim().length === 0}
               onClick={startItems}
-              className="mx-auto inline-flex h-12 items-center justify-center rounded-full bg-[var(--wm-brand)] px-10 text-[16px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-35"
+              className="diag-press mx-auto inline-flex h-12 items-center justify-center rounded-full bg-[var(--wm-brand)] px-10 text-[16px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-35"
             >
               {answered > 0 ? t.continueTest : t.beginButton}
             </button>
@@ -296,43 +296,47 @@ function Questionnaire({
             </div>
 
             <div className="flex flex-col gap-3">
-              {blockItems.map((item) => {
+              {blockItems.map((item, i) => {
                 const value = session.answers[item.id]
                 const missed = showMissing && value === undefined
                 return (
                   <div
                     key={item.id}
                     id={`item-${item.id}`}
-                    className="diag-card p-5"
-                    style={missed ? { borderColor: "var(--wm-red)" } : undefined}
+                    className="diag-card diag-item diag-enter p-5 sm:p-6"
+                    data-answered={value !== undefined}
+                    style={{
+                      ...(missed ? { borderColor: "var(--wm-red)" } : {}),
+                      animationDelay: `${Math.min(i * 30, 240)}ms`,
+                    }}
                   >
                     <p className="text-[15px] leading-relaxed">
-                      <span className="mr-2 font-semibold text-[var(--wm-text-3)]">{item.id}</span>
+                      <span className="mr-2 font-semibold tabular-nums text-[var(--wm-text-3)]">{item.id}</span>
                       {itemText(item, lang)}
                     </p>
-                    <div className="mt-4 flex items-center justify-between gap-2">
-                      <span className="hidden w-24 text-[11px] leading-tight text-[var(--wm-text-3)] sm:block">
-                        {scale[1]}
-                      </span>
-                      <div className="flex flex-1 items-center justify-center gap-2 sm:gap-3">
+
+                    <div className="mt-5">
+                      <div className="diag-scale-row" role="radiogroup" aria-label={itemText(item, lang)}>
                         {([1, 2, 3, 4, 5] as Answer[]).map((v) => (
                           <button
                             key={v}
                             type="button"
                             className="diag-scale-btn"
                             data-selected={value === v}
-                            aria-pressed={value === v}
+                            role="radio"
+                            aria-checked={value === v}
                             aria-label={`${v} — ${scale[v]}`}
-                            title={scale[v]}
                             onClick={() => setAnswer(item.id, v)}
                           >
                             {v}
                           </button>
                         ))}
                       </div>
-                      <span className="hidden w-24 text-right text-[11px] leading-tight text-[var(--wm-text-3)] sm:block">
-                        {scale[5]}
-                      </span>
+                      {/* Popisek se mění podle výběru — drží řádek symetrický
+                          a zároveň dává okamžitou zpětnou vazbu. */}
+                      <p className="diag-scale-caption" data-selected={value !== undefined}>
+                        {value !== undefined ? scale[value] : `1 · ${scale[1]}   —   5 · ${scale[5]}`}
+                      </p>
                     </div>
                   </div>
                 )
@@ -363,7 +367,7 @@ function Questionnaire({
               <button
                 type="button"
                 onClick={() => (block === 0 ? setStage("intro") : goToBlock(block - 1))}
-                className="inline-flex h-11 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-6 text-[15px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
+                className="diag-press inline-flex h-11 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-6 text-[15px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
               >
                 {t.back}
               </button>
@@ -371,7 +375,7 @@ function Questionnaire({
                 <button
                   type="button"
                   onClick={() => goToBlock(block + 1)}
-                  className="inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-8 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
+                  className="diag-press inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-8 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
                 >
                   {t.next}
                 </button>
@@ -380,7 +384,7 @@ function Questionnaire({
                   type="button"
                   onClick={finish}
                   disabled={submitting}
-                  className="inline-flex h-11 items-center rounded-full bg-[var(--wm-blue)] px-8 text-[15px] font-semibold text-white transition-opacity hover:opacity-85 disabled:opacity-50"
+                  className="diag-press inline-flex h-11 items-center rounded-full bg-[var(--wm-blue)] px-8 text-[15px] font-semibold text-white transition-opacity hover:opacity-85 disabled:opacity-50"
                 >
                   {submitting ? "…" : t.finish}
                 </button>
@@ -421,14 +425,14 @@ function Questionnaire({
                 type="button"
                 onClick={finish}
                 disabled={submitting}
-                className="inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-8 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-50"
+                className="diag-press inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-8 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-50"
               >
                 {submitting ? "…" : t.finish}
               </button>
               <button
                 type="button"
                 onClick={downloadBackup}
-                className="inline-flex h-11 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-6 text-[15px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
+                className="diag-press inline-flex h-11 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-6 text-[15px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
               >
                 {t.downloadBackup}
               </button>

@@ -37,32 +37,114 @@
   box-shadow: 0 0 0 3px var(--wm-tint-blue, rgba(0, 122, 255, 0.1));
 }
 
-/* škálové tlačítko 1–5 */
+/* ── škála 1–5 ──────────────────────────────────────────────────────────── */
+
+/* Řádek je vždy vycentrovaný; spojnice za kolečky drží celek pohromadě,
+   aby pětice četla jako jedna škála, ne pět samostatných tlačítek. */
+.diag-scale-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 3.2vw, 18px);
+}
+.diag-scale-row::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 12%;
+  right: 12%;
+  height: 1.5px;
+  background: var(--wm-border-light, #e5e5ea);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
 .diag-scale-btn {
-  width: 44px;
-  height: 44px;
+  position: relative;
+  width: clamp(46px, 12vw, 54px);
+  height: clamp(46px, 12vw, 54px);
+  flex: none;
   border-radius: 9999px;
   border: 1.5px solid var(--wm-border, #c6c6c8);
   background: var(--wm-surface, #fff);
   color: var(--wm-text-2, #6e6e73);
-  font-size: 15px;
-  font-weight: 500;
-  display: inline-flex;
+  font-size: 16px;
+  font-weight: 600;
+  /* Číslice stejné šířky + nulový line-height = číslo přesně v ose kolečka. */
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.12s ease;
   -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1),
+    border-color 0.16s ease,
+    background 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 .diag-scale-btn:hover {
   border-color: var(--wm-blue, #007aff);
   color: var(--wm-blue, #007aff);
+  transform: translateY(-2px);
+}
+.diag-scale-btn:active {
+  transform: scale(0.94);
+  transition-duration: 0.06s;
 }
 .diag-scale-btn[data-selected="true"] {
   background: var(--wm-brand, #1d1d1f);
   border-color: var(--wm-brand, #1d1d1f);
   color: var(--wm-brand-fg, #fff);
-  transform: scale(1.06);
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+  animation: diag-pop 0.34s cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+@keyframes diag-pop {
+  0% { transform: scale(0.86); }
+  55% { transform: scale(1.18); }
+  100% { transform: scale(1.1); }
+}
+
+/* Dynamický popisek pod škálou: dokud není vybráno, ukazuje krajní významy;
+   po výběru vypíše zvolenou odpověď. Vždy na střed, takže řádek zůstává
+   symetrický i na mobilu, kde se boční popisky nevešly. */
+.diag-scale-caption {
+  margin-top: 12px;
+  min-height: 18px;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: var(--wm-text-3, #8e8e93);
+  transition: color 0.16s ease;
+}
+.diag-scale-caption[data-selected="true"] {
+  color: var(--wm-text, #1d1d1f);
+  font-weight: 600;
+  animation: diag-fade-up 0.26s ease-out;
+}
+@keyframes diag-fade-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Zodpovězená položka se jemně zklidní, ať je vidět postup. */
+.diag-item {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+/* Zodpovězená položka se needituje do šedi — karta zůstává čistá,
+   vyplněné kolečko a popisek pod ním sdělují stav samy. */
+
+/* Nabíhání položek po přechodu na další blok. */
+.diag-enter {
+  animation: diag-enter 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes diag-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* segmentový přepínač jazyka */
@@ -133,6 +215,45 @@
   border-radius: 9999px;
   background: var(--band);
   transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  /* Pruh naběhne zleva při zobrazení, ať profil „vyroste“ před očima. */
+  transform-origin: left center;
+  animation: diag-grow 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes diag-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Odezva na stisk u hlavních tlačítek. */
+.diag-press {
+  transition: transform 0.14s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.16s ease, background 0.16s ease;
+}
+.diag-press:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Karty v přehledu kouče se při najetí jemně zvednou. */
+.diag-card-hover {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
+}
+.diag-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Uživatelé s omezením pohybu dostanou statickou, ale plně funkční verzi. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .diag-scale-btn:hover,
+  .diag-card-hover:hover {
+    transform: none;
+  }
 }
 
 /* tisk */
