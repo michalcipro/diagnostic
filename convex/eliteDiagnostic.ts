@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
+import { requireCoach } from "./sessions"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ELITE Performance Diagnostic — backend.
@@ -9,9 +10,9 @@ import { mutation, query } from "./_generated/server"
 // odesláním se pozvánka spotřebuje. Bez tokenu není kudy nic odeslat, takže
 // nehrozí spam ani vyplňování testů, které klientovi nepatří.
 //
-// VÝSLEDKY: odpovědi ani vyhodnocení se NIKDY nevrací bez hesla kouče, které
-// se ověřuje zde na serveru proti proměnné COACH_PASSWORD. Kdyby se
-// kontrolovalo jen v prohlížeči, kdokoli by si data stáhl přes veřejné API.
+// VÝSLEDKY: odpovědi ani vyhodnocení se NIKDY nevrací bez platné přihlášené
+// relace kouče, která se ověřuje zde na serveru. Kdyby se kontrolovalo jen
+// v prohlížeči, kdokoli by si data stáhl přes veřejné API.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TEST_IDS = new Set([
@@ -27,19 +28,6 @@ const personValidator = v.object({
   role: v.optional(v.string()),
   fillDate: v.string(),
 })
-
-/** Ověří heslo kouče. Vyhodí chybu, pokud nesedí nebo není nastavené. */
-function assertCoach(password: string) {
-  const expected = process.env.COACH_PASSWORD
-  if (!expected) {
-    throw new Error(
-      "Na serveru není nastavené heslo kouče (COACH_PASSWORD). Doplň ho v nastavení Convexu.",
-    )
-  }
-  if (password !== expected) {
-    throw new Error("Nesprávné heslo.")
-  }
-}
 
 /** Token do odkazu. Bez podobných znaků (0/O, 1/l), ať se dá případně přečíst. */
 function makeToken(): string {
@@ -58,7 +46,7 @@ function makeToken(): string {
 /** Vytvoří pozvánku na jedno použití. Pouze pro kouče. */
 export const createInvite = mutation({
   args: {
-    password: v.string(),
+    sessionToken: v.string(),
     testId: v.string(),
     lang: v.string(),
     clientName: v.optional(v.string()),
@@ -66,7 +54,7 @@ export const createInvite = mutation({
   },
   returns: v.object({ token: v.string() }),
   handler: async (ctx, args) => {
-    assertCoach(args.password)
+    await requireCoach(ctx, args.sessionToken)
     if (!TEST_IDS.has(args.testId)) {
       throw new Error(`Neznámý testId: ${args.testId}`)
     }
@@ -127,10 +115,10 @@ const inviteValidator = v.object({
 
 /** Seznam pozvánek. Pouze pro kouče. */
 export const listInvites = query({
-  args: { password: v.string() },
+  args: { sessionToken: v.string() },
   returns: v.array(inviteValidator),
   handler: async (ctx, args) => {
-    assertCoach(args.password)
+    await requireCoach(ctx, args.sessionToken)
     const docs = await ctx.db.query("invitations").withIndex("by_created").order("desc").take(500)
     return docs.map((d) => ({
       id: d._id,
@@ -148,10 +136,10 @@ export const listInvites = query({
 
 /** Zruší (smaže) pozvánku. Pouze pro kouče. */
 export const revokeInvite = mutation({
-  args: { password: v.string(), id: v.id("invitations") },
+  args: { sessionToken: v.string(), id: v.id("invitations") },
   returns: v.object({ ok: v.boolean() }),
   handler: async (ctx, args) => {
-    assertCoach(args.password)
+    await requireCoach(ctx, args.sessionToken)
     await ctx.db.delete(args.id)
     return { ok: true }
   },
@@ -236,10 +224,10 @@ const summaryValidator = v.object({
 })
 
 export const listForCoach = query({
-  args: { password: v.string() },
+  args: { sessionToken: v.string() },
   returns: v.array(summaryValidator),
   handler: async (ctx, args) => {
-    assertCoach(args.password)
+    await requireCoach(ctx, args.sessionToken)
     const docs = await ctx.db
       .query("eliteDiagnosticResults")
       .withIndex("by_created")
@@ -262,7 +250,7 @@ export const listForCoach = query({
 })
 
 export const getForCoach = query({
-  args: { password: v.string(), id: v.id("eliteDiagnosticResults") },
+  args: { sessionToken: v.string(), id: v.id("eliteDiagnosticResults") },
   returns: v.union(
     v.object({
       id: v.id("eliteDiagnosticResults"),
@@ -277,7 +265,7 @@ export const getForCoach = query({
     v.null(),
   ),
   handler: async (ctx, args) => {
-    assertCoach(args.password)
+    await requireCoach(ctx, args.sessionToken)
     const d = await ctx.db.get(args.id)
     if (!d) return null
     return {
@@ -293,27 +281,12 @@ export const getForCoach = query({
   },
 })
 
-/** Ověření hesla pro přihlašovací obrazovku přehledu. */
-export const checkPassword = query({
-  args: { password: v.string() },
-  returns: v.boolean(),
-  handler: async (_ctx, args) => {
-    const expected = process.env.COACH_PASSWORD
-    if (!expected) {
-      throw new Error(
-        "Na serveru není nastavené heslo kouče (COACH_PASSWORD). Doplň ho v nastavení Convexu.",
-      )
-    }
-    return args.password === expected
-  },
-})
-
 /** Smazání vyplnění. Pouze pro kouče. */
 export const removeForCoach = mutation({
-  args: { password: v.string(), id: v.id("eliteDiagnosticResults") },
+  args: { sessionToken: v.string(), id: v.id("eliteDiagnosticResults") },
   returns: v.object({ ok: v.boolean() }),
   handler: async (ctx, args) => {
-    assertCoach(args.password)
+    await requireCoach(ctx, args.sessionToken)
     await ctx.db.delete(args.id)
     return { ok: true }
   },

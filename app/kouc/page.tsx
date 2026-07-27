@@ -6,8 +6,15 @@ import { ReportView } from "@/components/diagnostic/report-view"
 import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
 import { getStructure, parseTestId } from "@/lib/diagnostic/structure"
 import {
-  checkCoachPassword,
+  addCoach,
   createInvite,
+  listCoaches,
+  login as doLogin,
+  logout as doLogout,
+  setCoachActive,
+  whoAmI,
+  type CoachIdentity,
+  type CoachRow,
   getResult,
   isRemoteEnabled,
   listInvites,
@@ -24,21 +31,29 @@ import type { Lang, TestId } from "@/lib/diagnostic/types"
 // Chráněná sekce pro kouče. Heslo se ověřuje na serveru (Convex) — v prohlížeči
 // se drží jen po dobu relace, aby se nemuselo psát u každého kliknutí.
 
-const PWD_KEY = "wm-diagnostic:coach"
+const SESSION_KEY = "wm-diagnostic:session"
 const LANG_KEY = "wm-diagnostic:lang"
 
 export default function CoachPage() {
   const [lang, setLang] = useState<Lang>("cs")
+  const [session, setSession] = useState<string>("")
+  const [meInfo, setMeInfo] = useState<CoachIdentity | null>(null)
+  const [booting, setBooting] = useState(true)
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [authed, setAuthed] = useState(false)
   const [checking, setChecking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [coaches, setCoaches] = useState<CoachRow[] | null>(null)
+  const [coachFormOpen, setCoachFormOpen] = useState(false)
+  const [cName, setCName] = useState("")
+  const [cEmail, setCEmail] = useState("")
+  const [cPassword, setCPassword] = useState("")
 
   const [rows, setRows] = useState<ResultSummary[] | null>(null)
   const [detail, setDetail] = useState<ResultDetail | null>(null)
   const [detailLang, setDetailLang] = useState<Lang>("cs")
 
-  const [tab, setTab] = useState<"results" | "invites">("results")
+  const [tab, setTab] = useState<"results" | "invites" | "coaches">("results")
   const [invites, setInvites] = useState<InviteRow[] | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [fTest, setFTest] = useState<TestId>("elite200-sport")
@@ -65,12 +80,24 @@ export default function CoachPage() {
   useEffect(() => {
     const savedLang = window.localStorage.getItem(LANG_KEY)
     if (savedLang === "en" || savedLang === "cs") setLang(savedLang)
-    const saved = window.sessionStorage.getItem(PWD_KEY)
-    if (saved) {
-      setPassword(saved)
-      setAuthed(true)
-      void load(saved)
+    const saved = window.localStorage.getItem(SESSION_KEY)
+    if (!saved || !isRemoteEnabled()) {
+      setBooting(false)
+      return
     }
+    // Relace může mezitím vypršet — ověř ji u serveru, ne jen v prohlížeči.
+    whoAmI(saved)
+      .then((who) => {
+        if (who) {
+          setSession(saved)
+          setMeInfo(who)
+          void load(saved)
+        } else {
+          window.localStorage.removeItem(SESSION_KEY)
+        }
+      })
+      .catch(() => window.localStorage.removeItem(SESSION_KEY))
+      .finally(() => setBooting(false))
   }, [load])
 
   const signIn = async (e: React.FormEvent) => {
@@ -82,31 +109,58 @@ export default function CoachPage() {
     }
     setChecking(true)
     try {
-      const ok = await checkCoachPassword(password)
-      if (!ok) {
-        setError(t.coachWrongPassword)
-        return
-      }
-      window.sessionStorage.setItem(PWD_KEY, password)
-      setAuthed(true)
-      await load(password)
-    } catch {
-      setError(t.coachNotConfigured)
+      const res = await doLogin(email, password)
+      window.localStorage.setItem(SESSION_KEY, res.sessionToken)
+      setSession(res.sessionToken)
+      setMeInfo({ name: res.name, email, role: res.role as "master" | "coach" })
+      setPassword("")
+      await load(res.sessionToken)
+    } catch (err) {
+      const msg = String(err)
+      setError(
+        msg.includes("Nesprávný") ? t.coachWrongPassword : msg.replace(/^Error:\s*/, "").replace(/\[.*?\]\s*/g, ""),
+      )
     } finally {
       setChecking(false)
     }
   }
 
-  const signOut = () => {
-    window.sessionStorage.removeItem(PWD_KEY)
-    setAuthed(false)
-    setPassword("")
+  const signOut = async () => {
+    if (session) await doLogout(session)
+    window.localStorage.removeItem(SESSION_KEY)
+    setSession("")
+    setMeInfo(null)
     setRows(null)
+    setInvites(null)
+    setCoaches(null)
     setDetail(null)
   }
 
+  const loadCoaches = async () => {
+    try {
+      setCoaches(await listCoaches(session))
+    } catch (e) {
+      setError(String(e))
+    }
+  }
+
+  const submitCoach = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    try {
+      await addCoach(session, cName, cEmail, cPassword)
+      setCName("")
+      setCEmail("")
+      setCPassword("")
+      setCoachFormOpen(false)
+      await loadCoaches()
+    } catch (err) {
+      setError(String(err).replace(/^Error:\s*/, "").replace(/\[.*?\]\s*/g, ""))
+    }
+  }
+
   const open = async (id: string) => {
-    const d = await getResult(password, id)
+    const d = await getResult(session, id)
     if (d) {
       setDetail(d)
       setDetailLang(d.lang)
@@ -116,8 +170,8 @@ export default function CoachPage() {
 
   const remove = async (id: string) => {
     if (!window.confirm(t.coachDeleteConfirm)) return
-    await removeResult(password, id)
-    await load(password)
+    await removeResult(session, id)
+    await load(session)
   }
 
   const inviteUrl = (token: string) => `${window.location.origin}/t/${token}`
@@ -126,11 +180,11 @@ export default function CoachPage() {
     e.preventDefault()
     setCreating(true)
     try {
-      const token = await createInvite(password, fTest, fLang, fName.trim())
+      const token = await createInvite(session, fTest, fLang, fName.trim())
       setNewLink(inviteUrl(token))
       setCopied(false)
       setFName("")
-      await load(password)
+      await load(session)
     } catch (err) {
       setError(String(err))
     } finally {
@@ -150,12 +204,13 @@ export default function CoachPage() {
 
   const revoke = async (id: string) => {
     if (!window.confirm(t.inviteRevokeConfirm)) return
-    await revokeInvite(password, id)
-    await load(password)
+    await revokeInvite(session, id)
+    await load(session)
   }
 
   // ---------- přihlášení ----------
-  if (!authed) {
+  if (booting) return null
+  if (!meInfo) {
     return (
       <div className="diag-container flex min-h-screen flex-col items-center justify-center pb-20">
         <form onSubmit={signIn} className="diag-card w-full max-w-sm p-7">
@@ -163,10 +218,19 @@ export default function CoachPage() {
           <h1 className="mt-2 text-[22px] font-bold tracking-tight">{t.coachTitle}</h1>
           <p className="mt-1 text-[14px] text-[var(--wm-text-2)]">{t.coachSubtitle}</p>
           <label className="mt-6 block">
+            <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">E-mail</span>
+            <input
+              type="email"
+              autoFocus
+              className="diag-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+          <label className="mt-4 block">
             <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">{t.coachPassword}</span>
             <input
               type="password"
-              autoFocus
               className="diag-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -175,7 +239,7 @@ export default function CoachPage() {
           {error && <p className="mt-3 text-[13px] font-medium text-[var(--wm-invalid-fg)]">{error}</p>}
           <button
             type="submit"
-            disabled={checking || password.length === 0}
+            disabled={checking || password.length === 0 || email.length === 0}
             className="diag-press mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-[var(--wm-brand)] text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-40"
           >
             {checking ? "…" : t.coachEnter}
@@ -226,7 +290,15 @@ export default function CoachPage() {
         <div>
           <p className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text-3)]">{t.brand}</p>
           <h1 className="mt-1 text-[28px] font-bold tracking-tight">{t.coachTitle}</h1>
-          {rows && <p className="mt-1 text-[14px] text-[var(--wm-text-2)]">{t.coachCount(rows.length)}</p>}
+          <p className="mt-1 text-[14px] text-[var(--wm-text-2)]">
+            {meInfo.name}
+            {meInfo.role === "master" && (
+              <span className="ml-2 rounded-full bg-[var(--wm-fill-4)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--wm-text-2)]">
+                master
+              </span>
+            )}
+            {rows && <span className="ml-2 text-[var(--wm-text-3)]">· {t.coachCount(rows.length)}</span>}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <LangToggle lang={lang} onChange={setLang} />
@@ -254,7 +326,101 @@ export default function CoachPage() {
         <button type="button" data-active={tab === "invites"} onClick={() => setTab("invites")}>
           {t.tabInvites}
         </button>
+        {meInfo.role === "master" && (
+          <button
+            type="button"
+            data-active={tab === "coaches"}
+            onClick={() => {
+              setTab("coaches")
+              if (coaches === null) void loadCoaches()
+            }}
+          >
+            Kouči
+          </button>
+        )}
       </div>
+
+      {tab === "coaches" && meInfo.role === "master" && (
+        <div className="mb-8">
+          {!coachFormOpen ? (
+            <button
+              type="button"
+              onClick={() => setCoachFormOpen(true)}
+              className="diag-press inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
+            >
+              + Přidat kouče
+            </button>
+          ) : (
+            <form onSubmit={submitCoach} className="diag-card p-6">
+              <h2 className="text-[16px] font-semibold">Přidat kouče</h2>
+              <p className="mt-1 text-[13px] text-[var(--wm-text-2)]">
+                Nový kouč uvidí vyplněné diagnostiky a bude moci vytvářet pozvánky. Spravovat účty
+                může dál pouze master.
+              </p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                <label className="block">
+                  <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">Jméno</span>
+                  <input className="diag-input" value={cName} onChange={(e) => setCName(e.target.value)} />
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">E-mail</span>
+                  <input type="email" className="diag-input" value={cEmail} onChange={(e) => setCEmail(e.target.value)} />
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">Heslo</span>
+                  <input type="password" className="diag-input" value={cPassword} onChange={(e) => setCPassword(e.target.value)} />
+                </label>
+              </div>
+              <div className="mt-5 flex items-center gap-3">
+                <button
+                  type="submit"
+                  disabled={!cName.trim() || !cEmail.trim() || cPassword.length < 10}
+                  className="diag-press inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-40"
+                >
+                  Vytvořit účet
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCoachFormOpen(false)}
+                  className="text-[14px] font-semibold text-[var(--wm-text-2)] hover:text-[var(--wm-text)]"
+                >
+                  {t.back}
+                </button>
+              </div>
+            </form>
+          )}
+
+          <div className="mt-5 flex flex-col gap-3">
+            {(coaches ?? []).map((c) => (
+              <article key={c.id} className="diag-card diag-card-hover flex flex-wrap items-center gap-4 p-5">
+                <div className="min-w-[180px] flex-1">
+                  <h3 className="text-[16px] font-semibold tracking-tight">
+                    {c.name}
+                    {c.role === "master" && (
+                      <span className="ml-2 rounded-full bg-[var(--wm-fill-4)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--wm-text-2)]">
+                        master
+                      </span>
+                    )}
+                  </h3>
+                  <p className="mt-0.5 text-[13px] text-[var(--wm-text-2)]">{c.email}</p>
+                </div>
+                {c.role !== "master" && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await setCoachActive(session, c.id, !c.active)
+                      await loadCoaches()
+                    }}
+                    className="diag-press inline-flex h-10 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
+                  >
+                    {c.active ? "Zablokovat" : "Obnovit přístup"}
+                  </button>
+                )}
+              </article>
+            ))}
+          </div>
+        </div>
+      )}
 
       {tab === "invites" && (
         <div className="mb-8">

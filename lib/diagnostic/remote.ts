@@ -24,7 +24,15 @@ const listInvitesRef = makeFunctionReference<"query">("eliteDiagnostic:listInvit
 const revokeInviteRef = makeFunctionReference<"mutation">("eliteDiagnostic:revokeInvite")
 const listRef = makeFunctionReference<"query">("eliteDiagnostic:listForCoach")
 const getRef = makeFunctionReference<"query">("eliteDiagnostic:getForCoach")
-const checkRef = makeFunctionReference<"query">("eliteDiagnostic:checkPassword")
+const setupStatusRef = makeFunctionReference<"query">("sessions:setupStatus")
+const createMasterRef = makeFunctionReference<"action">("auth:createMaster")
+const loginRef = makeFunctionReference<"action">("auth:login")
+const meRef = makeFunctionReference<"query">("sessions:me")
+const logoutRef = makeFunctionReference<"mutation">("sessions:logout")
+const listCoachesRef = makeFunctionReference<"query">("sessions:listCoaches")
+const addCoachRef = makeFunctionReference<"action">("auth:addCoach")
+const setCoachActiveRef = makeFunctionReference<"mutation">("sessions:setCoachActive")
+const changePasswordRef = makeFunctionReference<"action">("auth:changePassword")
 const removeRef = makeFunctionReference<"mutation">("eliteDiagnostic:removeForCoach")
 
 function client(): ConvexHttpClient | null {
@@ -109,7 +117,7 @@ export async function submitWithInvite(token: string, session: StoredSession): P
 
 /** Vytvoří pozvánku na jedno použití (pouze s platným heslem). */
 export async function createInvite(
-  password: string,
+  sessionToken: string,
   testId: TestId,
   lang: Lang,
   clientName?: string,
@@ -117,7 +125,7 @@ export async function createInvite(
   const c = client()
   if (!c) throw new Error("not-configured")
   const res = (await c.mutation(createInviteRef, {
-    password,
+    sessionToken,
     testId,
     lang,
     clientName: clientName || undefined,
@@ -126,38 +134,142 @@ export async function createInvite(
 }
 
 /** Seznam pozvánek (pouze s platným heslem). */
-export async function listInvites(password: string): Promise<InviteRow[]> {
+export async function listInvites(sessionToken: string): Promise<InviteRow[]> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  return (await c.query(listInvitesRef, { password })) as InviteRow[]
+  return (await c.query(listInvitesRef, { sessionToken })) as InviteRow[]
 }
 
 /** Zruší pozvánku (pouze s platným heslem). */
-export async function revokeInvite(password: string, id: string): Promise<void> {
+export async function revokeInvite(sessionToken: string, id: string): Promise<void> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  await c.mutation(revokeInviteRef, { password, id })
+  await c.mutation(revokeInviteRef, { sessionToken, id })
 }
 
-/** Ověří heslo kouče. */
-export async function checkCoachPassword(password: string): Promise<boolean> {
+// ── Účty a přihlášení ──────────────────────────────────────────────────────
+
+export interface CoachIdentity {
+  name: string
+  email: string
+  role: "master" | "coach"
+}
+
+export interface CoachRow extends CoachIdentity {
+  id: string
+  active: boolean
+  createdAt: number
+  lastLoginAt?: number
+}
+
+/** Je potřeba teprve založit master účet? */
+export async function needsSetup(): Promise<boolean> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  return (await c.query(checkRef, { password })) as boolean
+  const res = (await c.query(setupStatusRef, {})) as { needsSetup: boolean }
+  return res.needsSetup
+}
+
+/** Založí master účet přes jednorázový zakládací odkaz. */
+export async function createMaster(
+  setupToken: string,
+  name: string,
+  email: string,
+  password: string,
+): Promise<{ sessionToken: string; name: string; role: string }> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.action(createMasterRef, { setupToken, name, email, password })) as {
+    sessionToken: string
+    name: string
+    role: string
+  }
+}
+
+/** Přihlášení e-mailem a heslem. */
+export async function login(
+  email: string,
+  password: string,
+): Promise<{ sessionToken: string; name: string; role: string }> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.action(loginRef, { email, password })) as {
+    sessionToken: string
+    name: string
+    role: string
+  }
+}
+
+/** Ověří relaci a vrátí přihlášeného kouče (null, pokud vypršela). */
+export async function whoAmI(sessionToken: string): Promise<CoachIdentity | null> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(meRef, { sessionToken })) as CoachIdentity | null
+}
+
+export async function logout(sessionToken: string): Promise<void> {
+  const c = client()
+  if (!c) return
+  try {
+    await c.mutation(logoutRef, { sessionToken })
+  } catch {
+    // odhlášení v prohlížeči proběhne tak jako tak
+  }
+}
+
+/** Seznam koučů — pouze master. */
+export async function listCoaches(sessionToken: string): Promise<CoachRow[]> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(listCoachesRef, { sessionToken })) as CoachRow[]
+}
+
+/** Přidání dalšího kouče — pouze master. */
+export async function addCoach(
+  sessionToken: string,
+  name: string,
+  email: string,
+  password: string,
+): Promise<void> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  await c.action(addCoachRef, { sessionToken, name, email, password })
+}
+
+/** Zapnutí/vypnutí přístupu kouče — pouze master. */
+export async function setCoachActive(
+  sessionToken: string,
+  coachId: string,
+  active: boolean,
+): Promise<void> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  await c.mutation(setCoachActiveRef, { sessionToken, coachId, active })
+}
+
+/** Změna vlastního hesla. */
+export async function changePassword(
+  sessionToken: string,
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  await c.action(changePasswordRef, { sessionToken, currentPassword, newPassword })
 }
 
 /** Seznam všech vyplnění (pouze s platným heslem). */
-export async function listResults(password: string): Promise<ResultSummary[]> {
+export async function listResults(sessionToken: string): Promise<ResultSummary[]> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  return (await c.query(listRef, { password })) as ResultSummary[]
+  return (await c.query(listRef, { sessionToken })) as ResultSummary[]
 }
 
 /** Jedno vyplnění včetně odpovědí (pouze s platným heslem). */
-export async function getResult(password: string, id: string): Promise<ResultDetail | null> {
+export async function getResult(sessionToken: string, id: string): Promise<ResultDetail | null> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  const doc = (await c.query(getRef, { password, id })) as
+  const doc = (await c.query(getRef, { sessionToken, id })) as
     | (Omit<ResultDetail, "answers"> & { answers: string })
     | null
   if (!doc) return null
@@ -165,8 +277,8 @@ export async function getResult(password: string, id: string): Promise<ResultDet
 }
 
 /** Smaže vyplnění (pouze s platným heslem). */
-export async function removeResult(password: string, id: string): Promise<void> {
+export async function removeResult(sessionToken: string, id: string): Promise<void> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  await c.mutation(removeRef, { password, id })
+  await c.mutation(removeRef, { sessionToken, id })
 }

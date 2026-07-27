@@ -20,7 +20,8 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS · Convex
 ## Struktura
 
 ```
-app/                     # / (přehled testů), /[testId] (dotazník), /kouc (chráněná sekce)
+app/                     # / (info), /t/[token] (dotazník na pozvánku),
+                         # /kouc (chráněná sekce), /setup/[token] (založení master účtu)
 components/diagnostic/   # sdílené UI (přepínač jazyka, grafy skóre, ReportView)
 lib/diagnostic/          # logika: structure, scoring, i18n, items, content, remote
 convex/                  # backend: schema + eliteDiagnostic (submit, listForCoach, getForCoach)
@@ -31,11 +32,12 @@ convex/                  # backend: schema + eliteDiagnostic (submit, listForCoa
 | Role | Přístup |
 | --- | --- |
 | Respondent | vyplní dotazník na přímém odkazu, po odeslání vidí **pouze potvrzení** |
-| Kouč | `/kouc` — po zadání hesla seznam všech vyplnění, kompletní vyhodnocení, tisk do PDF |
+| Kouč | `/kouc` — po přihlášení seznam vyplnění, kompletní vyhodnocení, tisk do PDF, tvorba pozvánek |
+| Master | navíc správa účtů koučů |
 
-Odpovědi ani vyhodnocení se z backendu nikdy nevrací bez platného hesla; heslo
-se ověřuje **serverově** v Convexu proti proměnné `COACH_PASSWORD`. Kontrola jen
-v prohlížeči by nestačila — data by šla stáhnout přímo přes veřejné API.
+Odpovědi ani vyhodnocení se z backendu nikdy nevrací bez platné přihlášené relace,
+která se ověřuje **serverově** v Convexu. Kontrola jen v prohlížeči by nestačila —
+data by šla stáhnout přímo přes veřejné API.
 
 ## Nastavení Convexu
 
@@ -50,7 +52,25 @@ V dashboardu Convexu → **Settings → Environment Variables** přidej:
 
 | Proměnná | Význam |
 | --- | --- |
-| `COACH_PASSWORD` | heslo do sekce `/kouc` (nastav v dev i production prostředí) |
+| `SETUP_TOKEN` | jednorázový token pro založení master účtu (nastav v dev i production) |
+
+## Účty koučů
+
+Aplikace nemá sdílené heslo — každý kouč má vlastní účet.
+
+**Master účet** se zakládá jednou přes odkaz `/setup/<SETUP_TOKEN>`. Ten projde
+pouze tehdy, když sedí token **a zároveň zatím neexistuje žádný kouč**. Jakmile
+master vznikne, odkaz je nadobro mrtvý — druhý účet už tudy založit nejde.
+
+Další kouče může přidat **výhradně master** v přehledu → záložka **Kouči**.
+Master může jejich přístup kdykoli zablokovat a obnovit; sám sebe zablokovat nemůže.
+
+Hesla se ukládají hashovaná (PBKDF2-SHA256, 210 000 iterací, unikátní sůl) —
+z databáze je nelze zpětně přečíst. Přihlášení vytvoří relaci s platností 30 dní;
+změna hesla všechny existující relace ukončí.
+
+**Ztráta hesla:** v dashboardu Convexu smaž záznam v tabulce `coaches`. Tím se
+zakládací odkaz znovu aktivuje a master účet založíš nanovo.
 
 Na Vercelu nastav proměnnou `CONVEX_DEPLOY_KEY` (produkční deploy key z Convexu)
 a build command na `npx convex deploy --cmd 'npm run build'` — ten při každém

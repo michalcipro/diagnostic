@@ -7,6 +7,30 @@ import { v } from "convex/values"
 // na jedno použití. Vyplněné výsledky vidí pouze kouč (ověření heslem na
 // serveru, viz eliteDiagnostic.ts) — respondent po odeslání žádná data nedostává.
 export default defineSchema({
+  // Kouči. První založený účet je master — vzniká přes jednorázový zakládací
+  // odkaz, který po jeho vytvoření nadobro přestane fungovat. Další kouče
+  // může přidat výhradně master.
+  coaches: defineTable({
+    email: v.string(),
+    name: v.string(),
+    passwordHash: v.string(),
+    salt: v.string(),
+    role: v.union(v.literal("master"), v.literal("coach")),
+    active: v.boolean(),
+    createdAt: v.number(),
+    lastLoginAt: v.optional(v.number()),
+  }).index("by_email", ["email"]),
+
+  // Přihlášené relace. Token drží prohlížeč, platnost je omezená.
+  coachSessions: defineTable({
+    token: v.string(),
+    coachId: v.id("coaches"),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+  })
+    .index("by_token", ["token"])
+    .index("by_coach", ["coachId"]),
+
   // Pozvánka = jeden odkaz pro jednoho klienta na jeden konkrétní test.
   invitations: defineTable({
     token: v.string(), // neuhodnutelný token v odkazu /t/<token>
