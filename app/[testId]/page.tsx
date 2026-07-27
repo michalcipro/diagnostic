@@ -125,7 +125,7 @@ function Questionnaire({ testId }: { testId: TestId }) {
   return (
     <div ref={topRef}>
       {/* horní lišta */}
-      <div className="sticky top-0 z-10 border-b border-[var(--wm-border-light)] bg-[rgba(242,242,247,0.85)] backdrop-blur-xl">
+      <div className="sticky top-0 z-10 border-b border-[var(--wm-border-light)] bg-[var(--wm-glass)] backdrop-blur-xl">
         <div className="diag-container flex h-14 items-center justify-between gap-4">
           {/* Značka záměrně není odkaz — klient s přímým odkazem má vidět
               pouze svůj test, ne nabídku ostatních diagnostik. */}
@@ -232,7 +232,7 @@ function Questionnaire({ testId }: { testId: TestId }) {
               type="button"
               disabled={session.person.name.trim().length === 0}
               onClick={startItems}
-              className="mx-auto inline-flex h-12 items-center justify-center rounded-full bg-[var(--wm-brand)] px-10 text-[16px] font-semibold text-white transition-opacity hover:opacity-85 disabled:opacity-35"
+              className="mx-auto inline-flex h-12 items-center justify-center rounded-full bg-[var(--wm-brand)] px-10 text-[16px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-35"
             >
               {answered > 0 ? t.continueTest : t.beginButton}
             </button>
@@ -316,7 +316,7 @@ function Questionnaire({ testId }: { testId: TestId }) {
               <button
                 type="button"
                 onClick={() => (block === 0 ? setStage("intro") : goToBlock(block - 1))}
-                className="inline-flex h-11 items-center rounded-full border border-[var(--wm-border)] bg-white px-6 text-[15px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
+                className="inline-flex h-11 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-6 text-[15px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
               >
                 {t.back}
               </button>
@@ -324,7 +324,7 @@ function Questionnaire({ testId }: { testId: TestId }) {
                 <button
                   type="button"
                   onClick={() => goToBlock(block + 1)}
-                  className="inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-8 text-[15px] font-semibold text-white transition-opacity hover:opacity-85"
+                  className="inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-8 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
                 >
                   {t.next}
                 </button>

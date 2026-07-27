@@ -95,7 +95,7 @@ export default function DiagnosticHome() {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/${c.testId}`}
-                    className="inline-flex h-11 flex-1 items-center justify-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-white transition-opacity hover:opacity-85"
+                    className="inline-flex h-11 flex-1 items-center justify-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
                   >
                     {inProgress[c.testId] ? t.continueTest : t.start}
                   </Link>

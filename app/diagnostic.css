@@ -61,7 +61,7 @@
 .diag-scale-btn[data-selected="true"] {
   background: var(--wm-brand, #1d1d1f);
   border-color: var(--wm-brand, #1d1d1f);
-  color: #fff;
+  color: var(--wm-brand-fg, #fff);
   transform: scale(1.06);
 }
 
@@ -92,6 +92,15 @@
 .diag-band-stabilization { --band: #ff9500; --band-bg: #fff5e6; }
 .diag-band-strong { --band: #007aff; --band-bg: #ebf5ff; }
 .diag-band-elite { --band: #30d158; --band-bg: #e8f9ed; }
+
+/* Tmavý režim: světlé podklady štítků nahradit poloprůhlednými, aby
+   nesvítily na tmavém pozadí. */
+@media (prefers-color-scheme: dark) {
+  .diag-band-priority { --band-bg: rgba(255, 59, 48, 0.16); }
+  .diag-band-stabilization { --band-bg: rgba(255, 149, 0, 0.16); }
+  .diag-band-strong { --band-bg: rgba(10, 132, 255, 0.18); }
+  .diag-band-elite { --band-bg: rgba(48, 209, 88, 0.16); }
+}
 
 .diag-chip {
   display: inline-flex;

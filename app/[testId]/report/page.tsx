@@ -40,9 +40,9 @@ function Missing({ lang }: { lang: Lang }) {
 }
 
 const STATUS_STYLE: Record<ValidityStatus, { color: string; bg: string }> = {
-  ok: { color: "#248a3d", bg: "var(--wm-green-light, #E8F9ED)" },
-  caution: { color: "#c93400", bg: "var(--wm-orange-light, #FFF5E6)" },
-  invalid: { color: "#d70015", bg: "var(--wm-red-light, #FFF1F0)" },
+  ok: { color: "var(--wm-ok-fg, #248a3d)", bg: "var(--wm-green-light, #E8F9ED)" },
+  caution: { color: "var(--wm-caution-fg, #c93400)", bg: "var(--wm-orange-light, #FFF5E6)" },
+  invalid: { color: "var(--wm-invalid-fg, #d70015)", bg: "var(--wm-red-light, #FFF1F0)" },
 }
 
 function StatusChip({ status, lang }: { status: ValidityStatus; lang: Lang }) {
@@ -142,7 +142,7 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
             <button
               type="button"
               onClick={copyShareLink}
-              className="inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-white px-4 text-[13px] font-semibold transition-colors hover:bg-[var(--wm-fill-4)]"
+              className="inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold transition-colors hover:bg-[var(--wm-fill-4)]"
             >
               {copied ? (lang === "cs" ? "Zkopírováno ✓" : "Copied ✓") : lang === "cs" ? "Kopírovat odkaz" : "Copy link"}
             </button>
@@ -150,14 +150,14 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
           <button
             type="button"
             onClick={exportJson}
-            className="inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-white px-4 text-[13px] font-semibold transition-colors hover:bg-[var(--wm-fill-4)]"
+            className="inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold transition-colors hover:bg-[var(--wm-fill-4)]"
           >
             JSON
           </button>
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex h-9 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-white transition-opacity hover:opacity-85"
+            className="inline-flex h-9 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
           >
             {t.printButton}
           </button>
@@ -198,7 +198,7 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
       </header>
 
       {!result.complete && (
-        <div className="mt-4 rounded-2xl border border-[var(--wm-orange)] bg-[var(--wm-orange-light)] p-4 text-[14px] font-medium text-[#c93400]">
+        <div className="mt-4 rounded-2xl border border-[var(--wm-orange)] bg-[var(--wm-orange-light)] p-4 text-[14px] font-medium text-[var(--wm-caution-fg)]">
           {t.incompleteWarning(result.answeredCount, structure.itemCount)}
         </div>
       )}
@@ -280,7 +280,7 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
           ))}
         </div>
         {result.imbalanced && (
-          <p className="mt-3 rounded-xl bg-[var(--wm-orange-light)] p-3 text-[13px] font-medium text-[#c93400]">
+          <p className="mt-3 rounded-xl bg-[var(--wm-orange-light)] p-3 text-[13px] font-medium text-[var(--wm-caution-fg)]">
             {t.imbalanceNote}
           </p>
         )}
@@ -363,7 +363,7 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
                 </p>
 
                 {d.heterogeneous && (
-                  <p className="mt-3 rounded-xl bg-[var(--wm-orange-light)] p-3 text-[13px] font-medium text-[#c93400]">
+                  <p className="mt-3 rounded-xl bg-[var(--wm-orange-light)] p-3 text-[13px] font-medium text-[var(--wm-caution-fg)]">
                     {t.heterogeneityNote}
                   </p>
                 )}
