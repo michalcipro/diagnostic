@@ -32,6 +32,18 @@ type Identita = {
 const PBKDF2_ITERATIONS = 210_000
 const SESSION_DAYS = 30
 
+/**
+ * Zakládací token pro master účet.
+ *
+ * Skutečnou pojistkou proti vzniku druhého účtu je podmínka „zatím neexistuje
+ * žádný kouč" — ta platí vždy a token hned po prvním použití ztrácí jakoukoli
+ * moc. Proto je zabudovaný přímo v kódu: aplikace se rozjede bez nastavování
+ * serverových proměnných a nemůže se stát, že zakládací odkaz přestane platit
+ * kvůli chybějící konfiguraci. Kdo chce vlastní hodnotu, nastaví SETUP_TOKEN —
+ * ta se pak přijímá také.
+ */
+const ZAKLADACI_TOKEN = "9nnh1p1l1gup8tz0r10s69li0axdee0b8dxkfha6"
+
 function hashPassword(password: string, salt: string): string {
   return crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, 32, "sha256").toString("hex")
 }
@@ -50,6 +62,20 @@ function newToken(): string {
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase()
+}
+
+/**
+ * Porovná token z odkazu se zabudovanou i se serverovou hodnotou.
+ *
+ * Oba konce se ořezávají — do proměnné nastavené přes dashboard se snadno
+ * dostane mezera nebo konec řádku a odkaz by pak bez viditelného důvodu
+ * přestal platit.
+ */
+function tokenSedi(zadany: string): boolean {
+  const a = zadany.trim()
+  return [ZAKLADACI_TOKEN, process.env.SETUP_TOKEN].some(
+    (povoleny) => !!povoleny && safeEqual(a, povoleny.trim()),
+  )
 }
 
 /**
@@ -76,9 +102,9 @@ function validatePassword(password: string) {
 /**
  * Založení master účtu přes jednorázový odkaz.
  *
- * Projde pouze tehdy, když sedí SETUP_TOKEN a zároveň zatím neexistuje žádný
- * kouč. Jakmile master vznikne, odkaz je nadobro mrtvý — druhý účet už tudy
- * založit nejde.
+ * Projde pouze tehdy, když sedí zakládací token a zároveň zatím neexistuje
+ * žádný kouč. Jakmile master vznikne, odkaz je nadobro mrtvý — druhý účet už
+ * tudy založit nejde.
  */
 export const createMaster = action({
   args: {
@@ -90,15 +116,9 @@ export const createMaster = action({
   returns: v.object({ sessionToken: v.string(), name: v.string(), role: v.string() }),
   handler: async (ctx, args): Promise<Prihlaseni> =>
     sConvexChybou("createMaster", async () => {
-      const expected = process.env.SETUP_TOKEN
-      if (!expected) {
+      if (!tokenSedi(args.setupToken)) {
         throw new ConvexError(
-          "Na serveru chybí proměnná SETUP_TOKEN. Doplň ji v Convexu — v produkčním prostředí, ne jen ve vývojovém.",
-        )
-      }
-      if (!safeEqual(args.setupToken, expected)) {
-        throw new ConvexError(
-          "Zakládací odkaz nesouhlasí s hodnotou SETUP_TOKEN na serveru. Zkontroluj, že se shodují znak po znaku.",
+          "Tenhle zakládací odkaz neplatí. Otevři přesně ten, který k aplikaci patří — na konci adresy musí být celý token.",
         )
       }
       const exists: boolean = await ctx.runQuery(internal.authInternal.anyCoachExists, {})

@@ -47,18 +47,22 @@ export const whoAmI = internalQuery({
 })
 
 /**
+ * Označení verze backendu. Zvyš ho pokaždé, když se mění chování zakládání
+ * účtu — zakládací stránka ho zobrazuje, takže je na první pohled vidět, jestli
+ * je nasazená nová verze, nebo prohlížeč drží starou. Bez toho se „pořád stejná
+ * chyba" nedá odlišit od „oprava ještě nedojela".
+ */
+const VERZE_BACKENDU = "3"
+
+/**
  * Zjistí, jestli je potřeba založit master účet (veřejné, bez dat).
- *
- * Vrací i to, zda je na serveru vůbec nastavený SETUP_TOKEN — jen ano/ne,
- * samotná hodnota ven nejde. Bez toho se chybějící proměnná pozná až po
- * odeslání formuláře a vypadá to jako nevysvětlitelná chyba serveru.
  */
 export const setupStatus = query({
   args: {},
-  returns: v.object({ needsSetup: v.boolean(), setupTokenReady: v.boolean() }),
+  returns: v.object({ needsSetup: v.boolean(), verze: v.string() }),
   handler: async (ctx) => {
     const first = await ctx.db.query("coaches").first()
-    return { needsSetup: first === null, setupTokenReady: !!process.env.SETUP_TOKEN }
+    return { needsSetup: first === null, verze: VERZE_BACKENDU }
   },
 })
 
