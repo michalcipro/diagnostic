@@ -1,125 +1,33 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import Link from "next/link"
-import { LangToggle } from "@/components/diagnostic/lang-toggle"
-import { TEST_NAMES, UI, VARIANT_LABELS } from "@/lib/diagnostic/i18n"
-import { loadSession } from "@/lib/diagnostic/storage"
-import type { Lang, TestId, Variant } from "@/lib/diagnostic/types"
 
-const LANG_KEY = "wm-diagnostic:lang"
-
-interface CardDef {
-  testId: TestId
-  variant: Variant
-  items: number
-}
-
-const CARDS: CardDef[] = [
-  { testId: "elite200-sport", variant: "sport", items: 200 },
-  { testId: "elite100-sport", variant: "sport", items: 100 },
-  { testId: "elite200-business", variant: "business", items: 200 },
-  { testId: "elite100-business", variant: "business", items: 100 },
-]
-
-export default function DiagnosticHome() {
-  const [lang, setLang] = useState<Lang>("cs")
-  const [inProgress, setInProgress] = useState<Record<string, boolean>>({})
-  const [copied, setCopied] = useState<TestId | null>(null)
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem(LANG_KEY)
-    if (saved === "en" || saved === "cs") setLang(saved)
-    const progress: Record<string, boolean> = {}
-    for (const c of CARDS) {
-      const s = loadSession(c.testId)
-      progress[c.testId] = !!s && Object.keys(s.answers).length > 0 && !s.finishedAt
-    }
-    setInProgress(progress)
-  }, [])
-
-  const changeLang = (l: Lang) => {
-    setLang(l)
-    window.localStorage.setItem(LANG_KEY, l)
-  }
-
-  // Přímý odkaz na jeden konkrétní test ve zvoleném jazyce — klient uvidí
-  // rovnou dotazník, nikoli nabídku testů.
-  const shareUrl = (testId: TestId) => `${window.location.origin}/${testId}?lang=${lang}`
-
-  const copyShareLink = async (testId: TestId) => {
-    const url = shareUrl(testId)
-    try {
-      await navigator.clipboard.writeText(url)
-    } catch {
-      window.prompt(UI[lang].shareTitle, url)
-      return
-    }
-    setCopied(testId)
-    window.setTimeout(() => setCopied((c) => (c === testId ? null : c)), 2000)
-  }
-
-  const t = UI[lang]
-
+// Veřejná úvodní stránka. Záměrně nevypisuje žádné testy ani na ně neodkazuje —
+// dotazník se otevírá jen na pozvánku od kouče (/t/<token>). Přehled testů
+// a tvorba pozvánek jsou v chráněné sekci /kouc.
+export default function Home() {
   return (
-    <div className="diag-container pb-20 pt-10">
-      <header className="mb-10 flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <span className="text-[13px] font-bold tracking-[0.18em] text-[var(--wm-text)]">{t.brand}</span>
-          <LangToggle lang={lang} onChange={changeLang} />
-        </div>
-        <div>
-          <h1 className="text-[34px] font-bold leading-tight tracking-tight">{t.chooseTitle}</h1>
-          <p className="mt-2 max-w-xl text-[17px] leading-relaxed text-[var(--wm-text-2)]">{t.chooseSubtitle}</p>
-        </div>
-      </header>
-
-      {(["sport", "business"] as Variant[]).map((variant) => (
-        <section key={variant} className="mb-10">
-          <h2 className="mb-4 text-[13px] font-semibold uppercase tracking-[0.1em] text-[var(--wm-text-3)]">
-            {VARIANT_LABELS[variant][lang]}
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {CARDS.filter((c) => c.variant === variant).map((c) => (
-              <div key={c.testId} className="diag-card flex flex-col p-6">
-                <h3 className="text-[19px] font-semibold leading-snug tracking-tight">
-                  {TEST_NAMES[c.testId][lang]}
-                </h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
-                  {c.items === 200 ? t.facets200 : t.dims100}
-                </p>
-                <p className="mt-1 text-[13px] text-[var(--wm-text-3)]">
-                  {t.itemsCount(c.items)} · {c.items === 200 ? t.duration200 : t.duration100}
-                </p>
-                <div className="mt-5 flex-1" />
-                <div className="flex items-center gap-2">
-                  <Link
-                    href={`/${c.testId}`}
-                    className="inline-flex h-11 flex-1 items-center justify-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
-                  >
-                    {inProgress[c.testId] ? t.continueTest : t.start}
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => copyShareLink(c.testId)}
-                    title={t.shareHint}
-                    className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
-                  >
-                    {copied === c.testId ? t.copiedLink : t.copyLink}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
-
-      <p className="rounded-2xl bg-[var(--wm-surface-2)] p-4 text-[13px] leading-relaxed text-[var(--wm-text-2)]">
-        <span className="font-semibold text-[var(--wm-text)]">{t.shareTitle}:</span> {t.shareHint}
+    <div className="diag-container flex min-h-screen flex-col items-center justify-center py-20 text-center">
+      <p className="text-[13px] font-bold tracking-[0.18em] text-[var(--wm-text)]">WINNING MINDS</p>
+      <h1 className="mt-4 text-[32px] font-bold leading-tight tracking-tight">
+        Performance Diagnostic ELITE™
+      </h1>
+      <p className="mt-3 max-w-md text-[16px] leading-relaxed text-[var(--wm-text-2)]">
+        Komplexní psychodiagnostika mentálního výkonového profilu. Diagnostika probíhá na základě
+        pozvánky — odkaz na svůj dotazník dostaneš od svého kouče.
+      </p>
+      <p className="mt-4 max-w-md border-t border-[var(--wm-border-light)] pt-4 text-[14px] leading-relaxed text-[var(--wm-text-3)]">
+        Assessment is by invitation only. You will receive a personal link to your questionnaire
+        from your coach.
       </p>
 
-      <footer className="mt-14 border-t border-[var(--wm-border-light)] pt-6 text-center text-[12px] text-[var(--wm-text-3)]">
-        {t.confidential}
+      <Link
+        href="/kouc"
+        className="mt-10 text-[13px] font-semibold text-[var(--wm-text-3)] transition-colors hover:text-[var(--wm-text)]"
+      >
+        Přihlášení pro kouče
+      </Link>
+
+      <footer className="mt-16 text-[12px] text-[var(--wm-text-3)]">
+        Winning Minds s.r.o. · Praha 6 · winningminds.cz · Důvěrný dokument
       </footer>
     </div>
   )

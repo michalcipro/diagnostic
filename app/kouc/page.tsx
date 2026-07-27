@@ -7,14 +7,19 @@ import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
 import { getStructure, parseTestId } from "@/lib/diagnostic/structure"
 import {
   checkCoachPassword,
+  createInvite,
   getResult,
   isRemoteEnabled,
+  listInvites,
   listResults,
   removeResult,
+  revokeInvite,
+  type InviteRow,
   type ResultDetail,
   type ResultSummary,
 } from "@/lib/diagnostic/remote"
-import type { Lang } from "@/lib/diagnostic/types"
+import { TEST_IDS } from "@/lib/diagnostic/structure"
+import type { Lang, TestId } from "@/lib/diagnostic/types"
 
 // Chráněná sekce pro kouče. Heslo se ověřuje na serveru (Convex) — v prohlížeči
 // se drží jen po dobu relace, aby se nemuselo psát u každého kliknutí.
@@ -33,14 +38,26 @@ export default function CoachPage() {
   const [detail, setDetail] = useState<ResultDetail | null>(null)
   const [detailLang, setDetailLang] = useState<Lang>("cs")
 
+  const [tab, setTab] = useState<"results" | "invites">("results")
+  const [invites, setInvites] = useState<InviteRow[] | null>(null)
+  const [formOpen, setFormOpen] = useState(false)
+  const [fTest, setFTest] = useState<TestId>("elite200-sport")
+  const [fLang, setFLang] = useState<Lang>("cs")
+  const [fName, setFName] = useState("")
+  const [creating, setCreating] = useState(false)
+  const [newLink, setNewLink] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
   const t = UI[lang]
 
   const load = useCallback(async (pwd: string) => {
     try {
-      const list = await listResults(pwd)
+      const [list, inv] = await Promise.all([listResults(pwd), listInvites(pwd)])
       setRows(list)
+      setInvites(inv)
     } catch (e) {
       setRows([])
+      setInvites([])
       setError(String(e))
     }
   }, [])
@@ -100,6 +117,40 @@ export default function CoachPage() {
   const remove = async (id: string) => {
     if (!window.confirm(t.coachDeleteConfirm)) return
     await removeResult(password, id)
+    await load(password)
+  }
+
+  const inviteUrl = (token: string) => `${window.location.origin}/t/${token}`
+
+  const submitInvite = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setCreating(true)
+    try {
+      const token = await createInvite(password, fTest, fLang, fName.trim())
+      setNewLink(inviteUrl(token))
+      setCopied(false)
+      setFName("")
+      await load(password)
+    } catch (err) {
+      setError(String(err))
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  const copy = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch {
+      window.prompt(t.inviteCopy, url)
+    }
+  }
+
+  const revoke = async (id: string) => {
+    if (!window.confirm(t.inviteRevokeConfirm)) return
+    await revokeInvite(password, id)
     await load(password)
   }
 
@@ -195,7 +246,157 @@ export default function CoachPage() {
         </p>
       )}
 
-      {rows === null ? (
+      {/* záložky */}
+      <div className="diag-segment mb-5">
+        <button type="button" data-active={tab === "results"} onClick={() => setTab("results")}>
+          {t.tabResults}
+        </button>
+        <button type="button" data-active={tab === "invites"} onClick={() => setTab("invites")}>
+          {t.tabInvites}
+        </button>
+      </div>
+
+      {tab === "invites" && (
+        <div className="mb-8">
+          {!formOpen ? (
+            <button
+              type="button"
+              onClick={() => {
+                setFormOpen(true)
+                setNewLink(null)
+              }}
+              className="inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
+            >
+              + {t.newInvite}
+            </button>
+          ) : (
+            <form onSubmit={submitInvite} className="diag-card p-6">
+              <h2 className="text-[16px] font-semibold">{t.newInvite}</h2>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <label className="block">
+                  <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">{t.inviteTest}</span>
+                  <select
+                    className="diag-input"
+                    value={fTest}
+                    onChange={(e) => setFTest(e.target.value as TestId)}
+                  >
+                    {TEST_IDS.map((id) => (
+                      <option key={id} value={id}>
+                        {TEST_NAMES[id][lang]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">{t.inviteLang}</span>
+                  <select className="diag-input" value={fLang} onChange={(e) => setFLang(e.target.value as Lang)}>
+                    <option value="cs">Čeština</option>
+                    <option value="en">English</option>
+                  </select>
+                </label>
+                <label className="block sm:col-span-2">
+                  <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">{t.inviteClient}</span>
+                  <input
+                    className="diag-input"
+                    value={fName}
+                    placeholder={t.inviteClientPlaceholder}
+                    onChange={(e) => setFName(e.target.value)}
+                  />
+                </label>
+              </div>
+              <div className="mt-5 flex items-center gap-3">
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-40"
+                >
+                  {creating ? "…" : t.inviteCreate}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormOpen(false)
+                    setNewLink(null)
+                  }}
+                  className="text-[14px] font-semibold text-[var(--wm-text-2)] hover:text-[var(--wm-text)]"
+                >
+                  {t.back}
+                </button>
+              </div>
+
+              {newLink && (
+                <div className="mt-5 rounded-2xl bg-[var(--wm-surface-2)] p-4">
+                  <p className="text-[13px] font-medium text-[var(--wm-text-2)]">{t.inviteCreated}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-3">
+                    <code className="min-w-0 flex-1 break-all text-[14px] font-semibold">{newLink}</code>
+                    <button
+                      type="button"
+                      onClick={() => copy(newLink)}
+                      className="inline-flex h-10 shrink-0 items-center rounded-full bg-[var(--wm-blue)] px-5 text-[14px] font-semibold text-white transition-opacity hover:opacity-85"
+                    >
+                      {copied ? t.inviteCopied : t.inviteCopy}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </form>
+          )}
+
+          <div className="mt-5 flex flex-col gap-3">
+            {invites === null ? (
+              <p className="text-[15px] text-[var(--wm-text-2)]">{t.coachLoading}</p>
+            ) : invites.length === 0 ? (
+              <div className="diag-card p-8 text-center">
+                <p className="text-[15px] text-[var(--wm-text-2)]">{t.invitesEmpty}</p>
+              </div>
+            ) : (
+              invites.map((iv) => (
+                <article key={iv.id} className="diag-card flex flex-wrap items-center gap-4 p-5">
+                  <div className="min-w-[180px] flex-1">
+                    <h3 className="text-[16px] font-semibold tracking-tight">
+                      {iv.clientName || "—"}
+                    </h3>
+                    <p className="mt-0.5 text-[13px] text-[var(--wm-text-2)]">
+                      {TEST_NAMES[iv.testId][lang]} · {iv.lang.toUpperCase()}
+                    </p>
+                    <p className="mt-0.5 break-all text-[12px] text-[var(--wm-text-3)]">/t/{iv.token}</p>
+                  </div>
+                  <span
+                    className="inline-flex items-center rounded-full px-3 py-1 text-[12px] font-semibold"
+                    style={
+                      iv.usedAt
+                        ? { color: "var(--wm-ok-fg)", background: "var(--wm-green-light)" }
+                        : { color: "var(--wm-caution-fg)", background: "var(--wm-orange-light)" }
+                    }
+                  >
+                    {iv.usedAt ? t.inviteUsed : t.invitePending}
+                  </span>
+                  {!iv.usedAt && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => copy(inviteUrl(iv.token))}
+                        className="inline-flex h-10 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
+                      >
+                        {t.inviteCopy}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => revoke(iv.id)}
+                        className="inline-flex h-10 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text-2)] transition-colors hover:bg-[var(--wm-fill-4)] hover:text-[var(--wm-red)]"
+                      >
+                        {t.inviteRevoke}
+                      </button>
+                    </div>
+                  )}
+                </article>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {tab === "results" && (rows === null ? (
         <p className="text-[15px] text-[var(--wm-text-2)]">{t.coachLoading}</p>
       ) : rows.length === 0 ? (
         <div className="diag-card p-8 text-center">
@@ -242,7 +443,7 @@ export default function CoachPage() {
             )
           })}
         </div>
-      )}
+      ))}
 
       <footer className="mt-14 border-t border-[var(--wm-border-light)] pt-6 text-center text-[12px] text-[var(--wm-text-3)]">
         {t.confidential}

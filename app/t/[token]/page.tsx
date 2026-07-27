@@ -1,37 +1,86 @@
 "use client"
 
 import { use, useEffect, useMemo, useRef, useState } from "react"
-import Link from "next/link"
 import { LangToggle } from "@/components/diagnostic/lang-toggle"
 import { SCALE_LABELS, TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
 import { getItems, itemText } from "@/lib/diagnostic/items"
 import { getStructure, parseTestId } from "@/lib/diagnostic/structure"
-import { clearSession, loadSession, newSession, saveSession } from "@/lib/diagnostic/storage"
-import { isRemoteEnabled, submitToRemote } from "@/lib/diagnostic/remote"
+import { loadSession, newSession, saveSession } from "@/lib/diagnostic/storage"
+import { fetchInvite, isRemoteEnabled, submitWithInvite, type Invite } from "@/lib/diagnostic/remote"
 import type { Answer, Lang, StoredSession, TestId } from "@/lib/diagnostic/types"
 
 const BLOCK_SIZE = 20
-const LANG_KEY = "wm-diagnostic:lang"
 
-export default function QuestionnairePage({ params }: { params: Promise<{ testId: string }> }) {
-  const { testId } = use(params)
-  const parsed = parseTestId(testId)
-  if (!parsed) return <NotFound />
-  return <Questionnaire testId={testId as TestId} />
+// Dotazník se otevře pouze na platnou pozvánku od kouče. Token v odkazu určuje,
+// který test se zobrazí — klient se tak nedostane k jiným diagnostikám ani nemůže
+// vyplnit tentýž test dvakrát.
+export default function InvitePage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = use(params)
+  const [invite, setInvite] = useState<Invite | null | "error">(null)
+
+  useEffect(() => {
+    if (!isRemoteEnabled()) {
+      setInvite("error")
+      return
+    }
+    let active = true
+    fetchInvite(token)
+      .then((i) => active && setInvite(i))
+      .catch(() => active && setInvite("error"))
+    return () => {
+      active = false
+    }
+  }, [token])
+
+  if (invite === null) return null
+  if (invite === "error" || invite.status === "notfound") return <InviteProblem kind="invalid" />
+  if (invite.status === "used") return <InviteProblem kind="used" />
+
+  return (
+    <Questionnaire
+      token={token}
+      testId={invite.testId as TestId}
+      inviteLang={(invite.lang as Lang) ?? "cs"}
+      clientName={invite.clientName ?? ""}
+    />
+  )
 }
 
-function NotFound() {
+/** Neplatný nebo už použitý odkaz — srozumitelně, dvojjazyčně. */
+function InviteProblem({ kind }: { kind: "invalid" | "used" }) {
   return (
-    <div className="diag-container py-24 text-center">
-      <p className="text-[17px] text-[var(--wm-text-2)]">404</p>
-      <Link href="/" className="mt-4 inline-block text-[15px] font-semibold text-[var(--wm-blue)]">
-        Performance Diagnostic ELITE™
-      </Link>
+    <div className="diag-container flex min-h-screen items-center justify-center py-20">
+      <div className="diag-card max-w-md p-8 text-center">
+        <p className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text-3)]">WINNING MINDS</p>
+        <h1 className="mt-3 text-[20px] font-bold tracking-tight">
+          {kind === "used" ? "Tento odkaz už byl použit" : "Odkaz není platný"}
+        </h1>
+        <p className="mt-3 text-[15px] leading-relaxed text-[var(--wm-text-2)]">
+          {kind === "used"
+            ? "Dotazník z tohoto odkazu už byl vyplněn a odeslán. Pokud potřebuješ vyplnit další, požádej svého kouče o nový odkaz."
+            : "Odkaz je neplatný nebo byl zrušen. Požádej prosím svého kouče o nový."}
+        </p>
+        <p className="mt-4 border-t border-[var(--wm-border-light)] pt-4 text-[13px] leading-relaxed text-[var(--wm-text-3)]">
+          {kind === "used"
+            ? "This link has already been used. Please ask your coach for a new one."
+            : "This link is not valid or has been revoked. Please ask your coach for a new one."}
+        </p>
+      </div>
     </div>
   )
 }
 
-function Questionnaire({ testId }: { testId: TestId }) {
+function Questionnaire({
+  token,
+  testId,
+  inviteLang,
+  clientName,
+}: {
+  token: string
+  testId: TestId
+  inviteLang: Lang
+  clientName: string
+}) {
   const { model, variant } = parseTestId(testId)!
   const structure = useMemo(() => getStructure(model), [model])
   const items = useMemo(() => getItems(testId), [testId])
@@ -43,27 +92,22 @@ function Questionnaire({ testId }: { testId: TestId }) {
   const [submitting, setSubmitting] = useState(false)
   const topRef = useRef<HTMLDivElement>(null)
 
-  // načtení / založení session
+  // Rozpracované odpovědi se drží pod tokenem — klient si může dát pauzu
+  // a vrátit se ke stejnému odkazu.
   useEffect(() => {
-    // Jazyk z přímého odkazu (?lang=cs|en) má přednost — odkaz pro klienta
-    // tak otevře dotazník rovnou ve správném jazyce.
-    const urlLang = new URLSearchParams(window.location.search).get("lang")
-    const linkLang: Lang | null = urlLang === "en" ? "en" : urlLang === "cs" ? "cs" : null
-
-    const existing = loadSession(testId)
-    if (existing && !existing.finishedAt) {
-      setSession(linkLang ? { ...existing, lang: linkLang } : existing)
+    const existing = loadSession(token)
+    if (existing) {
+      setSession({ ...existing, lang: inviteLang })
       return
     }
-    const savedLang = window.localStorage.getItem(LANG_KEY)
-    const lang: Lang = linkLang ?? (savedLang === "en" ? "en" : "cs")
-    setSession(existing ? { ...existing, lang } : newSession(testId, lang))
-  }, [testId])
+    const fresh = newSession(testId, inviteLang)
+    setSession({ ...fresh, person: { ...fresh.person, name: clientName } })
+  }, [token, testId, inviteLang, clientName])
 
   // autosave
   useEffect(() => {
-    if (session) saveSession(session)
-  }, [session])
+    if (session) saveSession(token, session)
+  }, [token, session])
 
   if (!session) return null
 
@@ -77,7 +121,6 @@ function Questionnaire({ testId }: { testId: TestId }) {
   const missing = items.filter((i) => session.answers[i.id] === undefined).map((i) => i.id)
 
   const setLang = (l: Lang) => {
-    window.localStorage.setItem(LANG_KEY, l)
     setSession({ ...session, lang: l })
   }
 
@@ -104,12 +147,12 @@ function Questionnaire({ testId }: { testId: TestId }) {
       return
     }
     const done: StoredSession = { ...session, finishedAt: new Date().toISOString() }
-    saveSession(done)
+    saveSession(token, done)
 
-    // Odeslání kouči. Respondent výsledky nevidí — projde je s ním kouč osobně,
-    // proto se po odeslání zobrazuje jen potvrzení.
+    // Odeslání kouči proti pozvánce. Respondent výsledky nevidí — projde je
+    // s ním kouč osobně, proto se po odeslání zobrazuje jen potvrzení.
     setSubmitting(true)
-    const ok = isRemoteEnabled() ? await submitToRemote(done) : false
+    const ok = isRemoteEnabled() ? await submitWithInvite(token, done) : false
     setSubmitting(false)
     setStage(ok ? "sent" : "sendFailed")
     requestAnimationFrame(() => topRef.current?.scrollIntoView({ behavior: "smooth" }))

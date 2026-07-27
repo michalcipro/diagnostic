@@ -176,6 +176,24 @@ export interface UIStrings {
   colTest: string
   colDate: string
   colValidity: string
+  // pozvánky
+  invitesTitle: string
+  newInvite: string
+  inviteTest: string
+  inviteLang: string
+  inviteClient: string
+  inviteClientPlaceholder: string
+  inviteCreate: string
+  inviteCreated: string
+  inviteCopy: string
+  inviteCopied: string
+  invitePending: string
+  inviteUsed: string
+  inviteRevoke: string
+  inviteRevokeConfirm: string
+  invitesEmpty: string
+  tabResults: string
+  tabInvites: string
 }
 
 export const UI: Record<Lang, UIStrings> = {
@@ -291,6 +309,23 @@ export const UI: Record<Lang, UIStrings> = {
     colTest: "Test",
     colDate: "Vyplněno",
     colValidity: "Validita",
+    invitesTitle: "Pozvánky",
+    newInvite: "Nová pozvánka",
+    inviteTest: "Test",
+    inviteLang: "Jazyk dotazníku",
+    inviteClient: "Jméno klienta",
+    inviteClientPlaceholder: "nepovinné — předvyplní se klientovi",
+    inviteCreate: "Vytvořit odkaz",
+    inviteCreated: "Odkaz je připravený — pošli ho klientovi:",
+    inviteCopy: "Kopírovat odkaz",
+    inviteCopied: "Zkopírováno ✓",
+    invitePending: "Čeká na vyplnění",
+    inviteUsed: "Vyplněno",
+    inviteRevoke: "Zrušit",
+    inviteRevokeConfirm: "Opravdu zrušit tuto pozvánku? Odkaz přestane fungovat.",
+    invitesEmpty: "Zatím žádné pozvánky.",
+    tabResults: "Vyplněné diagnostiky",
+    tabInvites: "Pozvánky",
   },
   en: {
     brand: "WINNING MINDS",
@@ -404,5 +439,22 @@ export const UI: Record<Lang, UIStrings> = {
     colTest: "Test",
     colDate: "Completed",
     colValidity: "Validity",
+    invitesTitle: "Invitations",
+    newInvite: "New invitation",
+    inviteTest: "Test",
+    inviteLang: "Questionnaire language",
+    inviteClient: "Client name",
+    inviteClientPlaceholder: "optional — pre-filled for the client",
+    inviteCreate: "Create link",
+    inviteCreated: "The link is ready — send it to your client:",
+    inviteCopy: "Copy link",
+    inviteCopied: "Copied ✓",
+    invitePending: "Awaiting completion",
+    inviteUsed: "Completed",
+    inviteRevoke: "Revoke",
+    inviteRevokeConfirm: "Really revoke this invitation? The link will stop working.",
+    invitesEmpty: "No invitations yet.",
+    tabResults: "Completed diagnostics",
+    tabInvites: "Invitations",
   },
 }
