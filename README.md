@@ -20,10 +20,10 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS · Convex
 ## Struktura
 
 ```
-app/                     # / (výběr), /[testId] (dotazník), /[testId]/report
-components/diagnostic/   # sdílené UI (přepínač jazyka, grafy skóre)
+app/                     # / (přehled testů), /[testId] (dotazník), /kouc (chráněná sekce)
+components/diagnostic/   # sdílené UI (přepínač jazyka, grafy skóre, ReportView)
 lib/diagnostic/          # logika: structure, scoring, i18n, items, content, remote
-convex/                  # izolovaný backend: schema + eliteDiagnostic (submit/getByPublicId)
+convex/                  # backend: schema + eliteDiagnostic (submit, listForCoach, getForCoach)
 ```
 
 ## Kdo co vidí
