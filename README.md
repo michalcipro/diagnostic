@@ -48,19 +48,25 @@ npx convex login
 npx convex dev        # založí projekt, zapíše .env.local; pak Ctrl+C
 ```
 
-V dashboardu Convexu → **Settings → Environment Variables** přidej:
+Žádné další proměnné nastavovat nemusíš — aplikace se rozjede rovnou.
+Nepovinně jde v dashboardu Convexu → **Settings → Environment Variables** přidat:
 
 | Proměnná | Význam |
 | --- | --- |
-| `SETUP_TOKEN` | jednorázový token pro založení master účtu (nastav v dev i production) |
+| `SETUP_TOKEN` | vlastní zakládací token navíc; přijímá se vedle toho zabudovaného v `convex/auth.ts` |
 
 ## Účty koučů
 
 Aplikace nemá sdílené heslo — každý kouč má vlastní účet.
 
-**Master účet** se zakládá jednou přes odkaz `/setup/<SETUP_TOKEN>`. Ten projde
-pouze tehdy, když sedí token **a zároveň zatím neexistuje žádný kouč**. Jakmile
-master vznikne, odkaz je nadobro mrtvý — druhý účet už tudy založit nejde.
+**Master účet** se zakládá jednou přes odkaz `/setup/<token>`, kde token je
+konstanta `ZAKLADACI_TOKEN` v `convex/auth.ts`. Odkaz projde pouze tehdy, když
+sedí token **a zároveň zatím neexistuje žádný kouč**. Jakmile master vznikne,
+odkaz je nadobro mrtvý — druhý účet už tudy založit nejde.
+
+Že je token v repozitáři, nevadí: jeho jediná pravomoc je založit vůbec první
+účet, a ta zaniká v okamžiku, kdy účet vznikne. Kdo chce hodnotu držet mimo kód,
+nastaví `SETUP_TOKEN` a použije ten.
 
 Další kouče může přidat **výhradně master** v přehledu → záložka **Kouči**.
 Master může jejich přístup kdykoli zablokovat a obnovit; sám sebe zablokovat nemůže.
