@@ -29,6 +29,25 @@ Diagnostika funguje i **bez** Convexu (běží lokálně přes `localStorage`).
 Convex přidává trvalé uložení a sdílecí odkazy — aktivuje se, jakmile je
 nastaveno `NEXT_PUBLIC_CONVEX_URL`.
 
+## Odkazy pro klienty
+
+Produkční doména: **elitediagnostic.cz**
+
+Klientovi se posílá přímý odkaz na jeden konkrétní test. Otevře se rovnou
+dotazník — bez nabídky ostatních diagnostik a bez cesty zpět do menu.
+
+| Odkaz | Co klient dostane |
+| --- | --- |
+| `elitediagnostic.cz/elite200-sport` | ELITE 200 Sport, česky |
+| `elitediagnostic.cz/elite200-sport?lang=en` | ELITE 200 Sport, anglicky |
+| `elitediagnostic.cz/elite100-sport` | ELITE 100 Sport |
+| `elitediagnostic.cz/elite200-business` | ELITE 200 Business a Life |
+| `elitediagnostic.cz/elite100-business` | ELITE 100 Business a Life |
+
+Parametr `?lang=cs` / `?lang=en` nastaví jazyk dotazníku i vyhodnocení.
+Odkaz lze zkopírovat tlačítkem **Kopírovat odkaz** na úvodní stránce
+(kořen domény), kde je i přehled všech testů pro kouče.
+
 ## Lokální vývoj
 
 ```bash
