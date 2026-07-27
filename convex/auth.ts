@@ -1,6 +1,6 @@
 "use node"
 
-import { v } from "convex/values"
+import { ConvexError, v } from "convex/values"
 import crypto from "node:crypto"
 import { action } from "./_generated/server"
 import { internal } from "./_generated/api"
@@ -54,7 +54,7 @@ function normalizeEmail(email: string): string {
 
 function validatePassword(password: string) {
   if (password.length < 10) {
-    throw new Error("Heslo musí mít alespoň 10 znaků.")
+    throw new ConvexError("Heslo musí mít alespoň 10 znaků.")
   }
 }
 
@@ -76,19 +76,19 @@ export const createMaster = action({
   handler: async (ctx, args): Promise<Prihlaseni> => {
     const expected = process.env.SETUP_TOKEN
     if (!expected) {
-      throw new Error("Na serveru není nastavený SETUP_TOKEN. Doplň ho v nastavení Convexu.")
+      throw new ConvexError("Na serveru není nastavený SETUP_TOKEN. Doplň ho v nastavení Convexu.")
     }
     if (!safeEqual(args.setupToken, expected)) {
-      throw new Error("Neplatný zakládací odkaz.")
+      throw new ConvexError("Neplatný zakládací odkaz.")
     }
     const exists: boolean = await ctx.runQuery(internal.authInternal.anyCoachExists, {})
     if (exists) {
-      throw new Error("Master účet už existuje. Tento odkaz je neplatný.")
+      throw new ConvexError("Master účet už existuje. Tento odkaz je neplatný.")
     }
     validatePassword(args.password)
     const email = normalizeEmail(args.email)
-    if (!email.includes("@")) throw new Error("Zadej platný e-mail.")
-    if (args.name.trim().length < 2) throw new Error("Zadej své jméno.")
+    if (!email.includes("@")) throw new ConvexError("Zadej platný e-mail.")
+    if (args.name.trim().length < 2) throw new ConvexError("Zadej své jméno.")
 
     const salt = crypto.randomBytes(16).toString("hex")
     const coachId: Id<"coaches"> = await ctx.runMutation(internal.authInternal.insertCoach, {
@@ -120,9 +120,9 @@ export const login = action({
     // Stejná hláška pro neexistující účet i špatné heslo — ať nejde zjišťovat,
     // které e-maily jsou zaregistrované.
     const chyba = "Nesprávný e-mail nebo heslo."
-    if (!coach || !coach.active) throw new Error(chyba)
+    if (!coach || !coach.active) throw new ConvexError(chyba)
     if (!safeEqual(hashPassword(args.password, coach.salt), coach.passwordHash)) {
-      throw new Error(chyba)
+      throw new ConvexError(chyba)
     }
     const sessionToken = newToken()
     await ctx.runMutation(internal.authInternal.openSession, {
@@ -148,11 +148,11 @@ export const addCoach = action({
       sessionToken: args.sessionToken,
     })
     if (!me || me.role !== "master") {
-      throw new Error("Přidávat kouče může pouze master účet.")
+      throw new ConvexError("Přidávat kouče může pouze master účet.")
     }
     validatePassword(args.password)
     const email = normalizeEmail(args.email)
-    if (!email.includes("@")) throw new Error("Zadej platný e-mail.")
+    if (!email.includes("@")) throw new ConvexError("Zadej platný e-mail.")
 
     const salt = crypto.randomBytes(16).toString("hex")
     await ctx.runMutation(internal.authInternal.insertCoach, {
@@ -174,13 +174,13 @@ export const changePassword = action({
     const me: Identita = await ctx.runQuery(internal.sessions.whoAmI, {
       sessionToken: args.sessionToken,
     })
-    if (!me) throw new Error("Přihlášení vypršelo.")
+    if (!me) throw new ConvexError("Přihlášení vypršelo.")
     const coach: CoachZaznam = await ctx.runQuery(internal.authInternal.findByEmail, {
       email: me.email,
     })
-    if (!coach) throw new Error("Účet nenalezen.")
+    if (!coach) throw new ConvexError("Účet nenalezen.")
     if (!safeEqual(hashPassword(args.currentPassword, coach.salt), coach.passwordHash)) {
-      throw new Error("Stávající heslo nesouhlasí.")
+      throw new ConvexError("Stávající heslo nesouhlasí.")
     }
     validatePassword(args.newPassword)
     const salt = crypto.randomBytes(16).toString("hex")

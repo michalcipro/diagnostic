@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { createMaster, isRemoteEnabled, needsSetup } from "@/lib/diagnostic/remote"
+import { chybaText, createMaster, isRemoteEnabled, needsSetup } from "@/lib/diagnostic/remote"
 
 const SESSION_KEY = "wm-diagnostic:session"
 
@@ -54,13 +54,11 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
       window.localStorage.setItem(SESSION_KEY, res.sessionToken)
       router.push("/kouc")
     } catch (err) {
-      const msg = String(err)
       setError(
-        msg.includes("už existuje")
-          ? "Master účet už existuje — tento odkaz je neplatný."
-          : msg.includes("Neplatný zakládací")
-            ? "Tento zakládací odkaz není platný."
-            : msg.replace(/^Error:\s*/, "").replace(/\[.*?\]\s*/g, ""),
+        chybaText(
+          err,
+          "Účet se nepodařilo založit. Zkontroluj, že je v Convexu nastavená proměnná SETUP_TOKEN — a to i v produkčním prostředí.",
+        ),
       )
     } finally {
       setBusy(false)

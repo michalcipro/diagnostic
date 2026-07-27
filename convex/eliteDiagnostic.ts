@@ -1,4 +1,4 @@
-import { v } from "convex/values"
+import { ConvexError, v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { requireCoach } from "./sessions"
 
@@ -56,7 +56,7 @@ export const createInvite = mutation({
   handler: async (ctx, args) => {
     await requireCoach(ctx, args.sessionToken)
     if (!TEST_IDS.has(args.testId)) {
-      throw new Error(`Neznámý testId: ${args.testId}`)
+      throw new ConvexError(`Neznámý testId: ${args.testId}`)
     }
     const token = makeToken()
     await ctx.db.insert("invitations", {
@@ -165,8 +165,8 @@ export const submitWithInvite = mutation({
       .query("invitations")
       .withIndex("by_token", (q) => q.eq("token", args.token))
       .unique()
-    if (!inv) throw new Error("Neplatný odkaz.")
-    if (inv.usedAt) throw new Error("Tento odkaz už byl použit.")
+    if (!inv) throw new ConvexError("Neplatný odkaz.")
+    if (inv.usedAt) throw new ConvexError("Tento odkaz už byl použit.")
 
     const [model, variant] = inv.testId.split("-")
 
@@ -174,7 +174,7 @@ export const submitWithInvite = mutation({
     try {
       parsed = JSON.parse(args.answers) as Record<string, number>
     } catch {
-      throw new Error("answers není validní JSON")
+      throw new ConvexError("answers není validní JSON")
     }
     const itemCount = model === "elite200" ? 200 : 100
     let answeredCount = 0
@@ -182,7 +182,7 @@ export const submitWithInvite = mutation({
       const value = parsed[String(i)]
       if (value !== undefined) {
         if (typeof value !== "number" || value < 1 || value > 5) {
-          throw new Error(`Neplatná odpověď u položky ${i}`)
+          throw new ConvexError(`Neplatná odpověď u položky ${i}`)
         }
         answeredCount++
       }

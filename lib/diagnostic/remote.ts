@@ -17,6 +17,20 @@ export function isRemoteEnabled(): boolean {
   return !!convexUrl
 }
 
+/**
+ * Vytáhne srozumitelnou hlášku z chyby Convexu.
+ *
+ * Convex v produkci běžné chyby skrývá a klientovi pošle jen „Server Error";
+ * text projde pouze u ConvexError, kde dorazí v poli `data`.
+ */
+export function chybaText(err: unknown, nahradni: string): string {
+  const data = (err as { data?: unknown })?.data
+  if (typeof data === "string" && data.trim()) return data
+  const msg = String((err as { message?: unknown })?.message ?? err)
+  if (!msg || /server error/i.test(msg)) return nahradni
+  return msg.replace(/^\[?CONVEX[^\]]*\]?\s*/i, "").replace(/^Error:\s*/, "").trim() || nahradni
+}
+
 const submitRef = makeFunctionReference<"mutation">("eliteDiagnostic:submitWithInvite")
 const createInviteRef = makeFunctionReference<"mutation">("eliteDiagnostic:createInvite")
 const getInviteRef = makeFunctionReference<"query">("eliteDiagnostic:getInvite")

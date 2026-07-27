@@ -7,6 +7,7 @@ import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
 import { getStructure, parseTestId } from "@/lib/diagnostic/structure"
 import {
   addCoach,
+  chybaText,
   createInvite,
   listCoaches,
   login as doLogin,
@@ -73,7 +74,7 @@ export default function CoachPage() {
     } catch (e) {
       setRows([])
       setInvites([])
-      setError(String(e))
+      setError(chybaText(e, "Data se nepodařilo načíst."))
     }
   }, [])
 
@@ -116,10 +117,7 @@ export default function CoachPage() {
       setPassword("")
       await load(res.sessionToken)
     } catch (err) {
-      const msg = String(err)
-      setError(
-        msg.includes("Nesprávný") ? t.coachWrongPassword : msg.replace(/^Error:\s*/, "").replace(/\[.*?\]\s*/g, ""),
-      )
+      setError(chybaText(err, t.coachWrongPassword))
     } finally {
       setChecking(false)
     }
@@ -140,7 +138,7 @@ export default function CoachPage() {
     try {
       setCoaches(await listCoaches(session))
     } catch (e) {
-      setError(String(e))
+      setError(chybaText(e, "Seznam koučů se nepodařilo načíst."))
     }
   }
 
@@ -155,7 +153,7 @@ export default function CoachPage() {
       setCoachFormOpen(false)
       await loadCoaches()
     } catch (err) {
-      setError(String(err).replace(/^Error:\s*/, "").replace(/\[.*?\]\s*/g, ""))
+      setError(chybaText(err, "Kouče se nepodařilo přidat."))
     }
   }
 
@@ -186,7 +184,7 @@ export default function CoachPage() {
       setFName("")
       await load(session)
     } catch (err) {
-      setError(String(err))
+      setError(chybaText(err, "Pozvánku se nepodařilo vytvořit."))
     } finally {
       setCreating(false)
     }

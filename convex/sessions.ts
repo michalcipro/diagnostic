@@ -1,4 +1,4 @@
-import { v } from "convex/values"
+import { ConvexError, v } from "convex/values"
 import { internalQuery, mutation, query } from "./_generated/server"
 import type { QueryCtx } from "./_generated/server"
 import type { Doc } from "./_generated/dataModel"
@@ -17,10 +17,10 @@ export async function requireCoach(ctx: QueryCtx, sessionToken: string): Promise
     .query("coachSessions")
     .withIndex("by_token", (q) => q.eq("token", sessionToken))
     .unique()
-  if (!session) throw new Error("Nejsi přihlášený.")
-  if (session.expiresAt < Date.now()) throw new Error("Přihlášení vypršelo, přihlas se prosím znovu.")
+  if (!session) throw new ConvexError("Nejsi přihlášený.")
+  if (session.expiresAt < Date.now()) throw new ConvexError("Přihlášení vypršelo, přihlas se prosím znovu.")
   const coach = await ctx.db.get(session.coachId)
-  if (!coach || !coach.active) throw new Error("Účet není aktivní.")
+  if (!coach || !coach.active) throw new ConvexError("Účet není aktivní.")
   return coach
 }
 
@@ -107,7 +107,7 @@ export const listCoaches = query({
   ),
   handler: async (ctx, args) => {
     const me = await requireCoach(ctx, args.sessionToken)
-    if (me.role !== "master") throw new Error("Přístup má pouze master účet.")
+    if (me.role !== "master") throw new ConvexError("Přístup má pouze master účet.")
     const all = await ctx.db.query("coaches").collect()
     return all.map((c) => ({
       id: c._id,
@@ -127,8 +127,8 @@ export const setCoachActive = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const me = await requireCoach(ctx, args.sessionToken)
-    if (me.role !== "master") throw new Error("Přístup má pouze master účet.")
-    if (me._id === args.coachId) throw new Error("Vlastní účet vypnout nelze.")
+    if (me.role !== "master") throw new ConvexError("Přístup má pouze master účet.")
+    if (me._id === args.coachId) throw new ConvexError("Vlastní účet vypnout nelze.")
     await ctx.db.patch(args.coachId, { active: args.active })
     if (!args.active) {
       const sessions = await ctx.db

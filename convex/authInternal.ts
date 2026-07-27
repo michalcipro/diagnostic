@@ -1,4 +1,4 @@
-import { v } from "convex/values"
+import { ConvexError, v } from "convex/values"
 import { internalMutation, internalQuery } from "./_generated/server"
 
 // Vnitřní funkce účtů. Volají je výhradně akce v convex/auth.ts, které umí
@@ -59,7 +59,7 @@ export const insertCoach = internalMutation({
       .query("coaches")
       .withIndex("by_email", (q) => q.eq("email", args.email))
       .unique()
-    if (existing) throw new Error("Účet s tímto e-mailem už existuje.")
+    if (existing) throw new ConvexError("Účet s tímto e-mailem už existuje.")
     return await ctx.db.insert("coaches", {
       email: args.email,
       name: args.name,
