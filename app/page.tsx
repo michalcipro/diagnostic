@@ -25,6 +25,7 @@ const CARDS: CardDef[] = [
 export default function DiagnosticHome() {
   const [lang, setLang] = useState<Lang>("cs")
   const [inProgress, setInProgress] = useState<Record<string, boolean>>({})
+  const [copied, setCopied] = useState<TestId | null>(null)
 
   useEffect(() => {
     const saved = window.localStorage.getItem(LANG_KEY)
@@ -40,6 +41,22 @@ export default function DiagnosticHome() {
   const changeLang = (l: Lang) => {
     setLang(l)
     window.localStorage.setItem(LANG_KEY, l)
+  }
+
+  // Přímý odkaz na jeden konkrétní test ve zvoleném jazyce — klient uvidí
+  // rovnou dotazník, nikoli nabídku testů.
+  const shareUrl = (testId: TestId) => `${window.location.origin}/${testId}?lang=${lang}`
+
+  const copyShareLink = async (testId: TestId) => {
+    const url = shareUrl(testId)
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      window.prompt(UI[lang].shareTitle, url)
+      return
+    }
+    setCopied(testId)
+    window.setTimeout(() => setCopied((c) => (c === testId ? null : c)), 2000)
   }
 
   const t = UI[lang]
@@ -75,17 +92,31 @@ export default function DiagnosticHome() {
                   {t.itemsCount(c.items)} · {c.items === 200 ? t.duration200 : t.duration100}
                 </p>
                 <div className="mt-5 flex-1" />
-                <Link
-                  href={`/${c.testId}`}
-                  className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-white transition-opacity hover:opacity-85"
-                >
-                  {inProgress[c.testId] ? t.continueTest : t.start}
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/${c.testId}`}
+                    className="inline-flex h-11 flex-1 items-center justify-center rounded-full bg-[var(--wm-brand)] px-6 text-[15px] font-semibold text-white transition-opacity hover:opacity-85"
+                  >
+                    {inProgress[c.testId] ? t.continueTest : t.start}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => copyShareLink(c.testId)}
+                    title={t.shareHint}
+                    className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
+                  >
+                    {copied === c.testId ? t.copiedLink : t.copyLink}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         </section>
       ))}
+
+      <p className="rounded-2xl bg-[var(--wm-surface-2)] p-4 text-[13px] leading-relaxed text-[var(--wm-text-2)]">
+        <span className="font-semibold text-[var(--wm-text)]">{t.shareTitle}:</span> {t.shareHint}
+      </p>
 
       <footer className="mt-14 border-t border-[var(--wm-border-light)] pt-6 text-center text-[12px] text-[var(--wm-text-3)]">
         {t.confidential}

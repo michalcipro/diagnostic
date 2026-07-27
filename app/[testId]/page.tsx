@@ -47,14 +47,19 @@ function Questionnaire({ testId }: { testId: TestId }) {
 
   // načtení / založení session
   useEffect(() => {
+    // Jazyk z přímého odkazu (?lang=cs|en) má přednost — odkaz pro klienta
+    // tak otevře dotazník rovnou ve správném jazyce.
+    const urlLang = new URLSearchParams(window.location.search).get("lang")
+    const linkLang: Lang | null = urlLang === "en" ? "en" : urlLang === "cs" ? "cs" : null
+
     const existing = loadSession(testId)
     if (existing && !existing.finishedAt) {
-      setSession(existing)
+      setSession(linkLang ? { ...existing, lang: linkLang } : existing)
       return
     }
     const savedLang = window.localStorage.getItem(LANG_KEY)
-    const lang: Lang = savedLang === "en" ? "en" : "cs"
-    setSession(existing ?? newSession(testId, lang))
+    const lang: Lang = linkLang ?? (savedLang === "en" ? "en" : "cs")
+    setSession(existing ? { ...existing, lang } : newSession(testId, lang))
   }, [testId])
 
   // autosave
@@ -122,9 +127,9 @@ function Questionnaire({ testId }: { testId: TestId }) {
       {/* horní lišta */}
       <div className="sticky top-0 z-10 border-b border-[var(--wm-border-light)] bg-[rgba(242,242,247,0.85)] backdrop-blur-xl">
         <div className="diag-container flex h-14 items-center justify-between gap-4">
-          <Link href="/" className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text)]">
-            {t.brand}
-          </Link>
+          {/* Značka záměrně není odkaz — klient s přímým odkazem má vidět
+              pouze svůj test, ne nabídku ostatních diagnostik. */}
+          <span className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text)]">{t.brand}</span>
           <div className="flex min-w-0 flex-1 items-center justify-center px-2">
             {stage === "items" && (
               <div className="w-full max-w-xs">

@@ -134,9 +134,8 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
     <div className="diag-container pb-20 pt-8">
       {/* ovládání (netiskne se) */}
       <div className="diag-no-print mb-6 flex flex-wrap items-center justify-between gap-3">
-        <Link href="/" className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text)]">
-          {t.brand}
-        </Link>
+        {/* Značka záměrně není odkaz — klient vidí jen své vyhodnocení. */}
+        <span className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text)]">{t.brand}</span>
         <div className="flex items-center gap-2">
           <LangToggle lang={lang} onChange={setLang} />
           {publicId && (

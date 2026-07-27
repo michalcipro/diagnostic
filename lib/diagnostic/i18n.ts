@@ -146,6 +146,11 @@ export interface UIStrings {
   incompleteWarning: (a: number, t: number) => string
   notFound: string
   goHome: string
+  // sdílení přímého odkazu na jeden konkrétní test
+  copyLink: string
+  copiedLink: string
+  shareTitle: string
+  shareHint: string
 }
 
 export const UI: Record<Lang, UIStrings> = {
@@ -230,6 +235,11 @@ export const UI: Record<Lang, UIStrings> = {
     incompleteWarning: (a, t) => `Dotazník není kompletní (${a} z ${t}). Vyhodnocení je pouze orientační.`,
     notFound: "Vyhodnocení nebylo nalezeno. Nejdřív vyplň dotazník.",
     goHome: "Na úvodní stránku",
+    copyLink: "Kopírovat odkaz",
+    copiedLink: "Zkopírováno ✓",
+    shareTitle: "Odkaz pro klienta",
+    shareHint:
+      "Zkopírovaný odkaz vede přímo na tento test ve zvoleném jazyce. Klient uvidí jen tento dotazník, žádnou nabídku dalších testů.",
   },
   en: {
     brand: "WINNING MINDS",
@@ -312,5 +322,10 @@ export const UI: Record<Lang, UIStrings> = {
     incompleteWarning: (a, t) => `The questionnaire is incomplete (${a} of ${t}). The evaluation is indicative only.`,
     notFound: "No evaluation found. Please fill in the questionnaire first.",
     goHome: "Go to the start page",
+    copyLink: "Copy link",
+    copiedLink: "Copied ✓",
+    shareTitle: "Link for the client",
+    shareHint:
+      "The copied link leads straight to this test in the chosen language. The client sees only this questionnaire — no menu of other tests.",
   },
 }
