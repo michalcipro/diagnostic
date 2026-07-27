@@ -151,6 +151,31 @@ export interface UIStrings {
   copiedLink: string
   shareTitle: string
   shareHint: string
+  // obrazovka po odeslání (respondent výsledky nevidí)
+  sentTitle: string
+  sentBody: string
+  sentSaveFailedTitle: string
+  sentSaveFailedBody: string
+  downloadBackup: string
+  // chráněná sekce pro kouče
+  coachTitle: string
+  coachSubtitle: string
+  coachPassword: string
+  coachEnter: string
+  coachWrongPassword: string
+  coachNotConfigured: string
+  coachLoading: string
+  coachEmpty: string
+  coachCount: (n: number) => string
+  coachOpen: string
+  coachBack: string
+  coachLogout: string
+  coachDelete: string
+  coachDeleteConfirm: string
+  colName: string
+  colTest: string
+  colDate: string
+  colValidity: string
 }
 
 export const UI: Record<Lang, UIStrings> = {
@@ -240,6 +265,32 @@ export const UI: Record<Lang, UIStrings> = {
     shareTitle: "Odkaz pro klienta",
     shareHint:
       "Zkopírovaný odkaz vede přímo na tento test ve zvoleném jazyce. Klient uvidí jen tento dotazník, žádnou nabídku dalších testů.",
+    sentTitle: "Děkujeme, dotazník je odeslaný.",
+    sentBody:
+      "Tvoje odpovědi jsme v pořádku přijali. Vyhodnocení zpracuje certifikovaný kouč Winning Minds a projde ho s tebou osobně — výsledky se záměrně nezobrazují automaticky, protože jejich smysl dává až společná interpretace. Tuhle stránku teď můžeš zavřít.",
+    sentSaveFailedTitle: "Odpovědi se nepodařilo odeslat",
+    sentSaveFailedBody:
+      "Zkontroluj připojení a zkus to prosím znovu. Aby se tvoje práce neztratila, ulož si prosím zálohu odpovědí tlačítkem níže a pošli soubor svému kouči.",
+    downloadBackup: "Stáhnout zálohu odpovědí",
+    coachTitle: "Přehled diagnostik",
+    coachSubtitle: "Chráněná sekce pro certifikovaného kouče.",
+    coachPassword: "Heslo",
+    coachEnter: "Přihlásit se",
+    coachWrongPassword: "Nesprávné heslo.",
+    coachNotConfigured:
+      "Ukládání výsledků zatím není nastavené. Doplň proměnnou NEXT_PUBLIC_CONVEX_URL a heslo COACH_PASSWORD.",
+    coachLoading: "Načítám…",
+    coachEmpty: "Zatím nikdo dotazník nevyplnil.",
+    coachCount: (n) => `${n} ${n === 1 ? "vyplnění" : n <= 4 ? "vyplnění" : "vyplnění"}`,
+    coachOpen: "Otevřít vyhodnocení",
+    coachBack: "Zpět na přehled",
+    coachLogout: "Odhlásit",
+    coachDelete: "Smazat",
+    coachDeleteConfirm: "Opravdu smazat toto vyplnění? Nelze vzít zpět.",
+    colName: "Jméno",
+    colTest: "Test",
+    colDate: "Vyplněno",
+    colValidity: "Validita",
   },
   en: {
     brand: "WINNING MINDS",
@@ -327,5 +378,31 @@ export const UI: Record<Lang, UIStrings> = {
     shareTitle: "Link for the client",
     shareHint:
       "The copied link leads straight to this test in the chosen language. The client sees only this questionnaire — no menu of other tests.",
+    sentTitle: "Thank you — your questionnaire has been submitted.",
+    sentBody:
+      "We have received your answers. A certified Winning Minds coach will process the evaluation and go through it with you in person — results are deliberately not shown automatically, because they only make sense with a proper interpretation. You can close this page now.",
+    sentSaveFailedTitle: "Your answers could not be submitted",
+    sentSaveFailedBody:
+      "Please check your connection and try again. So your work isn't lost, save a backup of your answers with the button below and send the file to your coach.",
+    downloadBackup: "Download a backup of my answers",
+    coachTitle: "Diagnostics overview",
+    coachSubtitle: "Protected area for the certified coach.",
+    coachPassword: "Password",
+    coachEnter: "Sign in",
+    coachWrongPassword: "Incorrect password.",
+    coachNotConfigured:
+      "Result storage is not configured yet. Set NEXT_PUBLIC_CONVEX_URL and the COACH_PASSWORD variable.",
+    coachLoading: "Loading…",
+    coachEmpty: "Nobody has completed a questionnaire yet.",
+    coachCount: (n) => `${n} submission${n === 1 ? "" : "s"}`,
+    coachOpen: "Open evaluation",
+    coachBack: "Back to overview",
+    coachLogout: "Sign out",
+    coachDelete: "Delete",
+    coachDeleteConfirm: "Really delete this submission? This cannot be undone.",
+    colName: "Name",
+    colTest: "Test",
+    colDate: "Completed",
+    colValidity: "Validity",
   },
 }

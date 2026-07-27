@@ -1,43 +1,22 @@
 "use client"
 
-import { use, useEffect, useMemo, useState } from "react"
-import Link from "next/link"
-import { LangToggle } from "@/components/diagnostic/lang-toggle"
+import { useMemo } from "react"
 import { BandChip, ScoreRow } from "@/components/diagnostic/score-visuals"
 import { getDimensionContent, getFacetContent, vt } from "@/lib/diagnostic/content"
 import { BAND_DESCRIPTIONS, TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
 import { evaluate } from "@/lib/diagnostic/scoring"
 import { getStructure, parseTestId } from "@/lib/diagnostic/structure"
-import { loadSession } from "@/lib/diagnostic/storage"
-import { fetchFromRemote, isRemoteEnabled } from "@/lib/diagnostic/remote"
 import type {
-  DiagnosticResult,
+  AnswerMap,
   DimensionScore,
   Lang,
-  StoredSession,
+  PersonInfo,
   TestId,
   ValidityStatus,
-  Variant,
 } from "@/lib/diagnostic/types"
 
-export default function ReportPage({ params }: { params: Promise<{ testId: string }> }) {
-  const { testId } = use(params)
-  const parsed = parseTestId(testId)
-  if (!parsed) return <Missing lang="cs" />
-  return <Report testId={testId as TestId} variant={parsed.variant} />
-}
-
-function Missing({ lang }: { lang: Lang }) {
-  const t = UI[lang]
-  return (
-    <div className="diag-container py-24 text-center">
-      <p className="text-[17px] text-[var(--wm-text-2)]">{t.notFound}</p>
-      <Link href="/" className="mt-4 inline-block text-[15px] font-semibold text-[var(--wm-blue)]">
-        {t.goHome}
-      </Link>
-    </div>
-  )
-}
+// Kompletní vyhodnocení. Vykresluje se pouze v chráněné části pro kouče —
+// respondent tuhle komponentu nikdy nevidí.
 
 const STATUS_STYLE: Record<ValidityStatus, { color: string; bg: string }> = {
   ok: { color: "var(--wm-ok-fg, #248a3d)", bg: "var(--wm-green-light, #E8F9ED)" },
@@ -60,110 +39,25 @@ function StatusChip({ status, lang }: { status: ValidityStatus; lang: Lang }) {
   )
 }
 
-function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
-  const [session, setSession] = useState<StoredSession | null | undefined>(undefined)
-  const [lang, setLang] = useState<Lang>("cs")
-  const [publicId, setPublicId] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
-
-  useEffect(() => {
-    const r = new URLSearchParams(window.location.search).get("r")
-    if (r && isRemoteEnabled()) {
-      let active = true
-      fetchFromRemote(r).then((res) => {
-        if (!active) return
-        if (res) {
-          setPublicId(res.publicId)
-          const iso = new Date(res.createdAt).toISOString()
-          setSession({
-            testId: res.testId,
-            lang: res.lang,
-            person: res.person,
-            answers: res.answers,
-            startedAt: iso,
-            finishedAt: iso,
-          })
-          setLang(res.lang)
-        } else {
-          const local = loadSession(testId)
-          setSession(local)
-          if (local) setLang(local.lang)
-        }
-      })
-      return () => {
-        active = false
-      }
-    }
-    const s = loadSession(testId)
-    setSession(s)
-    if (s) setLang(s.lang)
-  }, [testId])
-
-  const copyShareLink = () => {
-    if (!publicId) return
-    const url = `${window.location.origin}/${testId}/report?r=${publicId}`
-    void navigator.clipboard?.writeText(url).then(() => {
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 2000)
-    })
-  }
-
-  const structure = useMemo(() => getStructure(parseTestId(testId)!.model), [testId])
-  const result: DiagnosticResult | null = useMemo(
-    () => (session && Object.keys(session.answers).length > 0 ? evaluate(structure, session.answers) : null),
-    [session, structure],
-  )
-
-  if (session === undefined) return null
-  if (!session || !result) return <Missing lang={lang} />
-
+export function ReportView({
+  testId,
+  person,
+  answers,
+  lang,
+}: {
+  testId: TestId
+  person: PersonInfo
+  answers: AnswerMap
+  lang: Lang
+}) {
+  const { model, variant } = parseTestId(testId)!
+  const structure = useMemo(() => getStructure(model), [model])
+  const result = useMemo(() => evaluate(structure, answers), [structure, answers])
   const t = UI[lang]
   const v = result.validity
 
-  const exportJson = () => {
-    const blob = new Blob([JSON.stringify({ session, result }, null, 2)], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `${testId}-${session.person.name.replace(/\s+/g, "-") || "report"}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
   return (
-    <div className="diag-container pb-20 pt-8">
-      {/* ovládání (netiskne se) */}
-      <div className="diag-no-print mb-6 flex flex-wrap items-center justify-between gap-3">
-        {/* Značka záměrně není odkaz — klient vidí jen své vyhodnocení. */}
-        <span className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text)]">{t.brand}</span>
-        <div className="flex items-center gap-2">
-          <LangToggle lang={lang} onChange={setLang} />
-          {publicId && (
-            <button
-              type="button"
-              onClick={copyShareLink}
-              className="inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold transition-colors hover:bg-[var(--wm-fill-4)]"
-            >
-              {copied ? (lang === "cs" ? "Zkopírováno ✓" : "Copied ✓") : lang === "cs" ? "Kopírovat odkaz" : "Copy link"}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={exportJson}
-            className="inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold transition-colors hover:bg-[var(--wm-fill-4)]"
-          >
-            JSON
-          </button>
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="inline-flex h-9 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
-          >
-            {t.printButton}
-          </button>
-        </div>
-      </div>
-
+    <>
       {/* hlavička reportu */}
       <header className="diag-card p-7">
         <p className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text-3)]">{t.brand}</p>
@@ -174,24 +68,24 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
         <div className="mt-5 grid gap-x-8 gap-y-2 border-t border-[var(--wm-border-light)] pt-4 text-[14px] sm:grid-cols-2">
           <div className="flex justify-between gap-4 sm:justify-start">
             <span className="text-[var(--wm-text-3)]">{t.personLabel}</span>
-            <span className="font-semibold">{session.person.name || "—"}</span>
+            <span className="font-semibold">{person.name || "—"}</span>
           </div>
           <div className="flex justify-between gap-4 sm:justify-start">
             <span className="text-[var(--wm-text-3)]">{t.filledLabel}</span>
-            <span className="font-semibold">{session.person.fillDate}</span>
+            <span className="font-semibold">{person.fillDate}</span>
           </div>
-          {session.person.role && (
+          {person.role && (
             <div className="flex justify-between gap-4 sm:justify-start">
               <span className="text-[var(--wm-text-3)]">
                 {variant === "sport" ? t.roleLabelSport : t.roleLabelBusiness}
               </span>
-              <span className="font-semibold">{session.person.role}</span>
+              <span className="font-semibold">{person.role}</span>
             </div>
           )}
-          {session.person.birthDate && (
+          {person.birthDate && (
             <div className="flex justify-between gap-4 sm:justify-start">
               <span className="text-[var(--wm-text-3)]">{t.birthLabel}</span>
-              <span className="font-semibold">{session.person.birthDate}</span>
+              <span className="font-semibold">{person.birthDate}</span>
             </div>
           )}
         </div>
@@ -254,7 +148,8 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
             <span>
               {t.validityStyle}
               <span className="ml-2 text-[13px] text-[var(--wm-text-3)]">
-                4–5: {v.responseStyle.agreePct} % · 1–2: {v.responseStyle.disagreePct} % · 1/5: {v.responseStyle.extremePct} %
+                4–5: {v.responseStyle.agreePct} % · 1–2: {v.responseStyle.disagreePct} % · 1/5:{" "}
+                {v.responseStyle.extremePct} %
               </span>
             </span>
             <StatusChip status={v.responseStyle.status} lang={lang} />
@@ -299,7 +194,9 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
                     : getFacetContent(s.id)?.name[lang] ?? s.id}
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="text-[13px] text-[var(--wm-text-3)]">{s.raw}/{s.max}</span>
+                  <span className="text-[13px] text-[var(--wm-text-3)]">
+                    {s.raw}/{s.max}
+                  </span>
                   <BandChip band={s.band} lang={lang} />
                 </span>
               </div>
@@ -317,7 +214,9 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
                     : getFacetContent(s.id)?.name[lang] ?? s.id}
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="text-[13px] text-[var(--wm-text-3)]">{s.raw}/{s.max}</span>
+                  <span className="text-[13px] text-[var(--wm-text-3)]">
+                    {s.raw}/{s.max}
+                  </span>
                   <BandChip band={s.band} lang={lang} />
                 </span>
               </div>
@@ -327,7 +226,7 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
       </section>
 
       {/* narativ po dimenzích */}
-      <section className="mt-8 diag-print-break">
+      <section className="diag-print-break mt-8">
         <h2 className="mb-4 text-[22px] font-bold tracking-tight">{t.dimensionsTitle}</h2>
         <div className="flex flex-col gap-5">
           {result.dimensions.map((d) => {
@@ -403,7 +302,7 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
       </section>
 
       {/* rozvojová doporučení */}
-      <section className="diag-card mt-8 p-7 diag-print-break">
+      <section className="diag-card diag-print-break mt-8 p-7">
         <h2 className="text-[18px] font-bold tracking-tight">{t.developmentTitle}</h2>
         <p className="mt-2 text-[14px] leading-relaxed text-[var(--wm-text-2)]">{t.developmentIntro}</p>
         <div className="mt-4 flex flex-col gap-5">
@@ -412,12 +311,8 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
             const name = isDim
               ? getDimensionContent(s.id as DimensionScore["id"]).name[lang]
               : getFacetContent(s.id)?.name[lang] ?? s.id
-            const development = isDim
-              ? undefined
-              : getFacetContent(s.id)?.development
-            const fallbackBand = isDim
-              ? getDimensionContent(s.id as DimensionScore["id"]).bands[s.band]
-              : undefined
+            const development = isDim ? undefined : getFacetContent(s.id)?.development
+            const fallbackBand = isDim ? getDimensionContent(s.id as DimensionScore["id"]).bands[s.band] : undefined
             return (
               <div key={s.id} className="rounded-2xl bg-[var(--wm-surface-2)] p-5">
                 <div className="flex items-center justify-between gap-3">
@@ -444,6 +339,6 @@ function Report({ testId, variant }: { testId: TestId; variant: Variant }) {
       <footer className="mt-10 border-t border-[var(--wm-border-light)] pt-6 text-center text-[12px] text-[var(--wm-text-3)]">
         {t.confidential}
       </footer>
-    </div>
+    </>
   )
 }

@@ -2,7 +2,6 @@
 
 import { use, useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { LangToggle } from "@/components/diagnostic/lang-toggle"
 import { SCALE_LABELS, TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
 import { getItems, itemText } from "@/lib/diagnostic/items"
@@ -33,13 +32,12 @@ function NotFound() {
 }
 
 function Questionnaire({ testId }: { testId: TestId }) {
-  const router = useRouter()
   const { model, variant } = parseTestId(testId)!
   const structure = useMemo(() => getStructure(model), [model])
   const items = useMemo(() => getItems(testId), [testId])
 
   const [session, setSession] = useState<StoredSession | null>(null)
-  const [stage, setStage] = useState<"intro" | "items">("intro")
+  const [stage, setStage] = useState<"intro" | "items" | "sent" | "sendFailed">("intro")
   const [block, setBlock] = useState(0)
   const [showMissing, setShowMissing] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -108,18 +106,24 @@ function Questionnaire({ testId }: { testId: TestId }) {
     const done: StoredSession = { ...session, finishedAt: new Date().toISOString() }
     saveSession(done)
 
-    // Uložení do Convexu (pokud je nakonfigurován) → sdílecí odkaz.
-    if (isRemoteEnabled()) {
-      setSubmitting(true)
-      const publicId = await submitToRemote(done)
-      setSubmitting(false)
-      if (publicId) {
-        router.push(`/${testId}/report?r=${publicId}`)
-        return
-      }
-    }
-    // Fallback: report z lokálního uložení.
-    router.push(`/${testId}/report`)
+    // Odeslání kouči. Respondent výsledky nevidí — projde je s ním kouč osobně,
+    // proto se po odeslání zobrazuje jen potvrzení.
+    setSubmitting(true)
+    const ok = isRemoteEnabled() ? await submitToRemote(done) : false
+    setSubmitting(false)
+    setStage(ok ? "sent" : "sendFailed")
+    requestAnimationFrame(() => topRef.current?.scrollIntoView({ behavior: "smooth" }))
+  }
+
+  /** Záloha odpovědí pro případ, že se odeslání nepodaří. */
+  const downloadBackup = () => {
+    const blob = new Blob([JSON.stringify(session, null, 2)], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `${testId}-${session.person.name.replace(/\s+/g, "-") || "odpovedi"}.json`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -340,6 +344,53 @@ function Questionnaire({ testId }: { testId: TestId }) {
               )}
             </div>
           </div>
+        )}
+
+        {/* Odesláno. Respondent zde záměrně nevidí žádné výsledky — vyhodnocení
+            s ním prochází kouč osobně. */}
+        {stage === "sent" && (
+          <section className="diag-card mt-8 p-8 text-center">
+            <div
+              className="mx-auto flex h-14 w-14 items-center justify-center rounded-full"
+              style={{ background: "var(--wm-green-light)" }}
+              aria-hidden="true"
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--wm-green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </div>
+            <h2 className="mt-5 text-[22px] font-bold tracking-tight">{t.sentTitle}</h2>
+            <p className="mx-auto mt-3 max-w-lg text-[15px] leading-relaxed text-[var(--wm-text-2)]">{t.sentBody}</p>
+          </section>
+        )}
+
+        {/* Odeslání selhalo — ať respondent nepřijde o hodinu práce. */}
+        {stage === "sendFailed" && (
+          <section className="diag-card mt-8 p-8 text-center" style={{ borderColor: "var(--wm-orange)" }}>
+            <h2 className="text-[20px] font-bold tracking-tight text-[var(--wm-caution-fg)]">
+              {t.sentSaveFailedTitle}
+            </h2>
+            <p className="mx-auto mt-3 max-w-lg text-[15px] leading-relaxed text-[var(--wm-text-2)]">
+              {t.sentSaveFailedBody}
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={finish}
+                disabled={submitting}
+                className="inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-8 text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-50"
+              >
+                {submitting ? "…" : t.finish}
+              </button>
+              <button
+                type="button"
+                onClick={downloadBackup}
+                className="inline-flex h-11 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-6 text-[15px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
+              >
+                {t.downloadBackup}
+              </button>
+            </div>
+          </section>
         )}
 
         <footer className="mt-14 border-t border-[var(--wm-border-light)] pt-6 text-center text-[12px] text-[var(--wm-text-3)]">

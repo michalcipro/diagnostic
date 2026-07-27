@@ -9,7 +9,8 @@ nesdílí kód ani data s koučovací platformou.
 - **Skórování dle klíčů:** kontrola validity (pozornost, infrekvence, konzistence,
   upřímnost, odpověďový styl), rekódování obrácených položek, fazety/dimenze,
   pásma, opěrné body a rozvojové priority
-- **Výsledky anonymní**, sdílené neuhodnutelným odkazem (`/<test>/report?r=…`)
+- **Výsledky vidí pouze kouč** v chráněné sekci `/kouc`; respondent po odeslání
+  dostane jen potvrzení, vyhodnocení s ním kouč prochází osobně
 - **Design:** Apple HIG, světlý i tmavý režim, export do PDF / tisk
 
 ## Stack
@@ -25,9 +26,35 @@ lib/diagnostic/          # logika: structure, scoring, i18n, items, content, rem
 convex/                  # izolovaný backend: schema + eliteDiagnostic (submit/getByPublicId)
 ```
 
-Diagnostika funguje i **bez** Convexu (běží lokálně přes `localStorage`).
-Convex přidává trvalé uložení a sdílecí odkazy — aktivuje se, jakmile je
-nastaveno `NEXT_PUBLIC_CONVEX_URL`.
+## Kdo co vidí
+
+| Role | Přístup |
+| --- | --- |
+| Respondent | vyplní dotazník na přímém odkazu, po odeslání vidí **pouze potvrzení** |
+| Kouč | `/kouc` — po zadání hesla seznam všech vyplnění, kompletní vyhodnocení, tisk do PDF |
+
+Odpovědi ani vyhodnocení se z backendu nikdy nevrací bez platného hesla; heslo
+se ověřuje **serverově** v Convexu proti proměnné `COACH_PASSWORD`. Kontrola jen
+v prohlížeči by nestačila — data by šla stáhnout přímo přes veřejné API.
+
+## Nastavení Convexu
+
+Bez Convexu se dotazník nemá kam odeslat a aplikace na to upozorní.
+
+```bash
+npx convex login
+npx convex dev        # založí projekt, zapíše .env.local; pak Ctrl+C
+```
+
+V dashboardu Convexu → **Settings → Environment Variables** přidej:
+
+| Proměnná | Význam |
+| --- | --- |
+| `COACH_PASSWORD` | heslo do sekce `/kouc` (nastav v dev i production prostředí) |
+
+Na Vercelu nastav proměnnou `CONVEX_DEPLOY_KEY` (produkční deploy key z Convexu)
+a build command na `npx convex deploy --cmd 'npm run build'` — ten při každém
+nasazení nahraje Convex funkce a sám doplní `NEXT_PUBLIC_CONVEX_URL`.
 
 ## Odkazy pro klienty
 
