@@ -4,6 +4,27 @@ import { v } from "convex/values"
 import crypto from "node:crypto"
 import { action } from "./_generated/server"
 import { internal } from "./_generated/api"
+import type { Id } from "./_generated/dataModel"
+
+// Explicitní typy návratových hodnot. Bez nich TypeScript zacyklí odvozování,
+// protože akce volají funkce přes `internal`, které se generují mimo jiné
+// i z tohoto souboru (Convex chyby TS7022 / TS7023).
+type Prihlaseni = { sessionToken: string; name: string; role: string }
+type CoachZaznam = {
+  id: Id<"coaches">
+  email: string
+  name: string
+  passwordHash: string
+  salt: string
+  role: "master" | "coach"
+  active: boolean
+} | null
+type Identita = {
+  id: Id<"coaches">
+  email: string
+  name: string
+  role: "master" | "coach"
+} | null
 
 // Přihlašování koučů. Běží v Node prostředí, aby šlo použít pořádnou
 // kryptografii — hesla se nikdy neukládají v čitelné podobě.
@@ -52,7 +73,7 @@ export const createMaster = action({
     password: v.string(),
   },
   returns: v.object({ sessionToken: v.string(), name: v.string(), role: v.string() }),
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<Prihlaseni> => {
     const expected = process.env.SETUP_TOKEN
     if (!expected) {
       throw new Error("Na serveru není nastavený SETUP_TOKEN. Doplň ho v nastavení Convexu.")
@@ -60,7 +81,7 @@ export const createMaster = action({
     if (!safeEqual(args.setupToken, expected)) {
       throw new Error("Neplatný zakládací odkaz.")
     }
-    const exists = await ctx.runQuery(internal.authInternal.anyCoachExists, {})
+    const exists: boolean = await ctx.runQuery(internal.authInternal.anyCoachExists, {})
     if (exists) {
       throw new Error("Master účet už existuje. Tento odkaz je neplatný.")
     }
@@ -70,7 +91,7 @@ export const createMaster = action({
     if (args.name.trim().length < 2) throw new Error("Zadej své jméno.")
 
     const salt = crypto.randomBytes(16).toString("hex")
-    const coachId = await ctx.runMutation(internal.authInternal.insertCoach, {
+    const coachId: Id<"coaches"> = await ctx.runMutation(internal.authInternal.insertCoach, {
       email,
       name: args.name.trim(),
       passwordHash: hashPassword(args.password, salt),
@@ -92,8 +113,8 @@ export const createMaster = action({
 export const login = action({
   args: { email: v.string(), password: v.string() },
   returns: v.object({ sessionToken: v.string(), name: v.string(), role: v.string() }),
-  handler: async (ctx, args) => {
-    const coach = await ctx.runQuery(internal.authInternal.findByEmail, {
+  handler: async (ctx, args): Promise<Prihlaseni> => {
+    const coach: CoachZaznam = await ctx.runQuery(internal.authInternal.findByEmail, {
       email: normalizeEmail(args.email),
     })
     // Stejná hláška pro neexistující účet i špatné heslo — ať nejde zjišťovat,
@@ -122,8 +143,10 @@ export const addCoach = action({
     password: v.string(),
   },
   returns: v.object({ ok: v.boolean() }),
-  handler: async (ctx, args) => {
-    const me = await ctx.runQuery(internal.sessions.whoAmI, { sessionToken: args.sessionToken })
+  handler: async (ctx, args): Promise<{ ok: boolean }> => {
+    const me: Identita = await ctx.runQuery(internal.sessions.whoAmI, {
+      sessionToken: args.sessionToken,
+    })
     if (!me || me.role !== "master") {
       throw new Error("Přidávat kouče může pouze master účet.")
     }
@@ -147,10 +170,14 @@ export const addCoach = action({
 export const changePassword = action({
   args: { sessionToken: v.string(), currentPassword: v.string(), newPassword: v.string() },
   returns: v.object({ ok: v.boolean() }),
-  handler: async (ctx, args) => {
-    const me = await ctx.runQuery(internal.sessions.whoAmI, { sessionToken: args.sessionToken })
+  handler: async (ctx, args): Promise<{ ok: boolean }> => {
+    const me: Identita = await ctx.runQuery(internal.sessions.whoAmI, {
+      sessionToken: args.sessionToken,
+    })
     if (!me) throw new Error("Přihlášení vypršelo.")
-    const coach = await ctx.runQuery(internal.authInternal.findByEmail, { email: me.email })
+    const coach: CoachZaznam = await ctx.runQuery(internal.authInternal.findByEmail, {
+      email: me.email,
+    })
     if (!coach) throw new Error("Účet nenalezen.")
     if (!safeEqual(hashPassword(args.currentPassword, coach.salt), coach.passwordHash)) {
       throw new Error("Stávající heslo nesouhlasí.")
