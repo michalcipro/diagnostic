@@ -45,6 +45,19 @@ export const NAZVY_PASEM: Record<PasmoRozsah["pasmo"], string> = {
   dominantni: "Dominantní aktivace",
 }
 
+/**
+ * Zkrácené názvy oblastí pro popisky v grafu. Plný název se do sloupce vedle
+ * osy nevejde a useknutý popisek je horší než kratší, ale celý; plné znění
+ * zůstává v textu a v bublině nad řádkem.
+ */
+export const NAZVY_DOMEN_KRATCE: Record<Domena, string> = {
+  odpojeni: "Odpojení a odmítnutí",
+  autonomie: "Autonomie a výkon",
+  hranice: "Narušené hranice",
+  zamereni: "Zaměření na druhé",
+  ostrazitost: "Ostražitost a nároky",
+}
+
 export const NAZVY_DOMEN: Record<Domena, string> = {
   odpojeni: "Odpojení a odmítnutí",
   autonomie: "Narušená autonomie a výkon",

@@ -35,6 +35,11 @@
   --wm-ok-fg: #248a3d;
   --wm-caution-fg: #c93400;
   --wm-invalid-fg: #d70015;
+  /* Grafy: dráha pruhu a barva nezvýrazněných dat. Vlastní tokeny proto, že
+     ani --wm-fill-4 (moc slabá), ani --wm-text-3 (moc tvrdá) nedávají na
+     pruzích dobrý poměr; obojí se musí převracet spolu s režimem. */
+  --wm-track: #e9e9ef;
+  --wm-bar-muted: #909099;
   color-scheme: light;
 }
 
@@ -66,6 +71,8 @@
     --wm-ok-fg: #30d158;
     --wm-caution-fg: #ff9f0a;
     --wm-invalid-fg: #ff453a;
+    --wm-track: #2c2c2e;
+    --wm-bar-muted: #68686e;
     color-scheme: dark;
   }
 }

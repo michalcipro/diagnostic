@@ -1,26 +1,36 @@
 "use client"
 
-import { NAZVY_DOMEN, NAZVY_PASEM, PASMA, VZORCE, vzorec } from "@/lib/vzorce/structure"
+import {
+  NAZVY_DOMEN,
+  NAZVY_DOMEN_KRATCE,
+  NAZVY_PASEM,
+  PASMA,
+  VZORCE,
+  vzorec,
+} from "@/lib/vzorce/structure"
 import { OBSAH } from "@/lib/vzorce/data/obsah"
-import type { Domena, VzorecSkore } from "@/lib/vzorce/types"
+import type { Domena, Pasmo, VzorecSkore } from "@/lib/vzorce/types"
 
 // Grafy k profilu vzorců.
 //
 // Zvolená forma: vodorovné pruhy seřazené sestupně, s důrazem na tři
 // nejaktivnější vzorce. Úkolem dat je porovnat velikost a vypíchnout tři
 // z jedenácti, na což je pruhový graf s důrazem správná forma; pavučinový graf
-// by plochou zkresloval a jedenáct os se nedá poctivě přečíst.
+// by plochou zkresloval a jedenáct os se nedá poctivě přečíst. Tři nejsilnější
+// dostávají navíc prstenec, protože u nich nejde o srovnání mezi sebou, ale
+// o jednu hodnotu na škále.
 //
 // Závažnost pásma NENESE barva, ale poloha na ose. Zelená a jantarová jsou pro
 // protanopii prakticky totožné (ΔE 2,8), takže barevně kódovaná pásma by pro
-// část lidí nesla nulovou informaci. Hranice pásem jsou proto svislé linky
-// přes celý graf, jejich rozsahy stojí v legendě pod grafem a název pásma je
-// u každého řádku napsaný slovy.
+// část lidí nesla nulovou informaci. Barva jen odděluje zvýrazněná data od
+// ostatních, hranice pásem stojí jako značky pod osou a rozsahy v legendě.
+//
+// Přechod ve výplni je svislý, ne vodorovný: dělá hloubku, ale nepředstírá,
+// že se hodnota podél pruhu mění.
 //
 // Rozvržení: nad 640 px jedna mřížka s pevnými šířkami sloupců, takže názvy,
 // osa i skóre lícují na svislici napříč všemi řádky; stejnou mřížku dostane
-// i tisk. Pod 640 px se stejná data vypisují ve svislém pořadí, protože čtyři
-// sloupce se na telefon poctivě nevejdou.
+// i tisk. Pod 640 px se stejná data vypisují ve svislém pořadí.
 
 const OSA_MIN = 10
 const OSA_MAX = 60
@@ -28,86 +38,89 @@ const OSA_MAX = 60
 /** Podíl na ose 10 až 60, v procentech šířky plochy. */
 const pozice = (skore: number) => ((skore - OSA_MIN) / (OSA_MAX - OSA_MIN)) * 100
 
-/**
- * Sloupce mřížky: název | osa | skóre | odznak. Na jednom místě, ať patka
- * lícuje s řádky. Pásmo tu vlastní sloupec nemá, protože se čte z polohy na
- * ose a jeho rozsahy stojí v legendě; na šířku vyhodnocení by se pátý sloupec
- * vešel jen za cenu useknuté osy.
- */
+/** Hranice pásem uvnitř osy: 20, 30, 40, 50. */
+const HRANICE = PASMA.slice(1).map((p) => p.min)
+
+/** Všechny popsané hodnoty na ose, od kraje ke kraji. */
+const ZNACKY = [OSA_MIN, ...HRANICE, OSA_MAX]
+
+/** Sloupce profilu: název | osa | skóre | odznak. */
 const MRIZKA =
-  "grid gap-x-3 grid-cols-[10.5rem_minmax(0,1fr)_2.5rem_1.5rem] lg:grid-cols-[13rem_minmax(0,1fr)_2.75rem_1.75rem]"
+  "grid gap-x-3 grid-cols-[11rem_minmax(0,1fr)_2.75rem_1.5rem] lg:grid-cols-[13rem_minmax(0,1fr)_3rem_1.75rem]"
 
-/** Výška jedné buňky. Pevná, aby řádky byly stejně vysoké a nic neposkakovalo. */
-const RADEK = "h-9"
+/** Oblasti mají delší názvy a žádný odznak, tak dostávají vlastní rozvrh. */
+const MRIZKA_OBLASTI =
+  "grid gap-x-3 grid-cols-[13rem_minmax(0,1fr)_2.75rem] lg:grid-cols-[15rem_minmax(0,1fr)_3rem]"
 
-/** Hranice pásem bez levého kraje: 20, 30, 40, 50 a pravý konec osy. */
-const HRANICE = [...PASMA.slice(1).map((p) => p.min), OSA_MAX]
+/** Výška jedné buňky. Pevná, aby řádky byly stejně vysoké. */
+const RADEK = "h-11"
 
-/** Podklad osy: svislé linky na hranicích pásem, přes celou výšku řádku. */
-function Mrizka() {
+/** Světlý nádech přes plnou barvu: hloubka bez druhé barvy v datech. */
+const LESK = "linear-gradient(180deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0) 58%)"
+
+const VYPLN_DURAZ = `${LESK}, var(--wm-blue)`
+const VYPLN_KLID = `${LESK}, var(--wm-bar-muted)`
+
+/** Pruh na ose. Dráha je vždy `w-full`, aby měla procentní šířka z čeho počítat. */
+function Pruh({ skore, duraz, popis }: { skore: number; duraz: boolean; popis: string }) {
   return (
-    <div className="pointer-events-none absolute inset-0">
-      {HRANICE.map((h) => (
+    <div className={`flex w-full min-w-0 items-center ${RADEK}`}>
+      <div
+        className="relative h-3.5 w-full overflow-hidden rounded-full bg-[var(--wm-track)]"
+        title={popis}
+      >
         <div
-          key={h}
-          className="absolute inset-y-0 w-px bg-[var(--wm-border-light)]"
-          style={{ left: `${pozice(h)}%` }}
+          className="h-full rounded-full transition-[width] duration-700 ease-out"
+          style={{
+            width: `${Math.max(2, pozice(skore))}%`,
+            minWidth: "14px",
+            background: duraz ? VYPLN_DURAZ : VYPLN_KLID,
+            boxShadow: duraz ? "0 1px 4px rgba(0, 122, 255, 0.32)" : "none",
+          }}
         />
-      ))}
+      </div>
     </div>
   )
 }
 
-/**
- * Jeden pruh na ose. Plocha je vždy `w-full`, aby procentní šířka pruhu měla
- * z čeho počítat; bez toho se pruh v pružném řádku smrskne na nulu.
- */
-function Pruh({ skore, duraz }: { skore: number; duraz: boolean }) {
+/** Dráha pro vzorec, který se pro chybějící odpovědi nevykazuje. */
+function PruhChybi({ popis }: { popis: string }) {
   return (
-    <div className={`relative flex w-full min-w-0 items-center ${RADEK}`}>
-      <Mrizka />
+    <div className={`flex w-full min-w-0 items-center ${RADEK}`}>
       <div
-        className="relative h-2.5 rounded-l-[3px] rounded-r-full transition-[width] duration-700"
-        style={{
-          width: `${Math.max(2, pozice(skore))}%`,
-          background: duraz ? "var(--wm-blue)" : "var(--wm-text-3)",
-        }}
+        className="h-3.5 w-full rounded-full border border-dashed border-[var(--wm-border)]"
+        title={popis}
       />
     </div>
   )
 }
 
-/** Plocha pro vzorec, který se pro chybějící odpovědi nevykazuje. */
-function PruhChybi({ popis }: { popis: string }) {
-  return (
-    <div className={`relative flex w-full min-w-0 items-center ${RADEK}`}>
-      <Mrizka />
-      <span className="relative truncate text-[12px] italic text-[var(--wm-text-3)]">{popis}</span>
-    </div>
-  )
-}
-
-/** Všechny popsané hodnoty na ose, od kraje ke kraji. */
-const ZNACKY = [OSA_MIN, ...HRANICE]
-
-/**
- * Číselná stupnice pod osou. Popisky visí přesně na hranicích pásem, krajní
- * dva zarovnané dovnitř, aby graf nikde nepřetékal.
- */
+/** Značky hranic pásem a číselná stupnice. Stojí jednou, pod celým grafem. */
 function Stupnice() {
   return (
-    <div className="relative h-3 w-full min-w-0">
-      {ZNACKY.map((h, i) => (
-        <span
-          key={h}
-          className={`absolute top-0 text-[10px] leading-none tabular-nums text-[var(--wm-text-3)] ${
-            i === 0 ? "" : i === ZNACKY.length - 1 ? "-translate-x-full" : "-translate-x-1/2"
-          }`}
-          style={{ left: `${pozice(h)}%` }}
-        >
-          {h}
-        </span>
-      ))}
+    <div className="relative w-full min-w-0 pt-2">
+      <div className="relative h-1.5">
+        {ZNACKY.map((h) => (
+          <span
+            key={h}
+            className="absolute top-0 h-1.5 w-px -translate-x-1/2 bg-[var(--wm-border)]"
+            style={{ left: `${pozice(h)}%` }}
+          />
+        ))}
+      </div>
+      <div className="relative mt-1 h-3.5">
+        {ZNACKY.map((h, i) => (
+          <span
+            key={h}
+            className={`absolute top-0 text-[10.5px] font-medium leading-none tabular-nums text-[var(--wm-text-3)] ${
+              i === 0 ? "" : i === ZNACKY.length - 1 ? "-translate-x-full" : "-translate-x-1/2"
+            }`}
+            style={{ left: `${pozice(h)}%` }}
+          >
+            {h}
+          </span>
+        ))}
+      </div>
     </div>
   )
 }
@@ -116,7 +129,7 @@ function Stupnice() {
 function Odznak({ pocet }: { pocet: number }) {
   return (
     <span
-      className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[var(--wm-border-light)] bg-[var(--wm-surface-2)] text-[11px] font-semibold leading-none tabular-nums text-[var(--wm-text-2)]"
+      className="inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-[var(--wm-track)] text-[11px] font-semibold leading-none tabular-nums text-[var(--wm-text-2)]"
       title={`${pocet} tvrzení označeno hodnotou 5 nebo 6`}
     >
       {pocet}
@@ -127,10 +140,13 @@ function Odznak({ pocet }: { pocet: number }) {
 /** Klíč k pásmům. Stojí v patce grafu, takže se nemá s čím překrýt. */
 function KlicPasem() {
   return (
-    <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-      <span className="font-semibold uppercase tracking-[0.08em]">Pásma</span>
+    <span className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+      <span className="text-[10.5px] font-bold uppercase tracking-[0.1em]">Pásma</span>
       {PASMA.map((p) => (
-        <span key={p.pasmo} className="whitespace-nowrap tabular-nums">
+        <span
+          key={p.pasmo}
+          className="whitespace-nowrap rounded-full bg-[var(--wm-track)] px-2 py-[3px] text-[11px] font-medium tabular-nums text-[var(--wm-text-2)]"
+        >
           {p.min}–{p.max} {NAZVY_PASEM[p.pasmo].replace(" aktivace", "").toLowerCase()}
         </span>
       ))}
@@ -138,18 +154,101 @@ function KlicPasem() {
   )
 }
 
-/** Patka grafu: dva řádky, oba zarovnané na levý okraj figury. */
+/** Vzorek v legendě: stejný tvar i výplň jako pruh v grafu. */
+function Vzorek({ duraz }: { duraz: boolean }) {
+  return (
+    <span
+      className="h-2.5 w-7 shrink-0 rounded-full"
+      style={{ background: duraz ? VYPLN_DURAZ : VYPLN_KLID }}
+    />
+  )
+}
+
+/** Patka grafu. */
 function Patka({ children }: { children: React.ReactNode }) {
   return (
-    <figcaption className="mt-4 flex flex-col gap-2 border-t border-[var(--wm-border-light)] pt-3 text-[12px] leading-relaxed text-[var(--wm-text-3)]">
+    <figcaption className="mt-5 flex flex-col gap-2.5 border-t border-[var(--wm-border-light)] pt-4 text-[12px] leading-relaxed text-[var(--wm-text-3)]">
       {children}
     </figcaption>
   )
 }
 
 /**
- * Profil všech jedenácti vzorců.
+ * Prstenec pro jednu hodnotu na škále 10 až 60.
+ *
+ * U tří nejsilnějších vzorců nejde o srovnání mezi sebou, ale o to, kde na
+ * škále vzorec stojí; prstenec tuhle jedinou hodnotu ukáže líp než pruh.
+ * Vyplněná část odpovídá stejnému podílu jako délka pruhu v profilu.
  */
+export function Prstenec({
+  skore,
+  pasmo,
+  velikost = 128,
+}: {
+  skore: number
+  pasmo: Pasmo
+  velikost?: number
+}) {
+  const polomer = 54
+  const obvod = 2 * Math.PI * polomer
+  const podil = Math.max(0, Math.min(1, (skore - OSA_MIN) / (OSA_MAX - OSA_MIN)))
+  const id = `prsten-${pasmo}-${skore}`
+
+  return (
+    <div
+      className="relative shrink-0"
+      style={{ width: velikost, height: velikost }}
+      title={`${skore} bodů z 60, ${NAZVY_PASEM[pasmo].toLowerCase()}`}
+    >
+      <svg viewBox="0 0 128 128" className="h-full w-full -rotate-90">
+        <defs>
+          <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="var(--wm-blue)" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="var(--wm-blue)" />
+          </linearGradient>
+        </defs>
+        <circle cx="64" cy="64" r={polomer} fill="none" stroke="var(--wm-track)" strokeWidth="12" />
+        <circle
+          cx="64"
+          cy="64"
+          r={polomer}
+          fill="none"
+          stroke={`url(#${id})`}
+          strokeWidth="12"
+          strokeLinecap="round"
+          strokeDasharray={`${obvod * podil} ${obvod}`}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-[30px] font-bold leading-none tracking-tight tabular-nums">
+          {skore}
+        </span>
+        <span className="mt-1 text-[11px] leading-none text-[var(--wm-text-3)]">z 60</span>
+      </div>
+    </div>
+  )
+}
+
+/** Tři prstence vedle sebe: rychlý obraz toho, kde vzorce stojí. */
+export function TrojicePrstencu({ top3 }: { top3: VzorecSkore[] }) {
+  if (!top3.length) return null
+  return (
+    <div className="grid gap-7 sm:grid-cols-3">
+      {top3.map((s, i) => (
+        <div key={s.id} className="flex flex-col items-center text-center">
+          <Prstenec skore={s.skore} pasmo={s.pasmo} />
+          <p className="mt-3.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--wm-text-3)]">
+            {i + 1}. místo
+          </p>
+          <p className="mt-1 text-[15.5px] font-semibold leading-tight">{OBSAH[s.id].nazev}</p>
+          <p className="mt-1 text-[12.5px] text-[var(--wm-text-2)]">{NAZVY_PASEM[s.pasmo]}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** Profil všech jedenácti vzorců. */
 export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: VzorecSkore[] }) {
   const vBoji = new Set(top3.map((v) => v.id))
 
@@ -160,29 +259,38 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
         <div className={MRIZKA}>
           {vsechny.map((v) => {
             const duraz = vBoji.has(v.id)
+            const nazev = OBSAH[v.id].nazev
             return (
               <div key={v.id} className="contents">
                 <div className={`flex min-w-0 items-center ${RADEK}`}>
                   <span
-                    className={`truncate text-[13.5px] ${
+                    className={`truncate text-[14px] ${
                       duraz ? "font-semibold text-[var(--wm-text)]" : "text-[var(--wm-text-2)]"
                     }`}
-                    title={OBSAH[v.id].nazev}
+                    title={nazev}
                   >
-                    {OBSAH[v.id].nazev}
+                    {nazev}
                   </span>
                 </div>
 
                 {v.vykazuje ? (
-                  <Pruh skore={v.skore} duraz={duraz} />
+                  <Pruh
+                    skore={v.skore}
+                    duraz={duraz}
+                    popis={`${nazev}: ${v.skore} bodů z 60, ${NAZVY_PASEM[v.pasmo].toLowerCase()}`}
+                  />
                 ) : (
-                  <PruhChybi popis={`zodpovězeno ${v.zodpovezeno} z ${v.celkem} položek`} />
+                  <PruhChybi
+                    popis={`${nazev}: zodpovězeno ${v.zodpovezeno} z ${v.celkem} položek, do pořadí se nezařazuje`}
+                  />
                 )}
 
                 <div className={`flex items-center justify-end ${RADEK}`}>
                   <span
-                    className={`text-[13.5px] tabular-nums ${
-                      duraz ? "font-semibold text-[var(--wm-text)]" : "text-[var(--wm-text-2)]"
+                    className={`tabular-nums ${
+                      duraz
+                        ? "text-[16px] font-bold text-[var(--wm-text)]"
+                        : "text-[15px] font-medium text-[var(--wm-text-2)]"
                     }`}
                   >
                     {v.vykazuje ? v.skore : "–"}
@@ -197,9 +305,7 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
           })}
 
           <div />
-          <div className="pt-1.5">
-            <Stupnice />
-          </div>
+          <Stupnice />
           <div />
           <div />
         </div>
@@ -209,21 +315,24 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
       <div className="flex flex-col gap-4 sm:hidden">
         {vsechny.map((v) => {
           const duraz = vBoji.has(v.id)
+          const nazev = OBSAH[v.id].nazev
           return (
             <div key={v.id}>
               <div className="flex items-baseline justify-between gap-3">
                 <span
-                  className={`min-w-0 truncate text-[14px] ${
+                  className={`min-w-0 truncate text-[14.5px] ${
                     duraz ? "font-semibold text-[var(--wm-text)]" : "text-[var(--wm-text-2)]"
                   }`}
                 >
-                  {OBSAH[v.id].nazev}
+                  {nazev}
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
                   {v.silnychOdpovedi > 0 && <Odznak pocet={v.silnychOdpovedi} />}
                   <span
-                    className={`text-[13.5px] tabular-nums ${
-                      duraz ? "font-semibold text-[var(--wm-text)]" : "text-[var(--wm-text-2)]"
+                    className={`tabular-nums ${
+                      duraz
+                        ? "text-[16px] font-bold text-[var(--wm-text)]"
+                        : "text-[15px] font-medium text-[var(--wm-text-2)]"
                     }`}
                   >
                     {v.vykazuje ? v.skore : "–"}
@@ -231,12 +340,14 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
                 </span>
               </div>
               {v.vykazuje ? (
-                <Pruh skore={v.skore} duraz={duraz} />
+                <Pruh skore={v.skore} duraz={duraz} popis={nazev} />
               ) : (
-                <PruhChybi popis={`zodpovězeno ${v.zodpovezeno} z ${v.celkem} položek`} />
+                <PruhChybi popis={nazev} />
               )}
               <p className="text-[12px] leading-none text-[var(--wm-text-3)]">
-                {v.vykazuje ? NAZVY_PASEM[v.pasmo] : "do pořadí se nezařazuje"}
+                {v.vykazuje
+                  ? NAZVY_PASEM[v.pasmo]
+                  : `zodpovězeno ${v.zodpovezeno} z ${v.celkem} položek`}
               </p>
             </div>
           )
@@ -247,11 +358,11 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
       <Patka>
         <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <span className="flex items-center gap-2">
-            <span className="h-2.5 w-6 rounded-full" style={{ background: "var(--wm-blue)" }} />
+            <Vzorek duraz />
             tři nejaktivnější vzorce
           </span>
           <span className="flex items-center gap-2">
-            <span className="h-2.5 w-6 rounded-full" style={{ background: "var(--wm-text-3)" }} />
+            <Vzorek duraz={false} />
             ostatní
           </span>
           <span className="flex items-center gap-2">
@@ -290,51 +401,53 @@ export function DomenyGraf({ vsechny }: { vsechny: VzorecSkore[] }) {
 
   if (!radky.length) return null
   const nejvic = radky[0].prumer
-
   const pocetSlovy = (n: number) => (n === 1 ? "1 vzorec" : n < 5 ? `${n} vzorce` : `${n} vzorců`)
 
   return (
     <figure className="m-0">
       <div className="hidden sm:block">
-        <div className={MRIZKA}>
+        <div className={MRIZKA_OBLASTI}>
           {radky.map((r) => {
             const duraz = r.prumer === nejvic
+            const nazev = NAZVY_DOMEN[r.domena]
             return (
               <div key={r.domena} className="contents">
                 <div className={`flex min-w-0 items-center ${RADEK}`}>
                   <span
-                    className={`truncate text-[13.5px] ${
+                    className={`truncate text-[14px] ${
                       duraz ? "font-semibold text-[var(--wm-text)]" : "text-[var(--wm-text-2)]"
                     }`}
-                    title={`${NAZVY_DOMEN[r.domena]}, ${pocetSlovy(r.pocet)}`}
+                    title={`${nazev}, ${pocetSlovy(r.pocet)}`}
                   >
-                    {NAZVY_DOMEN[r.domena]}{" "}
+                    {NAZVY_DOMEN_KRATCE[r.domena]}{" "}
                     <span className="font-normal text-[var(--wm-text-3)]">({r.pocet})</span>
                   </span>
                 </div>
 
-                <Pruh skore={r.prumer} duraz={duraz} />
+                <Pruh
+                  skore={r.prumer}
+                  duraz={duraz}
+                  popis={`${nazev}: průměr ${r.prumer} bodů z ${pocetSlovy(r.pocet)}`}
+                />
 
                 <div className={`flex items-center justify-end ${RADEK}`}>
                   <span
-                    className={`text-[13.5px] tabular-nums ${
-                      duraz ? "font-semibold text-[var(--wm-text)]" : "text-[var(--wm-text-2)]"
+                    className={`tabular-nums ${
+                      duraz
+                        ? "text-[16px] font-bold text-[var(--wm-text)]"
+                        : "text-[15px] font-medium text-[var(--wm-text-2)]"
                     }`}
                   >
                     {r.prumer}
                   </span>
                 </div>
 
-                <div className={RADEK} />
               </div>
             )
           })}
 
           <div />
-          <div className="pt-1.5">
-            <Stupnice />
-          </div>
-          <div />
+          <Stupnice />
           <div />
         </div>
       </div>
@@ -346,17 +459,17 @@ export function DomenyGraf({ vsechny }: { vsechny: VzorecSkore[] }) {
             <div key={r.domena}>
               <div className="flex items-baseline justify-between gap-3">
                 <span
-                  className={`min-w-0 truncate text-[14px] ${
+                  className={`min-w-0 truncate text-[14.5px] ${
                     duraz ? "font-semibold text-[var(--wm-text)]" : "text-[var(--wm-text-2)]"
                   }`}
                 >
                   {NAZVY_DOMEN[r.domena]}
                 </span>
-                <span className="shrink-0 text-[13.5px] tabular-nums text-[var(--wm-text-2)]">
+                <span className="shrink-0 text-[15px] font-medium tabular-nums text-[var(--wm-text-2)]">
                   {r.prumer}
                 </span>
               </div>
-              <Pruh skore={r.prumer} duraz={duraz} />
+              <Pruh skore={r.prumer} duraz={duraz} popis={NAZVY_DOMEN[r.domena]} />
               <p className="text-[12px] leading-none text-[var(--wm-text-3)]">
                 {pocetSlovy(r.pocet)}
               </p>

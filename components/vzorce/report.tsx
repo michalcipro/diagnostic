@@ -8,7 +8,7 @@ import { vyhodnot } from "@/lib/vzorce/scoring"
 import { NAZVY_DOMEN, NAZVY_PASEM, POCET_POLOZEK, vzorec } from "@/lib/vzorce/structure"
 import type { OdpovediMapa } from "@/lib/vzorce/types"
 import { propoj } from "@/lib/vzorce/vazby"
-import { DomenyGraf, ProfilGraf } from "@/components/vzorce/charts"
+import { DomenyGraf, ProfilGraf, TrojicePrstencu } from "@/components/vzorce/charts"
 
 // Vyhodnocení emocionálně-destruktivních vzorců.
 //
@@ -104,10 +104,15 @@ export function VzorceReport({
       {/* tři nejaktivnější */}
       <section className="diag-print-break mt-8">
         <h2 className="mb-1 text-[22px] font-bold tracking-tight">Tři nejaktivnější vzorce</h2>
-        <p className="mb-4 max-w-[74ch] text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
+        <p className="mb-5 max-w-[74ch] text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
           Tohle jsou vzorce, které se u respondenta aktivují nejsilněji. Nejsou to nálepky ani
           diagnóza. Je to popis mechanismu, který se spouští pod tlakem.
         </p>
+
+        <div className="diag-card mb-5 px-7 py-8">
+          <TrojicePrstencu top3={v.top3} />
+        </div>
+
         <div className="flex flex-col gap-5">
           {v.top3.map((s, i) => {
             const o = OBSAH[s.id]
@@ -122,9 +127,13 @@ export function VzorceReport({
                     <h3 className="mt-1 text-[20px] font-bold tracking-tight">{o.nazev}</h3>
                     <p className="mt-1 text-[13px] text-[var(--wm-text-2)]">{o.tema}</p>
                   </div>
-                  <div className="w-16 shrink-0 text-right">
-                    <div className="text-[24px] font-bold leading-none tabular-nums">{s.skore}</div>
-                    <div className="mt-1 text-[12px] leading-none text-[var(--wm-text-3)]">z 60</div>
+                  <div className="flex w-[76px] shrink-0 flex-col items-center rounded-2xl bg-[var(--wm-track)] px-2 py-3">
+                    <span className="text-[26px] font-bold leading-none tracking-tight tabular-nums">
+                      {s.skore}
+                    </span>
+                    <span className="mt-1.5 text-[11px] leading-none text-[var(--wm-text-3)]">
+                      z 60
+                    </span>
                   </div>
                 </div>
 
