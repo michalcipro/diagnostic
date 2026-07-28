@@ -7,7 +7,7 @@ import contentE from "./data/content/E.json"
 import contentF from "./data/content/F.json"
 import contentG from "./data/content/G.json"
 
-// Texty vyhodnocení — na fazetové i dimenzní úrovni, sport/business, cs/en.
+// Texty vyhodnocení – na fazetové i dimenzní úrovni, sport/business, cs/en.
 
 export interface VariantText {
   sport: Localized
@@ -54,7 +54,7 @@ export function getFacetContent(facetId: string): FacetContent | undefined {
  * a přídavných jmen v přísudku. Nechat ženu číst text v mužském rodě je hrubá
  * chyba, proto se každé takové místo v obsahu označuje a tady se rozvíjí.
  *
- * Angličtina rod neřeší — značka se v anglických textech nevyskytuje, a kdyby
+ * Angličtina rod neřeší – značka se v anglických textech nevyskytuje, a kdyby
  * se tam omylem dostala, rozvine se stejným způsobem a nerozbije větu.
  */
 export function applyGender(text: string, gender: Gender): string {

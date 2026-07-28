@@ -1,13 +1,13 @@
 import { defineSchema, defineTable } from "convex/server"
 import { v } from "convex/values"
 
-// Samostatná aplikace ELITE Performance Diagnostic — vlastní Convex projekt.
+// Samostatná aplikace ELITE Performance Diagnostic – vlastní Convex projekt.
 //
 // Přístup k dotazníku je pouze na pozvánku: kouč vygeneruje odkaz s tokenem
 // na jedno použití. Vyplněné výsledky vidí pouze kouč (ověření heslem na
-// serveru, viz eliteDiagnostic.ts) — respondent po odeslání žádná data nedostává.
+// serveru, viz eliteDiagnostic.ts) – respondent po odeslání žádná data nedostává.
 export default defineSchema({
-  // Kouči. První založený účet je master — vzniká přes jednorázový zakládací
+  // Kouči. První založený účet je master – vzniká přes jednorázový zakládací
   // odkaz, který po jeho vytvoření nadobro přestane fungovat. Další kouče
   // může přidat výhradně master.
   coaches: defineTable({
@@ -59,16 +59,16 @@ export default defineSchema({
     lang: v.string(),
     /** rok narození, nikdy celé datum */
     birthYear: v.optional(v.number()),
-    /** rod — do norem patří, identifikující není */
+    /** rod – do norem patří, identifikující není */
     gender: v.optional(v.union(v.literal("male"), v.literal("female"))),
     /** povolání (business) nebo disciplína a úroveň (sport) */
     role: v.optional(v.string()),
-    /** odpovědi — z nich se dopočítá reliabilita, faktorová struktura i normy */
+    /** odpovědi – z nich se dopočítá reliabilita, faktorová struktura i normy */
     answers: v.string(),
     answeredCount: v.number(),
     complete: v.boolean(),
     durationSec: v.optional(v.number()),
-    /** „2026-07" — na měsíc, ať nejde spárovat s časem vyplnění */
+    /** „2026-07" – na měsíc, ať nejde spárovat s časem vyplnění */
     collectedMonth: v.string(),
   })
     .index("by_test", ["testId"])
@@ -90,7 +90,7 @@ export default defineSchema({
     answeredCount: v.number(),
     complete: v.boolean(),
     /**
-     * Doba vyplňování v sekundách. Vstupuje do kontroly validity — příliš
+     * Doba vyplňování v sekundách. Vstupuje do kontroly validity – příliš
      * rychlé vyplnění je silný ukazatel nedbalého odpovídání. U záznamů
      * pořízených dřív chybí, proto volitelné.
      */

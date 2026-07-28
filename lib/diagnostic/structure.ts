@@ -42,7 +42,7 @@ export const ELITE200_FACETS: FacetDef[] = [
 
 /**
  * Obrácené obsahové položky ELITE 200 (rekódování 6 − x).
- * Pozn.: tučné zvýraznění se v PDF klíči nedochovalo — seznam je odvozen
+ * Pozn.: tučné zvýraznění se v PDF klíči nedochovalo – seznam je odvozen
  * ze znění položek a ověřen proti typům párů konzistence (viz testy).
  */
 export const ELITE200_REVERSED: number[] = [
@@ -79,7 +79,7 @@ export const ELITE200: StructureDef = {
       ],
       // Prahy jsou zkalibrované na rozdělení průměrného rozdílu u poctivého
       // respondenta (simulace 60 000 profilů, šum na úrovni položky σ = 0,8,
-      // tj. korelace mezi dvěma položkami měřícími totéž ≈ 0,52 — konzervativní
+      // tj. korelace mezi dvěma položkami měřícími totéž ≈ 0,52 – konzervativní
       // odhad, párové položky jsou parafráze a korelují spíš výš).
       // Výsledek: varování ~5 % poctivých, neplatné ~0,02 %; náhodný respondent
       // je označen jako neplatný v 98 % případů.
@@ -123,7 +123,7 @@ export const ELITE100_DIMENSION_ITEMS: Record<string, number[]> = {
   G: [7, 15, 23, 30, 39, 47, 54, 62, 70, 79, 86, 94],
 }
 
-/** Obrácené obsahové položky ELITE 100 — přesně 3 v každé dimenzi. */
+/** Obrácené obsahové položky ELITE 100 – přesně 3 v každé dimenzi. */
 export const ELITE100_REVERSED: number[] = [
   17, 18, 20, 22, 23, 24, 27, 41, 42, 43, 45, 46, 48, 54, 64, 65, 68, 71, 74, 85, 86,
 ]
@@ -135,7 +135,7 @@ export const ELITE100: StructureDef = {
   reversedItems: ELITE100_REVERSED,
   validity: {
     attention: { 38: 2, 75: 4 },
-    // Kontroly jsou jen dvě, takže shovívavější práh než u ELITE 200 nejde —
+    // Kontroly jsou jen dvě, takže shovívavější práh než u ELITE 200 nejde –
     // jedna minutá kontrola z dvou už je polovina.
     attentionThresholds: { caution: 1, invalid: 2 },
     honesty: { items: [10, 21, 32, 44, 55, 66, 78, 89], thresholds: [22, 29] },

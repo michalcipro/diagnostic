@@ -26,7 +26,7 @@ function bandFor(score: number, bands: BandRange[]): BandKey {
   for (const b of bands) {
     if (score >= b.min && score <= b.max) return b.band
   }
-  // mimo rozsah (nemělo by nastat) — přiřaď krajní pásmo
+  // mimo rozsah (nemělo by nastat) – přiřaď krajní pásmo
   return score < bands[0].min ? bands[0].band : bands[bands.length - 1].band
 }
 
@@ -86,7 +86,7 @@ export function evaluateValidity(
   //
   // Pár, u kterého chybí některá odpověď, se do průměru NEPOČÍTÁ. Dřív se
   // takový pár bral jako dokonalá shoda, takže vynechávání položek index
-  // validity zlepšovalo — přesně opačně, než má být.
+  // validity zlepšovalo – přesně opačně, než má být.
   const cfg = s.validity.consistency
   const pairDiffs = cfg.pairs.map(({ a, b, type }) => {
     const va = answers[a]
@@ -101,7 +101,7 @@ export function evaluateValidity(
   const meanDiff = pairsUsed === 0 ? 0 : Math.round((usable.reduce((sum, p) => sum + p.diff, 0) / pairsUsed) * 100) / 100
   const pairsOver3 = usable.filter((p) => p.diff >= 3).length
   const consistency = {
-    // Bez dostatku párů index nic neříká — pak zůstává „ok" a do celkového
+    // Bez dostatku párů index nic neříká – pak zůstává „ok" a do celkového
     // verdiktu nevstupuje, ale v reportu je označený jako nezjistitelný.
     status: (!consistencyAvailable
       ? "ok"
@@ -168,7 +168,7 @@ export function evaluateValidity(
   //
   // Položku nelze přečíst a zvážit za dvě sekundy. Krátký čas je jeden
   // z nejspolehlivějších ukazatelů nedbalého odpovídání a stojí nulové úsilí
-  // navíc. Dlouhý čas naopak nic neznamená — respondent si mohl dát pauzu.
+  // navíc. Dlouhý čas naopak nic neznamená – respondent si mohl dát pauzu.
   let pace: ValidityResult["pace"]
   if (s.validity.pace && admin.durationSec !== undefined && admin.durationSec > 0 && values.length > 0) {
     const secPerItem = Math.round((admin.durationSec / values.length) * 100) / 100
@@ -187,7 +187,7 @@ export function evaluateValidity(
   //
   // Tvrdé indexy říkají, jestli odpovědi vůbec odrážejí to, co měly měřit.
   // Měkké indexy (upřímnost, odpověďový styl) popisují, JAK o sobě respondent
-  // vypovídá — to je informace k interpretaci, ne důvod vyhodnocení zahodit.
+  // vypovídá – to je informace k interpretaci, ne důvod vyhodnocení zahodit.
   // Proto mohou verdikt zvednout nejvýš na „opatrně".
   let overall: ValidityStatus = "ok"
   for (const st of [attention.status, infrequency?.status ?? "ok", consistency.status, pace?.status ?? "ok"]) {
@@ -203,7 +203,7 @@ export function evaluateValidity(
  * Skóre jedné škály.
  *
  * Chybějící položka se NEPOČÍTÁ jako nula. Minimum škály je počet položek
- * (každá alespoň 1 bod), takže nula by skóre srazila pod teoretické minimum —
+ * (každá alespoň 1 bod), takže nula by skóre srazila pod teoretické minimum –
  * tři vynechané položky z osmi dokázaly poslat jinak maximální profil
  * z pásma „elitní" do „stabilizace". Místo toho se skóre dopočte z průměru
  * zodpovězených položek a při příliš velkém výpadku se nevykazuje vůbec.
@@ -262,11 +262,11 @@ export function evaluate(
     dimensions = s.dimensions.map((d) => {
       const dimFacets = facets!.filter((f) => f.dimension === d.id)
       // Dimenze se počítá přímo ze svých 24 položek, ne součtem fazetových
-      // skóre — při chybějících odpovědích je dopočet z celé sady přesnější.
+      // skóre – při chybějících odpovědích je dopočet z celé sady přesnější.
       const dimItems = dimFacets.flatMap((f) => s.facets!.find((x) => x.id === f.id)!.items)
       const base = scoreScale(d.id, dimItems, answers, reversedSet, s.scoring.dimensionBands, cover)
       // Heterogenitu má smysl číst jen tehdy, když jsou všechny tři fazety
-      // vykazatelné — jinak by rozpětí míchalo skóre s mírou chybějících dat.
+      // vykazatelné – jinak by rozpětí míchalo skóre s mírou chybějících dat.
       const allReported = dimFacets.every((f) => f.reported)
       const spread = Math.max(...dimFacets.map((f) => f.raw)) - Math.min(...dimFacets.map((f) => f.raw))
       return {
@@ -288,7 +288,7 @@ export function evaluate(
     }))
   }
 
-  // Nejsilnější / nejslabší škály — jen z těch, které se vykazují.
+  // Nejsilnější / nejslabší škály – jen z těch, které se vykazují.
   const pool: ScaleScore[] = (facets ?? dimensions).filter((x) => x.reported)
   const sorted = [...pool].sort((a, b) => b.raw - a.raw || a.id.localeCompare(b.id))
   const strongest = sorted.slice(0, s.scoring.topCount)
@@ -322,7 +322,7 @@ export function evaluate(
   }
 }
 
-/** Kontrola integrity struktury — používá se v testech i při startu. */
+/** Kontrola integrity struktury – používá se v testech i při startu. */
 export function structureIntegrity(s: StructureDef): { ok: boolean; problems: string[] } {
   const problems: string[] = []
   const content = contentItems(s)

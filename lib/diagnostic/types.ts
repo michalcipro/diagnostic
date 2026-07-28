@@ -1,4 +1,4 @@
-// ELITE Performance Diagnostic — typy
+// ELITE Performance Diagnostic – typy
 // Modely: elite200 (7 dimenzí × 3 fazety × 8 položek), elite100 (7 dimenzí × 12 položek)
 
 export type Lang = "cs" | "en"
@@ -11,7 +11,7 @@ export type TestModel = "elite200" | "elite100"
 export type TestId = `${TestModel}-${Variant}` | "vzorce"
 
 /**
- * Rod respondenta. Řídí gramatické tvary v českém vyhodnocení — žena nesmí
+ * Rod respondenta. Řídí gramatické tvary v českém vyhodnocení – žena nesmí
  * dostat text v mužském rodě. Angličtina rod neřeší.
  */
 export type Gender = "male" | "female"
@@ -65,14 +65,14 @@ export interface StructureDef {
   itemCount: number
   dimensions: DimensionDef[]
   facets?: FacetDef[] // pouze elite200
-  /** Obrácené obsahové položky — rekódují se 6 − x před součtem */
+  /** Obrácené obsahové položky – rekódují se 6 − x před součtem */
   reversedItems: number[]
   validity: {
     /** položka → požadovaná odpověď */
     attention: Record<number, Answer>
     /**
      * Kolik minutých kontrol pozornosti znamená varování a kolik neplatnost.
-     * Jedna chyba nestačí — i pozorní respondenti instruktážní položku minou
+     * Jedna chyba nestačí – i pozorní respondenti instruktážní položku minou
      * ve 2–5 % případů, takže práh „1 = varování" označí ~11 % poctivých lidí.
      */
     attentionThresholds: { caution: number; invalid: number }
@@ -98,7 +98,7 @@ export interface StructureDef {
     longestRunThreshold?: number
     /**
      * Tempo vyplňování v sekundách na položku. Příliš rychlé vyplnění je jeden
-     * z nejspolehlivějších ukazatelů nedbalého odpovídání — položku nelze
+     * z nejspolehlivějších ukazatelů nedbalého odpovídání – položku nelze
      * přečíst a zvážit za dvě sekundy.
      */
     pace?: { cautionSecPerItem: number; invalidSecPerItem: number }
@@ -139,7 +139,7 @@ export interface ValidityResult {
     pairsUsed: number
     pairsTotal: number
     pairsOver3: number
-    /** diff = null u páru, kde chybí odpověď — takový pár se do průměru nepočítá */
+    /** diff = null u páru, kde chybí odpověď – takový pár se do průměru nepočítá */
     pairDiffs: { a: number; b: number; diff: number | null }[]
   }
   honesty: { status: ValidityStatus; score: number; min: number; max: number }
@@ -156,7 +156,7 @@ export interface ValidityResult {
   /**
    * Celkový verdikt. Určují ho tvrdé indexy (pozornost, infrekvence,
    * konzistence, tempo). Měkké indexy (upřímnost, odpověďový styl) popisují,
-   * jak respondent o sobě vypovídá — samy o sobě vyhodnocení neruší, mohou
+   * jak respondent o sobě vypovídá – samy o sobě vyhodnocení neruší, mohou
    * verdikt zvednout nejvýš na „opatrně".
    */
   overall: ValidityStatus

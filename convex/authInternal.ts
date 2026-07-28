@@ -2,7 +2,7 @@ import { ConvexError, v } from "convex/values"
 import { internalMutation, internalQuery } from "./_generated/server"
 
 // Vnitřní funkce účtů. Volají je výhradně akce v convex/auth.ts, které umí
-// pracovat s kryptografií — do veřejného API se tyhle funkce nedostanou.
+// pracovat s kryptografií – do veřejného API se tyhle funkce nedostanou.
 
 export const anyCoachExists = internalQuery({
   args: {},

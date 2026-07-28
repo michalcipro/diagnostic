@@ -6,8 +6,9 @@ import type { Gender, PersonInfo } from "@/lib/diagnostic/types"
 import { OBSAH } from "@/lib/vzorce/data/obsah"
 import { vyhodnot } from "@/lib/vzorce/scoring"
 import { NAZVY_DOMEN, NAZVY_PASEM, POCET_POLOZEK, vzorec } from "@/lib/vzorce/structure"
-import type { OdpovediMapa, Pasmo, VzorecSkore } from "@/lib/vzorce/types"
+import type { OdpovediMapa } from "@/lib/vzorce/types"
 import { propoj } from "@/lib/vzorce/vazby"
+import { DomenyGraf, ProfilGraf } from "@/components/vzorce/charts"
 
 // Vyhodnocení emocionálně-destruktivních vzorců.
 //
@@ -15,36 +16,23 @@ import { propoj } from "@/lib/vzorce/vazby"
 // vysvětlení tří nejaktivnějších vzorců a nakonec shrnutí, které je propojuje
 // do jednoho obrazu. Vidí ho pouze kouč.
 
-const BARVA_PASMA: Record<Pasmo, string> = {
-  "velmi-nizka": "var(--wm-ok-fg, #248a3d)",
-  nizka: "var(--wm-ok-fg, #248a3d)",
-  stredni: "var(--wm-caution-fg, #c93400)",
-  vysoka: "var(--wm-caution-fg, #c93400)",
-  dominantni: "var(--wm-invalid-fg, #d70015)",
+/** Datum v českém tvaru. Vstup je ISO, ať se dá řadit. */
+function datum(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso ?? "")
+  if (!m) return iso || "–"
+  return `${Number(m[3])}. ${Number(m[2])}. ${m[1]}`
 }
 
-function Pruh({ v }: { v: VzorecSkore }) {
-  const barva = BARVA_PASMA[v.pasmo]
+/** Popisek nad údajem v hlavičce. */
+function Udaj({ popis, hodnota }: { popis: string; hodnota: string }) {
   return (
-    <div className="py-2.5">
-      <div className="mb-1.5 flex items-baseline justify-between gap-3">
-        <span className="text-[14px] font-medium">{OBSAH[v.id].nazev}</span>
-        <span className="flex items-center gap-2 whitespace-nowrap text-[12.5px]">
-          {v.silnychOdpovedi > 0 && (
-            <span className="text-[var(--wm-text-3)]">{v.silnychOdpovedi}× 5–6</span>
-          )}
-          <span className="tabular-nums text-[var(--wm-text-2)]">{v.skore}/60</span>
-          <span className="font-semibold" style={{ color: barva }}>
-            {NAZVY_PASEM[v.pasmo]}
-          </span>
-        </span>
-      </div>
-      <div className="diag-bar-track" style={{ height: 6 }}>
-        <div
-          className="diag-bar-fill"
-          style={{ width: `${Math.max(2, v.procenta)}%`, background: barva }}
-        />
-      </div>
+    <div className="min-w-0">
+      <dt className="text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--wm-text-3)]">
+        {popis}
+      </dt>
+      <dd className="mt-1 truncate text-[15px] font-semibold" title={hodnota}>
+        {hodnota}
+      </dd>
     </div>
   )
 }
@@ -73,22 +61,11 @@ export function VzorceReport({
         <p className="mt-1 text-[15px] text-[var(--wm-text-2)]">
           Diagnostický profil automatických emočních reakcí, vztahových strategií a výkonových bloků
         </p>
-        <div className="mt-5 grid gap-x-8 gap-y-2 border-t border-[var(--wm-border-light)] pt-4 text-[14px] sm:grid-cols-2">
-          <div className="flex justify-between gap-4 sm:justify-start">
-            <span className="text-[var(--wm-text-3)]">Respondent</span>
-            <span className="font-semibold">{person.name || "–"}</span>
-          </div>
-          <div className="flex justify-between gap-4 sm:justify-start">
-            <span className="text-[var(--wm-text-3)]">Datum vyplnění</span>
-            <span className="font-semibold">{person.fillDate}</span>
-          </div>
-          {person.role && (
-            <div className="flex justify-between gap-4 sm:justify-start">
-              <span className="text-[var(--wm-text-3)]">Role / oblast</span>
-              <span className="font-semibold">{person.role}</span>
-            </div>
-          )}
-        </div>
+        <dl className="mt-6 grid gap-x-8 gap-y-4 border-t border-[var(--wm-border-light)] pt-5 sm:grid-cols-3">
+          <Udaj popis="Respondent" hodnota={person.name || "–"} />
+          <Udaj popis="Role / oblast" hodnota={person.role || "–"} />
+          <Udaj popis="Datum vyplnění" hodnota={datum(person.fillDate)} />
+        </dl>
       </header>
 
       {!v.kompletni && (
@@ -106,33 +83,28 @@ export function VzorceReport({
       {/* profil všech jedenácti */}
       <section className="diag-card mt-5 p-7">
         <h2 className="text-[18px] font-bold tracking-tight">Profil všech vzorců</h2>
-        <p className="mt-1 text-[13px] leading-relaxed text-[var(--wm-text-3)]">
-          Skóre jednoho vzorce je součet deseti odpovědí, tedy 10 až 60 bodů. Sloupec 5–6 ukazuje,
-          kolik jednotlivých tvrzení respondent označil nejvyššími hodnotami; ta jsou významná
-          i tehdy, když celkové skóre vysoké není.
+        <p className="mt-1 mb-5 max-w-2xl text-[13px] leading-relaxed text-[var(--wm-text-3)]">
+          Skóre jednoho vzorce je součet deseti odpovědí, tedy 10 až 60 bodů. Pásmo se čte z polohy
+          na ose, ne z barvy. Číslo v kolečku ukazuje, kolik tvrzení respondent označil hodnotou
+          5 nebo 6; ta jsou významná i tehdy, když celkové skóre vysoké není.
         </p>
-        <div className="mt-4 divide-y divide-[var(--wm-border-light)]">
-          {v.vsechny.map((s) =>
-            s.vykazuje ? (
-              <Pruh key={s.id} v={s} />
-            ) : (
-              <div key={s.id} className="flex items-center justify-between gap-3 py-3">
-                <span className="text-[14px] font-medium text-[var(--wm-text-3)]">
-                  {OBSAH[s.id].nazev}
-                </span>
-                <span className="text-[12.5px] italic text-[var(--wm-text-3)]">
-                  nevykazuje se · {s.zodpovezeno} z {s.celkem} položek
-                </span>
-              </div>
-            ),
-          )}
-        </div>
+        <ProfilGraf vsechny={v.vsechny} top3={v.top3} />
+      </section>
+
+      {/* zatížení oblastí */}
+      <section className="diag-card mt-5 p-7">
+        <h2 className="text-[18px] font-bold tracking-tight">Zatížení oblastí</h2>
+        <p className="mt-1 mb-5 max-w-2xl text-[13px] leading-relaxed text-[var(--wm-text-3)]">
+          Tentýž profil po oblastech, ze kterých vzorce pocházejí. Když je zatížená jedna oblast,
+          nejde o několik problémů, ale o jedno téma ve více podobách.
+        </p>
+        <DomenyGraf vsechny={v.vsechny} />
       </section>
 
       {/* tři nejaktivnější */}
       <section className="diag-print-break mt-8">
         <h2 className="mb-1 text-[22px] font-bold tracking-tight">Tři nejaktivnější vzorce</h2>
-        <p className="mb-4 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
+        <p className="mb-4 max-w-[74ch] text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
           Tohle jsou vzorce, které se u respondenta aktivují nejsilněji. Nejsou to nálepky ani
           diagnóza. Je to popis mechanismu, který se spouští pod tlakem.
         </p>
@@ -150,41 +122,43 @@ export function VzorceReport({
                     <h3 className="mt-1 text-[20px] font-bold tracking-tight">{o.nazev}</h3>
                     <p className="mt-1 text-[13px] text-[var(--wm-text-2)]">{o.tema}</p>
                   </div>
-                  <div className="shrink-0 text-right">
-                    <div className="text-[22px] font-bold tabular-nums">{s.skore}</div>
-                    <div className="text-[12px] text-[var(--wm-text-3)]">z 60</div>
+                  <div className="w-16 shrink-0 text-right">
+                    <div className="text-[24px] font-bold leading-none tabular-nums">{s.skore}</div>
+                    <div className="mt-1 text-[12px] leading-none text-[var(--wm-text-3)]">z 60</div>
                   </div>
                 </div>
 
-                <p className="mt-4 border-l-2 border-[var(--wm-brand)] pl-4 text-[15px] font-semibold italic">
+                <p className="mt-4 max-w-[74ch] border-l-2 border-[var(--wm-brand)] pl-4 text-[15px] font-semibold italic">
                   „{g(o.motto)}“
                 </p>
 
-                <p className="mt-4 text-[13.5px] font-medium" style={{ color: BARVA_PASMA[s.pasmo] }}>
-                  {NAZVY_PASEM[s.pasmo]} · {g(o.pasma[s.pasmo])}
+                <div className="mt-4 rounded-xl bg-[var(--wm-surface-2)] p-4">
+                  <p className="text-[13.5px] leading-relaxed">
+                    <span className="font-semibold">{NAZVY_PASEM[s.pasmo]}</span>{" "}
+                    {g(o.pasma[s.pasmo])}
+                  </p>
                   {s.silnychOdpovedi > 0 && (
-                    <span className="font-normal text-[var(--wm-text-3)]">
-                      {" "}
-                      Nejvyššími hodnotami označeno {s.silnychOdpovedi} z 10 tvrzení
-                      {s.silnePolozky.length > 0 && ` (položky ${s.silnePolozky.join(", ")})`}.
-                    </span>
+                    <p className="mt-1.5 text-[12.5px] leading-relaxed text-[var(--wm-text-3)]">
+                      Hodnotou 5 nebo 6 označeno {s.silnychOdpovedi} z 10 tvrzení
+                      {s.silnePolozky.length > 0 && `, konkrétně ${s.silnePolozky.join(", ")}`}.
+                    </p>
                   )}
-                </p>
+                </div>
 
                 <h4 className="mt-5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--wm-text-3)]">
                   Jak to vypadá zevnitř
                 </h4>
-                <p className="mt-1.5 text-[14.5px] leading-relaxed">{g(o.prozitek)}</p>
+                <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed">{g(o.prozitek)}</p>
 
                 <h4 className="mt-4 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--wm-text-3)]">
                   Co dělá pod tlakem
                 </h4>
-                <p className="mt-1.5 text-[14.5px] leading-relaxed">{g(o.podTlakem)}</p>
+                <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed">{g(o.podTlakem)}</p>
 
                 <h4 className="mt-4 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--wm-text-3)]">
                   Odkud se to vzalo
                 </h4>
-                <p className="mt-1.5 text-[14.5px] leading-relaxed text-[var(--wm-text-2)]">
+                <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed text-[var(--wm-text-2)]">
                   {g(o.puvod)}
                 </p>
               </article>
@@ -196,18 +170,27 @@ export function VzorceReport({
       {/* situačně aktivované vzorce */}
       {v.situacni.length > 0 && (
         <section className="diag-card mt-5 p-7">
-          <h2 className="text-[16px] font-bold tracking-tight">Situačně aktivované vzorce</h2>
-          <p className="mt-1.5 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
+          <h2 className="text-[18px] font-bold tracking-tight">Situačně aktivované vzorce</h2>
+          <p className="mt-1.5 max-w-[74ch] text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
             Tyhle vzorce se nedostaly do první trojice, ale mají tři a více tvrzení označených
             nejvyššími hodnotami. To znamená, že se neaktivují trvale, zato v konkrétních situacích
             silně. Stojí za to se na ně v rozhovoru zeptat.
           </p>
-          <div className="mt-3 flex flex-col gap-2">
+          <div className="mt-4 flex flex-col divide-y divide-[var(--wm-border-light)] border-t border-[var(--wm-border-light)]">
             {v.situacni.map((s) => (
-              <div key={s.id} className="flex items-baseline justify-between gap-3 text-[14px]">
-                <span className="font-medium">{OBSAH[s.id].nazev}</span>
-                <span className="text-[12.5px] text-[var(--wm-text-3)]">
-                  {s.skore}/60 · {s.silnychOdpovedi}× 5–6 (položky {s.silnePolozky.join(", ")})
+              <div
+                key={s.id}
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-1 py-2.5 md:grid-cols-[14rem_3.25rem_minmax(0,1fr)]"
+              >
+                <span className="truncate text-[14px] font-medium" title={OBSAH[s.id].nazev}>
+                  {OBSAH[s.id].nazev}
+                </span>
+                <span className="text-right text-[14px] font-semibold tabular-nums">
+                  {s.skore}
+                  <span className="font-normal text-[var(--wm-text-3)]">/60</span>
+                </span>
+                <span className="col-span-2 text-[12.5px] leading-relaxed text-[var(--wm-text-3)] md:col-span-1">
+                  {s.silnychOdpovedi}× hodnota 5 nebo 6 · položky {s.silnePolozky.join(", ")}
                 </span>
               </div>
             ))}
@@ -218,13 +201,13 @@ export function VzorceReport({
       {/* propojené shrnutí */}
       {spojeni && (
         <section className="diag-card diag-print-break mt-8 border-2 border-[var(--wm-brand)] p-7">
-          <h2 className="text-[20px] font-bold tracking-tight">Jak to funguje dohromady</h2>
-          <p className="mt-1 text-[13px] text-[var(--wm-text-3)]">
+          <h2 className="text-[22px] font-bold tracking-tight">Jak to funguje dohromady</h2>
+          <p className="mt-1 max-w-[74ch] text-[13px] text-[var(--wm-text-3)]">
             Tři vzorce nejsou tři oddělené problémy. Teprve jejich spojení vysvětluje chování,
             kterému člověk sám nerozumí.
           </p>
 
-          <p className="mt-4 text-[15px] leading-relaxed">{g(spojeni.domeny)}</p>
+          <p className="mt-4 max-w-[74ch] text-[15px] leading-relaxed">{g(spojeni.domeny)}</p>
 
           <h4 className="mt-5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--wm-text-3)]">
             Kde se navzájem živí
@@ -237,7 +220,7 @@ export function VzorceReport({
             ))}
           </div>
 
-          <p className="mt-5 text-[15px] leading-relaxed">{g(spojeni.souhrn)}</p>
+          <p className="mt-5 max-w-[74ch] text-[15px] leading-relaxed">{g(spojeni.souhrn)}</p>
 
           <p className="mt-4 rounded-xl bg-[var(--wm-surface-2)] p-4 text-[15px] font-medium leading-relaxed">
             {g(spojeni.kdeZacit)}

@@ -2,7 +2,7 @@ import type { AnswerMap, Lang, PersonInfo, StoredSession, TestId } from "./types
 
 // Ukládání rozpracovaného vyplnění do localStorage.
 //
-// Klíčem je token pozvánky, ne test — každá pozvánka má vlastní rozpracované
+// Klíčem je token pozvánky, ne test – každá pozvánka má vlastní rozpracované
 // odpovědi a nic se nemíchá dohromady.
 
 const key = (token: string) => `wm-diagnostic:t:${token}`
@@ -25,7 +25,7 @@ export function saveSession(token: string, session: StoredSession): void {
   try {
     window.localStorage.setItem(key(token), JSON.stringify(session))
   } catch {
-    // úložiště plné / nedostupné — vyplňování může pokračovat bez ukládání
+    // úložiště plné / nedostupné – vyplňování může pokračovat bez ukládání
   }
 }
 

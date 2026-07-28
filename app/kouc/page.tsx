@@ -786,7 +786,7 @@ async function exportPdf(detail: ResultDetail, lang: Lang): Promise<void> {
       await navigator.share({ files: [soubor], title: nazev })
       return
     } catch (e) {
-      // Uživatel sdílení zavřel — pak už nic dalšího nedělej.
+      // Uživatel sdílení zavřel – pak už nic dalšího nedělej.
       if (e instanceof DOMException && e.name === "AbortError") return
     }
   }

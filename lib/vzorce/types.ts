@@ -1,4 +1,4 @@
-// Emocionálně-destruktivní vzorce — typy.
+// Emocionálně-destruktivní vzorce – typy.
 //
 // Záměrně samostatný modul, ne rozšíření ELITE. Tenhle test má jinou škálu
 // (1-6 místo 1-5), jinou stavbu (11 rovnocenných vzorců bez fazet), jiná pásma

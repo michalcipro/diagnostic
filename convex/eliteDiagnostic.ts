@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server"
 import { requireCoach } from "./sessions"
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ELITE Performance Diagnostic — backend.
+// ELITE Performance Diagnostic – backend.
 //
 // PŘÍSTUP: dotazník lze otevřít i odeslat pouze s platnou pozvánkou. Kouč
 // vygeneruje odkaz s neuhodnutelným tokenem pro jednoho klienta a jeden test;
@@ -47,7 +47,7 @@ const personValidator = v.object({
 /**
  * Rok narození z data ve tvaru „YYYY-MM-DD".
  *
- * Do normativního vzorku se ukládá jen rok — celé datum narození je ve spojení
+ * Do normativního vzorku se ukládá jen rok – celé datum narození je ve spojení
  * s povoláním prakticky identifikátor.
  */
 function birthYearOnly(birthDate?: string): number | undefined {
@@ -58,7 +58,7 @@ function birthYearOnly(birthDate?: string): number | undefined {
   return rok >= 1900 && rok <= letos ? rok : undefined
 }
 
-/** Povolání / disciplína, zkrácené — delší text bývá spíš vyprávění než údaj. */
+/** Povolání / disciplína, zkrácené – delší text bývá spíš vyprávění než údaj. */
 function shortRole(role?: string): string | undefined {
   const t = role?.trim()
   return t ? t.slice(0, 120) : undefined
@@ -112,7 +112,7 @@ export const createInvite = mutation({
 })
 
 /**
- * Veřejné načtení pozvánky podle tokenu — potřebuje ho respondent, aby se mu
+ * Veřejné načtení pozvánky podle tokenu – potřebuje ho respondent, aby se mu
  * otevřel správný test. Vrací pouze to, co je k zobrazení dotazníku nutné;
  * žádné odpovědi ani vyhodnocení.
  */
@@ -190,7 +190,7 @@ export const revokeInvite = mutation({
 // ---------------------------------------------------------------------------
 
 /**
- * Odeslání dotazníku proti pozvánce. Vrací jen potvrzení — respondent
+ * Odeslání dotazníku proti pozvánce. Vrací jen potvrzení – respondent
  * záměrně nedostává žádné výsledky ani odkaz na ně.
  */
 export const submitWithInvite = mutation({
@@ -232,7 +232,7 @@ export const submitWithInvite = mutation({
     }
 
     const now = Date.now()
-    // Nesmyslné hodnoty (záporné, absurdně dlouhé) zahoď — index tempa se pak
+    // Nesmyslné hodnoty (záporné, absurdně dlouhé) zahoď – index tempa se pak
     // prostě nepočítá, místo aby počítal s nesmyslem.
     const durationSec =
       typeof args.durationSec === "number" && args.durationSec > 0 && args.durationSec < 86400
@@ -253,7 +253,7 @@ export const submitWithInvite = mutation({
     })
     // Anonymní kopie do normativního vzorku.
     //
-    // Vědomě se NEUKLÁDÁ jméno, celé datum narození ani odkaz na vyplnění výše —
+    // Vědomě se NEUKLÁDÁ jméno, celé datum narození ani odkaz na vyplnění výše –
     // jinak by šel záznam spárovat zpět s člověkem a anonymizace by byla jen
     // naoko. Vzorek slouží k výpočtu norem, reliability a faktorové struktury,
     // k čemuž stačí odpovědi, rok narození a povolání.
@@ -272,7 +272,7 @@ export const submitWithInvite = mutation({
       collectedMonth: collectedMonth(now),
     })
 
-    // Pozvánku spotřebuj — odkaz už podruhé nepustí.
+    // Pozvánku spotřebuj – odkaz už podruhé nepustí.
     await ctx.db.patch(inv._id, { usedAt: now, resultId })
     return { ok: true }
   },
@@ -395,7 +395,7 @@ export const normStats = query({
 })
 
 /**
- * Export vzorku k analýze. Vrací přesně to, co je v tabulce — tedy bez jmen,
+ * Export vzorku k analýze. Vrací přesně to, co je v tabulce – tedy bez jmen,
  * bez celých dat narození a bez vazby na konkrétní vyplnění.
  */
 export const normExport = query({

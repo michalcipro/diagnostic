@@ -4,7 +4,7 @@ import type { AnswerMap, Lang, PersonInfo, StoredSession, TestId } from "./types
 
 // Napojení na Convex backend.
 //
-// Funguje pouze pokud je nastaveno NEXT_PUBLIC_CONVEX_URL — jinak se dotazník
+// Funguje pouze pokud je nastaveno NEXT_PUBLIC_CONVEX_URL – jinak se dotazník
 // nikam neodešle a aplikace na to upozorní.
 //
 // Používáme ConvexHttpClient + makeFunctionReference záměrně: nevyžaduje
@@ -96,7 +96,7 @@ export interface ResultDetail {
   createdAt: number
 }
 
-/** Pozvánka tak, jak ji vidí respondent — jen co je nutné k zobrazení testu. */
+/** Pozvánka tak, jak ji vidí respondent – jen co je nutné k zobrazení testu. */
 export interface Invite {
   status: "ok" | "used" | "notfound"
   testId?: TestId
@@ -118,7 +118,7 @@ export interface InviteRow {
 }
 
 /**
- * Doba vyplňování v sekundách. Vrací undefined, pokud čas nedává smysl —
+ * Doba vyplňování v sekundách. Vrací undefined, pokud čas nedává smysl –
  * index tempa se pak nepočítá vůbec, což je lepší než počítat s nesmyslem.
  */
 function sessionDurationSec(session: StoredSession): number | undefined {
@@ -139,7 +139,7 @@ export async function fetchInvite(token: string): Promise<Invite> {
 
 /**
  * Odešle vyplněný dotazník proti pozvánce. Vrací true při úspěchu.
- * Respondent zpět nedostává žádná data — vyhodnocení vidí jen kouč.
+ * Respondent zpět nedostává žádná data – vyhodnocení vidí jen kouč.
  */
 export async function submitWithInvite(token: string, session: StoredSession): Promise<boolean> {
   const c = client()
@@ -205,7 +205,7 @@ export interface CoachRow extends CoachIdentity {
   lastLoginAt?: number
 }
 
-/** Označení verze frontendu — drží krok s VERZE_BACKENDU v convex/sessions.ts. */
+/** Označení verze frontendu – drží krok s VERZE_BACKENDU v convex/sessions.ts. */
 export const VERZE_FRONTENDU = "3"
 
 /** Je potřeba teprve založit master účet? Vrací i verzi nasazeného backendu. */
@@ -213,7 +213,7 @@ export async function needsSetup(): Promise<{ needsSetup: boolean; verze: string
   const c = client()
   if (!c) throw new Error("not-configured")
   const res = (await c.query(setupStatusRef, {})) as { needsSetup: boolean; verze?: string }
-  // Starší nasazení backendu verzi ještě neposílá — pak to nepředstíráme.
+  // Starší nasazení backendu verzi ještě neposílá – pak to nepředstíráme.
   return { needsSetup: res.needsSetup, verze: res.verze ?? "≤2" }
 }
 
@@ -264,14 +264,14 @@ export async function logout(sessionToken: string): Promise<void> {
   }
 }
 
-/** Seznam koučů — pouze master. */
+/** Seznam koučů – pouze master. */
 export async function listCoaches(sessionToken: string): Promise<CoachRow[]> {
   const c = client()
   if (!c) throw new Error("not-configured")
   return (await c.query(listCoachesRef, { sessionToken })) as CoachRow[]
 }
 
-/** Přidání dalšího kouče — pouze master. */
+/** Přidání dalšího kouče – pouze master. */
 export async function addCoach(
   sessionToken: string,
   name: string,
@@ -283,7 +283,7 @@ export async function addCoach(
   await c.action(addCoachRef, { sessionToken, name, email, password })
 }
 
-/** Zapnutí/vypnutí přístupu kouče — pouze master. */
+/** Zapnutí/vypnutí přístupu kouče – pouze master. */
 export async function setCoachActive(
   sessionToken: string,
   coachId: string,

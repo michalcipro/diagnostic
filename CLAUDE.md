@@ -9,8 +9,14 @@ v kódu, ani v dokumentaci, ani v odpovědích v chatu. Místo ní patří čár
 dvojtečka, středník, závorka, nebo se věta rozdělí. Krátká pomlčka U+2013
 (en dash) se mezerami je v pořádku a používá se i pro rozsahy („8–40").
 
-Kontrola: `grep -rn "—" --include="*.ts" --include="*.tsx" --include="*.json"`
-nesmí vrátit nic mimo `node_modules`.
+Kontrola (hledá se U+2014, ne U+2013):
+
+```bash
+grep -rnP "\x{2014}" --include="*.ts" --include="*.tsx" --include="*.css" \
+  --include="*.md" --include="*.json" . | grep -v node_modules | grep -v "\.next"
+```
+
+nesmí vrátit nic.
 
 ## Rod respondenta
 

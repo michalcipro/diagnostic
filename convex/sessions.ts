@@ -4,7 +4,7 @@ import type { QueryCtx } from "./_generated/server"
 import type { Doc } from "./_generated/dataModel"
 
 // Ověřování přihlášené relace. Sdílí ho všechny funkce, které pracují
-// s daty koučů — bez platné relace nevrátí žádná data.
+// s daty koučů – bez platné relace nevrátí žádná data.
 
 export type Coach = Doc<"coaches">
 
@@ -24,7 +24,7 @@ export async function requireCoach(ctx: QueryCtx, sessionToken: string): Promise
   return coach
 }
 
-/** Interní varianta pro akce — vrací null místo chyby. */
+/** Interní varianta pro akce – vrací null místo chyby. */
 export const whoAmI = internalQuery({
   args: { sessionToken: v.string() },
   returns: v.union(
@@ -48,7 +48,7 @@ export const whoAmI = internalQuery({
 
 /**
  * Označení verze backendu. Zvyš ho pokaždé, když se mění chování zakládání
- * účtu — zakládací stránka ho zobrazuje, takže je na první pohled vidět, jestli
+ * účtu – zakládací stránka ho zobrazuje, takže je na první pohled vidět, jestli
  * je nasazená nová verze, nebo prohlížeč drží starou. Bez toho se „pořád stejná
  * chyba" nedá odlišit od „oprava ještě nedojela".
  */
@@ -87,7 +87,7 @@ export const me = query({
   },
 })
 
-/** Odhlášení — zruší relaci na serveru. */
+/** Odhlášení – zruší relaci na serveru. */
 export const logout = mutation({
   args: { sessionToken: v.string() },
   returns: v.null(),
