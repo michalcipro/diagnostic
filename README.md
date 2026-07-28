@@ -63,6 +63,32 @@ dopočte z průměru zodpovězených. Škála, kde chybí víc než čtvrtina od
 nevykazuje vůbec a nezobrazí se u ní ani pásmo, ani jeho výklad. Pár konzistence
 s chybějící odpovědí se do průměru nepočítá.
 
+### Anonymní vzorek pro normy
+
+Z každého odeslaného dotazníku se ukládá anonymní kopie do samostatné tabulky
+`normSamples`. Slouží k výpočtu percentilů, reliability a faktorové struktury —
+tedy přesně k tomu, co instrumentu zatím chybí.
+
+| Ve vzorku je | Ve vzorku NENÍ |
+| --- | --- |
+| odpovědi, doba vyplňování | jméno |
+| rok narození | celé datum narození |
+| povolání / disciplína (max 120 znaků) | odkaz na konkrétní vyplnění |
+| test, varianta, jazyk | přesný čas pořízení (jen měsíc) |
+
+Chybějící `resultId` a přesný čas jsou záměr, ne opomenutí: s kterýmkoli z nich
+by šel záznam spárovat zpět s konkrétním člověkem a anonymizace by byla jen
+naoko. Že záznam nemůže obsahovat nic navíc, hlídá typová kontrola — vkládaný
+objekt se kontroluje proti schématu tabulky, takže přidané pole neprojde buildem.
+
+Stav vzorku a jeho export najdeš v `/kouc` → záložka **Normy**. Respondent je
+o ukládání informován na úvodní obrazovce dotazníku.
+
+**Zbytkové riziko:** pole „povolání / disciplína" je volný text. Když do něj
+někdo napíše „brankář FC X, U19", je to ve spojení s rokem narození potenciálně
+identifikující. Pokud by měl vzorek opustit tvůj okruh, stojí za to text nejdřív
+převést na hrubší kategorie.
+
 ### Co instrument zatím nemá
 
 Tohle není výčet chyb, ale hranic, uvnitř kterých se výsledky smí vykládat:

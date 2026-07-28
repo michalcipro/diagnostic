@@ -248,6 +248,14 @@ function Questionnaire({
                   />
                 </label>
               </div>
+              {/*
+                Respondent má vědět, že se z jeho odpovědí ukládá anonymní kopie
+                pro rozvoj metody. Bez toho by to byl skrytý sběr dat, i když se
+                záznam zpět k člověku dohledat nedá.
+              */}
+              <p className="mt-5 rounded-xl bg-[var(--wm-surface-2)] p-4 text-[13px] leading-relaxed text-[var(--wm-text-2)]">
+                {t.dataNote}
+              </p>
             </section>
 
             {/* instrukce */}

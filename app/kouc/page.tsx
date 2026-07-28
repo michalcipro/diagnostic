@@ -20,9 +20,12 @@ import {
   isRemoteEnabled,
   listInvites,
   listResults,
+  normExport,
+  normStats,
   removeResult,
   revokeInvite,
   type InviteRow,
+  type NormStats,
   type ResultDetail,
   type ResultSummary,
 } from "@/lib/diagnostic/remote"
@@ -54,7 +57,9 @@ export default function CoachPage() {
   const [detail, setDetail] = useState<ResultDetail | null>(null)
   const [detailLang, setDetailLang] = useState<Lang>("cs")
 
-  const [tab, setTab] = useState<"results" | "invites" | "coaches">("results")
+  const [tab, setTab] = useState<"results" | "invites" | "coaches" | "norms">("results")
+  const [norms, setNorms] = useState<NormStats | null>(null)
+  const [exporting, setExporting] = useState(false)
   const [invites, setInvites] = useState<InviteRow[] | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [fTest, setFTest] = useState<TestId>("elite200-sport")
@@ -139,6 +144,33 @@ export default function CoachPage() {
       setCoaches(await listCoaches(session))
     } catch (e) {
       setError(chybaText(e, "Seznam koučů se nepodařilo načíst."))
+    }
+  }
+
+  const loadNorms = async () => {
+    try {
+      setNorms(await normStats(session))
+    } catch (e) {
+      setError(chybaText(e, "Přehled vzorku se nepodařilo načíst."))
+    }
+  }
+
+  /** Stáhne anonymní vzorek jako JSON — bez jmen a bez vazby na vyplnění. */
+  const exportNorms = async () => {
+    setExporting(true)
+    try {
+      const data = await normExport(session)
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `elite-normativni-vzorek-${new Date().toISOString().slice(0, 10)}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setError(chybaText(e, "Export se nepodařil."))
+    } finally {
+      setExporting(false)
     }
   }
 
@@ -325,6 +357,16 @@ export default function CoachPage() {
         <button type="button" data-active={tab === "invites"} onClick={() => setTab("invites")}>
           {t.tabInvites}
         </button>
+        <button
+          type="button"
+          data-active={tab === "norms"}
+          onClick={() => {
+            setTab("norms")
+            if (norms === null) void loadNorms()
+          }}
+        >
+          {t.tabNorms}
+        </button>
         {meInfo.role === "master" && (
           <button
             type="button"
@@ -338,6 +380,15 @@ export default function CoachPage() {
           </button>
         )}
       </div>
+
+      {tab === "norms" && (
+        <NormsPanel
+          stats={norms}
+          lang={lang}
+          exporting={exporting}
+          onExport={() => void exportNorms()}
+        />
+      )}
 
       {tab === "coaches" && meInfo.role === "master" && (
         <div className="mb-8">
@@ -613,6 +664,76 @@ export default function CoachPage() {
       <footer className="mt-14 border-t border-[var(--wm-border-light)] pt-6 text-center text-[12px] text-[var(--wm-text-3)]">
         {t.confidential}
       </footer>
+    </div>
+  )
+}
+
+/** Milníky, od kterých má analýza smysl (na jednu variantu testu). */
+const NORM_MILNIKY = { normy: 100, cfa: 250 }
+
+/**
+ * Stav anonymního normativního vzorku.
+ *
+ * Ukazuje, kolik dat se nasbíralo a jak daleko je to k tomu, aby šly spočítat
+ * percentily a reliabilita. Do té doby report u pořadí škál poctivě přiznává,
+ * že srovnání s populací zatím nemá o co opřít.
+ */
+function NormsPanel({
+  stats,
+  lang,
+  exporting,
+  onExport,
+}: {
+  stats: NormStats | null
+  lang: Lang
+  exporting: boolean
+  onExport: () => void
+}) {
+  const t = UI[lang]
+  if (stats === null) {
+    return <p className="mb-8 text-[14px] text-[var(--wm-text-3)]">{t.loading}</p>
+  }
+  return (
+    <div className="mb-8">
+      <div className="diag-card p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-[17px] font-bold tracking-tight">{t.normsTitle}</h2>
+            <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">{t.normsIntro}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onExport}
+            disabled={exporting || stats.total === 0}
+            className="diag-press inline-flex h-9 shrink-0 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-40"
+          >
+            {exporting ? t.normsExporting : t.normsExport}
+          </button>
+        </div>
+
+        <div className="mt-5 flex flex-col gap-3">
+          {stats.byTest.map((r) => {
+            const podil = Math.min(100, Math.round((r.count / NORM_MILNIKY.normy) * 100))
+            return (
+              <div key={r.testId}>
+                <div className="mb-1.5 flex items-baseline justify-between gap-3">
+                  <span className="text-[14px] font-medium">{TEST_NAMES[r.testId as TestId][lang]}</span>
+                  <span className="text-[13px] tabular-nums text-[var(--wm-text-3)]">
+                    {t.normsCount(r.count, NORM_MILNIKY.normy)}
+                  </span>
+                </div>
+                <div className="diag-bar">
+                  <div className="diag-bar-fill" style={{ width: `${Math.max(2, podil)}%` }} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        <p className="mt-5 rounded-xl bg-[var(--wm-surface-2)] p-4 text-[13px] leading-relaxed text-[var(--wm-text-2)]">
+          {t.normsPrivacy}
+        </p>
+      </div>
     </div>
   )
 }

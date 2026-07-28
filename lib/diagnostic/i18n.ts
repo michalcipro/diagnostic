@@ -218,6 +218,17 @@ export interface UIStrings {
   invitesEmpty: string
   tabResults: string
   tabInvites: string
+  // anonymní normativní vzorek
+  tabNorms: string
+  loading: string
+  normsTitle: string
+  normsIntro: string
+  normsCount: (count: number, target: number) => string
+  normsPrivacy: string
+  normsExport: string
+  normsExporting: string
+  /** informace pro respondenta, co se s odpověďmi děje */
+  dataNote: string
 }
 
 export const UI: Record<Lang, UIStrings> = {
@@ -363,6 +374,18 @@ export const UI: Record<Lang, UIStrings> = {
     invitesEmpty: "Zatím žádné pozvánky.",
     tabResults: "Vyplněné diagnostiky",
     tabInvites: "Pozvánky",
+    tabNorms: "Normy",
+    loading: "Načítám…",
+    normsTitle: "Anonymní vzorek pro normy",
+    normsIntro:
+      "Z každého vyplnění se ukládá anonymní kopie odpovědí. Až se jich nasbírá dost, půjde spočítat percentily a reliabilitu — teprve pak bude možné říct, jestli je někdo nadprůměrný, a ne jen s čím souhlasil nejvíc.",
+    normsCount: (c, cil) => `${c} z ${cil}`,
+    normsPrivacy:
+      "Ve vzorku není jméno, celé datum narození ani odkaz na konkrétní vyplnění — jen odpovědi, rok narození, povolání či disciplína a měsíc pořízení. Zpět ke konkrétnímu člověku se z něj dostat nedá.",
+    normsExport: "Stáhnout data",
+    normsExporting: "Připravuji…",
+    dataNote:
+      "Z tvých odpovědí se ukládá anonymní kopie, která slouží k dalšímu rozvoji metody. Není v ní tvoje jméno ani datum narození — pouze rok narození a obor či disciplína, takže tě z ní nelze identifikovat.",
   },
   en: {
     brand: "WINNING MINDS",
@@ -506,5 +529,17 @@ export const UI: Record<Lang, UIStrings> = {
     invitesEmpty: "No invitations yet.",
     tabResults: "Completed diagnostics",
     tabInvites: "Invitations",
+    tabNorms: "Norms",
+    loading: "Loading…",
+    normsTitle: "Anonymous sample for norms",
+    normsIntro:
+      "An anonymous copy of the answers is stored for every completed questionnaire. Once enough have accumulated, percentiles and reliability can be computed — only then will it be possible to say that someone is above average, rather than only what they agreed with most.",
+    normsCount: (c, cil) => `${c} of ${cil}`,
+    normsPrivacy:
+      "The sample contains no name, no full date of birth and no link to a specific submission — only the answers, year of birth, occupation or discipline, and the month of collection. It cannot be traced back to an individual.",
+    normsExport: "Download data",
+    normsExporting: "Preparing…",
+    dataNote:
+      "An anonymous copy of your answers is stored and used to develop the method further. It contains neither your name nor your date of birth — only your year of birth and your field or discipline, so you cannot be identified from it.",
   },
 }

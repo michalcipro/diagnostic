@@ -59,6 +59,8 @@ const addCoachRef = makeFunctionReference<"action">("auth:addCoach")
 const setCoachActiveRef = makeFunctionReference<"mutation">("sessions:setCoachActive")
 const changePasswordRef = makeFunctionReference<"action">("auth:changePassword")
 const removeRef = makeFunctionReference<"mutation">("eliteDiagnostic:removeForCoach")
+const normStatsRef = makeFunctionReference<"query">("eliteDiagnostic:normStats")
+const normExportRef = makeFunctionReference<"query">("eliteDiagnostic:normExport")
 
 function client(): ConvexHttpClient | null {
   if (!convexUrl) return null
@@ -326,4 +328,26 @@ export async function removeResult(sessionToken: string, id: string): Promise<vo
   const c = client()
   if (!c) throw new Error("not-configured")
   await c.mutation(removeRef, { sessionToken, id })
+}
+
+// ── Normativní vzorek ──────────────────────────────────────────────
+
+export interface NormStats {
+  total: number
+  byTest: { testId: string; count: number; complete: number }[]
+  months: string[]
+}
+
+/** Kolik anonymních záznamů se zatím nasbíralo. */
+export async function normStats(sessionToken: string): Promise<NormStats> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(normStatsRef, { sessionToken })) as NormStats
+}
+
+/** Export anonymního vzorku k analýze (bez jmen a bez vazby na vyplnění). */
+export async function normExport(sessionToken: string): Promise<unknown[]> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(normExportRef, { sessionToken })) as unknown[]
 }

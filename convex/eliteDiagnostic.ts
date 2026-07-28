@@ -29,6 +29,31 @@ const personValidator = v.object({
   fillDate: v.string(),
 })
 
+/**
+ * Rok narození z data ve tvaru „YYYY-MM-DD".
+ *
+ * Do normativního vzorku se ukládá jen rok — celé datum narození je ve spojení
+ * s povoláním prakticky identifikátor.
+ */
+function birthYearOnly(birthDate?: string): number | undefined {
+  if (!birthDate) return undefined
+  const rok = Number(birthDate.slice(0, 4))
+  if (!Number.isInteger(rok)) return undefined
+  const letos = new Date().getFullYear()
+  return rok >= 1900 && rok <= letos ? rok : undefined
+}
+
+/** Povolání / disciplína, zkrácené — delší text bývá spíš vyprávění než údaj. */
+function shortRole(role?: string): string | undefined {
+  const t = role?.trim()
+  return t ? t.slice(0, 120) : undefined
+}
+
+/** Měsíc pořízení, „2026-07". Přesný čas by šel spárovat s vyplněním. */
+function collectedMonth(now: number): string {
+  return new Date(now).toISOString().slice(0, 7)
+}
+
 /** Token do odkazu. Bez podobných znaků (0/O, 1/l), ať se dá případně přečíst. */
 function makeToken(): string {
   const alphabet = "abcdefghijkmnpqrstuvwxyz23456789"
@@ -190,6 +215,14 @@ export const submitWithInvite = mutation({
       }
     }
 
+    const now = Date.now()
+    // Nesmyslné hodnoty (záporné, absurdně dlouhé) zahoď — index tempa se pak
+    // prostě nepočítá, místo aby počítal s nesmyslem.
+    const durationSec =
+      typeof args.durationSec === "number" && args.durationSec > 0 && args.durationSec < 86400
+        ? Math.round(args.durationSec)
+        : undefined
+
     const resultId = await ctx.db.insert("eliteDiagnosticResults", {
       testId: inv.testId,
       model,
@@ -199,16 +232,31 @@ export const submitWithInvite = mutation({
       answers: args.answers,
       answeredCount,
       complete: answeredCount === itemCount,
-      // Nesmyslné hodnoty (záporné, absurdně dlouhé) zahoď — index tempa
-      // se pak prostě nepočítá, místo aby počítal s nesmyslem.
-      durationSec:
-        typeof args.durationSec === "number" && args.durationSec > 0 && args.durationSec < 86400
-          ? Math.round(args.durationSec)
-          : undefined,
-      createdAt: Date.now(),
+      durationSec,
+      createdAt: now,
     })
+    // Anonymní kopie do normativního vzorku.
+    //
+    // Vědomě se NEUKLÁDÁ jméno, celé datum narození ani odkaz na vyplnění výše —
+    // jinak by šel záznam spárovat zpět s člověkem a anonymizace by byla jen
+    // naoko. Vzorek slouží k výpočtu norem, reliability a faktorové struktury,
+    // k čemuž stačí odpovědi, rok narození a povolání.
+    await ctx.db.insert("normSamples", {
+      testId: inv.testId,
+      model,
+      variant,
+      lang: inv.lang,
+      birthYear: birthYearOnly(args.person.birthDate),
+      role: shortRole(args.person.role),
+      answers: args.answers,
+      answeredCount,
+      complete: answeredCount === itemCount,
+      durationSec,
+      collectedMonth: collectedMonth(now),
+    })
+
     // Pozvánku spotřebuj — odkaz už podruhé nepustí.
-    await ctx.db.patch(inv._id, { usedAt: Date.now(), resultId })
+    await ctx.db.patch(inv._id, { usedAt: now, resultId })
     return { ok: true }
   },
 })
@@ -288,6 +336,84 @@ export const getForCoach = query({
       durationSec: d.durationSec,
       createdAt: d.createdAt,
     }
+  },
+})
+
+// ---------------------------------------------------------------------------
+// Normativní vzorek (pouze kouč)
+// ---------------------------------------------------------------------------
+
+/**
+ * Kolik anonymních záznamů se zatím nasbíralo, po testech.
+ *
+ * Orientační milníky: od ~100 záznamů na variantu dávají smysl percentily
+ * a reliabilita (α/ω), od ~250 konfirmační faktorová analýza.
+ */
+export const normStats = query({
+  args: { sessionToken: v.string() },
+  returns: v.object({
+    total: v.number(),
+    byTest: v.array(v.object({ testId: v.string(), count: v.number(), complete: v.number() })),
+    months: v.array(v.string()),
+  }),
+  handler: async (ctx, args) => {
+    await requireCoach(ctx, args.sessionToken)
+    const vsechny = await ctx.db.query("normSamples").collect()
+    const mapa = new Map<string, { count: number; complete: number }>()
+    for (const id of TEST_IDS) mapa.set(id, { count: 0, complete: 0 })
+    const mesice = new Set<string>()
+    for (const z of vsechny) {
+      const m = mapa.get(z.testId) ?? { count: 0, complete: 0 }
+      m.count++
+      if (z.complete) m.complete++
+      mapa.set(z.testId, m)
+      mesice.add(z.collectedMonth)
+    }
+    return {
+      total: vsechny.length,
+      byTest: [...mapa].map(([testId, m]) => ({ testId, ...m })),
+      months: [...mesice].sort(),
+    }
+  },
+})
+
+/**
+ * Export vzorku k analýze. Vrací přesně to, co je v tabulce — tedy bez jmen,
+ * bez celých dat narození a bez vazby na konkrétní vyplnění.
+ */
+export const normExport = query({
+  args: { sessionToken: v.string() },
+  returns: v.array(
+    v.object({
+      testId: v.string(),
+      model: v.string(),
+      variant: v.string(),
+      lang: v.string(),
+      birthYear: v.optional(v.number()),
+      role: v.optional(v.string()),
+      answers: v.string(),
+      answeredCount: v.number(),
+      complete: v.boolean(),
+      durationSec: v.optional(v.number()),
+      collectedMonth: v.string(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    await requireCoach(ctx, args.sessionToken)
+    const vsechny = await ctx.db.query("normSamples").take(5000)
+    return vsechny.map((z) => ({
+      testId: z.testId,
+      model: z.model,
+      variant: z.variant,
+      lang: z.lang,
+      birthYear: z.birthYear,
+      role: z.role,
+      answers: z.answers,
+      answeredCount: z.answeredCount,
+      complete: z.complete,
+      durationSec: z.durationSec,
+      collectedMonth: z.collectedMonth,
+    }))
   },
 })
 

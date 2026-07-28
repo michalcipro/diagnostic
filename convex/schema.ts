@@ -45,6 +45,33 @@ export default defineSchema({
     .index("by_token", ["token"])
     .index("by_created", ["createdAt"]),
 
+  // Anonymní vzorek pro tvorbu norem.
+  //
+  // Záměrně samostatná tabulka BEZ odkazu na vyplnění a bez jména. Kdyby tu byl
+  // resultId nebo přesný čas pořízení, dal by se záznam triviálně spárovat zpět
+  // s konkrétním člověkem a celá anonymizace by byla jen naoko. Proto je tu
+  // z osobních údajů jen rok narození a povolání či disciplína, a čas pouze
+  // v přesnosti na měsíc.
+  normSamples: defineTable({
+    testId: v.string(),
+    model: v.string(),
+    variant: v.string(),
+    lang: v.string(),
+    /** rok narození, nikdy celé datum */
+    birthYear: v.optional(v.number()),
+    /** povolání (business) nebo disciplína a úroveň (sport) */
+    role: v.optional(v.string()),
+    /** odpovědi — z nich se dopočítá reliabilita, faktorová struktura i normy */
+    answers: v.string(),
+    answeredCount: v.number(),
+    complete: v.boolean(),
+    durationSec: v.optional(v.number()),
+    /** „2026-07" — na měsíc, ať nejde spárovat s časem vyplnění */
+    collectedMonth: v.string(),
+  })
+    .index("by_test", ["testId"])
+    .index("by_month", ["collectedMonth"]),
+
   eliteDiagnosticResults: defineTable({
     testId: v.string(),
     model: v.string(),
