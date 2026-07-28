@@ -303,14 +303,13 @@ export default function CoachPage() {
             </button>
             <button
               type="button"
-              onClick={() => exportPdf(detail, detailLang)}
+              onClick={() => void exportPdf(detail, detailLang)}
               className="diag-press inline-flex h-9 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
             >
               {t.pdfButton}
             </button>
           </div>
         </div>
-        <div id="diag-report">
         <ReportView
           testId={detail.testId}
           person={detail.person}
@@ -318,7 +317,6 @@ export default function CoachPage() {
           lang={detailLang}
           durationSec={detail.durationSec}
         />
-        </div>
       </div>
     )
   }
@@ -748,42 +746,45 @@ function NormsPanel({
 }
 
 /**
- * Otevře vyhodnocení jako samostatný dokument a rovnou nabídne uložení do PDF.
+ * Vyrobí skutečný soubor PDF a nabídne ho k uložení nebo odeslání.
  *
- * Prohlížeč neumí vyrobit soubor PDF bez svého tiskového dialogu, takže tudy
- * vede jediná cesta k opravdu vektorovému výstupu. Přínos oproti prostému
- * tisku je konkrétní: dokument nemá nic z aplikace kolem a název souboru se
- * předvyplní podle klienta a data, takže hotové PDF se dá rovnou poslat.
+ * Tiskový dialog prohlížeče tudy nevede: na iPhonu z něj soubor uložit ani
+ * poslat nejde. Proto se PDF skládá přímo v prohlížeči a pak se předá
+ * systémovému sdílení, kde je „Uložit do souborů", Mail i WhatsApp. Kde
+ * sdílení souborů není (běžný desktop), soubor se prostě stáhne.
+ *
+ * Knihovna se načítá až při kliknutí, aby nezdržovala první zobrazení stránky.
  */
-function exportPdf(detail: ResultDetail, lang: Lang) {
-  const zprava = document.getElementById("diag-report")
-  if (!zprava) return
-
-  const nazev = [
-    TEST_NAMES[detail.testId][lang].replace(/[™·]/g, "").replace(/\s+/g, " ").trim(),
-    detail.person.name,
-    detail.person.fillDate,
-  ]
-    .filter(Boolean)
-    .join(" - ")
-
-  // Styly stránky se přenesou beze změny, ať dokument vypadá stejně.
-  const styly = [...document.querySelectorAll('link[rel="stylesheet"], style')]
-    .map((n) => n.outerHTML)
-    .join("\n")
-
-  const okno = window.open("", "_blank")
-  if (!okno) return
-  okno.document.write(
-    `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">` +
-      `<title>${nazev.replace(/[<>&]/g, "")}</title>${styly}` +
-      `<style>body{background:#fff;margin:0;padding:24px}</style>` +
-      `</head><body><div class="diag-container">${zprava.innerHTML}</div></body></html>`,
-  )
-  okno.document.close()
-  // Počkej, až se načtou styly, jinak by se tisklo neostylované.
-  okno.onload = () => {
-    okno.focus()
-    okno.print()
+async function exportPdf(detail: ResultDetail, lang: Lang): Promise<void> {
+  const { buildReportPdf, pdfFileName } = await import("@/lib/diagnostic/pdf/report-pdf")
+  const vstup = {
+    testId: detail.testId,
+    person: detail.person,
+    answers: detail.answers,
+    lang,
+    durationSec: detail.durationSec,
   }
+  const blob = buildReportPdf(vstup)
+  const nazev = pdfFileName(vstup)
+  const soubor = new File([blob], nazev, { type: "application/pdf" })
+
+  // iPhone i iPad: systémové sdílení se souborem.
+  if (typeof navigator.canShare === "function" && navigator.canShare({ files: [soubor] })) {
+    try {
+      await navigator.share({ files: [soubor], title: nazev })
+      return
+    } catch (e) {
+      // Uživatel sdílení zavřel — pak už nic dalšího nedělej.
+      if (e instanceof DOMException && e.name === "AbortError") return
+    }
+  }
+
+  // Ostatní prohlížeče: stažení souboru.
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = nazev
+  a.click()
+  // Odvolání až po chvíli, jinak stahování v Safari nestihne začít.
+  window.setTimeout(() => URL.revokeObjectURL(url), 10_000)
 }

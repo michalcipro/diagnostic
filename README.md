@@ -151,6 +151,29 @@ Na Vercelu nastav proměnnou `CONVEX_DEPLOY_KEY` (produkční deploy key z Conve
 a build command na `npx convex deploy --cmd 'npm run build'` – ten při každém
 nasazení nahraje Convex funkce a sám doplní `NEXT_PUBLIC_CONVEX_URL`.
 
+## Export do PDF
+
+Vyhodnocení má dvě tlačítka: **Tisk** (tiskový dialog prohlížeče) a
+**Exportovat PDF**, které vyrobí skutečný soubor přímo v prohlížeči.
+
+Proč se PDF neskládá přes tiskový dialog: na iPhonu z něj soubor nejde uložit
+ani odeslat. Takto vznikne opravdový soubor, který se na mobilu předá
+systémovému sdílení (Uložit do souborů, Mail, WhatsApp) a na počítači se
+stáhne. Text zůstává textem, takže se v PDF dá vyhledávat a soubor váží
+asi 50 kB.
+
+Vestavěná písma formátu PDF neumí české znaky, proto se do dokumentu vkládá
+Liberation Sans (SIL OFL 1.1), osekaný jen na použité znaky. Znovu se vyrobí
+takto:
+
+```bash
+pip install fonttools
+python3 -m fontTools.subset /usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf \
+  --text-file=znaky.txt --output-file=sub.ttf --layout-features='' --no-hinting \
+  --drop-tables+=GSUB,GPOS,GDEF
+# výsledek zakódovat do base64 a vložit do lib/diagnostic/pdf/font.ts
+```
+
 ## Odkazy pro klienty
 
 Produkční doména: **elitediagnostic.cz**
