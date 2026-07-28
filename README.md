@@ -39,6 +39,49 @@ Odpovědi ani vyhodnocení se z backendu nikdy nevrací bez platné přihlášen
 která se ověřuje **serverově** v Convexu. Kontrola jen v prohlížeči by nestačila —
 data by šla stáhnout přímo přes veřejné API.
 
+## Kontrola validity — jak funguje a co ještě neumí
+
+Indexy jsou rozdělené na **tvrdé** a **měkké**. Tvrdé (pozornost, infrekvence,
+konzistence, tempo vyplňování) odpovídají na otázku, jestli odpovědi vůbec měří
+to, co měly — ty určují celkový verdikt. Měkké (upřímnost, odpověďový styl)
+popisují, *jak* o sobě respondent vypovídá; samy o sobě vyhodnocení neruší
+a mohou verdikt zvednout nejvýš na „opatrně".
+
+Prahy jsou zkalibrované simulací, ne odhadem. Návrhový bod je šum na úrovni
+položky σ = 0,8 (korelace mezi dvěma položkami měřícími totéž ≈ 0,52), což je
+vůči skutečnosti konzervativní — párové položky jsou parafráze a korelují výš.
+
+| Respondent | Nějaký příznak | Označen jako neplatný |
+| --- | --- | --- |
+| Poctivý, přesný | 8,5 % | 0,2 % |
+| Poctivý, šumivý | 12,6 % | 0,3 % |
+| Z poloviny nedbalý | 82,3 % | 26,0 % |
+| Zcela náhodný | 100 % | 98,3 % |
+
+**Chybějící odpovědi.** Nezodpovězená položka se nepočítá jako nula — skóre se
+dopočte z průměru zodpovězených. Škála, kde chybí víc než čtvrtina odpovědí, se
+nevykazuje vůbec a nezobrazí se u ní ani pásmo, ani jeho výklad. Pár konzistence
+s chybějící odpovědí se do průměru nepočítá.
+
+### Co instrument zatím nemá
+
+Tohle není výčet chyb, ale hranic, uvnitř kterých se výsledky smí vykládat:
+
+- **Žádné normy.** Pásma jsou absolutní hranice, ne percentily. Pořadí škál je
+  proto ipsativní — říká, se kterými výroky respondent souhlasil nejvíc, ne v čem
+  je nadprůměrný. Report to u pořadí explicitně přiznává.
+- **Žádná doložená reliabilita** (α/ω) ani ověřená faktorová struktura. Model
+  7 dimenzí × 3 fazety je teoretický předpoklad.
+- **Pásmo „priorita" je prakticky nedosažitelné** — i respondent odpovídající
+  vesměs neutrálně (průměr 3,0) do něj spadne v 1 % případů. Hranice pocházejí
+  z původního klíče a záměrně se neměnily; překalibrovat je má smysl až na datech.
+- **Rovnocennost forem** (Sport vs. Business, CZ vs. EN) není doložená měřicí
+  invariancí.
+- **Prahy pro retest** (±4 fazeta, ±8 dimenze) nejsou odvozené z chyby měření.
+
+Pro koučovací práci, kde výsledek procházíš s klientem osobně, je to obhajitelné.
+Pro rozhodnutí o výběru do týmu nebo o kariéře ne.
+
 ## Nastavení Convexu
 
 Bez Convexu se dotazník nemá kam odeslat a aplikace na to upozorní.

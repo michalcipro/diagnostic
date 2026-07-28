@@ -2,6 +2,16 @@ import type { BandKey, Lang, TestId, Variant } from "./types"
 
 // UI texty diagnostiky — CZ/EN
 
+/**
+ * Desetinné číslo se správným oddělovačem — česky čárka, anglicky tečka.
+ * Nepoužíváme toLocaleString: chceme, aby report vypadal stejně na serveru
+ * i v prohlížeči a nezáviselo to na nastavení systému.
+ */
+export function fmtNum(value: number, lang: Lang, decimals = 1): string {
+  const s = value.toFixed(decimals)
+  return lang === "cs" ? s.replace(".", ",") : s
+}
+
 export const SCALE_LABELS: Record<Lang, Record<1 | 2 | 3 | 4 | 5, string>> = {
   cs: {
     1: "Rozhodně nesouhlasím",
@@ -123,9 +133,23 @@ export interface UIStrings {
   validityConsistency: string
   validityHonesty: string
   validityStyle: string
+  validityPace: string
   validityStatusOk: string
   validityStatusCaution: string
   validityStatusInvalid: string
+  /** dvě skupiny indexů: co ruší vyhodnocení a co jen barví interpretaci */
+  validityHardTitle: string
+  validitySoftTitle: string
+  validitySoftNote: string
+  /** index nelze spočítat kvůli chybějícím odpovědím */
+  validityUnavailable: string
+  paceValue: (secPerItem: number, totalMin: number) => string
+  /** škála se nevykazuje, protože chybí příliš mnoho odpovědí */
+  scaleNotReported: string
+  scaleCoverage: (answered: number, total: number) => string
+  proratedNote: string
+  /** pořadí škál není srovnání s populací */
+  normativeCaveat: string
   strengthsTitle: string
   prioritiesTitle: string
   developmentTitle: string
@@ -251,9 +275,22 @@ export const UI: Record<Lang, UIStrings> = {
     validityConsistency: "Index konzistence",
     validityHonesty: "Index upřímnosti",
     validityStyle: "Odpověďový styl",
+    validityPace: "Tempo vyplňování",
     validityStatusOk: "v pořádku",
     validityStatusCaution: "opatrně",
     validityStatusInvalid: "neplatné",
+    validityHardTitle: "Zda odpovědi měří to, co měly",
+    validitySoftTitle: "Jak o sobě respondent vypovídá",
+    validitySoftNote:
+      "Tyhle dva ukazatele vyhodnocení neruší — popisují, jakým způsobem člověk o sobě mluví. Ber je jako kontext k rozhovoru, ne jako chybu.",
+    validityUnavailable: "nelze určit",
+    paceValue: (s, min) => `${fmtNum(s, "cs")} s/položku · celkem ${min} min`,
+    scaleNotReported: "nevykazuje se",
+    scaleCoverage: (a, t) => `${a} z ${t} položek`,
+    proratedNote:
+      "U škál s chybějícími odpověďmi je skóre dopočítané z průměru zodpovězených položek. Škály, kde chybí víc než čtvrtina odpovědí, se nevykazují vůbec.",
+    normativeCaveat:
+      "Pořadí škál vychází z hrubých skóre, ne ze srovnání s populací — normy zatím nejsou k dispozici. Čti je jako „s těmito výroky souhlasil nejvíc“, ne jako „v tomhle je nadprůměrný“.",
     strengthsTitle: "Opěrné body profilu",
     prioritiesTitle: "Rozvojové priority",
     developmentTitle: "Doporučení pro rozvoj (8–12 týdnů)",
@@ -381,9 +418,22 @@ export const UI: Record<Lang, UIStrings> = {
     validityConsistency: "Consistency index",
     validityHonesty: "Honesty index",
     validityStyle: "Response style",
+    validityPace: "Completion pace",
     validityStatusOk: "OK",
     validityStatusCaution: "caution",
     validityStatusInvalid: "invalid",
+    validityHardTitle: "Whether the answers measured what they should",
+    validitySoftTitle: "How the respondent describes themselves",
+    validitySoftNote:
+      "These two indicators do not invalidate the evaluation — they describe the way the person talks about themselves. Treat them as context for the conversation, not as an error.",
+    validityUnavailable: "cannot be determined",
+    paceValue: (s, min) => `${fmtNum(s, "en")} s/item · ${min} min total`,
+    scaleNotReported: "not reported",
+    scaleCoverage: (a, t) => `${a} of ${t} items`,
+    proratedNote:
+      "For scales with missing answers the score is estimated from the mean of the answered items. Scales missing more than a quarter of their answers are not reported at all.",
+    normativeCaveat:
+      "The ranking of scales comes from raw scores, not from a comparison with a population — norms are not available yet. Read it as “agreed with these statements most”, not as “is above average in this”.",
     strengthsTitle: "Anchors of the profile",
     prioritiesTitle: "Development priorities",
     developmentTitle: "Development recommendations (8–12 weeks)",

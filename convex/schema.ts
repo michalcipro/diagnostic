@@ -59,6 +59,12 @@ export default defineSchema({
     answers: v.string(),
     answeredCount: v.number(),
     complete: v.boolean(),
+    /**
+     * Doba vyplňování v sekundách. Vstupuje do kontroly validity — příliš
+     * rychlé vyplnění je silný ukazatel nedbalého odpovídání. U záznamů
+     * pořízených dřív chybí, proto volitelné.
+     */
+    durationSec: v.optional(v.number()),
     createdAt: v.number(),
   }).index("by_created", ["createdAt"]),
 })

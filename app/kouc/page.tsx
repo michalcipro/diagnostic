@@ -276,6 +276,7 @@ export default function CoachPage() {
           person={detail.person}
           answers={detail.answers}
           lang={detailLang}
+          durationSec={detail.durationSec}
         />
       </div>
     )

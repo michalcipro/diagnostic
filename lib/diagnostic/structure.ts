@@ -59,6 +59,7 @@ export const ELITE200: StructureDef = {
   reversedItems: ELITE200_REVERSED,
   validity: {
     attention: { 50: 2, 100: 4, 150: 1, 188: 3 },
+    attentionThresholds: { caution: 2, invalid: 3 },
     infrequency: { expectAgree: [34, 79], expectDisagree: [124, 169] },
     honesty: { items: [13, 27, 41, 56, 71, 86, 101, 116, 131, 146, 161, 176], thresholds: [33, 44] },
     consistency: {
@@ -76,9 +77,19 @@ export const ELITE200: StructureDef = {
         { a: 44, b: 199, type: "agree" },
         { a: 14, b: 200, type: "agree" },
       ],
-      invalidPairCount: 3,
+      // Prahy jsou zkalibrované na rozdělení průměrného rozdílu u poctivého
+      // respondenta (simulace 60 000 profilů, šum na úrovni položky σ = 0,8,
+      // tj. korelace mezi dvěma položkami měřícími totéž ≈ 0,52 — konzervativní
+      // odhad, párové položky jsou parafráze a korelují spíš výš).
+      // Výsledek: varování ~5 % poctivých, neplatné ~0,02 %; náhodný respondent
+      // je označen jako neplatný v 98 % případů.
+      cautionMeanDiff: 1.2,
+      invalidMeanDiff: 1.7,
+      invalidPairCount: 4,
+      minUsablePairs: 2 / 3,
     },
     longestRunThreshold: 15,
+    pace: { cautionSecPerItem: 3, invalidSecPerItem: 2 },
   },
   scoring: {
     facetBands: [
@@ -96,6 +107,7 @@ export const ELITE200: StructureDef = {
     heterogeneityThreshold: 12,
     topCount: 3,
     retestSignificance: { facet: 4, dimension: 8 },
+    minCoverage: 0.75,
   },
 }
 
@@ -123,6 +135,9 @@ export const ELITE100: StructureDef = {
   reversedItems: ELITE100_REVERSED,
   validity: {
     attention: { 38: 2, 75: 4 },
+    // Kontroly jsou jen dvě, takže shovívavější práh než u ELITE 200 nejde —
+    // jedna minutá kontrola z dvou už je polovina.
+    attentionThresholds: { caution: 1, invalid: 2 },
     honesty: { items: [10, 21, 32, 44, 55, 66, 78, 89], thresholds: [22, 29] },
     consistency: {
       pairs: [
@@ -133,8 +148,15 @@ export const ELITE100: StructureDef = {
         { a: 14, b: 99, type: "reversed" },
         { a: 61, b: 100, type: "reversed" },
       ],
-      invalidPairCount: 2,
+      // Šest párů kolísá víc než dvanáct, proto vyšší prahy než u ELITE 200.
+      // Varování ~3 % poctivých, neplatné ~0,08 %.
+      cautionMeanDiff: 1.35,
+      invalidMeanDiff: 1.85,
+      invalidPairCount: 3,
+      minUsablePairs: 2 / 3,
     },
+    longestRunThreshold: 12,
+    pace: { cautionSecPerItem: 3, invalidSecPerItem: 2 },
   },
   scoring: {
     dimensionBands: [
@@ -146,6 +168,7 @@ export const ELITE100: StructureDef = {
     imbalanceThreshold: 15,
     topCount: 2,
     retestSignificance: { dimension: 5 },
+    minCoverage: 0.75,
   },
 }
 

@@ -158,6 +158,8 @@ export const submitWithInvite = mutation({
     token: v.string(),
     person: personValidator,
     answers: v.string(), // JSON { "1": 4, … }
+    /** doba vyplňování v sekundách; vstupuje do kontroly validity */
+    durationSec: v.optional(v.number()),
   },
   returns: v.object({ ok: v.boolean() }),
   handler: async (ctx, args) => {
@@ -197,6 +199,12 @@ export const submitWithInvite = mutation({
       answers: args.answers,
       answeredCount,
       complete: answeredCount === itemCount,
+      // Nesmyslné hodnoty (záporné, absurdně dlouhé) zahoď — index tempa
+      // se pak prostě nepočítá, místo aby počítal s nesmyslem.
+      durationSec:
+        typeof args.durationSec === "number" && args.durationSec > 0 && args.durationSec < 86400
+          ? Math.round(args.durationSec)
+          : undefined,
       createdAt: Date.now(),
     })
     // Pozvánku spotřebuj — odkaz už podruhé nepustí.
@@ -260,6 +268,7 @@ export const getForCoach = query({
       answers: v.string(),
       answeredCount: v.number(),
       complete: v.boolean(),
+      durationSec: v.optional(v.number()),
       createdAt: v.number(),
     }),
     v.null(),
@@ -276,6 +285,7 @@ export const getForCoach = query({
       answers: d.answers,
       answeredCount: d.answeredCount,
       complete: d.complete,
+      durationSec: d.durationSec,
       createdAt: d.createdAt,
     }
   },

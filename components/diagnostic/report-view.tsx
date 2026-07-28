@@ -3,7 +3,7 @@
 import { useMemo } from "react"
 import { BandChip, ScoreRow } from "@/components/diagnostic/score-visuals"
 import { getDimensionContent, getFacetContent, vt } from "@/lib/diagnostic/content"
-import { BAND_DESCRIPTIONS, TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
+import { BAND_DESCRIPTIONS, TEST_NAMES, UI, fmtNum } from "@/lib/diagnostic/i18n"
 import { evaluate } from "@/lib/diagnostic/scoring"
 import { getStructure, parseTestId } from "@/lib/diagnostic/structure"
 import type {
@@ -39,20 +39,62 @@ function StatusChip({ status, lang }: { status: ValidityStatus; lang: Lang }) {
   )
 }
 
+/** Jeden řádek kontroly validity: název, naměřená hodnota, stav. */
+function IndexRow({
+  label,
+  status,
+  lang,
+  children,
+  muted,
+  last,
+}: {
+  label: string
+  status: ValidityStatus
+  lang: Lang
+  children: React.ReactNode
+  /** index se nedal spočítat — hodnota se tlumí, ať neplete */
+  muted?: boolean
+  last?: boolean
+}) {
+  return (
+    <div
+      className={`flex items-center justify-between gap-3 ${last ? "" : "border-b border-[var(--wm-border-light)] pb-2"}`}
+    >
+      <span>
+        {label}
+        <span className={`ml-2 text-[13px] ${muted ? "italic opacity-70" : ""} text-[var(--wm-text-3)]`}>
+          {children}
+        </span>
+      </span>
+      {muted ? (
+        <span className="text-[12px] text-[var(--wm-text-3)]">—</span>
+      ) : (
+        <StatusChip status={status} lang={lang} />
+      )}
+    </div>
+  )
+}
+
 export function ReportView({
   testId,
   person,
   answers,
   lang,
+  durationSec,
 }: {
   testId: TestId
   person: PersonInfo
   answers: AnswerMap
   lang: Lang
+  /** doba vyplňování; chybí u starších vyplnění, index tempa se pak nezobrazí */
+  durationSec?: number
 }) {
   const { model, variant } = parseTestId(testId)!
   const structure = useMemo(() => getStructure(model), [model])
-  const result = useMemo(() => evaluate(structure, answers), [structure, answers])
+  const result = useMemo(
+    () => evaluate(structure, answers, { durationSec }),
+    [structure, answers, durationSec],
+  )
   const t = UI[lang]
   const v = result.validity
 
@@ -92,8 +134,9 @@ export function ReportView({
       </header>
 
       {!result.complete && (
-        <div className="mt-4 rounded-2xl border border-[var(--wm-orange)] bg-[var(--wm-orange-light)] p-4 text-[14px] font-medium text-[var(--wm-caution-fg)]">
-          {t.incompleteWarning(result.answeredCount, structure.itemCount)}
+        <div className="mt-4 rounded-2xl border border-[var(--wm-orange)] bg-[var(--wm-orange-light)] p-4 text-[14px] text-[var(--wm-caution-fg)]">
+          <p className="font-medium">{t.incompleteWarning(result.answeredCount, structure.itemCount)}</p>
+          <p className="mt-1.5 text-[13px] leading-relaxed opacity-90">{t.proratedNote}</p>
         </div>
       )}
 
@@ -109,70 +152,79 @@ export function ReportView({
         >
           {v.overall === "ok" ? t.validityOkNote : v.overall === "caution" ? t.validityCautionNote : t.validityInvalidNote}
         </p>
-        <div className="mt-4 grid gap-2 text-[14px]">
-          <div className="flex items-center justify-between gap-3 border-b border-[var(--wm-border-light)] pb-2">
-            <span>
-              {t.validityAttention}
-              <span className="ml-2 text-[13px] text-[var(--wm-text-3)]">
-                {v.attention.total - v.attention.errors}/{v.attention.total}
-              </span>
-            </span>
-            <StatusChip status={v.attention.status} lang={lang} />
-          </div>
+        {/*
+          Indexy jsou rozdělené do dvou skupin. Tvrdé určují, jestli odpovědi
+          vůbec měří to, co měly. Měkké popisují, jak o sobě člověk vypovídá —
+          to je informace do rozhovoru, ne důvod vyhodnocení zahodit.
+        */}
+        <p className="mt-5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--wm-text-3)]">
+          {t.validityHardTitle}
+        </p>
+        <div className="mt-2 grid gap-2 text-[14px]">
+          <IndexRow label={t.validityAttention} status={v.attention.status} lang={lang}>
+            {v.attention.total - v.attention.errors}/{v.attention.total}
+          </IndexRow>
           {v.infrequency && (
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--wm-border-light)] pb-2">
-              <span>
-                {t.validityInfrequency}
-                <span className="ml-2 text-[13px] text-[var(--wm-text-3)]">{v.infrequency.signals} ×</span>
-              </span>
-              <StatusChip status={v.infrequency.status} lang={lang} />
-            </div>
+            <IndexRow label={t.validityInfrequency} status={v.infrequency.status} lang={lang}>
+              {v.infrequency.signals} ×
+            </IndexRow>
           )}
-          <div className="flex items-center justify-between gap-3 border-b border-[var(--wm-border-light)] pb-2">
-            <span>
-              {t.validityConsistency}
-              <span className="ml-2 text-[13px] text-[var(--wm-text-3)]">Ø {v.consistency.meanDiff.toFixed(2)}</span>
-            </span>
-            <StatusChip status={v.consistency.status} lang={lang} />
-          </div>
-          <div className="flex items-center justify-between gap-3 border-b border-[var(--wm-border-light)] pb-2">
-            <span>
-              {t.validityHonesty}
-              <span className="ml-2 text-[13px] text-[var(--wm-text-3)]">
-                {v.honesty.score} ({v.honesty.min}–{v.honesty.max})
-              </span>
-            </span>
-            <StatusChip status={v.honesty.status} lang={lang} />
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <span>
-              {t.validityStyle}
-              <span className="ml-2 text-[13px] text-[var(--wm-text-3)]">
-                4–5: {v.responseStyle.agreePct} % · 1–2: {v.responseStyle.disagreePct} % · 1/5:{" "}
-                {v.responseStyle.extremePct} %
-              </span>
-            </span>
-            <StatusChip status={v.responseStyle.status} lang={lang} />
-          </div>
+          <IndexRow label={t.validityConsistency} status={v.consistency.status} lang={lang} muted={!v.consistency.available}>
+            {v.consistency.available
+              ? `Ø ${fmtNum(v.consistency.meanDiff, lang, 2)} · ${v.consistency.pairsUsed}/${v.consistency.pairsTotal}`
+              : t.validityUnavailable}
+          </IndexRow>
+          {v.pace && (
+            <IndexRow label={t.validityPace} status={v.pace.status} lang={lang} last>
+              {t.paceValue(v.pace.secPerItem, Math.round(v.pace.totalSec / 60))}
+            </IndexRow>
+          )}
         </div>
+
+        <p className="mt-6 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--wm-text-3)]">
+          {t.validitySoftTitle}
+        </p>
+        <div className="mt-2 grid gap-2 text-[14px]">
+          <IndexRow label={t.validityHonesty} status={v.honesty.status} lang={lang}>
+            {v.honesty.score} ({v.honesty.min}–{v.honesty.max})
+          </IndexRow>
+          <IndexRow label={t.validityStyle} status={v.responseStyle.status} lang={lang} last>
+            4–5: {fmtNum(v.responseStyle.agreePct, lang)} % · 1–2: {fmtNum(v.responseStyle.disagreePct, lang)} % ·
+            1/5: {fmtNum(v.responseStyle.extremePct, lang)} %
+          </IndexRow>
+        </div>
+        <p className="mt-3 text-[13px] leading-relaxed text-[var(--wm-text-3)]">{t.validitySoftNote}</p>
       </section>
 
       {/* přehled profilu */}
       <section className="diag-card mt-5 p-7">
         <h2 className="text-[18px] font-bold tracking-tight">{t.profileOverview}</h2>
         <div className="mt-3 divide-y divide-[var(--wm-border-light)]">
-          {result.dimensions.map((d) => (
-            <ScoreRow
-              key={d.id}
-              label={getDimensionContent(d.id).name[lang]}
-              raw={d.raw}
-              min={d.min}
-              max={d.max}
-              percent={d.percent}
-              band={d.band}
-              lang={lang}
-            />
-          ))}
+          {result.dimensions.map((d) =>
+            d.reported ? (
+              <ScoreRow
+                key={d.id}
+                label={getDimensionContent(d.id).name[lang]}
+                raw={d.raw}
+                min={d.min}
+                max={d.max}
+                percent={d.percent}
+                band={d.band}
+                lang={lang}
+              />
+            ) : (
+              // Chybí příliš mnoho odpovědí — číslo by budilo zdání přesnosti,
+              // kterou nemá, proto se místo něj píše, kolik dat vlastně je.
+              <div key={d.id} className="flex items-center justify-between gap-3 py-3">
+                <span className="text-[15px] font-medium text-[var(--wm-text-3)]">
+                  {getDimensionContent(d.id).name[lang]}
+                </span>
+                <span className="text-[13px] italic text-[var(--wm-text-3)]">
+                  {t.scaleNotReported} · {t.scaleCoverage(d.answered, d.total)}
+                </span>
+              </div>
+            ),
+          )}
         </div>
         {result.imbalanced && (
           <p className="mt-3 rounded-xl bg-[var(--wm-orange-light)] p-3 text-[13px] font-medium text-[var(--wm-caution-fg)]">
@@ -225,6 +277,13 @@ export function ReportView({
         </div>
       </section>
 
+      {/*
+        Bez norem je pořadí škál ipsativní — říká, se kterými výroky respondent
+        souhlasil nejvíc, ne v čem je nadprůměrný. Report to musí přiznat,
+        jinak by tvrdil víc, než na co má podklady.
+      */}
+      <p className="mt-3 text-[13px] leading-relaxed text-[var(--wm-text-3)]">{t.normativeCaveat}</p>
+
       {/* narativ po dimenzích */}
       <section className="diag-print-break mt-8">
         <h2 className="mb-4 text-[22px] font-bold tracking-tight">{t.dimensionsTitle}</h2>
@@ -239,27 +298,46 @@ export function ReportView({
                     <p className="mt-1 text-[13px] text-[var(--wm-text-2)]">{vt(content.tagline, variant, lang)}</p>
                   </div>
                   <div className="shrink-0 text-right">
-                    <div className="text-[22px] font-bold tabular-nums">{d.raw}</div>
-                    <div className="text-[12px] text-[var(--wm-text-3)]">
-                      {d.min}–{d.max} · {d.percent} %
-                    </div>
+                    {d.reported ? (
+                      <>
+                        <div className="text-[22px] font-bold tabular-nums">{d.raw}</div>
+                        <div className="text-[12px] text-[var(--wm-text-3)]">
+                          {d.min}–{d.max} · {fmtNum(d.percent, lang)} %
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-[12px] italic text-[var(--wm-text-3)]">{t.scaleNotReported}</div>
+                    )}
                   </div>
                 </div>
-                <div className="mt-3">
-                  <ScoreRow
-                    label={BAND_DESCRIPTIONS[lang][d.band]}
-                    raw={d.raw}
-                    min={d.min}
-                    max={d.max}
-                    percent={d.percent}
-                    band={d.band}
-                    lang={lang}
-                    compact
-                  />
-                </div>
-                <p className="mt-3 text-[14.5px] leading-relaxed text-[var(--wm-text)]">
-                  {vt(content.bands[d.band], variant, lang)}
-                </p>
+                {/*
+                  Bez dostatku odpovědí se pásmo ani jeho výklad nezobrazuje —
+                  text pásma je tvrzení o člověku a nesmí stát na dopočtu
+                  z hrsti položek.
+                */}
+                {d.reported ? (
+                  <>
+                    <div className="mt-3">
+                      <ScoreRow
+                        label={BAND_DESCRIPTIONS[lang][d.band]}
+                        raw={d.raw}
+                        min={d.min}
+                        max={d.max}
+                        percent={d.percent}
+                        band={d.band}
+                        lang={lang}
+                        compact
+                      />
+                    </div>
+                    <p className="mt-3 text-[14.5px] leading-relaxed text-[var(--wm-text)]">
+                      {vt(content.bands[d.band], variant, lang)}
+                    </p>
+                  </>
+                ) : (
+                  <p className="mt-3 rounded-xl bg-[var(--wm-surface-2)] p-3 text-[13px] leading-relaxed text-[var(--wm-text-2)]">
+                    {t.scaleCoverage(d.answered, d.total)} — {t.proratedNote}
+                  </p>
+                )}
 
                 {d.heterogeneous && (
                   <p className="mt-3 rounded-xl bg-[var(--wm-orange-light)] p-3 text-[13px] font-medium text-[var(--wm-caution-fg)]">
@@ -277,19 +355,30 @@ export function ReportView({
                       if (!fc) return null
                       return (
                         <div key={f.id} className="border-b border-[var(--wm-border-light)] py-3 last:border-b-0">
-                          <ScoreRow
-                            label={fc.name[lang]}
-                            raw={f.raw}
-                            min={f.min}
-                            max={f.max}
-                            percent={f.percent}
-                            band={f.band}
-                            lang={lang}
-                            compact
-                          />
-                          <p className="mt-1.5 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
-                            {vt(fc.bands[f.band], variant, lang)}
-                          </p>
+                          {f.reported ? (
+                            <>
+                              <ScoreRow
+                                label={fc.name[lang]}
+                                raw={f.raw}
+                                min={f.min}
+                                max={f.max}
+                                percent={f.percent}
+                                band={f.band}
+                                lang={lang}
+                                compact
+                              />
+                              <p className="mt-1.5 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
+                                {vt(fc.bands[f.band], variant, lang)}
+                              </p>
+                            </>
+                          ) : (
+                            <div className="flex items-center justify-between gap-3">
+                              <span className="text-[14px] font-medium text-[var(--wm-text-3)]">{fc.name[lang]}</span>
+                              <span className="text-[13px] italic text-[var(--wm-text-3)]">
+                                {t.scaleNotReported} · {t.scaleCoverage(f.answered, f.total)}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       )
                     })}

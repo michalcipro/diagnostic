@@ -89,6 +89,8 @@ export interface ResultDetail {
   answers: AnswerMap
   answeredCount: number
   complete: boolean
+  /** chybí u vyplnění pořízených dřív, než se čas začal měřit */
+  durationSec?: number
   createdAt: number
 }
 
@@ -113,6 +115,19 @@ export interface InviteRow {
   resultId?: string
 }
 
+/**
+ * Doba vyplňování v sekundách. Vrací undefined, pokud čas nedává smysl —
+ * index tempa se pak nepočítá vůbec, což je lepší než počítat s nesmyslem.
+ */
+function sessionDurationSec(session: StoredSession): number | undefined {
+  if (!session.finishedAt) return undefined
+  const od = Date.parse(session.startedAt)
+  const do_ = Date.parse(session.finishedAt)
+  if (!Number.isFinite(od) || !Number.isFinite(do_)) return undefined
+  const sec = Math.round((do_ - od) / 1000)
+  return sec > 0 && sec < 86400 ? sec : undefined
+}
+
 /** Načte pozvánku podle tokenu z odkazu (veřejné). */
 export async function fetchInvite(token: string): Promise<Invite> {
   const c = client()
@@ -132,6 +147,7 @@ export async function submitWithInvite(token: string, session: StoredSession): P
       token,
       person: session.person,
       answers: JSON.stringify(session.answers),
+      durationSec: sessionDurationSec(session),
     })
     return true
   } catch (err) {
