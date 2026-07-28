@@ -3,6 +3,7 @@
 import { use, useEffect, useMemo, useRef, useState } from "react"
 import { LangToggle } from "@/components/diagnostic/lang-toggle"
 import { SCALE_LABELS, TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
+import { applyGender } from "@/lib/diagnostic/content"
 import { getItems, itemText } from "@/lib/diagnostic/items"
 import { getStructure, parseTestId } from "@/lib/diagnostic/structure"
 import { loadSession, newSession, saveSession } from "@/lib/diagnostic/storage"
@@ -12,7 +13,7 @@ import type { Answer, Lang, StoredSession, TestId } from "@/lib/diagnostic/types
 const BLOCK_SIZE = 20
 
 // Dotazník se otevře pouze na platnou pozvánku od kouče. Token v odkazu určuje,
-// který test se zobrazí — klient se tak nedostane k jiným diagnostikám ani nemůže
+// který test se zobrazí – klient se tak nedostane k jiným diagnostikám ani nemůže
 // vyplnit tentýž test dvakrát.
 export default function InvitePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = use(params)
@@ -46,7 +47,7 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
   )
 }
 
-/** Neplatný nebo už použitý odkaz — srozumitelně, dvojjazyčně. */
+/** Neplatný nebo už použitý odkaz – srozumitelně, dvojjazyčně. */
 function InviteProblem({ kind }: { kind: "invalid" | "used" }) {
   return (
     <div className="diag-container flex min-h-screen items-center justify-center py-20">
@@ -92,7 +93,7 @@ function Questionnaire({
   const [submitting, setSubmitting] = useState(false)
   const topRef = useRef<HTMLDivElement>(null)
 
-  // Rozpracované odpovědi se drží pod tokenem — klient si může dát pauzu
+  // Rozpracované odpovědi se drží pod tokenem – klient si může dát pauzu
   // a vrátit se ke stejnému odkazu.
   useEffect(() => {
     const existing = loadSession(token)
@@ -149,7 +150,7 @@ function Questionnaire({
     const done: StoredSession = { ...session, finishedAt: new Date().toISOString() }
     saveSession(token, done)
 
-    // Odeslání kouči proti pozvánce. Respondent výsledky nevidí — projde je
+    // Odeslání kouči proti pozvánce. Respondent výsledky nevidí – projde je
     // s ním kouč osobně, proto se po odeslání zobrazuje jen potvrzení.
     setSubmitting(true)
     const ok = isRemoteEnabled() ? await submitWithInvite(token, done) : false
@@ -174,7 +175,7 @@ function Questionnaire({
       {/* horní lišta */}
       <div className="sticky top-0 z-10 border-b border-[var(--wm-border-light)] bg-[var(--wm-glass)] backdrop-blur-xl">
         <div className="diag-container flex h-14 items-center justify-between gap-4">
-          {/* Značka záměrně není odkaz — klient s přímým odkazem má vidět
+          {/* Značka záměrně není odkaz – klient s přímým odkazem má vidět
               pouze svůj test, ne nabídku ostatních diagnostik. */}
           <span className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text)]">{t.brand}</span>
           <div className="flex min-w-0 flex-1 items-center justify-center px-2">
@@ -225,6 +226,31 @@ function Questionnaire({
                     }
                   />
                 </label>
+                {/*
+                  Rod řídí gramatické tvary v českém vyhodnocení. Bez něj by
+                  žena dostala text v mužském rodě, což je hrubá chyba, proto
+                  je pole povinné stejně jako jméno.
+                */}
+                <div className="block">
+                  <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">
+                    {t.genderLabel} *
+                  </span>
+                  <div className="diag-segment">
+                    {(["female", "male"] as const).map((g) => (
+                      <button
+                        key={g}
+                        type="button"
+                        data-active={session.person.gender === g}
+                        onClick={() => setSession({ ...session, person: { ...session.person, gender: g } })}
+                      >
+                        {g === "female" ? t.genderFemale : t.genderMale}
+                      </button>
+                    ))}
+                  </div>
+                  <span className="mt-1.5 block text-[12px] leading-relaxed text-[var(--wm-text-3)]">
+                    {t.genderHint}
+                  </span>
+                </div>
                 <label className="block">
                   <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">
                     {variant === "sport" ? t.roleLabelSport : t.roleLabelBusiness}
@@ -262,12 +288,12 @@ function Questionnaire({
             <section className="diag-card p-6">
               <h2 className="mb-4 text-[16px] font-semibold">{t.howToTitle}</h2>
               <ol className="flex flex-col gap-3">
-                {t.howTo.map((line, i) => (
+                {t.howTo.map((raw, i) => (
                   <li key={i} className="flex gap-3 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
                     <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--wm-fill-4)] text-[11px] font-bold text-[var(--wm-text)]">
                       {i + 1}
                     </span>
-                    {line}
+                    {applyGender(raw, session.person.gender ?? "male")}
                   </li>
                 ))}
               </ol>
@@ -285,7 +311,7 @@ function Questionnaire({
 
             <button
               type="button"
-              disabled={session.person.name.trim().length === 0}
+              disabled={session.person.name.trim().length === 0 || !session.person.gender}
               onClick={startItems}
               className="diag-press mx-auto inline-flex h-12 items-center justify-center rounded-full bg-[var(--wm-brand)] px-10 text-[16px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-35"
             >
@@ -333,17 +359,17 @@ function Questionnaire({
                             data-selected={value === v}
                             role="radio"
                             aria-checked={value === v}
-                            aria-label={`${v} — ${scale[v]}`}
+                            aria-label={`${v} – ${scale[v]}`}
                             onClick={() => setAnswer(item.id, v)}
                           >
                             {v}
                           </button>
                         ))}
                       </div>
-                      {/* Popisek se mění podle výběru — drží řádek symetrický
+                      {/* Popisek se mění podle výběru – drží řádek symetrický
                           a zároveň dává okamžitou zpětnou vazbu. */}
                       <p className="diag-scale-caption" data-selected={value !== undefined}>
-                        {value !== undefined ? scale[value] : `1 · ${scale[1]}   —   5 · ${scale[5]}`}
+                        {value !== undefined ? scale[value] : `1 · ${scale[1]}   –   5 · ${scale[5]}`}
                       </p>
                     </div>
                   </div>
@@ -401,7 +427,7 @@ function Questionnaire({
           </div>
         )}
 
-        {/* Odesláno. Respondent zde záměrně nevidí žádné výsledky — vyhodnocení
+        {/* Odesláno. Respondent zde záměrně nevidí žádné výsledky – vyhodnocení
             s ním prochází kouč osobně. */}
         {stage === "sent" && (
           <section className="diag-card mt-8 p-8 text-center">
@@ -419,7 +445,7 @@ function Questionnaire({
           </section>
         )}
 
-        {/* Odeslání selhalo — ať respondent nepřijde o hodinu práce. */}
+        {/* Odeslání selhalo – ať respondent nepřijde o hodinu práce. */}
         {stage === "sendFailed" && (
           <section className="diag-card mt-8 p-8 text-center" style={{ borderColor: "var(--wm-orange)" }}>
             <h2 className="text-[20px] font-bold tracking-tight text-[var(--wm-caution-fg)]">

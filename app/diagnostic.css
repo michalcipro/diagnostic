@@ -1,4 +1,4 @@
-/* ELITE Performance Diagnostic — samostatný vizuální okruh (Apple HIG) */
+/* ELITE Performance Diagnostic – samostatný vizuální okruh (Apple HIG) */
 
 .diag-root {
   min-height: 100vh;
@@ -135,7 +135,7 @@
 .diag-item {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
-/* Zodpovězená položka se needituje do šedi — karta zůstává čistá,
+/* Zodpovězená položka se needituje do šedi – karta zůstává čistá,
    vyplněné kolečko a popisek pod ním sdělují stav samy. */
 
 /* Nabíhání položek po přechodu na další blok. */

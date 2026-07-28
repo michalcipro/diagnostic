@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import { BandChip, ScoreRow } from "@/components/diagnostic/score-visuals"
-import { getDimensionContent, getFacetContent, vt } from "@/lib/diagnostic/content"
+import { applyGender, getDimensionContent, getFacetContent, vt } from "@/lib/diagnostic/content"
 import { BAND_DESCRIPTIONS, TEST_NAMES, UI, fmtNum } from "@/lib/diagnostic/i18n"
 import { evaluate } from "@/lib/diagnostic/scoring"
 import { getStructure, parseTestId } from "@/lib/diagnostic/structure"
@@ -15,7 +15,7 @@ import type {
   ValidityStatus,
 } from "@/lib/diagnostic/types"
 
-// Kompletní vyhodnocení. Vykresluje se pouze v chráněné části pro kouče —
+// Kompletní vyhodnocení. Vykresluje se pouze v chráněné části pro kouče –
 // respondent tuhle komponentu nikdy nevidí.
 
 const STATUS_STYLE: Record<ValidityStatus, { color: string; bg: string }> = {
@@ -52,7 +52,7 @@ function IndexRow({
   status: ValidityStatus
   lang: Lang
   children: React.ReactNode
-  /** index se nedal spočítat — hodnota se tlumí, ať neplete */
+  /** index se nedal spočítat – hodnota se tlumí, ať neplete */
   muted?: boolean
   last?: boolean
 }) {
@@ -67,7 +67,7 @@ function IndexRow({
         </span>
       </span>
       {muted ? (
-        <span className="text-[12px] text-[var(--wm-text-3)]">—</span>
+        <span className="text-[12px] text-[var(--wm-text-3)]">–</span>
       ) : (
         <StatusChip status={status} lang={lang} />
       )}
@@ -90,6 +90,9 @@ export function ReportView({
   durationSec?: number
 }) {
   const { model, variant } = parseTestId(testId)!
+  // Rod řídí gramatické tvary v českém textu. U starších vyplnění chybí –
+  // tehdy se pole ještě nezadávalo, takže padáme na mužský rod.
+  const gender = person.gender ?? "male"
   const structure = useMemo(() => getStructure(model), [model])
   const result = useMemo(
     () => evaluate(structure, answers, { durationSec }),
@@ -110,7 +113,7 @@ export function ReportView({
         <div className="mt-5 grid gap-x-8 gap-y-2 border-t border-[var(--wm-border-light)] pt-4 text-[14px] sm:grid-cols-2">
           <div className="flex justify-between gap-4 sm:justify-start">
             <span className="text-[var(--wm-text-3)]">{t.personLabel}</span>
-            <span className="font-semibold">{person.name || "—"}</span>
+            <span className="font-semibold">{person.name || "–"}</span>
           </div>
           <div className="flex justify-between gap-4 sm:justify-start">
             <span className="text-[var(--wm-text-3)]">{t.filledLabel}</span>
@@ -154,7 +157,7 @@ export function ReportView({
         </p>
         {/*
           Indexy jsou rozdělené do dvou skupin. Tvrdé určují, jestli odpovědi
-          vůbec měří to, co měly. Měkké popisují, jak o sobě člověk vypovídá —
+          vůbec měří to, co měly. Měkké popisují, jak o sobě člověk vypovídá –
           to je informace do rozhovoru, ne důvod vyhodnocení zahodit.
         */}
         <p className="mt-5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--wm-text-3)]">
@@ -213,7 +216,7 @@ export function ReportView({
                 lang={lang}
               />
             ) : (
-              // Chybí příliš mnoho odpovědí — číslo by budilo zdání přesnosti,
+              // Chybí příliš mnoho odpovědí – číslo by budilo zdání přesnosti,
               // kterou nemá, proto se místo něj píše, kolik dat vlastně je.
               <div key={d.id} className="flex items-center justify-between gap-3 py-3">
                 <span className="text-[15px] font-medium text-[var(--wm-text-3)]">
@@ -278,11 +281,11 @@ export function ReportView({
       </section>
 
       {/*
-        Bez norem je pořadí škál ipsativní — říká, se kterými výroky respondent
+        Bez norem je pořadí škál ipsativní – říká, se kterými výroky respondent
         souhlasil nejvíc, ne v čem je nadprůměrný. Report to musí přiznat,
         jinak by tvrdil víc, než na co má podklady.
       */}
-      <p className="mt-3 text-[13px] leading-relaxed text-[var(--wm-text-3)]">{t.normativeCaveat}</p>
+      <p className="mt-3 text-[13px] leading-relaxed text-[var(--wm-text-3)]">{applyGender(t.normativeCaveat, gender)}</p>
 
       {/* narativ po dimenzích */}
       <section className="diag-print-break mt-8">
@@ -295,7 +298,7 @@ export function ReportView({
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <h3 className="text-[19px] font-bold tracking-tight">{content.name[lang]}</h3>
-                    <p className="mt-1 text-[13px] text-[var(--wm-text-2)]">{vt(content.tagline, variant, lang)}</p>
+                    <p className="mt-1 text-[13px] text-[var(--wm-text-2)]">{vt(content.tagline, variant, lang, gender)}</p>
                   </div>
                   <div className="shrink-0 text-right">
                     {d.reported ? (
@@ -311,7 +314,7 @@ export function ReportView({
                   </div>
                 </div>
                 {/*
-                  Bez dostatku odpovědí se pásmo ani jeho výklad nezobrazuje —
+                  Bez dostatku odpovědí se pásmo ani jeho výklad nezobrazuje –
                   text pásma je tvrzení o člověku a nesmí stát na dopočtu
                   z hrsti položek.
                 */}
@@ -330,12 +333,12 @@ export function ReportView({
                       />
                     </div>
                     <p className="mt-3 text-[14.5px] leading-relaxed text-[var(--wm-text)]">
-                      {vt(content.bands[d.band], variant, lang)}
+                      {vt(content.bands[d.band], variant, lang, gender)}
                     </p>
                   </>
                 ) : (
                   <p className="mt-3 rounded-xl bg-[var(--wm-surface-2)] p-3 text-[13px] leading-relaxed text-[var(--wm-text-2)]">
-                    {t.scaleCoverage(d.answered, d.total)} — {t.proratedNote}
+                    {t.scaleCoverage(d.answered, d.total)} – {t.proratedNote}
                   </p>
                 )}
 
@@ -368,7 +371,7 @@ export function ReportView({
                                 compact
                               />
                               <p className="mt-1.5 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
-                                {vt(fc.bands[f.band], variant, lang)}
+                                {vt(fc.bands[f.band], variant, lang, gender)}
                               </p>
                             </>
                           ) : (
@@ -411,7 +414,7 @@ export function ReportView({
                   <BandChip band={s.band} lang={lang} />
                 </div>
                 <p className="mt-2 text-[14px] leading-relaxed text-[var(--wm-text)]">
-                  {development ? vt(development, variant, lang) : fallbackBand ? vt(fallbackBand, variant, lang) : ""}
+                  {development ? vt(development, variant, lang, gender) : fallbackBand ? vt(fallbackBand, variant, lang, gender) : ""}
                 </p>
               </div>
             )

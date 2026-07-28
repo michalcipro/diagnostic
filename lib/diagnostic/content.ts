@@ -1,4 +1,4 @@
-import type { BandKey, DimensionId, Lang, Localized, Variant } from "./types"
+import type { BandKey, DimensionId, Gender, Lang, Localized, Variant } from "./types"
 import contentA from "./data/content/A.json"
 import contentB from "./data/content/B.json"
 import contentC from "./data/content/C.json"
@@ -47,8 +47,24 @@ export function getFacetContent(facetId: string): FacetContent | undefined {
   return CONTENT[dim]?.facets[facetId]
 }
 
-export function vt(text: VariantText, variant: Variant, lang: Lang): string {
-  return text[variant]?.[lang] ?? ""
+/**
+ * Rozvine rodové tvary zapsané jako `{mužský|ženský}`.
+ *
+ * Čeština rod oslovované osoby prozradí u příčestí minulých, krátkých tvarů
+ * a přídavných jmen v přísudku. Nechat ženu číst text v mužském rodě je hrubá
+ * chyba, proto se každé takové místo v obsahu označuje a tady se rozvíjí.
+ *
+ * Angličtina rod neřeší — značka se v anglických textech nevyskytuje, a kdyby
+ * se tam omylem dostala, rozvine se stejným způsobem a nerozbije větu.
+ */
+export function applyGender(text: string, gender: Gender): string {
+  if (!text.includes("{")) return text
+  const zensky = gender === "female"
+  return text.replace(/\{([^{}|]*)\|([^{}|]*)\}/g, (_, m: string, f: string) => (zensky ? f : m))
+}
+
+export function vt(text: VariantText, variant: Variant, lang: Lang, gender: Gender = "male"): string {
+  return applyGender(text[variant]?.[lang] ?? "", gender)
 }
 
 export const ALL_DIMENSION_CONTENT = CONTENT

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Winning Minds — brand a Apple HIG barevné tokeny (světlý / tmavý režim) */
+/* Winning Minds – brand a Apple HIG barevné tokeny (světlý / tmavý režim) */
 :root {
   --wm-bg: #f2f2f7;
   --wm-surface: #ffffff;
@@ -13,7 +13,7 @@
   --wm-border: #c6c6c8;
   --wm-border-light: #e5e5ea;
   --wm-brand: #1d1d1f;
-  /* Text na tlačítku v barvě značky — musí se převracet spolu s pozadím,
+  /* Text na tlačítku v barvě značky – musí se převracet spolu s pozadím,
      jinak je v tmavém režimu bílý text na světlém tlačítku. */
   --wm-brand-fg: #ffffff;
   /* Poloprůhledné pozadí lepivé horní lišty */
@@ -30,7 +30,7 @@
   --wm-gray: #8e8e93;
   --wm-fill-4: rgba(116, 116, 128, 0.08);
   --wm-tint-blue: rgba(0, 122, 255, 0.1);
-  /* Text stavových štítků (validita, upozornění) — v tmavém režimu se
+  /* Text stavových štítků (validita, upozornění) – v tmavém režimu se
      musí zesvětlit, jinak splyne s tmavým podkladem. */
   --wm-ok-fg: #248a3d;
   --wm-caution-fg: #c93400;

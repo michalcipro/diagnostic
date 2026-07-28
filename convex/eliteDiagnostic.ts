@@ -26,6 +26,8 @@ const personValidator = v.object({
   name: v.string(),
   birthDate: v.optional(v.string()),
   role: v.optional(v.string()),
+  /** rod pro české vyhodnocení; u starších záznamů chybí */
+  gender: v.optional(v.union(v.literal("male"), v.literal("female"))),
   fillDate: v.string(),
 })
 
@@ -247,6 +249,7 @@ export const submitWithInvite = mutation({
       variant,
       lang: inv.lang,
       birthYear: birthYearOnly(args.person.birthDate),
+      gender: args.person.gender,
       role: shortRole(args.person.role),
       answers: args.answers,
       answeredCount,

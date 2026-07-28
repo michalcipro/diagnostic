@@ -59,6 +59,8 @@ export default defineSchema({
     lang: v.string(),
     /** rok narození, nikdy celé datum */
     birthYear: v.optional(v.number()),
+    /** rod — do norem patří, identifikující není */
+    gender: v.optional(v.union(v.literal("male"), v.literal("female"))),
     /** povolání (business) nebo disciplína a úroveň (sport) */
     role: v.optional(v.string()),
     /** odpovědi — z nich se dopočítá reliabilita, faktorová struktura i normy */
@@ -81,6 +83,7 @@ export default defineSchema({
       name: v.string(),
       birthDate: v.optional(v.string()),
       role: v.optional(v.string()),
+      gender: v.optional(v.union(v.literal("male"), v.literal("female"))),
       fillDate: v.string(),
     }),
     answers: v.string(),

@@ -1,0 +1,49 @@
+# Pokyny pro práci na tomto projektu
+
+Platí pro všechny budoucí úkoly, testy i texty v této aplikaci.
+
+## Typografie
+
+**Nikdy nepoužívej dlouhou pomlčku** (em dash, U+2014). Ani ve vyhodnocení, ani
+v kódu, ani v dokumentaci, ani v odpovědích v chatu. Místo ní patří čárka,
+dvojtečka, středník, závorka, nebo se věta rozdělí. Krátká pomlčka U+2013
+(en dash) se mezerami je v pořádku a používá se i pro rozsahy („8–40").
+
+Kontrola: `grep -rn "—" --include="*.ts" --include="*.tsx" --include="*.json"`
+nesmí vrátit nic mimo `node_modules`.
+
+## Rod respondenta
+
+**České vyhodnocení musí být ve správném gramatickém rodě.** Když dotazník
+vyplňuje žena, všechny tvary jsou v ženském rodě; když muž, v mužském. Nikdy
+se nesmí stát, že žena dostane text v mužském rodě.
+
+V obsahových textech se rodové tvary zapisují značkou `{mužský|ženský}`,
+kterou při vykreslení rozvine `applyGender()` v `lib/diagnostic/content.ts`.
+Píše se celé slovo do obou větví: správně `jsi {schopen|schopna}`,
+špatně `jsi schopen{|a}`.
+
+Angličtina rod neřeší, tam se značka nepoužívá.
+
+U nového textu projdi všechna místa, kde se rod projeví: příčestí minulá
+(`{byl|byla}`, `{dokázal|dokázala}`), krátké tvary (`{schopen|schopna}`,
+`{sám|sama}`), přídavná jména v přísudku (`{unavený|unavená}`). Přítomný čas
+druhé osoby („víš", „děláš") je rodově neutrální a značku nepotřebuje.
+
+## Shrnutí na závěr
+
+Každé vyhodnocení musí končit **srozumitelným shrnutím pro klienta**. Ne výčet
+čísel, ale několik vět běžnou řečí: co z profilu plyne, na čem stavět a co
+řešit jako první. Píše se tak, aby tomu rozuměl člověk bez psychologického
+vzdělání.
+
+## Ověřování
+
+Před commitem musí projít:
+
+```bash
+npx tsc --noEmit
+npm run build
+```
+
+Na kontrolu textů slouží skripty popsané v README.

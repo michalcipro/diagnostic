@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-// Veřejná úvodní stránka. Záměrně nevypisuje žádné testy ani na ně neodkazuje —
+// Veřejná úvodní stránka. Záměrně nevypisuje žádné testy ani na ně neodkazuje –
 // dotazník se otevírá jen na pozvánku od kouče (/t/<token>). Přehled testů
 // a tvorba pozvánek jsou v chráněné sekci /kouc.
 export default function Home() {
@@ -12,7 +12,7 @@ export default function Home() {
       </h1>
       <p className="mt-3 max-w-md text-[16px] leading-relaxed text-[var(--wm-text-2)]">
         Komplexní psychodiagnostika mentálního výkonového profilu. Diagnostika probíhá na základě
-        pozvánky — odkaz na svůj dotazník dostaneš od svého kouče.
+        pozvánky – odkaz na svůj dotazník dostaneš od svého kouče.
       </p>
       <p className="mt-4 max-w-md border-t border-[var(--wm-border-light)] pt-4 text-[14px] leading-relaxed text-[var(--wm-text-3)]">
         Assessment is by invitation only. You will receive a personal link to your questionnaire

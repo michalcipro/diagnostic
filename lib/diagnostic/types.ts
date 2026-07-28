@@ -6,6 +6,12 @@ export type Variant = "sport" | "business"
 export type TestModel = "elite200" | "elite100"
 export type TestId = `${TestModel}-${Variant}`
 
+/**
+ * Rod respondenta. Řídí gramatické tvary v českém vyhodnocení — žena nesmí
+ * dostat text v mužském rodě. Angličtina rod neřeší.
+ */
+export type Gender = "male" | "female"
+
 export type Answer = 1 | 2 | 3 | 4 | 5
 /** Mapa odpovědí: číslo položky (1-based) → 1..5 */
 export type AnswerMap = Record<number, Answer>
@@ -203,6 +209,8 @@ export interface PersonInfo {
   birthDate?: string
   /** sport: disciplína a úroveň; business: role/oblast působení */
   role?: string
+  /** rod pro české vyhodnocení; u starších záznamů chybí */
+  gender?: Gender
   fillDate: string // ISO
 }
 

@@ -1,9 +1,9 @@
 import type { BandKey, Lang, TestId, Variant } from "./types"
 
-// UI texty diagnostiky — CZ/EN
+// UI texty diagnostiky – CZ/EN
 
 /**
- * Desetinné číslo se správným oddělovačem — česky čárka, anglicky tečka.
+ * Desetinné číslo se správným oddělovačem – česky čárka, anglicky tečka.
  * Nepoužíváme toLocaleString: chceme, aby report vypadal stejně na serveru
  * i v prohlížeči a nezáviselo to na nastavení systému.
  */
@@ -46,13 +46,13 @@ export const BAND_LABELS: Record<Lang, Record<BandKey, string>> = {
 
 export const BAND_DESCRIPTIONS: Record<Lang, Record<BandKey, string>> = {
   cs: {
-    priority: "Oblast systematicky limituje výkon — patří do rozvojového plánu jako první.",
+    priority: "Oblast systematicky limituje výkon – patří do rozvojového plánu jako první.",
     stabilization: "Dovednost existuje, ale pod tlakem není spolehlivá. Cílem je konzistence.",
     strong: "Funguje i pod tlakem. Udržuj a využívej jako opěrný bod profilu.",
     elite: "Konkurenční výhoda. Stavěj na ní identitu a strategii.",
   },
   en: {
-    priority: "This area systematically limits performance — it belongs first in the development plan.",
+    priority: "This area systematically limits performance – it belongs first in the development plan.",
     stabilization: "The skill exists but is not reliable under pressure. The goal is consistency.",
     strong: "Works even under pressure. Maintain it and use it as an anchor of your profile.",
     elite: "A competitive advantage. Build your identity and strategy on it.",
@@ -218,6 +218,11 @@ export interface UIStrings {
   invitesEmpty: string
   tabResults: string
   tabInvites: string
+  // rod respondenta (řídí gramatické tvary v českém vyhodnocení)
+  genderLabel: string
+  genderFemale: string
+  genderMale: string
+  genderHint: string
   // anonymní normativní vzorek
   tabNorms: string
   loading: string
@@ -257,9 +262,9 @@ export const UI: Record<Lang, UIStrings> = {
     howToTitle: "Jak odpovídat",
     howTo: [
       "U každého tvrzení zvol jedno číslo od 1 do 5 podle toho, jak přesně tě tvrzení vystihuje v posledních třech měsících.",
-      "Odpovídej podle toho, jaký skutečně jsi, ne podle toho, jaký bys chtěl být. Neexistují správné ani špatné odpovědi — dotazník obsahuje kontrolní mechanismy, které rozpoznají stylizaci i nepozorné čtení.",
+      "Odpovídej podle toho, {jaký|jaká} skutečně jsi, ne podle toho, {jaký|jaká} bys {chtěl|chtěla} být. Neexistují správné ani špatné odpovědi – dotazník obsahuje kontrolní mechanismy, které rozpoznají stylizaci i nepozorné čtení.",
       "Odpovídej svižně. První reakce bývá nejpřesnější, u žádné položky se nezdržuj déle než 20 sekund.",
-      "Některá tvrzení se mohou zdát podobná — to je záměr, odpovídej na každé samostatně.",
+      "Některá tvrzení se mohou zdát podobná – to je záměr, odpovídej na každé samostatně.",
       "Odpovědi se průběžně ukládají v tomto zařízení. Můžeš si dát pauzu a vrátit se později.",
       "Výsledky jsou důvěrné a slouží výhradně pro tvůj rozvoj v rámci spolupráce s Winning Minds.",
     ],
@@ -280,7 +285,7 @@ export const UI: Record<Lang, UIStrings> = {
     validityCautionNote:
       "Některé kontrolní ukazatele doporučují opatrnost při interpretaci. Projdi výsledky s koučem a ověř je na konkrétních situacích.",
     validityInvalidNote:
-      "Kontrola validity ukazuje, že administrace pravděpodobně není spolehlivá. Profil neinterpretuj jako diagnostiku — doporučujeme dotazník po čase zopakovat v klidnějším rozpoložení.",
+      "Kontrola validity ukazuje, že administrace pravděpodobně není spolehlivá. Profil neinterpretuj jako diagnostiku – doporučujeme dotazník po čase zopakovat v klidnějším rozpoložení.",
     validityAttention: "Kontrola pozornosti",
     validityInfrequency: "Index infrekvence",
     validityConsistency: "Index konzistence",
@@ -293,7 +298,7 @@ export const UI: Record<Lang, UIStrings> = {
     validityHardTitle: "Zda odpovědi měří to, co měly",
     validitySoftTitle: "Jak o sobě respondent vypovídá",
     validitySoftNote:
-      "Tyhle dva ukazatele vyhodnocení neruší — popisují, jakým způsobem člověk o sobě mluví. Ber je jako kontext k rozhovoru, ne jako chybu.",
+      "Tyhle dva ukazatele vyhodnocení neruší – popisují, jakým způsobem člověk o sobě mluví. Ber je jako kontext k rozhovoru, ne jako chybu.",
     validityUnavailable: "nelze určit",
     paceValue: (s, min) => `${fmtNum(s, "cs")} s/položku · celkem ${min} min`,
     scaleNotReported: "nevykazuje se",
@@ -301,15 +306,15 @@ export const UI: Record<Lang, UIStrings> = {
     proratedNote:
       "U škál s chybějícími odpověďmi je skóre dopočítané z průměru zodpovězených položek. Škály, kde chybí víc než čtvrtina odpovědí, se nevykazují vůbec.",
     normativeCaveat:
-      "Pořadí škál vychází z hrubých skóre, ne ze srovnání s populací — normy zatím nejsou k dispozici. Čti je jako „s těmito výroky souhlasil nejvíc“, ne jako „v tomhle je nadprůměrný“.",
+      "Pořadí škál vychází z hrubých skóre, ne ze srovnání s populací – normy zatím nejsou k dispozici. Čti je jako „s těmito výroky {souhlasil|souhlasila} nejvíc“, ne jako „v tomhle je {nadprůměrný|nadprůměrná}“.",
     strengthsTitle: "Opěrné body profilu",
     prioritiesTitle: "Rozvojové priority",
     developmentTitle: "Doporučení pro rozvoj (8–12 týdnů)",
     developmentIntro:
       "Rozvojový plán stavíme na nejslabších oblastech profilu. Než začneš, ověř si každou oblast na konkrétních situacích z posledních týdnů.",
     heterogeneityNote:
-      "Fazety této dimenze se výrazně liší — dimenzi nelze číst jako celek, pracuj s jednotlivými fazetami.",
-    imbalanceNote: "Rozdíl mezi nejsilnější a nejslabší dimenzí je výrazný — profil je nevyvážený.",
+      "Fazety této dimenze se výrazně liší – dimenzi nelze číst jako celek, pracuj s jednotlivými fazetami.",
+    imbalanceNote: "Rozdíl mezi nejsilnější a nejslabší dimenzí je výrazný – profil je nevyvážený.",
     dimensionsTitle: "Dimenze profilu",
     facetProfile: "Fazetový profil",
     score: "Skór",
@@ -333,7 +338,7 @@ export const UI: Record<Lang, UIStrings> = {
       "Zkopírovaný odkaz vede přímo na tento test ve zvoleném jazyce. Klient uvidí jen tento dotazník, žádnou nabídku dalších testů.",
     sentTitle: "Děkujeme, dotazník je odeslaný.",
     sentBody:
-      "Tvoje odpovědi jsme v pořádku přijali. Vyhodnocení zpracuje certifikovaný kouč Winning Minds a projde ho s tebou osobně — výsledky se záměrně nezobrazují automaticky, protože jejich smysl dává až společná interpretace. Tuhle stránku teď můžeš zavřít.",
+      "Tvoje odpovědi jsme v pořádku přijali. Vyhodnocení zpracuje certifikovaný kouč Winning Minds a projde ho s tebou osobně – výsledky se záměrně nezobrazují automaticky, protože jejich smysl dává až společná interpretace. Tuhle stránku teď můžeš zavřít.",
     sentSaveFailedTitle: "Odpovědi se nepodařilo odeslat",
     sentSaveFailedBody:
       "Zkontroluj připojení a zkus to prosím znovu. Aby se tvoje práce neztratila, ulož si prosím zálohu odpovědí tlačítkem níže a pošli soubor svému kouči.",
@@ -362,9 +367,9 @@ export const UI: Record<Lang, UIStrings> = {
     inviteTest: "Test",
     inviteLang: "Jazyk dotazníku",
     inviteClient: "Jméno klienta",
-    inviteClientPlaceholder: "nepovinné — předvyplní se klientovi",
+    inviteClientPlaceholder: "nepovinné – předvyplní se klientovi",
     inviteCreate: "Vytvořit odkaz",
-    inviteCreated: "Odkaz je připravený — pošli ho klientovi:",
+    inviteCreated: "Odkaz je připravený – pošli ho klientovi:",
     inviteCopy: "Kopírovat odkaz",
     inviteCopied: "Zkopírováno ✓",
     invitePending: "Čeká na vyplnění",
@@ -374,18 +379,22 @@ export const UI: Record<Lang, UIStrings> = {
     invitesEmpty: "Zatím žádné pozvánky.",
     tabResults: "Vyplněné diagnostiky",
     tabInvites: "Pozvánky",
+    genderLabel: "Oslovení",
+    genderFemale: "Žena",
+    genderMale: "Muž",
+    genderHint: "Podle toho se vyhodnocení napíše ve správném rodě.",
     tabNorms: "Normy",
     loading: "Načítám…",
     normsTitle: "Anonymní vzorek pro normy",
     normsIntro:
-      "Z každého vyplnění se ukládá anonymní kopie odpovědí. Až se jich nasbírá dost, půjde spočítat percentily a reliabilitu — teprve pak bude možné říct, jestli je někdo nadprůměrný, a ne jen s čím souhlasil nejvíc.",
+      "Z každého vyplnění se ukládá anonymní kopie odpovědí. Až se jich nasbírá dost, půjde spočítat percentily a reliabilitu – teprve pak bude možné říct, jestli je někdo nad průměrem, a ne jen s čím lidé souhlasili nejvíc.",
     normsCount: (c, cil) => `${c} z ${cil}`,
     normsPrivacy:
-      "Ve vzorku není jméno, celé datum narození ani odkaz na konkrétní vyplnění — jen odpovědi, rok narození, povolání či disciplína a měsíc pořízení. Zpět ke konkrétnímu člověku se z něj dostat nedá.",
+      "Ve vzorku není jméno, celé datum narození ani odkaz na konkrétní vyplnění – jen odpovědi, rok narození, povolání či disciplína a měsíc pořízení. Zpět ke konkrétnímu člověku se z něj dostat nedá.",
     normsExport: "Stáhnout data",
     normsExporting: "Připravuji…",
     dataNote:
-      "Z tvých odpovědí se ukládá anonymní kopie, která slouží k dalšímu rozvoji metody. Není v ní tvoje jméno ani datum narození — pouze rok narození a obor či disciplína, takže tě z ní nelze identifikovat.",
+      "Z tvých odpovědí se ukládá anonymní kopie, která slouží k dalšímu rozvoji metody. Není v ní tvoje jméno ani datum narození – pouze rok narození a obor či disciplína, takže tě z ní nelze identifikovat.",
   },
   en: {
     brand: "WINNING MINDS",
@@ -412,9 +421,9 @@ export const UI: Record<Lang, UIStrings> = {
     howToTitle: "How to answer",
     howTo: [
       "For each statement choose one number from 1 to 5 according to how accurately it describes you over the last three months.",
-      "Answer as you really are, not as you would like to be. There are no right or wrong answers — the questionnaire contains control mechanisms that detect idealised or careless responding.",
+      "Answer as you really are, not as you would like to be. There are no right or wrong answers – the questionnaire contains control mechanisms that detect idealised or careless responding.",
       "Answer briskly. Your first reaction is usually the most accurate; don't spend more than 20 seconds on any item.",
-      "Some statements may feel similar — that is intentional. Answer each one independently.",
+      "Some statements may feel similar – that is intentional. Answer each one independently.",
       "Your answers are saved automatically on this device. You can take a break and come back later.",
       "Results are confidential and serve exclusively your development within your work with Winning Minds.",
     ],
@@ -435,7 +444,7 @@ export const UI: Record<Lang, UIStrings> = {
     validityCautionNote:
       "Some control indicators recommend caution. Go through the results with your coach and verify them against concrete situations.",
     validityInvalidNote:
-      "Validity control shows the administration is probably not reliable. Do not interpret the profile as a diagnostic — we recommend repeating the questionnaire later in a calmer state.",
+      "Validity control shows the administration is probably not reliable. Do not interpret the profile as a diagnostic – we recommend repeating the questionnaire later in a calmer state.",
     validityAttention: "Attention check",
     validityInfrequency: "Infrequency index",
     validityConsistency: "Consistency index",
@@ -448,7 +457,7 @@ export const UI: Record<Lang, UIStrings> = {
     validityHardTitle: "Whether the answers measured what they should",
     validitySoftTitle: "How the respondent describes themselves",
     validitySoftNote:
-      "These two indicators do not invalidate the evaluation — they describe the way the person talks about themselves. Treat them as context for the conversation, not as an error.",
+      "These two indicators do not invalidate the evaluation – they describe the way the person talks about themselves. Treat them as context for the conversation, not as an error.",
     validityUnavailable: "cannot be determined",
     paceValue: (s, min) => `${fmtNum(s, "en")} s/item · ${min} min total`,
     scaleNotReported: "not reported",
@@ -456,15 +465,15 @@ export const UI: Record<Lang, UIStrings> = {
     proratedNote:
       "For scales with missing answers the score is estimated from the mean of the answered items. Scales missing more than a quarter of their answers are not reported at all.",
     normativeCaveat:
-      "The ranking of scales comes from raw scores, not from a comparison with a population — norms are not available yet. Read it as “agreed with these statements most”, not as “is above average in this”.",
+      "The ranking of scales comes from raw scores, not from a comparison with a population – norms are not available yet. Read it as “agreed with these statements most”, not as “is above average in this”.",
     strengthsTitle: "Anchors of the profile",
     prioritiesTitle: "Development priorities",
     developmentTitle: "Development recommendations (8–12 weeks)",
     developmentIntro:
       "The development plan is built on the weakest areas of the profile. Before you start, verify each area against concrete situations from recent weeks.",
     heterogeneityNote:
-      "The facets of this dimension differ substantially — do not read the dimension as a whole; work with the individual facets.",
-    imbalanceNote: "The gap between the strongest and weakest dimension is substantial — the profile is unbalanced.",
+      "The facets of this dimension differ substantially – do not read the dimension as a whole; work with the individual facets.",
+    imbalanceNote: "The gap between the strongest and weakest dimension is substantial – the profile is unbalanced.",
     dimensionsTitle: "Profile dimensions",
     facetProfile: "Facet profile",
     score: "Score",
@@ -485,10 +494,10 @@ export const UI: Record<Lang, UIStrings> = {
     copiedLink: "Copied ✓",
     shareTitle: "Link for the client",
     shareHint:
-      "The copied link leads straight to this test in the chosen language. The client sees only this questionnaire — no menu of other tests.",
-    sentTitle: "Thank you — your questionnaire has been submitted.",
+      "The copied link leads straight to this test in the chosen language. The client sees only this questionnaire – no menu of other tests.",
+    sentTitle: "Thank you – your questionnaire has been submitted.",
     sentBody:
-      "We have received your answers. A certified Winning Minds coach will process the evaluation and go through it with you in person — results are deliberately not shown automatically, because they only make sense with a proper interpretation. You can close this page now.",
+      "We have received your answers. A certified Winning Minds coach will process the evaluation and go through it with you in person – results are deliberately not shown automatically, because they only make sense with a proper interpretation. You can close this page now.",
     sentSaveFailedTitle: "Your answers could not be submitted",
     sentSaveFailedBody:
       "Please check your connection and try again. So your work isn't lost, save a backup of your answers with the button below and send the file to your coach.",
@@ -517,9 +526,9 @@ export const UI: Record<Lang, UIStrings> = {
     inviteTest: "Test",
     inviteLang: "Questionnaire language",
     inviteClient: "Client name",
-    inviteClientPlaceholder: "optional — pre-filled for the client",
+    inviteClientPlaceholder: "optional – pre-filled for the client",
     inviteCreate: "Create link",
-    inviteCreated: "The link is ready — send it to your client:",
+    inviteCreated: "The link is ready – send it to your client:",
     inviteCopy: "Copy link",
     inviteCopied: "Copied ✓",
     invitePending: "Awaiting completion",
@@ -529,17 +538,21 @@ export const UI: Record<Lang, UIStrings> = {
     invitesEmpty: "No invitations yet.",
     tabResults: "Completed diagnostics",
     tabInvites: "Invitations",
+    genderLabel: "Form of address",
+    genderFemale: "Woman",
+    genderMale: "Man",
+    genderHint: "Used to write the Czech evaluation in the correct grammatical gender.",
     tabNorms: "Norms",
     loading: "Loading…",
     normsTitle: "Anonymous sample for norms",
     normsIntro:
-      "An anonymous copy of the answers is stored for every completed questionnaire. Once enough have accumulated, percentiles and reliability can be computed — only then will it be possible to say that someone is above average, rather than only what they agreed with most.",
+      "An anonymous copy of the answers is stored for every completed questionnaire. Once enough have accumulated, percentiles and reliability can be computed – only then will it be possible to say that someone is above average, rather than only what they agreed with most.",
     normsCount: (c, cil) => `${c} of ${cil}`,
     normsPrivacy:
-      "The sample contains no name, no full date of birth and no link to a specific submission — only the answers, year of birth, occupation or discipline, and the month of collection. It cannot be traced back to an individual.",
+      "The sample contains no name, no full date of birth and no link to a specific submission – only the answers, year of birth, occupation or discipline, and the month of collection. It cannot be traced back to an individual.",
     normsExport: "Download data",
     normsExporting: "Preparing…",
     dataNote:
-      "An anonymous copy of your answers is stored and used to develop the method further. It contains neither your name nor your date of birth — only your year of birth and your field or discipline, so you cannot be identified from it.",
+      "An anonymous copy of your answers is stored and used to develop the method further. It contains neither your name nor your date of birth – only your year of birth and your field or discipline, so you cannot be identified from it.",
   },
 }

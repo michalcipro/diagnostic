@@ -15,7 +15,7 @@ const SESSION_KEY = "wm-diagnostic:session"
 // Jednorázové založení master účtu.
 //
 // Odkaz projde jen tehdy, když sedí zakládací token A zároveň zatím neexistuje
-// žádný kouč. Jakmile master vznikne, odkaz je nadobro mrtvý — druhý účet už
+// žádný kouč. Jakmile master vznikne, odkaz je nadobro mrtvý – druhý účet už
 // tudy založit nejde.
 export default function SetupPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = use(params)
@@ -172,7 +172,7 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
         </button>
 
         <p className="mt-4 text-[12px] leading-relaxed text-[var(--wm-text-3)]">
-          Heslo se ukládá pouze v zašifrované podobě, ze které ho nelze zpětně přečíst — ani
+          Heslo se ukládá pouze v zašifrované podobě, ze které ho nelze zpětně přečíst – ani
           správce databáze ho neuvidí. Ulož si ho proto na bezpečné místo.
         </p>
       </form>
@@ -182,7 +182,7 @@ export default function SetupPage({ params }: { params: Promise<{ token: string 
       </p>
       {/*
         Označení verze. Když se čísla liší, drží prohlížeč starou stránku nebo
-        ještě neproběhlo nasazení — pak nemá smysl řešit samotnou chybu.
+        ještě neproběhlo nasazení – pak nemá smysl řešit samotnou chybu.
       */}
       <p className="mt-1.5 text-center font-mono text-[11px] text-[var(--wm-text-3)]">
         aplikace v{VERZE_FRONTENDU} · server v{verzeBackendu}

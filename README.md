@@ -1,7 +1,7 @@
-# Performance Diagnostic ELITE™ — samostatná aplikace
+# Performance Diagnostic ELITE™ – samostatná aplikace
 
 Online administrace a automatické vyhodnocení mentální výkonové diagnostiky
-Winning Minds. Zcela nezávislá Next.js aplikace s vlastním Convex backendem —
+Winning Minds. Zcela nezávislá Next.js aplikace s vlastním Convex backendem –
 nesdílí kód ani data s koučovací platformou.
 
 - **4 testy:** ELITE 200 a ELITE 100, varianta **Sport** a **Business & Life**
@@ -32,24 +32,24 @@ convex/                  # backend: schema + eliteDiagnostic (submit, listForCoa
 | Role | Přístup |
 | --- | --- |
 | Respondent | vyplní dotazník na přímém odkazu, po odeslání vidí **pouze potvrzení** |
-| Kouč | `/kouc` — po přihlášení seznam vyplnění, kompletní vyhodnocení, tisk do PDF, tvorba pozvánek |
+| Kouč | `/kouc` – po přihlášení seznam vyplnění, kompletní vyhodnocení, tisk do PDF, tvorba pozvánek |
 | Master | navíc správa účtů koučů |
 
 Odpovědi ani vyhodnocení se z backendu nikdy nevrací bez platné přihlášené relace,
-která se ověřuje **serverově** v Convexu. Kontrola jen v prohlížeči by nestačila —
+která se ověřuje **serverově** v Convexu. Kontrola jen v prohlížeči by nestačila –
 data by šla stáhnout přímo přes veřejné API.
 
-## Kontrola validity — jak funguje a co ještě neumí
+## Kontrola validity – jak funguje a co ještě neumí
 
 Indexy jsou rozdělené na **tvrdé** a **měkké**. Tvrdé (pozornost, infrekvence,
 konzistence, tempo vyplňování) odpovídají na otázku, jestli odpovědi vůbec měří
-to, co měly — ty určují celkový verdikt. Měkké (upřímnost, odpověďový styl)
+to, co měly – ty určují celkový verdikt. Měkké (upřímnost, odpověďový styl)
 popisují, *jak* o sobě respondent vypovídá; samy o sobě vyhodnocení neruší
 a mohou verdikt zvednout nejvýš na „opatrně".
 
 Prahy jsou zkalibrované simulací, ne odhadem. Návrhový bod je šum na úrovni
 položky σ = 0,8 (korelace mezi dvěma položkami měřícími totéž ≈ 0,52), což je
-vůči skutečnosti konzervativní — párové položky jsou parafráze a korelují výš.
+vůči skutečnosti konzervativní – párové položky jsou parafráze a korelují výš.
 
 | Respondent | Nějaký příznak | Označen jako neplatný |
 | --- | --- | --- |
@@ -58,7 +58,7 @@ vůči skutečnosti konzervativní — párové položky jsou parafráze a korel
 | Z poloviny nedbalý | 82,3 % | 26,0 % |
 | Zcela náhodný | 100 % | 98,3 % |
 
-**Chybějící odpovědi.** Nezodpovězená položka se nepočítá jako nula — skóre se
+**Chybějící odpovědi.** Nezodpovězená položka se nepočítá jako nula – skóre se
 dopočte z průměru zodpovězených. Škála, kde chybí víc než čtvrtina odpovědí, se
 nevykazuje vůbec a nezobrazí se u ní ani pásmo, ani jeho výklad. Pár konzistence
 s chybějící odpovědí se do průměru nepočítá.
@@ -66,7 +66,7 @@ s chybějící odpovědí se do průměru nepočítá.
 ### Anonymní vzorek pro normy
 
 Z každého odeslaného dotazníku se ukládá anonymní kopie do samostatné tabulky
-`normSamples`. Slouží k výpočtu percentilů, reliability a faktorové struktury —
+`normSamples`. Slouží k výpočtu percentilů, reliability a faktorové struktury –
 tedy přesně k tomu, co instrumentu zatím chybí.
 
 | Ve vzorku je | Ve vzorku NENÍ |
@@ -78,7 +78,7 @@ tedy přesně k tomu, co instrumentu zatím chybí.
 
 Chybějící `resultId` a přesný čas jsou záměr, ne opomenutí: s kterýmkoli z nich
 by šel záznam spárovat zpět s konkrétním člověkem a anonymizace by byla jen
-naoko. Že záznam nemůže obsahovat nic navíc, hlídá typová kontrola — vkládaný
+naoko. Že záznam nemůže obsahovat nic navíc, hlídá typová kontrola – vkládaný
 objekt se kontroluje proti schématu tabulky, takže přidané pole neprojde buildem.
 
 Stav vzorku a jeho export najdeš v `/kouc` → záložka **Normy**. Respondent je
@@ -94,11 +94,11 @@ převést na hrubší kategorie.
 Tohle není výčet chyb, ale hranic, uvnitř kterých se výsledky smí vykládat:
 
 - **Žádné normy.** Pásma jsou absolutní hranice, ne percentily. Pořadí škál je
-  proto ipsativní — říká, se kterými výroky respondent souhlasil nejvíc, ne v čem
+  proto ipsativní – říká, se kterými výroky respondent souhlasil nejvíc, ne v čem
   je nadprůměrný. Report to u pořadí explicitně přiznává.
 - **Žádná doložená reliabilita** (α/ω) ani ověřená faktorová struktura. Model
   7 dimenzí × 3 fazety je teoretický předpoklad.
-- **Pásmo „priorita" je prakticky nedosažitelné** — i respondent odpovídající
+- **Pásmo „priorita" je prakticky nedosažitelné** – i respondent odpovídající
   vesměs neutrálně (průměr 3,0) do něj spadne v 1 % případů. Hranice pocházejí
   z původního klíče a záměrně se neměnily; překalibrovat je má smysl až na datech.
 - **Rovnocennost forem** (Sport vs. Business, CZ vs. EN) není doložená měřicí
@@ -117,7 +117,7 @@ npx convex login
 npx convex dev        # založí projekt, zapíše .env.local; pak Ctrl+C
 ```
 
-Žádné další proměnné nastavovat nemusíš — aplikace se rozjede rovnou.
+Žádné další proměnné nastavovat nemusíš – aplikace se rozjede rovnou.
 Nepovinně jde v dashboardu Convexu → **Settings → Environment Variables** přidat:
 
 | Proměnná | Význam |
@@ -126,12 +126,12 @@ Nepovinně jde v dashboardu Convexu → **Settings → Environment Variables** p
 
 ## Účty koučů
 
-Aplikace nemá sdílené heslo — každý kouč má vlastní účet.
+Aplikace nemá sdílené heslo – každý kouč má vlastní účet.
 
 **Master účet** se zakládá jednou přes odkaz `/setup/<token>`, kde token je
 konstanta `ZAKLADACI_TOKEN` v `convex/auth.ts`. Odkaz projde pouze tehdy, když
 sedí token **a zároveň zatím neexistuje žádný kouč**. Jakmile master vznikne,
-odkaz je nadobro mrtvý — druhý účet už tudy založit nejde.
+odkaz je nadobro mrtvý – druhý účet už tudy založit nejde.
 
 Že je token v repozitáři, nevadí: jeho jediná pravomoc je založit vůbec první
 účet, a ta zaniká v okamžiku, kdy účet vznikne. Kdo chce hodnotu držet mimo kód,
@@ -140,7 +140,7 @@ nastaví `SETUP_TOKEN` a použije ten.
 Další kouče může přidat **výhradně master** v přehledu → záložka **Kouči**.
 Master může jejich přístup kdykoli zablokovat a obnovit; sám sebe zablokovat nemůže.
 
-Hesla se ukládají hashovaná (PBKDF2-SHA256, 210 000 iterací, unikátní sůl) —
+Hesla se ukládají hashovaná (PBKDF2-SHA256, 210 000 iterací, unikátní sůl) –
 z databáze je nelze zpětně přečíst. Přihlášení vytvoří relaci s platností 30 dní;
 změna hesla všechny existující relace ukončí.
 
@@ -148,7 +148,7 @@ změna hesla všechny existující relace ukončí.
 zakládací odkaz znovu aktivuje a master účet založíš nanovo.
 
 Na Vercelu nastav proměnnou `CONVEX_DEPLOY_KEY` (produkční deploy key z Convexu)
-a build command na `npx convex deploy --cmd 'npm run build'` — ten při každém
+a build command na `npx convex deploy --cmd 'npm run build'` – ten při každém
 nasazení nahraje Convex funkce a sám doplní `NEXT_PUBLIC_CONVEX_URL`.
 
 ## Odkazy pro klienty
@@ -156,7 +156,7 @@ nasazení nahraje Convex funkce a sám doplní `NEXT_PUBLIC_CONVEX_URL`.
 Produkční doména: **elitediagnostic.cz**
 
 Klientovi se posílá přímý odkaz na jeden konkrétní test. Otevře se rovnou
-dotazník — bez nabídky ostatních diagnostik a bez cesty zpět do menu.
+dotazník – bez nabídky ostatních diagnostik a bez cesty zpět do menu.
 
 | Odkaz | Co klient dostane |
 | --- | --- |
@@ -178,7 +178,7 @@ npx convex dev      # 1. terminál: přihlásí, vytvoří dev projekt, zapíše
 npm run dev         # 2. terminál: http://localhost:3000
 ```
 
-## Nasazení na Vercel — přesný postup
+## Nasazení na Vercel – přesný postup
 
 Viz kroky níže / v odpovědi. Ve zkratce:
 

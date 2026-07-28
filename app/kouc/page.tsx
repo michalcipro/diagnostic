@@ -32,7 +32,7 @@ import {
 import { TEST_IDS } from "@/lib/diagnostic/structure"
 import type { Lang, TestId } from "@/lib/diagnostic/types"
 
-// Chráněná sekce pro kouče. Heslo se ověřuje na serveru (Convex) — v prohlížeči
+// Chráněná sekce pro kouče. Heslo se ověřuje na serveru (Convex) – v prohlížeči
 // se drží jen po dobu relace, aby se nemuselo psát u každého kliknutí.
 
 const SESSION_KEY = "wm-diagnostic:session"
@@ -91,7 +91,7 @@ export default function CoachPage() {
       setBooting(false)
       return
     }
-    // Relace může mezitím vypršet — ověř ji u serveru, ne jen v prohlížeči.
+    // Relace může mezitím vypršet – ověř ji u serveru, ne jen v prohlížeči.
     whoAmI(saved)
       .then((who) => {
         if (who) {
@@ -155,7 +155,7 @@ export default function CoachPage() {
     }
   }
 
-  /** Stáhne anonymní vzorek jako JSON — bez jmen a bez vazby na vyplnění. */
+  /** Stáhne anonymní vzorek jako JSON – bez jmen a bez vazby na vyplnění. */
   const exportNorms = async () => {
     setExporting(true)
     try {
@@ -570,7 +570,7 @@ export default function CoachPage() {
                 <article key={iv.id} className="diag-card diag-card-hover flex flex-wrap items-center gap-4 p-5">
                   <div className="min-w-[180px] flex-1">
                     <h3 className="text-[16px] font-semibold tracking-tight">
-                      {iv.clientName || "—"}
+                      {iv.clientName || "–"}
                     </h3>
                     <p className="mt-0.5 text-[13px] text-[var(--wm-text-2)]">
                       {TEST_NAMES[iv.testId][lang]} · {iv.lang.toUpperCase()}
@@ -625,7 +625,7 @@ export default function CoachPage() {
             return (
               <article key={r.id} className="diag-card diag-card-hover flex flex-wrap items-center gap-4 p-5">
                 <div className="min-w-[180px] flex-1">
-                  <h2 className="text-[17px] font-semibold tracking-tight">{r.personName || "—"}</h2>
+                  <h2 className="text-[17px] font-semibold tracking-tight">{r.personName || "–"}</h2>
                   <p className="mt-0.5 text-[13px] text-[var(--wm-text-2)]">
                     {TEST_NAMES[r.testId][lang]}
                     {r.personRole ? ` · ${r.personRole}` : ""}

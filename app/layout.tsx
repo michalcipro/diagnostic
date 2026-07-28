@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     default: "Performance Diagnostic ELITE™",
     template: "%s | Winning Minds",
   },
-  description: "Komplexní psychodiagnostika mentálního výkonového profilu — Winning Minds.",
+  description: "Komplexní psychodiagnostika mentálního výkonového profilu – Winning Minds.",
   robots: { index: false },
 }
 
