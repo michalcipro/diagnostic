@@ -297,12 +297,20 @@ export default function CoachPage() {
             <button
               type="button"
               onClick={() => window.print()}
-              className="diag-press inline-flex h-9 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
+              className="diag-press inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
             >
               {t.printButton}
             </button>
+            <button
+              type="button"
+              onClick={() => exportPdf(detail, detailLang)}
+              className="diag-press inline-flex h-9 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
+            >
+              {t.pdfButton}
+            </button>
           </div>
         </div>
+        <div id="diag-report">
         <ReportView
           testId={detail.testId}
           person={detail.person}
@@ -310,6 +318,7 @@ export default function CoachPage() {
           lang={detailLang}
           durationSec={detail.durationSec}
         />
+        </div>
       </div>
     )
   }
@@ -736,4 +745,45 @@ function NormsPanel({
       </div>
     </div>
   )
+}
+
+/**
+ * Otevře vyhodnocení jako samostatný dokument a rovnou nabídne uložení do PDF.
+ *
+ * Prohlížeč neumí vyrobit soubor PDF bez svého tiskového dialogu, takže tudy
+ * vede jediná cesta k opravdu vektorovému výstupu. Přínos oproti prostému
+ * tisku je konkrétní: dokument nemá nic z aplikace kolem a název souboru se
+ * předvyplní podle klienta a data, takže hotové PDF se dá rovnou poslat.
+ */
+function exportPdf(detail: ResultDetail, lang: Lang) {
+  const zprava = document.getElementById("diag-report")
+  if (!zprava) return
+
+  const nazev = [
+    TEST_NAMES[detail.testId][lang].replace(/[™·]/g, "").replace(/\s+/g, " ").trim(),
+    detail.person.name,
+    detail.person.fillDate,
+  ]
+    .filter(Boolean)
+    .join(" - ")
+
+  // Styly stránky se přenesou beze změny, ať dokument vypadá stejně.
+  const styly = [...document.querySelectorAll('link[rel="stylesheet"], style')]
+    .map((n) => n.outerHTML)
+    .join("\n")
+
+  const okno = window.open("", "_blank")
+  if (!okno) return
+  okno.document.write(
+    `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">` +
+      `<title>${nazev.replace(/[<>&]/g, "")}</title>${styly}` +
+      `<style>body{background:#fff;margin:0;padding:24px}</style>` +
+      `</head><body><div class="diag-container">${zprava.innerHTML}</div></body></html>`,
+  )
+  okno.document.close()
+  // Počkej, až se načtou styly, jinak by se tisklo neostylované.
+  okno.onload = () => {
+    okno.focus()
+    okno.print()
+  }
 }

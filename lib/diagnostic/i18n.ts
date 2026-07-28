@@ -163,6 +163,7 @@ export interface UIStrings {
   retestNote: string
   disclaimer: string
   printButton: string
+  pdfButton: string
   backToTest: string
   newTest: string
   personLabel: string
@@ -323,7 +324,8 @@ export const UI: Record<Lang, UIStrings> = {
       "Retest doporučujeme po 12–16 týdnech cílené práce. Prakticky významná změna je 4 a více bodů na fazetě a 8 a více bodů na dimenzi (ELITE 200), resp. 5 a více bodů na dimenzi (ELITE 100).",
     disclaimer:
       "Toto vyhodnocení je podkladem pro rozvojovou práci s certifikovaným koučem Winning Minds. Není klinickou ani zdravotnickou diagnózou.",
-    printButton: "Uložit jako PDF / tisk",
+    printButton: "Tisk",
+    pdfButton: "Exportovat PDF",
     backToTest: "Zpět na dotazník",
     newTest: "Nová diagnostika",
     personLabel: "Respondent",
@@ -482,7 +484,8 @@ export const UI: Record<Lang, UIStrings> = {
       "We recommend a retest after 12–16 weeks of focused work. A practically meaningful change is 4+ points on a facet and 8+ points on a dimension (ELITE 200), or 5+ points on a dimension (ELITE 100).",
     disclaimer:
       "This evaluation is a basis for development work with a certified Winning Minds coach. It is not a clinical or medical diagnosis.",
-    printButton: "Save as PDF / print",
+    printButton: "Print",
+    pdfButton: "Export PDF",
     backToTest: "Back to the questionnaire",
     newTest: "New diagnostic",
     personLabel: "Respondent",

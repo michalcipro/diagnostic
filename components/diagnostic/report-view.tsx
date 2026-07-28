@@ -6,6 +6,7 @@ import { applyGender, getDimensionContent, getFacetContent, vt } from "@/lib/dia
 import { BAND_DESCRIPTIONS, TEST_NAMES, UI, fmtNum } from "@/lib/diagnostic/i18n"
 import { evaluate } from "@/lib/diagnostic/scoring"
 import { getStructure, parseTestId } from "@/lib/diagnostic/structure"
+import { buildSummary, summaryHeading } from "@/lib/diagnostic/summary"
 import type {
   AnswerMap,
   DimensionScore,
@@ -100,6 +101,8 @@ export function ReportView({
   )
   const t = UI[lang]
   const v = result.validity
+  const summary = useMemo(() => buildSummary(result, lang), [result, lang])
+  const heading = summaryHeading(lang, gender)
 
   return (
     <>
@@ -419,6 +422,30 @@ export function ReportView({
               </div>
             )
           })}
+        </div>
+      </section>
+
+      {/*
+        Shrnutí pro klienta. Poslední a nejdůležitější část reportu: běžnou
+        řečí, bez čísel a odborných pojmů, aby jí klient rozuměl napoprvé.
+      */}
+      <section className="diag-card diag-print-break mt-8 border-2 border-[var(--wm-brand)] p-7">
+        <h2 className="text-[20px] font-bold tracking-tight">{heading.title}</h2>
+        <p className="mt-1 text-[13px] text-[var(--wm-text-3)]">{heading.intro}</p>
+        <div className="mt-4 flex flex-col gap-4 text-[15px] leading-relaxed text-[var(--wm-text)]">
+          <p>{applyGender(summary.overall, gender)}</p>
+          {summary.strengths && <p>{applyGender(summary.strengths, gender)}</p>}
+          {summary.priorities && <p>{applyGender(summary.priorities, gender)}</p>}
+          {summary.caveat && (
+            <p className="rounded-xl bg-[var(--wm-orange-light)] p-4 text-[14px] text-[var(--wm-caution-fg)]">
+              {applyGender(summary.caveat, gender)}
+            </p>
+          )}
+          {summary.nextStep && (
+            <p className="rounded-xl bg-[var(--wm-surface-2)] p-4 font-medium">
+              {applyGender(summary.nextStep, gender)}
+            </p>
+          )}
         </div>
       </section>
 
