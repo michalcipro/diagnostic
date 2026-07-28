@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useState } from "react"
 import { LangToggle } from "@/components/diagnostic/lang-toggle"
 import { ReportView } from "@/components/diagnostic/report-view"
+import { VzorceReport } from "@/components/vzorce/report"
 import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
-import { getStructure, parseTestId } from "@/lib/diagnostic/structure"
+import { jeVzorce } from "@/lib/diagnostic/structure"
+import { testMeta } from "@/lib/diagnostic/test-meta"
 import {
   addCoach,
   chybaText,
@@ -301,6 +303,7 @@ export default function CoachPage() {
             >
               {t.printButton}
             </button>
+            {!jeVzorce(detail.testId) && (
             <button
               type="button"
               onClick={() => void exportPdf(detail, detailLang)}
@@ -308,15 +311,24 @@ export default function CoachPage() {
             >
               {t.pdfButton}
             </button>
+            )}
           </div>
         </div>
-        <ReportView
-          testId={detail.testId}
-          person={detail.person}
-          answers={detail.answers}
-          lang={detailLang}
-          durationSec={detail.durationSec}
-        />
+        {jeVzorce(detail.testId) ? (
+          <VzorceReport
+            person={detail.person}
+            answers={detail.answers}
+            durationSec={detail.durationSec}
+          />
+        ) : (
+          <ReportView
+            testId={detail.testId}
+            person={detail.person}
+            answers={detail.answers}
+            lang={detailLang}
+            durationSec={detail.durationSec}
+          />
+        )}
       </div>
     )
   }
@@ -628,7 +640,7 @@ export default function CoachPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {rows.map((r) => {
-            const structure = getStructure(parseTestId(r.testId)!.model)
+            const pocetPolozek = testMeta(r.testId).pocetPolozek
             return (
               <article key={r.id} className="diag-card diag-card-hover flex flex-wrap items-center gap-4 p-5">
                 <div className="min-w-[180px] flex-1">
@@ -639,7 +651,7 @@ export default function CoachPage() {
                   </p>
                   <p className="mt-0.5 text-[12px] text-[var(--wm-text-3)]">
                     {t.colDate}: {r.fillDate}
-                    {!r.complete && ` · ${r.answeredCount}/${structure.itemCount}`}
+                    {!r.complete && ` · ${r.answeredCount}/${pocetPolozek}`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">

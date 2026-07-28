@@ -174,7 +174,21 @@ export const ELITE100: StructureDef = {
 
 // ---------- Registr testů ----------
 
-export const TEST_IDS: TestId[] = ["elite200-sport", "elite200-business", "elite100-sport", "elite100-business"]
+export const TEST_IDS: TestId[] = [
+  "elite200-sport",
+  "elite200-business",
+  "elite100-sport",
+  "elite100-business",
+  "vzorce",
+]
+
+/** Testy z rodiny ELITE, tedy ty, které mají dimenze, fazety a škálu 1-5. */
+export const ELITE_TEST_IDS = TEST_IDS.filter((t) => t !== "vzorce")
+
+/** Emocionálně-destruktivní vzorce se skórují jinde, v lib/vzorce. */
+export function jeVzorce(testId: string): boolean {
+  return testId === "vzorce"
+}
 
 export function parseTestId(testId: string): { model: TestModel; variant: Variant } | null {
   const m = testId.match(/^(elite200|elite100)-(sport|business)$/)

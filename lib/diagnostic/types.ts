@@ -4,7 +4,11 @@
 export type Lang = "cs" | "en"
 export type Variant = "sport" | "business"
 export type TestModel = "elite200" | "elite100"
-export type TestId = `${TestModel}-${Variant}`
+/**
+ * Emocionálně-destruktivní vzorce. Samostatný test s jinou škálou i logikou,
+ * proto stojí vedle rodiny ELITE, ne uvnitř ní.
+ */
+export type TestId = `${TestModel}-${Variant}` | "vzorce"
 
 /**
  * Rod respondenta. Řídí gramatické tvary v českém vyhodnocení — žena nesmí
@@ -12,8 +16,12 @@ export type TestId = `${TestModel}-${Variant}`
  */
 export type Gender = "male" | "female"
 
-export type Answer = 1 | 2 | 3 | 4 | 5
-/** Mapa odpovědí: číslo položky (1-based) → 1..5 */
+/**
+ * Odpověď na položku. ELITE používá škálu 1-5, emocionálně-destruktivní vzorce
+ * škálu 1-6. Rozsah konkrétního testu hlídá TEST_META a serverová validace.
+ */
+export type Answer = 1 | 2 | 3 | 4 | 5 | 6
+/** Mapa odpovědí: číslo položky (1-based) → hodnota na škále testu */
 export type AnswerMap = Record<number, Answer>
 
 export type BandKey = "priority" | "stabilization" | "strong" | "elite"

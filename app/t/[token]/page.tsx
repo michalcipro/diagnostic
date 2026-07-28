@@ -2,10 +2,11 @@
 
 import { use, useEffect, useMemo, useRef, useState } from "react"
 import { LangToggle } from "@/components/diagnostic/lang-toggle"
-import { SCALE_LABELS, TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
+import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
+import { testMeta } from "@/lib/diagnostic/test-meta"
 import { applyGender } from "@/lib/diagnostic/content"
 import { getItems, itemText } from "@/lib/diagnostic/items"
-import { getStructure, parseTestId } from "@/lib/diagnostic/structure"
+import { jeVzorce, parseTestId } from "@/lib/diagnostic/structure"
 import { loadSession, newSession, saveSession } from "@/lib/diagnostic/storage"
 import { fetchInvite, isRemoteEnabled, submitWithInvite, type Invite } from "@/lib/diagnostic/remote"
 import type { Answer, Lang, StoredSession, TestId } from "@/lib/diagnostic/types"
@@ -82,8 +83,10 @@ function Questionnaire({
   inviteLang: Lang
   clientName: string
 }) {
-  const { model, variant } = parseTestId(testId)!
-  const structure = useMemo(() => getStructure(model), [model])
+  // Vzorce nepatří do rodiny ELITE, takže nemají model ani variantu.
+  const parsed = parseTestId(testId)
+  const variant = parsed?.variant ?? "business"
+  const meta = useMemo(() => testMeta(testId), [testId])
   const items = useMemo(() => getItems(testId), [testId])
 
   const [session, setSession] = useState<StoredSession | null>(null)
@@ -114,8 +117,8 @@ function Questionnaire({
 
   const lang = session.lang
   const t = UI[lang]
-  const scale = SCALE_LABELS[lang]
-  const total = structure.itemCount
+  const scale = meta.popiskySkaly(lang)
+  const total = meta.pocetPolozek
   const answered = Object.keys(session.answers).length
   const blocks = Math.ceil(total / BLOCK_SIZE)
   const blockItems = items.slice(block * BLOCK_SIZE, (block + 1) * BLOCK_SIZE)
@@ -288,7 +291,7 @@ function Questionnaire({
             <section className="diag-card p-6">
               <h2 className="mb-4 text-[16px] font-semibold">{t.howToTitle}</h2>
               <ol className="flex flex-col gap-3">
-                {t.howTo.map((raw, i) => (
+                {(meta.instrukceProJazyk?.(lang) ?? t.howTo).map((raw, i) => (
                   <li key={i} className="flex gap-3 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
                     <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--wm-fill-4)] text-[11px] font-bold text-[var(--wm-text)]">
                       {i + 1}
@@ -297,8 +300,8 @@ function Questionnaire({
                   </li>
                 ))}
               </ol>
-              <div className="mt-5 grid grid-cols-1 gap-2 rounded-xl bg-[var(--wm-surface-2)] p-4 sm:grid-cols-5">
-                {([1, 2, 3, 4, 5] as Answer[]).map((v) => (
+              <div className={`mt-5 grid grid-cols-1 gap-2 rounded-xl bg-[var(--wm-surface-2)] p-4 ${meta.maxOdpoved === 6 ? "sm:grid-cols-3" : "sm:grid-cols-5"}`}>
+                {meta.hodnoty.map((v) => (
                   <div key={v} className="flex items-center gap-2 text-[12px] text-[var(--wm-text-2)] sm:flex-col sm:text-center">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--wm-border)] text-[12px] font-semibold text-[var(--wm-text)]">
                       {v}
@@ -351,7 +354,7 @@ function Questionnaire({
 
                     <div className="mt-5">
                       <div className="diag-scale-row" role="radiogroup" aria-label={itemText(item, lang)}>
-                        {([1, 2, 3, 4, 5] as Answer[]).map((v) => (
+                        {meta.hodnoty.map((v) => (
                           <button
                             key={v}
                             type="button"
@@ -369,7 +372,7 @@ function Questionnaire({
                       {/* Popisek se mění podle výběru – drží řádek symetrický
                           a zároveň dává okamžitou zpětnou vazbu. */}
                       <p className="diag-scale-caption" data-selected={value !== undefined}>
-                        {value !== undefined ? scale[value] : `1 · ${scale[1]}   –   5 · ${scale[5]}`}
+                        {value !== undefined ? scale[value] : `1 · ${scale[1]}   –   ${meta.maxOdpoved} · ${scale[meta.maxOdpoved]}`}
                       </p>
                     </div>
                   </div>

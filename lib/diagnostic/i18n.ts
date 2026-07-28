@@ -76,6 +76,33 @@ export const TEST_NAMES: Record<TestId, Record<Lang, string>> = {
     cs: "Performance Diagnostic ELITE 100™ · Business a Life",
     en: "Performance Diagnostic ELITE 100™ · Business & Life",
   },
+  vzorce: {
+    cs: "Emocionálně-destruktivní vzorce",
+    en: "Emotionally destructive patterns",
+  },
+}
+
+/**
+ * Popisky šestibodové škály emocionálně-destruktivních vzorců.
+ * Šestka nemá střed, takže nutí se k jedné straně přiklonit.
+ */
+export const SCALE_LABELS_6: Record<Lang, Record<1 | 2 | 3 | 4 | 5 | 6, string>> = {
+  cs: {
+    1: "V žádném případě to pro mě neplatí",
+    2: "Platí to pro mě jen výjimečně",
+    3: "Platí to pro mě částečně",
+    4: "Do jisté míry to pro mě platí",
+    5: "Z velké části je to můj problém",
+    6: "Je to přesně můj problém",
+  },
+  en: {
+    1: "Does not apply to me at all",
+    2: "Applies to me only rarely",
+    3: "Partly applies to me",
+    4: "Applies to me to some extent",
+    5: "This is largely my problem",
+    6: "This is exactly my problem",
+  },
 }
 
 export const VARIANT_LABELS: Record<Variant, Record<Lang, string>> = {

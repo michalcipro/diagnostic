@@ -20,7 +20,20 @@ const TEST_IDS = new Set([
   "elite200-business",
   "elite100-sport",
   "elite100-business",
+  "vzorce",
 ])
+
+/**
+ * Počet položek a rozsah škály podle testu.
+ *
+ * Emocionálně-destruktivní vzorce mají 110 položek a škálu 1-6, rodina ELITE
+ * 100 nebo 200 položek a škálu 1-5. Kontroluje se to tady na serveru, protože
+ * kontrola jen v prohlížeči by se dala obejít.
+ */
+function parametryTestu(testId: string): { pocet: number; maxHodnota: number } {
+  if (testId === "vzorce") return { pocet: 110, maxHodnota: 6 }
+  return { pocet: testId.startsWith("elite200") ? 200 : 100, maxHodnota: 5 }
+}
 
 const personValidator = v.object({
   name: v.string(),
@@ -197,7 +210,8 @@ export const submitWithInvite = mutation({
     if (!inv) throw new ConvexError("Neplatný odkaz.")
     if (inv.usedAt) throw new ConvexError("Tento odkaz už byl použit.")
 
-    const [model, variant] = inv.testId.split("-")
+    // Vzorce nemají variantu, proto se doplní zástupná hodnota.
+    const [model, variant] = inv.testId === "vzorce" ? ["vzorce", "vzorce"] : inv.testId.split("-")
 
     let parsed: Record<string, number>
     try {
@@ -205,12 +219,12 @@ export const submitWithInvite = mutation({
     } catch {
       throw new ConvexError("answers není validní JSON")
     }
-    const itemCount = model === "elite200" ? 200 : 100
+    const { pocet: itemCount, maxHodnota } = parametryTestu(inv.testId)
     let answeredCount = 0
     for (let i = 1; i <= itemCount; i++) {
       const value = parsed[String(i)]
       if (value !== undefined) {
-        if (typeof value !== "number" || value < 1 || value > 5) {
+        if (typeof value !== "number" || !Number.isInteger(value) || value < 1 || value > maxHodnota) {
           throw new ConvexError(`Neplatná odpověď u položky ${i}`)
         }
         answeredCount++
