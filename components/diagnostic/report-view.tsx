@@ -19,6 +19,31 @@ import type {
 // Kompletní vyhodnocení. Vykresluje se pouze v chráněné části pro kouče –
 // respondent tuhle komponentu nikdy nevidí.
 
+const MESICE_EN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+
+/** Datum v místním tvaru. Vstup je ISO, ať se dá řadit. */
+function datumLokalne(iso: string | undefined, lang: Lang): string {
+  if (!iso) return "–"
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso)
+  if (!m) return iso
+  if (lang === "en") return `${Number(m[3])} ${MESICE_EN[Number(m[2]) - 1]} ${m[1]}`
+  return `${Number(m[3])}. ${Number(m[2])}. ${m[1]}`
+}
+
+/** Popisek nad údajem v hlavičce. */
+function Udaj({ popis, hodnota }: { popis: string; hodnota: string }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--wm-text-3)]">
+        {popis}
+      </dt>
+      <dd className="mt-1 truncate text-[15px] font-semibold" title={hodnota}>
+        {hodnota}
+      </dd>
+    </div>
+  )
+}
+
 const STATUS_STYLE: Record<ValidityStatus, { color: string; bg: string }> = {
   ok: { color: "var(--wm-ok-fg, #248a3d)", bg: "var(--wm-green-light, #E8F9ED)" },
   caution: { color: "var(--wm-caution-fg, #c93400)", bg: "var(--wm-orange-light, #FFF5E6)" },
@@ -113,30 +138,17 @@ export function ReportView({
           {TEST_NAMES[testId][lang]} · {t.reportTitle}
         </h1>
         <p className="mt-1 text-[15px] text-[var(--wm-text-2)]">{t.reportSubtitle}</p>
-        <div className="mt-5 grid gap-x-8 gap-y-2 border-t border-[var(--wm-border-light)] pt-4 text-[14px] sm:grid-cols-2">
-          <div className="flex justify-between gap-4 sm:justify-start">
-            <span className="text-[var(--wm-text-3)]">{t.personLabel}</span>
-            <span className="font-semibold">{person.name || "–"}</span>
-          </div>
-          <div className="flex justify-between gap-4 sm:justify-start">
-            <span className="text-[var(--wm-text-3)]">{t.filledLabel}</span>
-            <span className="font-semibold">{person.fillDate}</span>
-          </div>
-          {person.role && (
-            <div className="flex justify-between gap-4 sm:justify-start">
-              <span className="text-[var(--wm-text-3)]">
-                {variant === "sport" ? t.roleLabelSport : t.roleLabelBusiness}
-              </span>
-              <span className="font-semibold">{person.role}</span>
-            </div>
-          )}
+        <dl className="mt-6 grid gap-x-8 gap-y-4 border-t border-[var(--wm-border-light)] pt-5 sm:grid-cols-2">
+          <Udaj popis={t.personLabel} hodnota={person.name || "–"} />
+          <Udaj
+            popis={variant === "sport" ? t.roleLabelSport : t.roleLabelBusiness}
+            hodnota={person.role || "–"}
+          />
+          <Udaj popis={t.filledLabel} hodnota={datumLokalne(person.fillDate, lang)} />
           {person.birthDate && (
-            <div className="flex justify-between gap-4 sm:justify-start">
-              <span className="text-[var(--wm-text-3)]">{t.birthLabel}</span>
-              <span className="font-semibold">{person.birthDate}</span>
-            </div>
+            <Udaj popis={t.birthLabel} hodnota={datumLokalne(person.birthDate, lang)} />
           )}
-        </div>
+        </dl>
       </header>
 
       {!result.complete && (

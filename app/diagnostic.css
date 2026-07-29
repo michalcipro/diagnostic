@@ -169,19 +169,23 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-/* pásma */
-.diag-band-priority { --band: #ff3b30; --band-bg: #fff1f0; }
-.diag-band-stabilization { --band: #ff9500; --band-bg: #fff5e6; }
-.diag-band-strong { --band: #007aff; --band-bg: #ebf5ff; }
-.diag-band-elite { --band: #30d158; --band-bg: #e8f9ed; }
+/* Pásma.
+   --band je sytá barva tečky ve štítku, --band-fg text štítku a --band-bg
+   jeho podklad. Text a tečka mají vlastní odstín schválně: syté #ff9500 nebo
+   #30d158 na světlém podkladu nedají čitelný text (kolem 2:1), zatímco tečka
+   vedle textu smí být sytá, protože význam nese slovo. */
+.diag-band-priority { --band: #ff3b30; --band-fg: #c00f2d; --band-bg: #fdecec; }
+.diag-band-stabilization { --band: #ff9500; --band-fg: #a75200; --band-bg: #fdf1e3; }
+.diag-band-strong { --band: #007aff; --band-fg: #0a5fbd; --band-bg: #e9f2fd; }
+.diag-band-elite { --band: #30d158; --band-fg: #1a7f37; --band-bg: #e6f5ea; }
 
 /* Tmavý režim: světlé podklady štítků nahradit poloprůhlednými, aby
-   nesvítily na tmavém pozadí. */
+   nesvítily na tmavém pozadí, a text zesvětlit. */
 @media (prefers-color-scheme: dark) {
-  .diag-band-priority { --band-bg: rgba(255, 59, 48, 0.16); }
-  .diag-band-stabilization { --band-bg: rgba(255, 149, 0, 0.16); }
-  .diag-band-strong { --band-bg: rgba(10, 132, 255, 0.18); }
-  .diag-band-elite { --band-bg: rgba(48, 209, 88, 0.16); }
+  .diag-band-priority { --band-fg: #ff8078; --band-bg: rgba(255, 59, 48, 0.16); }
+  .diag-band-stabilization { --band-fg: #ffb340; --band-bg: rgba(255, 149, 0, 0.16); }
+  .diag-band-strong { --band-fg: #64b0ff; --band-bg: rgba(10, 132, 255, 0.18); }
+  .diag-band-elite { --band-fg: #5be07f; --band-bg: rgba(48, 209, 88, 0.16); }
 }
 
 .diag-chip {
@@ -192,7 +196,7 @@
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--band);
+  color: var(--band-fg, var(--band));
   background: var(--band-bg);
   white-space: nowrap;
 }
@@ -204,16 +208,25 @@
   background: var(--band);
 }
 
+/* Dráha a výplň pruhu.
+   Výplň má jednu barvu pro všechna pásma. Pásmo nese štítek se slovem vedle
+   hodnoty: čtyři barevně kódovaná pásma by pro protanopii nesla nulovou
+   informaci, protože červená a oranžová jsou pro ni prakticky totožné.
+   Světlý přechod je svislý, takže dělá hloubku, ale nepředstírá, že se
+   hodnota podél pruhu mění. */
 .diag-bar-track {
-  height: 8px;
+  height: 10px;
   border-radius: 9999px;
-  background: var(--wm-fill-4, rgba(116, 116, 128, 0.08));
+  background: var(--wm-track, #e9e9ef);
   overflow: hidden;
 }
 .diag-bar-fill {
   height: 100%;
+  min-width: 10px;
   border-radius: 9999px;
-  background: var(--band);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 58%),
+    var(--wm-blue, #007aff);
   transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   /* Pruh naběhne zleva při zobrazení, ať profil „vyroste“ před očima. */
   transform-origin: left center;

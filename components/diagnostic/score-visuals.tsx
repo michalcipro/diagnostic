@@ -40,13 +40,31 @@ export function ScoreRow({
   lang: Lang
   compact?: boolean
 }) {
+  // Pruh patří k řádku nad sebou, proto je nad ním míň místa než pod ním.
+  // Když je mezera stejná, čte se pruh jako podtržení textu, který následuje.
   return (
-    <div className={compact ? "py-2" : "py-3"}>
-      <div className="mb-1.5 flex items-baseline justify-between gap-3">
-        <span className={compact ? "text-[13px] text-[var(--wm-text-2)]" : "text-[15px] font-medium"}>{label}</span>
-        <span className="flex items-center gap-2 whitespace-nowrap">
-          <span className={compact ? "text-[12px] text-[var(--wm-text-3)]" : "text-[13px] text-[var(--wm-text-2)]"}>
-            {raw} / {max}
+    <div className={compact ? "pb-4 pt-1" : "pb-6 pt-2"}>
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <span
+          className={
+            compact
+              ? "min-w-0 truncate text-[13.5px] text-[var(--wm-text-2)]"
+              : "min-w-0 truncate text-[15px] font-semibold"
+          }
+          title={label}
+        >
+          {label}
+        </span>
+        <span className="flex shrink-0 items-center gap-2.5 whitespace-nowrap">
+          <span
+            className={`tabular-nums ${
+              compact
+                ? "text-[13px] font-medium text-[var(--wm-text-2)]"
+                : "text-[14px] font-bold text-[var(--wm-text)]"
+            }`}
+          >
+            {raw}
+            <span className="font-normal text-[var(--wm-text-3)]">/{max}</span>
           </span>
           <BandChip band={band} lang={lang} />
         </span>

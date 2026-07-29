@@ -33,6 +33,7 @@ import {
 } from "@/lib/diagnostic/remote"
 import { TEST_IDS } from "@/lib/diagnostic/structure"
 import type { Lang, TestId } from "@/lib/diagnostic/types"
+import type { OdpovediMapa } from "@/lib/vzorce/types"
 
 // Chráněná sekce pro kouče. Heslo se ověřuje na serveru (Convex) – v prohlížeči
 // se drží jen po dobu relace, aby se nemuselo psát u každého kliknutí.
@@ -303,7 +304,6 @@ export default function CoachPage() {
             >
               {t.printButton}
             </button>
-            {!jeVzorce(detail.testId) && (
             <button
               type="button"
               onClick={() => void exportPdf(detail, detailLang)}
@@ -311,7 +311,6 @@ export default function CoachPage() {
             >
               {t.pdfButton}
             </button>
-            )}
           </div>
         </div>
         {jeVzorce(detail.testId) ? (
@@ -768,16 +767,32 @@ function NormsPanel({
  * Knihovna se načítá až při kliknutí, aby nezdržovala první zobrazení stránky.
  */
 async function exportPdf(detail: ResultDetail, lang: Lang): Promise<void> {
-  const { buildReportPdf, pdfFileName } = await import("@/lib/diagnostic/pdf/report-pdf")
-  const vstup = {
-    testId: detail.testId,
-    person: detail.person,
-    answers: detail.answers,
-    lang,
-    durationSec: detail.durationSec,
+  // Oba testy maji vlastni generator, ale stejnou sazbu.
+  let blob: Blob
+  let nazev: string
+  if (jeVzorce(detail.testId)) {
+    const { buildVzorcePdf, vzorcePdfFileName } = await import("@/lib/vzorce/pdf")
+    const vstup = {
+      person: detail.person,
+      // Škála vzorců má šest stupňů, ELITE pět; uložené odpovědi jsou v obou
+      // případech čísla, typ se liší jen rozsahem.
+      answers: detail.answers as unknown as OdpovediMapa,
+      durationSec: detail.durationSec,
+    }
+    blob = buildVzorcePdf(vstup)
+    nazev = vzorcePdfFileName(vstup)
+  } else {
+    const { buildReportPdf, pdfFileName } = await import("@/lib/diagnostic/pdf/report-pdf")
+    const vstup = {
+      testId: detail.testId,
+      person: detail.person,
+      answers: detail.answers,
+      lang,
+      durationSec: detail.durationSec,
+    }
+    blob = buildReportPdf(vstup)
+    nazev = pdfFileName(vstup)
   }
-  const blob = buildReportPdf(vstup)
-  const nazev = pdfFileName(vstup)
   const soubor = new File([blob], nazev, { type: "application/pdf" })
 
   // iPhone i iPad: systémové sdílení se souborem.
