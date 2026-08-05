@@ -59,6 +59,7 @@ const addCoachRef = makeFunctionReference<"action">("auth:addCoach")
 const setCoachActiveRef = makeFunctionReference<"mutation">("sessions:setCoachActive")
 const changePasswordRef = makeFunctionReference<"action">("auth:changePassword")
 const removeRef = makeFunctionReference<"mutation">("eliteDiagnostic:removeForCoach")
+const changeTestRef = makeFunctionReference<"mutation">("eliteDiagnostic:changeTestForCoach")
 const normStatsRef = makeFunctionReference<"query">("eliteDiagnostic:normStats")
 const normExportRef = makeFunctionReference<"query">("eliteDiagnostic:normExport")
 
@@ -328,6 +329,20 @@ export async function removeResult(sessionToken: string, id: string): Promise<vo
   const c = client()
   if (!c) throw new Error("not-configured")
   await c.mutation(removeRef, { sessionToken, id })
+}
+
+/**
+ * Přeřadí vyplnění pod jinou variantu téhož testu. Server pustí jen záměnu
+ * sport za business u stejného modelu; jiný počet položek odmítne.
+ */
+export async function changeResultTest(
+  sessionToken: string,
+  id: string,
+  testId: TestId,
+): Promise<void> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  await c.mutation(changeTestRef, { sessionToken, id, testId })
 }
 
 // ── Normativní vzorek ──────────────────────────────────────────────

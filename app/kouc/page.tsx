@@ -9,6 +9,7 @@ import { jeVzorce } from "@/lib/diagnostic/structure"
 import { testMeta } from "@/lib/diagnostic/test-meta"
 import {
   addCoach,
+  changeResultTest,
   chybaText,
   createInvite,
   listCoaches,
@@ -41,6 +42,20 @@ import type { OdpovediMapa } from "@/lib/vzorce/types"
 const SESSION_KEY = "wm-diagnostic:session"
 const LANG_KEY = "wm-diagnostic:lang"
 
+/**
+ * Druhá varianta téhož testu, tedy sport za business a naopak.
+ *
+ * Obě varianty jednoho modelu mají stejné položky ve stejném pořadí, liší se
+ * jen znění textů ve vyhodnocení. Proto jde vyplnění mezi nimi přeřadit, aniž
+ * by se odpovědi musely přepisovat. Modely s jiným počtem položek ani vzorce
+ * se tu záměrně nenabízejí.
+ */
+function druhaVarianta(testId: TestId): TestId | null {
+  const m = /^(elite200|elite100)-(sport|business)$/.exec(testId)
+  if (!m) return null
+  return `${m[1]}-${m[2] === "sport" ? "business" : "sport"}` as TestId
+}
+
 export default function CoachPage() {
   const [lang, setLang] = useState<Lang>("cs")
   const [session, setSession] = useState<string>("")
@@ -59,6 +74,7 @@ export default function CoachPage() {
   const [rows, setRows] = useState<ResultSummary[] | null>(null)
   const [detail, setDetail] = useState<ResultDetail | null>(null)
   const [detailLang, setDetailLang] = useState<Lang>("cs")
+  const [moving, setMoving] = useState(false)
 
   const [tab, setTab] = useState<"results" | "invites" | "coaches" | "norms">("results")
   const [norms, setNorms] = useState<NormStats | null>(null)
@@ -207,6 +223,35 @@ export default function CoachPage() {
     await load(session)
   }
 
+  /**
+   * Přeřadí otevřené vyplnění na druhou variantu téhož testu.
+   *
+   * Odpovědi zůstávají beze změny: obě varianty ELITE 200 mají stejné položky
+   * ve stejném pořadí, liší se jen znění textů ve vyhodnocení. Server navíc
+   * hlídá, aby nešlo přeřadit na test s jiným počtem položek.
+   */
+  const prehodTest = async (cil: TestId) => {
+    if (!detail) return
+    const zNazvu = TEST_NAMES[detail.testId][lang]
+    const naNazev = TEST_NAMES[cil][lang]
+    if (!window.confirm(`${t.moveConfirm(detail.person.name || "?", zNazvu, naNazev)}`)) return
+    setMoving(true)
+    setError(null)
+    try {
+      await changeResultTest(session, detail.id, cil)
+      const d = await getResult(session, detail.id)
+      if (d) {
+        setDetail(d)
+        setDetailLang(d.lang)
+      }
+      await load(session)
+    } catch (e) {
+      setError(chybaText(e, "Vyplnění se nepodařilo přeřadit."))
+    } finally {
+      setMoving(false)
+    }
+  }
+
   const inviteUrl = (token: string) => `${window.location.origin}/t/${token}`
 
   const submitInvite = async (e: React.FormEvent) => {
@@ -295,7 +340,18 @@ export default function CoachPage() {
           >
             ← {t.coachBack}
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {druhaVarianta(detail.testId) && (
+              <button
+                type="button"
+                disabled={moving}
+                onClick={() => void prehodTest(druhaVarianta(detail.testId)!)}
+                title={t.moveHint}
+                className="diag-press inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)] disabled:opacity-50"
+              >
+                {moving ? t.moveWorking : t.moveButton(TEST_NAMES[druhaVarianta(detail.testId)!][lang])}
+              </button>
+            )}
             <LangToggle lang={detailLang} onChange={setDetailLang} />
             <button
               type="button"

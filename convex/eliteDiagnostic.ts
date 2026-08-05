@@ -444,3 +444,48 @@ export const removeForCoach = mutation({
     return { ok: true }
   },
 })
+
+/**
+ * Přeřazení hotového vyplnění pod jinou variantu téhož testu.
+ *
+ * Na papíře se odpovídá na tvrzení, ne na název testu. Když se odpovědi
+ * přepíšou do špatné varianty, jsou samy o sobě v pořádku a stačí je přeřadit;
+ * přepisovat dvě stě položek znovu by byla zbytečná práce a další příležitost
+ * k překlepu.
+ *
+ * Měnit se smí VÝHRADNĚ varianta (sport / business) u stejného modelu. Modely
+ * se liší počtem položek i jejich významem, takže přesun mezi ELITE 200
+ * a ELITE 100 nebo na vzorce by z odpovědí udělal nesmysl, který by přitom
+ * vypadal jako platné vyhodnocení. Takový požadavek se proto odmítá.
+ */
+export const changeTestForCoach = mutation({
+  args: {
+    sessionToken: v.string(),
+    id: v.id("eliteDiagnosticResults"),
+    testId: v.string(),
+  },
+  returns: v.object({ ok: v.boolean(), testId: v.string() }),
+  handler: async (ctx, args) => {
+    await requireCoach(ctx, args.sessionToken)
+
+    const doc = await ctx.db.get(args.id)
+    if (!doc) throw new ConvexError("Vyplnění se nenašlo.")
+
+    const novy = /^(elite200|elite100)-(sport|business)$/.exec(args.testId)
+    const stary = /^(elite200|elite100)-(sport|business)$/.exec(doc.testId)
+    if (!novy || !stary) {
+      throw new ConvexError(
+        "Přeřadit lze jen mezi variantami ELITE. Vzorce mají jiný počet položek i jinou škálu.",
+      )
+    }
+    if (novy[1] !== stary[1]) {
+      throw new ConvexError(
+        `Nelze přeřadit z ${stary[1]} na ${novy[1]}: testy mají jiný počet položek, odpovědi by neseděly.`,
+      )
+    }
+    if (args.testId === doc.testId) return { ok: true, testId: doc.testId }
+
+    await ctx.db.patch(args.id, { testId: args.testId, variant: novy[2] })
+    return { ok: true, testId: args.testId }
+  },
+})
