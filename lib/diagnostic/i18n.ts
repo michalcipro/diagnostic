@@ -193,10 +193,6 @@ export interface UIStrings {
   pdfButton: string
   backToTest: string
   newTest: string
-  moveButton: (naNazev: string) => string
-  moveWorking: string
-  moveHint: string
-  moveConfirm: (jmeno: string, zNazvu: string, naNazev: string) => string
   personLabel: string
   filledLabel: string
   incompleteWarning: (a: number, t: number) => string
@@ -359,12 +355,6 @@ export const UI: Record<Lang, UIStrings> = {
     pdfButton: "Exportovat PDF",
     backToTest: "Zpět na dotazník",
     newTest: "Nová diagnostika",
-    moveButton: (naNazev) => `Přeřadit na ${naNazev}`,
-    moveWorking: "Přeřazuji…",
-    moveHint:
-      "Obě varianty mají stejné položky ve stejném pořadí, mění se jen znění vyhodnocení. Odpovědi zůstávají beze změny.",
-    moveConfirm: (jmeno, zNazvu, naNazev) =>
-      `Přeřadit vyplnění klienta ${jmeno} z „${zNazvu}“ na „${naNazev}“?\n\nOdpovědi se nemění, přepočítá se jen vyhodnocení.`,
     personLabel: "Respondent",
     filledLabel: "Datum vyplnění",
     incompleteWarning: (a, t) => `Dotazník není kompletní (${a} z ${t}). Vyhodnocení je pouze orientační.`,
@@ -525,12 +515,6 @@ export const UI: Record<Lang, UIStrings> = {
     pdfButton: "Export PDF",
     backToTest: "Back to the questionnaire",
     newTest: "New diagnostic",
-    moveButton: (naNazev) => `Move to ${naNazev}`,
-    moveWorking: "Moving…",
-    moveHint:
-      "Both variants share the same items in the same order; only the wording of the evaluation differs. The answers stay untouched.",
-    moveConfirm: (jmeno, zNazvu, naNazev) =>
-      `Move the response set of ${jmeno} from "${zNazvu}" to "${naNazev}"?\n\nThe answers do not change, only the evaluation is recalculated.`,
     personLabel: "Respondent",
     filledLabel: "Completed on",
     incompleteWarning: (a, t) => `The questionnaire is incomplete (${a} of ${t}). The evaluation is indicative only.`,
