@@ -9,7 +9,8 @@ import type { BandKey, Lang, TestId, Variant } from "./types"
  */
 export function fmtNum(value: number, lang: Lang, decimals = 1): string {
   const s = value.toFixed(decimals)
-  return lang === "cs" ? s.replace(".", ",") : s
+  // Čeština i slovenština píšou desetinnou čárku, angličtina tečku.
+  return lang === "en" ? s : s.replace(".", ",")
 }
 
 export const SCALE_LABELS: Record<Lang, Record<1 | 2 | 3 | 4 | 5, string>> = {
@@ -27,6 +28,13 @@ export const SCALE_LABELS: Record<Lang, Record<1 | 2 | 3 | 4 | 5, string>> = {
     4: "Somewhat agree",
     5: "Strongly agree",
   },
+  sk: {
+    1: "Rozhodne nesúhlasím",
+    2: "Skôr nesúhlasím",
+    3: "Ani súhlas, ani nesúhlas",
+    4: "Skôr súhlasím",
+    5: "Rozhodne súhlasím",
+  },
 }
 
 export const BAND_LABELS: Record<Lang, Record<BandKey, string>> = {
@@ -41,6 +49,12 @@ export const BAND_LABELS: Record<Lang, Record<BandKey, string>> = {
     stabilization: "Stabilisation",
     strong: "Strong area",
     elite: "Elite level",
+  },
+  sk: {
+    priority: "Rozvojová priorita",
+    stabilization: "Stabilizácia",
+    strong: "Silná oblasť",
+    elite: "Elitná úroveň",
   },
 }
 
@@ -57,28 +71,39 @@ export const BAND_DESCRIPTIONS: Record<Lang, Record<BandKey, string>> = {
     strong: "Works even under pressure. Maintain it and use it as an anchor of your profile.",
     elite: "A competitive advantage. Build your identity and strategy on it.",
   },
+  sk: {
+    priority: "Oblasť systematicky limituje výkon – patrí do rozvojového plánu ako prvá.",
+    stabilization: "Zručnosť existuje, ale pod tlakom nie je spoľahlivá. Cieľom je konzistencia.",
+    strong: "Funguje aj pod tlakom. Udržuj ju a využívaj ako oporný bod profilu.",
+    elite: "Konkurenčná výhoda. Stavaj na nej identitu a stratégiu.",
+  },
 }
 
 export const TEST_NAMES: Record<TestId, Record<Lang, string>> = {
   "elite200-sport": {
     cs: "Performance Diagnostic ELITE 200™",
     en: "Performance Diagnostic ELITE 200™",
+    sk: "Performance Diagnostic ELITE 200™",
   },
   "elite200-business": {
     cs: "Performance Diagnostic ELITE 200™ · Business a Life",
     en: "Performance Diagnostic ELITE 200™ · Business & Life",
+    sk: "Performance Diagnostic ELITE 200™ · Business a Life",
   },
   "elite100-sport": {
     cs: "Performance Diagnostic ELITE 100™",
     en: "Performance Diagnostic ELITE 100™",
+    sk: "Performance Diagnostic ELITE 100™",
   },
   "elite100-business": {
     cs: "Performance Diagnostic ELITE 100™ · Business a Life",
     en: "Performance Diagnostic ELITE 100™ · Business & Life",
+    sk: "Performance Diagnostic ELITE 100™ · Business a Life",
   },
   vzorce: {
     cs: "Emocionálně-destruktivní vzorce",
     en: "Emotionally destructive patterns",
+    sk: "Emocionálne-deštruktívne vzorce",
   },
 }
 
@@ -103,11 +128,19 @@ export const SCALE_LABELS_6: Record<Lang, Record<1 | 2 | 3 | 4 | 5 | 6, string>>
     5: "This is largely my problem",
     6: "This is exactly my problem",
   },
+  sk: {
+    1: "V žiadnom prípade to pre mňa neplatí",
+    2: "Platí to pre mňa len výnimočne",
+    3: "Platí to pre mňa čiastočne",
+    4: "Do istej miery to pre mňa platí",
+    5: "Z veľkej časti je to môj problém",
+    6: "Je to presne môj problém",
+  },
 }
 
 export const VARIANT_LABELS: Record<Variant, Record<Lang, string>> = {
-  sport: { cs: "Sport", en: "Sport" },
-  business: { cs: "Business a Life", en: "Business & Life" },
+  sport: { cs: "Sport", en: "Sport", sk: "Šport" },
+  business: { cs: "Business a Life", en: "Business & Life", sk: "Business a Life" },
 }
 
 export interface UIStrings {
@@ -584,5 +617,165 @@ export const UI: Record<Lang, UIStrings> = {
     normsExporting: "Preparing…",
     dataNote:
       "An anonymous copy of your answers is stored and used to develop the method further. It contains neither your name nor your date of birth – only your year of birth and your field or discipline, so you cannot be identified from it.",
+  },
+  sk: {
+    brand: "WINNING MINDS",
+    confidential: "Winning Minds s.r.o. · Praha 6 · winningminds.cz · Dôverný dokument",
+    chooseTitle: "Performance Diagnostic ELITE™",
+    chooseSubtitle: "Komplexná psychodiagnostika mentálneho výkonového profilu.",
+    itemsCount: (n) => `${n} ${n === 1 ? "položka" : n <= 4 ? "položky" : "položiek"}`,
+    duration200: "45–60 minút",
+    duration100: "20–30 minút",
+    facets200: "7 dimenzií · 21 faziet · štvorvrstvová kontrola validity",
+    dims100: "7 dimenzií · kontrola validity odpovedí",
+    start: "Spustiť diagnostiku",
+    continueTest: "Pokračovať vo vypĺňaní",
+    language: "Jazyk",
+    identityTitle: "Identifikačné údaje",
+    nameLabel: "Meno a priezvisko",
+    namePlaceholder: "Ján Novák",
+    birthLabel: "Dátum narodenia",
+    roleLabelSport: "Športová disciplína a úroveň",
+    roleLabelBusiness: "Rola / oblasť pôsobenia",
+    rolePlaceholderSport: "napr. tenis, extraliga juniorov",
+    rolePlaceholderBusiness: "napr. konateľ, technologická firma",
+    dateLabel: "Dátum vyplnenia",
+    howToTitle: "Ako odpovedať",
+    howTo: [
+      "Pri každom tvrdení zvoľ jedno číslo od 1 do 5 podľa toho, ako presne ťa tvrdenie vystihuje za posledné tri mesiace.",
+      "Odpovedaj podľa toho, {aký|aká} naozaj si, nie podľa toho, {aký|aká} by si {chcel|chcela} byť. Neexistujú správne ani nesprávne odpovede – dotazník obsahuje kontrolné mechanizmy, ktoré rozpoznajú štylizáciu aj nepozorné čítanie.",
+      "Odpovedaj svižne. Prvá reakcia býva najpresnejšia, pri žiadnej položke sa nezdržuj dlhšie ako 20 sekúnd.",
+      "Niektoré tvrdenia sa môžu zdať podobné – je to zámer, odpovedaj na každé samostatne.",
+      "Odpovede sa priebežne ukladajú v tomto zariadení. Môžeš si dať pauzu a vrátiť sa neskôr.",
+      "Výsledky sú dôverné a slúžia výhradne pre tvoj rozvoj v rámci spolupráce s Winning Minds.",
+    ],
+    beginButton: "Začať vypĺňať",
+    progressAnswered: (a, t) => `Zodpovedané ${a} z ${t}`,
+    blockLabel: (from, to) => `Položky ${from}–${to}`,
+    next: "Pokračovať",
+    back: "Späť",
+    finish: "Dokončiť a vyhodnotiť",
+    missingAnswers: (n) => `Zostáva zodpovedať ${n} ${n === 1 ? "položku" : n <= 4 ? "položky" : "položiek"}.`,
+    jumpToFirstMissing: "Prejsť na prvú nezodpovedanú",
+    autosaveNote: "Odpovede sa ukladajú automaticky.",
+    reportTitle: "Vyhodnotenie",
+    reportSubtitle: "Individuálny mentálny výkonový profil",
+    profileOverview: "Profil v prehľade",
+    validityTitle: "Kontrola validity odpovedí",
+    validityOkNote: "Všetky kontrolné mechanizmy prebehli v poriadku. Profil možno interpretovať štandardne.",
+    validityCautionNote:
+      "Niektoré kontrolné ukazovatele odporúčajú opatrnosť pri interpretácii. Prejdi výsledky s koučom a over ich na konkrétnych situáciách.",
+    validityInvalidNote:
+      "Kontrola validity ukazuje, že administrácia pravdepodobne nie je spoľahlivá. Profil neinterpretuj ako diagnostiku – odporúčame dotazník po čase zopakovať v pokojnejšom rozpoložení.",
+    validityAttention: "Kontrola pozornosti",
+    validityInfrequency: "Index infrekvencie",
+    validityConsistency: "Index konzistencie",
+    validityHonesty: "Index úprimnosti",
+    validityStyle: "Odpoveďový štýl",
+    validityPace: "Tempo vypĺňania",
+    validityStatusOk: "v poriadku",
+    validityStatusCaution: "opatrne",
+    validityStatusInvalid: "neplatné",
+    validityHardTitle: "Či odpovede merajú to, čo mali",
+    validitySoftTitle: "Ako o sebe respondent vypovedá",
+    validitySoftNote:
+      "Tieto dva ukazovatele vyhodnotenie nerušia – opisujú, akým spôsobom človek o sebe hovorí. Ber ich ako kontext k rozhovoru, nie ako chybu.",
+    validityUnavailable: "nedá sa určiť",
+    paceValue: (s, min) => `${fmtNum(s, "sk")} s/položku · celkom ${min} min`,
+    scaleNotReported: "nevykazuje sa",
+    scaleCoverage: (a, t) => `${a} z ${t} položiek`,
+    proratedNote:
+      "Pri škálach s chýbajúcimi odpoveďami je skóre dopočítané z priemeru zodpovedaných položiek. Škály, kde chýba viac než štvrtina odpovedí, sa nevykazujú vôbec.",
+    normativeCaveat:
+      "Poradie škál vychádza z hrubých skóre, nie z porovnania s populáciou – normy zatiaľ nie sú k dispozícii. Čítaj ich ako „s týmito výrokmi {súhlasil|súhlasila} najviac“, nie ako „v tomto je {nadpriemerný|nadpriemerná}“.",
+    strengthsTitle: "Oporné body profilu",
+    prioritiesTitle: "Rozvojové priority",
+    developmentTitle: "Odporúčania pre rozvoj (8–12 týždňov)",
+    developmentIntro:
+      "Rozvojový plán staviame na najslabších oblastiach profilu. Než začneš, over si každú oblasť na konkrétnych situáciách z posledných týždňov.",
+    heterogeneityNote:
+      "Fazety tejto dimenzie sa výrazne líšia – dimenziu nemožno čítať ako celok, pracuj s jednotlivými fazetami.",
+    imbalanceNote: "Rozdiel medzi najsilnejšou a najslabšou dimenziou je výrazný – profil je nevyvážený.",
+    dimensionsTitle: "Dimenzie profilu",
+    facetProfile: "Fazetový profil",
+    score: "Skóre",
+    band: "Pásmo",
+    retestNote:
+      "Retest odporúčame po 12–16 týždňoch cielenej práce. Prakticky významná zmena je 4 a viac bodov na fazete a 8 a viac bodov na dimenzii (ELITE 200), respektíve 5 a viac bodov na dimenzii (ELITE 100).",
+    disclaimer:
+      "Toto vyhodnotenie je podkladom pre rozvojovú prácu s certifikovaným koučom Winning Minds. Nie je klinickou ani zdravotníckou diagnózou.",
+    printButton: "Tlač",
+    pdfButton: "Exportovať PDF",
+    backToTest: "Späť na dotazník",
+    newTest: "Nová diagnostika",
+    personLabel: "Respondent",
+    filledLabel: "Dátum vyplnenia",
+    incompleteWarning: (a, t) => `Dotazník nie je kompletný (${a} z ${t}). Vyhodnotenie je iba orientačné.`,
+    notFound: "Vyhodnotenie sa nenašlo. Najprv vyplň dotazník.",
+    goHome: "Na úvodnú stránku",
+    copyLink: "Kopírovať odkaz",
+    copiedLink: "Skopírované ✓",
+    shareTitle: "Odkaz pre klienta",
+    shareHint:
+      "Skopírovaný odkaz vedie priamo na tento test vo zvolenom jazyku. Klient uvidí len tento dotazník, žiadnu ponuku ďalších testov.",
+    sentTitle: "Ďakujeme, dotazník je odoslaný.",
+    sentBody:
+      "Tvoje odpovede sme v poriadku prijali. Vyhodnotenie spracuje certifikovaný kouč Winning Minds a prejde ho s tebou osobne – výsledky sa zámerne nezobrazujú automaticky, pretože ich zmysel dáva až spoločná interpretácia. Túto stránku teraz môžeš zavrieť.",
+    sentSaveFailedTitle: "Odpovede sa nepodarilo odoslať",
+    sentSaveFailedBody:
+      "Skontroluj pripojenie a skús to prosím znova. Aby sa tvoja práca nestratila, ulož si prosím zálohu odpovedí tlačidlom nižšie a pošli súbor svojmu koučovi.",
+    downloadBackup: "Stiahnuť zálohu odpovedí",
+    coachTitle: "Prehľad diagnostík",
+    coachSubtitle: "Chránená sekcia pre certifikovaného kouča.",
+    coachPassword: "Heslo",
+    coachEnter: "Prihlásiť sa",
+    coachWrongPassword: "Nesprávne heslo.",
+    coachNotConfigured:
+      "Ukladanie výsledkov zatiaľ nie je nastavené. Doplň premennú NEXT_PUBLIC_CONVEX_URL a heslo COACH_PASSWORD.",
+    coachLoading: "Načítavam…",
+    coachEmpty: "Zatiaľ nikto dotazník nevyplnil.",
+    coachCount: (n) => `${n} ${n === 1 ? "vyplnenie" : n <= 4 ? "vyplnenia" : "vyplnení"}`,
+    coachOpen: "Otvoriť vyhodnotenie",
+    coachBack: "Späť na prehľad",
+    coachLogout: "Odhlásiť",
+    coachDelete: "Zmazať",
+    coachDeleteConfirm: "Naozaj zmazať toto vyplnenie? Nedá sa vziať späť.",
+    colName: "Meno",
+    colTest: "Test",
+    colDate: "Vyplnené",
+    colValidity: "Validita",
+    invitesTitle: "Pozvánky",
+    newInvite: "Nová pozvánka",
+    inviteTest: "Test",
+    inviteLang: "Jazyk dotazníka",
+    inviteClient: "Meno klienta",
+    inviteClientPlaceholder: "nepovinné – predvyplní sa klientovi",
+    inviteCreate: "Vytvoriť odkaz",
+    inviteCreated: "Odkaz je pripravený – pošli ho klientovi:",
+    inviteCopy: "Kopírovať odkaz",
+    inviteCopied: "Skopírované ✓",
+    invitePending: "Čaká na vyplnenie",
+    inviteUsed: "Vyplnené",
+    inviteRevoke: "Zrušiť",
+    inviteRevokeConfirm: "Naozaj zrušiť túto pozvánku? Odkaz prestane fungovať.",
+    invitesEmpty: "Zatiaľ žiadne pozvánky.",
+    tabResults: "Vyplnené diagnostiky",
+    tabInvites: "Pozvánky",
+    genderLabel: "Oslovenie",
+    genderFemale: "Žena",
+    genderMale: "Muž",
+    genderHint: "Podľa toho sa vyhodnotenie napíše v správnom rode.",
+    tabNorms: "Normy",
+    loading: "Načítavam…",
+    normsTitle: "Anonymná vzorka pre normy",
+    normsIntro:
+      "Z každého vyplnenia sa ukladá anonymná kópia odpovedí. Keď sa ich nazbiera dosť, pôjde spočítať percentily a reliabilitu – až potom bude možné povedať, či je niekto nad priemerom, a nie len s čím ľudia súhlasili najviac.",
+    normsCount: (c, cil) => `${c} z ${cil}`,
+    normsPrivacy:
+      "Vo vzorke nie je meno, celý dátum narodenia ani odkaz na konkrétne vyplnenie – len odpovede, rok narodenia, povolanie či disciplína a mesiac zberu. Späť ku konkrétnemu človeku sa z nej dostať nedá.",
+    normsExport: "Stiahnuť dáta",
+    normsExporting: "Pripravujem…",
+    dataNote:
+      "Z tvojich odpovedí sa ukladá anonymná kópia, ktorá slúži na ďalší rozvoj metódy. Nie je v nej tvoje meno ani dátum narodenia – iba rok narodenia a odbor či disciplína, takže ťa z nej nemožno identifikovať.",
   },
 }

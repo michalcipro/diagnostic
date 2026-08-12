@@ -2,7 +2,8 @@
   "id": "D",
   "name": {
     "cs": "Emoční regulace a výkon pod tlakem",
-    "en": "Emotion regulation and performance under pressure"
+    "en": "Emotion regulation and performance under pressure",
+    "sk": "Emočná regulácia a výkon pod tlakom"
   },
   "tagline": {
     "sport": {
@@ -60,7 +61,8 @@
     "D1": {
       "name": {
         "cs": "Vnímání tělesných signálů",
-        "en": "Awareness of bodily signals"
+        "en": "Awareness of bodily signals",
+        "sk": "Vnímanie telesných signálov"
       },
       "bands": {
         "priority": {
@@ -118,7 +120,8 @@
     "D2": {
       "name": {
         "cs": "Regulace aktivace a techniky",
-        "en": "Arousal regulation and techniques"
+        "en": "Arousal regulation and techniques",
+        "sk": "Regulácia aktivácie a techniky"
       },
       "bands": {
         "priority": {
@@ -176,7 +179,8 @@
     "D3": {
       "name": {
         "cs": "Výzva vs. hrozba a jednání pod tlakem",
-        "en": "Challenge vs. threat and acting under pressure"
+        "en": "Challenge vs. threat and acting under pressure",
+        "sk": "Výzva vs. hrozba a konanie pod tlakom"
       },
       "bands": {
         "priority": {

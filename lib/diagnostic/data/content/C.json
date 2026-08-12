@@ -2,7 +2,8 @@
   "id": "C",
   "name": {
     "cs": "Koncentrace a řízení pozornosti",
-    "en": "Concentration and attention control"
+    "en": "Concentration and attention control",
+    "sk": "Koncentrácia a riadenie pozornosti"
   },
   "tagline": {
     "sport": {
@@ -60,7 +61,8 @@
     "C1": {
       "name": {
         "cs": "Selektivní pozornost a odolnost vůči rušení",
-        "en": "Selective attention and resistance to distraction"
+        "en": "Selective attention and resistance to distraction",
+        "sk": "Selektívna pozornosť a odolnosť voči rušeniu"
       },
       "bands": {
         "priority": {
@@ -118,7 +120,8 @@
     "C2": {
       "name": {
         "cs": "Znovuzaměření a rutiny pozornosti",
-        "en": "Refocusing and attention routines"
+        "en": "Refocusing and attention routines",
+        "sk": "Znovuzameranie a rutiny pozornosti"
       },
       "bands": {
         "priority": {
@@ -176,7 +179,8 @@
     "C3": {
       "name": {
         "cs": "Přítomný okamžik a proces",
-        "en": "Present moment and process"
+        "en": "Present moment and process",
+        "sk": "Prítomný okamih a proces"
       },
       "bands": {
         "priority": {

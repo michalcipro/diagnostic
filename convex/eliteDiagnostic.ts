@@ -15,6 +15,8 @@ import { filtrViditelnosti, odmitniExterniho, requireCoach, vyzadujMastera } fro
 // v prohlížeči, kdokoli by si data stáhl přes veřejné API.
 // ─────────────────────────────────────────────────────────────────────────────
 
+const JAZYKY = new Set(["cs", "en", "sk"])
+
 const TEST_IDS = new Set([
   "elite200-sport",
   "elite200-business",
@@ -102,7 +104,7 @@ export const createInvite = mutation({
     await ctx.db.insert("invitations", {
       token,
       testId: args.testId,
-      lang: args.lang === "en" ? "en" : "cs",
+      lang: JAZYKY.has(args.lang) ? args.lang : "cs",
       clientName: args.clientName,
       note: args.note,
       // Vlastník rozhoduje, do čí větve vyplnění spadne.

@@ -2,7 +2,8 @@
   "id": "F",
   "name": {
     "cs": "Disciplína, návyky a regenerace",
-    "en": "Discipline, habits and recovery"
+    "en": "Discipline, habits and recovery",
+    "sk": "Disciplína, návyky a regenerácia"
   },
   "tagline": {
     "sport": {
@@ -60,7 +61,8 @@
     "F1": {
       "name": {
         "cs": "Seberegulace a konzistence",
-        "en": "Self-regulation and consistency"
+        "en": "Self-regulation and consistency",
+        "sk": "Sebaregulácia a konzistencia"
       },
       "bands": {
         "priority": {
@@ -118,7 +120,8 @@
     "F2": {
       "name": {
         "cs": "Spánek a regenerace",
-        "en": "Sleep and recovery"
+        "en": "Sleep and recovery",
+        "sk": "Spánok a regenerácia"
       },
       "bands": {
         "priority": {
@@ -176,7 +179,8 @@
     "F3": {
       "name": {
         "cs": "Energie a životní styl",
-        "en": "Energy and lifestyle"
+        "en": "Energy and lifestyle",
+        "sk": "Energia a životný štýl"
       },
       "bands": {
         "priority": {

@@ -38,6 +38,14 @@ const INSTRUKCE_VZORCE: Record<Lang, string[]> = {
     "Your answers are saved on this device as you go. You can take a break and come back later.",
     "The result is not a diagnosis or a label. It is a map for the conversation with your coach.",
   ],
+  sk: [
+    "Pri každom tvrdení označ číslo od 1 do 6 podľa toho, do akej miery pre teba dané tvrdenie platí.",
+    "Vypĺňaj rýchlo a pravdivo, bez potreby pôsobiť lepšie, silnejšie alebo vyrovnanejšie.",
+    "Neodpovedaj podľa toho, {aký|aká} by si {chcel|chcela} byť. Odpovedaj podľa toho, čo sa v tebe naozaj deje, keď si pod tlakom.",
+    "Škála nemá stred. Je to zámer: pri každom tvrdení sa prikloň na jednu stranu.",
+    "Odpovede sa priebežne ukladajú v tomto zariadení. Môžeš si dať pauzu a vrátiť sa neskôr.",
+    "Výsledok nie je diagnóza ani nálepka. Je to mapa pre rozhovor s koučom.",
+  ],
 }
 
 export function testMeta(testId: TestId): TestMeta {

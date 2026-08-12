@@ -6,6 +6,7 @@ import { ExternalPanel } from "@/components/diagnostic/external-panel"
 import { ReportView } from "@/components/diagnostic/report-view"
 import { VzorceReport } from "@/components/vzorce/report"
 import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
+import { JAZYKY } from "@/lib/diagnostic/lang"
 import { jeVzorce } from "@/lib/diagnostic/structure"
 import { testMeta } from "@/lib/diagnostic/test-meta"
 import {
@@ -94,7 +95,7 @@ export default function CoachPage() {
 
   useEffect(() => {
     const savedLang = window.localStorage.getItem(LANG_KEY)
-    if (savedLang === "en" || savedLang === "cs") setLang(savedLang)
+    if (savedLang && (JAZYKY as string[]).includes(savedLang)) setLang(savedLang as Lang)
     const saved = window.localStorage.getItem(SESSION_KEY)
     if (!saved || !isRemoteEnabled()) {
       setBooting(false)

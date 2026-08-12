@@ -1,3 +1,4 @@
+import { doplnJazykyPolozek, lok } from "./lang"
 import type { Lang, Localized, TestId } from "./types"
 import elite200Sport from "./data/items/elite200-sport.json"
 import elite200Business from "./data/items/elite200-business.json"
@@ -5,22 +6,21 @@ import elite100Sport from "./data/items/elite100-sport.json"
 import elite100Business from "./data/items/elite100-business.json"
 import vzorce from "../vzorce/data/polozky.json"
 
-type ItemsFile = Record<string, { cs: string; en: string }>
+type ItemsFile = Record<string, Localized>
 
 /**
  * Vzorce mají položky jen česky, protože zdrojový dotazník existuje jen v této
- * podobě. Do společného tvaru se převedou tak, že anglická verze ukazuje na
- * český text; přeložit je bude samostatný krok.
+ * podobě. Ostatní jazyky se zatím doplní z češtiny; překlad je samostatný krok.
  */
-const VZORCE_ITEMS: ItemsFile = Object.fromEntries(
-  Object.entries(vzorce as Record<string, string>).map(([id, cs]) => [id, { cs, en: cs }]),
+const VZORCE_ITEMS: ItemsFile = doplnJazykyPolozek(
+  Object.fromEntries(Object.entries(vzorce as Record<string, string>).map(([id, cs]) => [id, { cs }])),
 )
 
 const FILES: Record<TestId, ItemsFile> = {
-  "elite200-sport": elite200Sport as ItemsFile,
-  "elite200-business": elite200Business as ItemsFile,
-  "elite100-sport": elite100Sport as ItemsFile,
-  "elite100-business": elite100Business as ItemsFile,
+  "elite200-sport": doplnJazykyPolozek(elite200Sport),
+  "elite200-business": doplnJazykyPolozek(elite200Business),
+  "elite100-sport": doplnJazykyPolozek(elite100Sport),
+  "elite100-business": doplnJazykyPolozek(elite100Business),
   vzorce: VZORCE_ITEMS,
 }
 
@@ -37,6 +37,5 @@ export function getItems(testId: TestId): Item[] {
 }
 
 export function itemText(item: Item, lang: Lang): string {
-  // EN překlad s CZ fallbackem, dokud není doplněn
-  return item.text[lang] || item.text.cs
+  return lok(item.text, lang)
 }

@@ -2,7 +2,8 @@
   "id": "G",
   "name": {
     "cs": "Vztahy, komunikace a prostředí",
-    "en": "Relationships, communication and environment"
+    "en": "Relationships, communication and environment",
+    "sk": "Vzťahy, komunikácia a prostredie"
   },
   "tagline": {
     "sport": {
@@ -60,7 +61,8 @@
     "G1": {
       "name": {
         "cs": "Komunikace a psychologické bezpečí",
-        "en": "Communication and psychological safety"
+        "en": "Communication and psychological safety",
+        "sk": "Komunikácia a psychologické bezpečie"
       },
       "bands": {
         "priority": {
@@ -118,7 +120,8 @@
     "G2": {
       "name": {
         "cs": "Hranice a asertivita",
-        "en": "Boundaries and assertiveness"
+        "en": "Boundaries and assertiveness",
+        "sk": "Hranice a asertivita"
       },
       "bands": {
         "priority": {
@@ -176,7 +179,8 @@
     "G3": {
       "name": {
         "cs": "Sociální opora a prostředí",
-        "en": "Social support and environment"
+        "en": "Social support and environment",
+        "sk": "Sociálna opora a prostredie"
       },
       "bands": {
         "priority": {

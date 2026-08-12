@@ -2,7 +2,8 @@
   "id": "B",
   "name": {
     "cs": "Sebedůvěra a vnitřní dialog",
-    "en": "Confidence and inner dialogue"
+    "en": "Confidence and inner dialogue",
+    "sk": "Sebadôvera a vnútorný dialóg"
   },
   "tagline": {
     "sport": {
@@ -60,7 +61,8 @@
     "B1": {
       "name": {
         "cs": "Výkonová sebedůvěra",
-        "en": "Performance confidence"
+        "en": "Performance confidence",
+        "sk": "Výkonová sebadôvera"
       },
       "bands": {
         "priority": {
@@ -118,7 +120,8 @@
     "B2": {
       "name": {
         "cs": "Kvalita vnitřního dialogu",
-        "en": "Quality of inner dialogue"
+        "en": "Quality of inner dialogue",
+        "sk": "Kvalita vnútorného dialógu"
       },
       "bands": {
         "priority": {
@@ -176,7 +179,8 @@
     "B3": {
       "name": {
         "cs": "Vztah k sobě po chybě",
-        "en": "Self-relation after mistakes"
+        "en": "Self-relation after mistakes",
+        "sk": "Vzťah k sebe po chybe"
       },
       "bands": {
         "priority": {

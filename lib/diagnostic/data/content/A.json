@@ -2,7 +2,8 @@
   "id": "A",
   "name": {
     "cs": "Identita a vnitřní motivace",
-    "en": "Identity and inner motivation"
+    "en": "Identity and inner motivation",
+    "sk": "Identita a vnútorná motivácia"
   },
   "tagline": {
     "sport": {
@@ -60,7 +61,8 @@
     "A1": {
       "name": {
         "cs": "Jasnost identity a hodnot",
-        "en": "Clarity of identity and values"
+        "en": "Clarity of identity and values",
+        "sk": "Jasnosť identity a hodnôt"
       },
       "bands": {
         "priority": {
@@ -118,7 +120,8 @@
     "A2": {
       "name": {
         "cs": "Vnitřní motivace a smysl",
-        "en": "Intrinsic motivation and purpose"
+        "en": "Intrinsic motivation and purpose",
+        "sk": "Vnútorná motivácia a zmysel"
       },
       "bands": {
         "priority": {
@@ -176,7 +179,8 @@
     "A3": {
       "name": {
         "cs": "Sebehodnota nezávislá na výsledku",
-        "en": "Self-worth independent of results"
+        "en": "Self-worth independent of results",
+        "sk": "Sebahodnota nezávislá od výsledku"
       },
       "bands": {
         "priority": {

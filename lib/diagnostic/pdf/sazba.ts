@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf"
+import type { Lang } from "../types"
 import { FONT_BOLD, FONT_REGULAR } from "./font"
 
 // Sdílený sazeč pro všechna PDF s vyhodnocením.
@@ -52,8 +53,11 @@ export const STITEK_NEUTRALNI: BarvyStitku = {
 
 const MESICE_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-/** Datum v místním tvaru. Vstup je ISO, ať se dá řadit. */
-export function datumLokalne(iso: string | undefined, lang: "cs" | "en"): string {
+/**
+ * Datum v místním tvaru. Vstup je ISO, ať se dá řadit.
+ * Čeština i slovenština píšou „29. 7. 2026", angličtina „29 Jul 2026".
+ */
+export function datumLokalne(iso: string | undefined, lang: Lang): string {
   if (!iso) return ""
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso)
   if (!m) return iso

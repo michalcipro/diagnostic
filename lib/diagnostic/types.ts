@@ -1,7 +1,7 @@
 // ELITE Performance Diagnostic – typy
 // Modely: elite200 (7 dimenzí × 3 fazety × 8 položek), elite100 (7 dimenzí × 12 položek)
 
-export type Lang = "cs" | "en"
+export type Lang = "cs" | "en" | "sk"
 export type Variant = "sport" | "business"
 export type TestModel = "elite200" | "elite100"
 /**
@@ -26,9 +26,14 @@ export type AnswerMap = Record<number, Answer>
 
 export type BandKey = "priority" | "stabilization" | "strong" | "elite"
 
+/**
+ * Přeložený řetězec. Po načtení dat je vždy kompletní: chybějící jazyk doplní
+ * `doplnJazyky()` z náhradního řetězce, viz lib/diagnostic/lang.ts.
+ */
 export interface Localized {
   cs: string
   en: string
+  sk: string
 }
 
 export interface FacetDef {

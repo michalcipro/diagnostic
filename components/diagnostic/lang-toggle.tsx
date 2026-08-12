@@ -1,6 +1,10 @@
 "use client"
 
+import { JAZYKY } from "@/lib/diagnostic/lang"
 import type { Lang } from "@/lib/diagnostic/types"
+
+/** Krátké názvy, ať se přepínač vejde i vedle ostatních tlačítek. */
+const NAZVY: Record<Lang, string> = { cs: "Čeština", en: "English", sk: "Slovenčina" }
 
 export function LangToggle({
   lang,
@@ -13,7 +17,7 @@ export function LangToggle({
 }) {
   return (
     <div className={`diag-segment ${className ?? ""}`} role="tablist" aria-label="Language">
-      {(["cs", "en"] as Lang[]).map((l) => (
+      {JAZYKY.map((l) => (
         <button
           key={l}
           type="button"
@@ -22,7 +26,7 @@ export function LangToggle({
           data-active={lang === l}
           onClick={() => onChange(l)}
         >
-          {l === "cs" ? "Čeština" : "English"}
+          {NAZVY[l]}
         </button>
       ))}
     </div>

@@ -2,7 +2,8 @@
   "id": "E",
   "name": {
     "cs": "Odolnost a růstové nastavení mysli",
-    "en": "Resilience and growth mindset"
+    "en": "Resilience and growth mindset",
+    "sk": "Odolnosť a rastové nastavenie mysle"
   },
   "tagline": {
     "sport": {
@@ -60,7 +61,8 @@
     "E1": {
       "name": {
         "cs": "Růstové přesvědčení",
-        "en": "Growth beliefs"
+        "en": "Growth beliefs",
+        "sk": "Rastové presvedčenie"
       },
       "bands": {
         "priority": {
@@ -118,7 +120,8 @@
     "E2": {
       "name": {
         "cs": "Vytrvalost a dlouhodobé úsilí",
-        "en": "Persistence and long-term effort"
+        "en": "Persistence and long-term effort",
+        "sk": "Vytrvalosť a dlhodobé úsilie"
       },
       "bands": {
         "priority": {
@@ -176,7 +179,8 @@
     "E3": {
       "name": {
         "cs": "Zpracování neúspěchu a zpětné vazby",
-        "en": "Processing setbacks and feedback"
+        "en": "Processing setbacks and feedback",
+        "sk": "Spracovanie neúspechu a spätnej väzby"
       },
       "bands": {
         "priority": {

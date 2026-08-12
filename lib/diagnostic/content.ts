@@ -1,3 +1,4 @@
+import { doplnJazyky } from "./lang"
 import type { BandKey, DimensionId, Gender, Lang, Localized, Variant } from "./types"
 import contentA from "./data/content/A.json"
 import contentB from "./data/content/B.json"
@@ -7,7 +8,12 @@ import contentE from "./data/content/E.json"
 import contentF from "./data/content/F.json"
 import contentG from "./data/content/G.json"
 
-// Texty vyhodnocení – na fazetové i dimenzní úrovni, sport/business, cs/en.
+// Texty vyhodnocení – na fazetové i dimenzní úrovni, sport/business,
+// česky, anglicky a slovensky.
+//
+// Slovenština se překládá po souborech; dokud u některého textu chybí, doplní
+// se čeština. Zajišťuje to doplnJazyky() níž, takže zbytek aplikace nikde
+// neřeší, jestli překlad existuje.
 
 export interface VariantText {
   sport: Localized
@@ -28,7 +34,7 @@ export interface DimensionContent {
   facets: Record<string, FacetContent>
 }
 
-const CONTENT: Record<DimensionId, DimensionContent> = {
+const CONTENT: Record<DimensionId, DimensionContent> = doplnJazyky({
   A: contentA as unknown as DimensionContent,
   B: contentB as unknown as DimensionContent,
   C: contentC as unknown as DimensionContent,
@@ -36,7 +42,7 @@ const CONTENT: Record<DimensionId, DimensionContent> = {
   E: contentE as unknown as DimensionContent,
   F: contentF as unknown as DimensionContent,
   G: contentG as unknown as DimensionContent,
-}
+})
 
 export function getDimensionContent(id: DimensionId): DimensionContent {
   return CONTENT[id]
@@ -54,6 +60,7 @@ export function getFacetContent(facetId: string): FacetContent | undefined {
  * a přídavných jmen v přísudku. Nechat ženu číst text v mužském rodě je hrubá
  * chyba, proto se každé takové místo v obsahu označuje a tady se rozvíjí.
  *
+ * Slovenština rod řeší stejně jako čeština, takže značka platí i tam.
  * Angličtina rod neřeší – značka se v anglických textech nevyskytuje, a kdyby
  * se tam omylem dostala, rozvine se stejným způsobem a nerozbije větu.
  */
