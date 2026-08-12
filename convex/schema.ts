@@ -15,7 +15,16 @@ export default defineSchema({
     name: v.string(),
     passwordHash: v.string(),
     salt: v.string(),
-    role: v.union(v.literal("master"), v.literal("coach")),
+    /**
+     * master  – zakládá kouče, vidí vše kromě větví externích koučů
+     * coach   – náš kouč, sdílí přehled klientů s masterem
+     * external – externí kouč: samostatná větev klientů. Vidí výhradně to, co
+     *   sám založil, a nikdo z našich na jeho klienty nevidí. Master o jeho
+     *   větvi zná jen počty, typy testů a data, aby mohl vystavit fakturu.
+     */
+    role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
+    /** interní poznámka mastera k účtu, například smluvní podmínky */
+    note: v.optional(v.string()),
     active: v.boolean(),
     createdAt: v.number(),
     lastLoginAt: v.optional(v.number()),
@@ -38,11 +47,17 @@ export default defineSchema({
     lang: v.string(),
     clientName: v.optional(v.string()), // předvyplní se respondentovi
     note: v.optional(v.string()), // interní poznámka kouče
+    /**
+     * Kdo pozvánku vystavil. Řídí se tím, do čí větve vyplnění spadne.
+     * U záznamů z doby před externími kouči chybí; ty patří nám.
+     */
+    coachId: v.optional(v.id("coaches")),
     createdAt: v.number(),
     usedAt: v.optional(v.number()), // vyplněno = pozvánka spotřebovaná
     resultId: v.optional(v.id("eliteDiagnosticResults")),
   })
     .index("by_token", ["token"])
+    .index("by_coach", ["coachId"])
     .index("by_created", ["createdAt"]),
 
   // Anonymní vzorek pro tvorbu norem.
@@ -95,6 +110,13 @@ export default defineSchema({
      * pořízených dřív chybí, proto volitelné.
      */
     durationSec: v.optional(v.number()),
+    /**
+     * Kouč, do jehož větve vyplnění patří. Přebírá se z pozvánky. Chybí
+     * u záznamů z doby před externími kouči; ty patří nám.
+     */
+    coachId: v.optional(v.id("coaches")),
     createdAt: v.number(),
-  }).index("by_created", ["createdAt"]),
+  })
+    .index("by_created", ["createdAt"])
+    .index("by_coach", ["coachId"]),
 })

@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values"
 import { mutation, query } from "./_generated/server"
-import { requireCoach } from "./sessions"
+import { filtrViditelnosti, odmitniExterniho, requireCoach, vyzadujMastera } from "./sessions"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ELITE Performance Diagnostic – backend.
@@ -94,7 +94,7 @@ export const createInvite = mutation({
   },
   returns: v.object({ token: v.string() }),
   handler: async (ctx, args) => {
-    await requireCoach(ctx, args.sessionToken)
+    const me = await requireCoach(ctx, args.sessionToken)
     if (!TEST_IDS.has(args.testId)) {
       throw new ConvexError(`Neznámý testId: ${args.testId}`)
     }
@@ -105,6 +105,8 @@ export const createInvite = mutation({
       lang: args.lang === "en" ? "en" : "cs",
       clientName: args.clientName,
       note: args.note,
+      // Vlastník rozhoduje, do čí větve vyplnění spadne.
+      coachId: me._id,
       createdAt: Date.now(),
     })
     return { token }
@@ -158,8 +160,10 @@ export const listInvites = query({
   args: { sessionToken: v.string() },
   returns: v.array(inviteValidator),
   handler: async (ctx, args) => {
-    await requireCoach(ctx, args.sessionToken)
-    const docs = await ctx.db.query("invitations").withIndex("by_created").order("desc").take(500)
+    const me = await requireCoach(ctx, args.sessionToken)
+    const vidi = await filtrViditelnosti(ctx, me)
+    const vsechny = await ctx.db.query("invitations").withIndex("by_created").order("desc").take(500)
+    const docs = vsechny.filter((d) => vidi(d.coachId))
     return docs.map((d) => ({
       id: d._id,
       token: d.token,
@@ -179,7 +183,11 @@ export const revokeInvite = mutation({
   args: { sessionToken: v.string(), id: v.id("invitations") },
   returns: v.object({ ok: v.boolean() }),
   handler: async (ctx, args) => {
-    await requireCoach(ctx, args.sessionToken)
+    const me = await requireCoach(ctx, args.sessionToken)
+    const doc = await ctx.db.get(args.id)
+    if (!doc) return { ok: true }
+    const vidi = await filtrViditelnosti(ctx, me)
+    if (!vidi(doc.coachId)) throw new ConvexError("Tahle pozvánka do tvé větve nepatří.")
     await ctx.db.delete(args.id)
     return { ok: true }
   },
@@ -249,6 +257,7 @@ export const submitWithInvite = mutation({
       answeredCount,
       complete: answeredCount === itemCount,
       durationSec,
+      coachId: inv.coachId,
       createdAt: now,
     })
     // Anonymní kopie do normativního vzorku.
@@ -300,12 +309,14 @@ export const listForCoach = query({
   args: { sessionToken: v.string() },
   returns: v.array(summaryValidator),
   handler: async (ctx, args) => {
-    await requireCoach(ctx, args.sessionToken)
-    const docs = await ctx.db
+    const me = await requireCoach(ctx, args.sessionToken)
+    const vidi = await filtrViditelnosti(ctx, me)
+    const vsechna = await ctx.db
       .query("eliteDiagnosticResults")
       .withIndex("by_created")
       .order("desc")
       .take(500)
+    const docs = vsechna.filter((d) => vidi(d.coachId))
     return docs.map((d) => ({
       id: d._id,
       testId: d.testId,
@@ -339,9 +350,12 @@ export const getForCoach = query({
     v.null(),
   ),
   handler: async (ctx, args) => {
-    await requireCoach(ctx, args.sessionToken)
+    const me = await requireCoach(ctx, args.sessionToken)
     const d = await ctx.db.get(args.id)
     if (!d) return null
+    // Cizí větev se nevrací ani na přímý dotaz s uhodnutým id.
+    const vidi = await filtrViditelnosti(ctx, me)
+    if (!vidi(d.coachId)) return null
     return {
       id: d._id,
       testId: d.testId,
@@ -374,7 +388,7 @@ export const normStats = query({
     months: v.array(v.string()),
   }),
   handler: async (ctx, args) => {
-    await requireCoach(ctx, args.sessionToken)
+    odmitniExterniho(await requireCoach(ctx, args.sessionToken))
     const vsechny = await ctx.db.query("normSamples").collect()
     const mapa = new Map<string, { count: number; complete: number }>()
     for (const id of TEST_IDS) mapa.set(id, { count: 0, complete: 0 })
@@ -416,7 +430,7 @@ export const normExport = query({
     }),
   ),
   handler: async (ctx, args) => {
-    await requireCoach(ctx, args.sessionToken)
+    odmitniExterniho(await requireCoach(ctx, args.sessionToken))
     const vsechny = await ctx.db.query("normSamples").take(5000)
     return vsechny.map((z) => ({
       testId: z.testId,
@@ -439,8 +453,112 @@ export const removeForCoach = mutation({
   args: { sessionToken: v.string(), id: v.id("eliteDiagnosticResults") },
   returns: v.object({ ok: v.boolean() }),
   handler: async (ctx, args) => {
-    await requireCoach(ctx, args.sessionToken)
+    const me = await requireCoach(ctx, args.sessionToken)
+    const doc = await ctx.db.get(args.id)
+    if (!doc) return { ok: true }
+    const vidi = await filtrViditelnosti(ctx, me)
+    if (!vidi(doc.coachId)) throw new ConvexError("Tohle vyplnění do tvé větve nepatří.")
     await ctx.db.delete(args.id)
     return { ok: true }
+  },
+})
+
+// ---------------------------------------------------------------------------
+// Přehled větví externích koučů (pouze master)
+// ---------------------------------------------------------------------------
+
+/**
+ * Podklad pro fakturaci externímu kouči.
+ *
+ * Záměrně BEZ jakéhokoli osobního údaje: vrací se jen typ testu, datum
+ * a úplnost. Jméno, datum narození ani odpovědi tudy neprojdou, protože
+ * externí kouč má vlastní větev klientů a my do ní nevidíme. Na účtování
+ * stačí vědět, kolik testů kterého typu a kdy proběhlo.
+ */
+export const externalUsage = query({
+  args: { sessionToken: v.string() },
+  returns: v.array(
+    v.object({
+      coachId: v.id("coaches"),
+      name: v.string(),
+      email: v.string(),
+      note: v.optional(v.string()),
+      active: v.boolean(),
+      createdAt: v.number(),
+      celkem: v.number(),
+      podleTestu: v.array(v.object({ testId: v.string(), pocet: v.number() })),
+      podleMesice: v.array(
+        v.object({
+          mesic: v.string(),
+          pocet: v.number(),
+          podleTestu: v.array(v.object({ testId: v.string(), pocet: v.number() })),
+        }),
+      ),
+      zaznamy: v.array(
+        v.object({
+          testId: v.string(),
+          lang: v.string(),
+          createdAt: v.number(),
+          complete: v.boolean(),
+          answeredCount: v.number(),
+        }),
+      ),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    vyzadujMastera(await requireCoach(ctx, args.sessionToken))
+
+    const vsichni = await ctx.db.query("coaches").collect()
+    const externi = vsichni.filter((c) => c.role === "external")
+
+    const out = []
+    for (const c of externi) {
+      const vyplneni = await ctx.db
+        .query("eliteDiagnosticResults")
+        .withIndex("by_coach", (q) => q.eq("coachId", c._id))
+        .collect()
+
+      const podleTestu = new Map<string, number>()
+      const podleMesice = new Map<string, Map<string, number>>()
+      for (const d of vyplneni) {
+        podleTestu.set(d.testId, (podleTestu.get(d.testId) ?? 0) + 1)
+        const mesic = collectedMonth(d.createdAt)
+        const vMesici = podleMesice.get(mesic) ?? new Map<string, number>()
+        vMesici.set(d.testId, (vMesici.get(d.testId) ?? 0) + 1)
+        podleMesice.set(mesic, vMesici)
+      }
+
+      out.push({
+        coachId: c._id,
+        name: c.name,
+        email: c.email,
+        note: c.note,
+        active: c.active,
+        createdAt: c.createdAt,
+        celkem: vyplneni.length,
+        podleTestu: [...podleTestu.entries()]
+          .map(([testId, pocet]) => ({ testId, pocet }))
+          .sort((a, b) => b.pocet - a.pocet),
+        podleMesice: [...podleMesice.entries()]
+          .sort((a, b) => b[0].localeCompare(a[0]))
+          .map(([mesic, testy]) => ({
+            mesic,
+            pocet: [...testy.values()].reduce((a, b) => a + b, 0),
+            podleTestu: [...testy.entries()]
+              .map(([testId, pocet]) => ({ testId, pocet }))
+              .sort((a, b) => b.pocet - a.pocet),
+          })),
+        zaznamy: vyplneni
+          .sort((a, b) => b.createdAt - a.createdAt)
+          .map((d) => ({
+            testId: d.testId,
+            lang: d.lang,
+            createdAt: d.createdAt,
+            complete: d.complete,
+            answeredCount: d.answeredCount,
+          })),
+      })
+    }
+    return out.sort((a, b) => b.celkem - a.celkem)
   },
 })

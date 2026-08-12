@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { LangToggle } from "@/components/diagnostic/lang-toggle"
+import { ExternalPanel } from "@/components/diagnostic/external-panel"
 import { ReportView } from "@/components/diagnostic/report-view"
 import { VzorceReport } from "@/components/vzorce/report"
 import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
@@ -10,6 +11,8 @@ import { testMeta } from "@/lib/diagnostic/test-meta"
 import {
   addCoach,
   chybaText,
+  externalUsage,
+  type ExternalUsage,
   createInvite,
   listCoaches,
   login as doLogin,
@@ -55,12 +58,15 @@ export default function CoachPage() {
   const [cName, setCName] = useState("")
   const [cEmail, setCEmail] = useState("")
   const [cPassword, setCPassword] = useState("")
+  const [cRole, setCRole] = useState<"coach" | "external">("coach")
+  const [cNote, setCNote] = useState("")
 
   const [rows, setRows] = useState<ResultSummary[] | null>(null)
   const [detail, setDetail] = useState<ResultDetail | null>(null)
   const [detailLang, setDetailLang] = useState<Lang>("cs")
 
-  const [tab, setTab] = useState<"results" | "invites" | "coaches" | "norms">("results")
+  const [tab, setTab] = useState<"results" | "invites" | "coaches" | "norms" | "externi">("results")
+  const [externi, setExterni] = useState<ExternalUsage[] | null>(null)
   const [norms, setNorms] = useState<NormStats | null>(null)
   const [exporting, setExporting] = useState(false)
   const [invites, setInvites] = useState<InviteRow[] | null>(null)
@@ -121,7 +127,7 @@ export default function CoachPage() {
       const res = await doLogin(email, password)
       window.localStorage.setItem(SESSION_KEY, res.sessionToken)
       setSession(res.sessionToken)
-      setMeInfo({ name: res.name, email, role: res.role as "master" | "coach" })
+      setMeInfo({ name: res.name, email, role: res.role as CoachIdentity["role"] })
       setPassword("")
       await load(res.sessionToken)
     } catch (err) {
@@ -147,6 +153,14 @@ export default function CoachPage() {
       setCoaches(await listCoaches(session))
     } catch (e) {
       setError(chybaText(e, "Seznam koučů se nepodařilo načíst."))
+    }
+  }
+
+  const loadExterni = async () => {
+    try {
+      setExterni(await externalUsage(session))
+    } catch (e) {
+      setError(chybaText(e, "Přehled externích koučů se nepodařilo načíst."))
     }
   }
 
@@ -181,12 +195,15 @@ export default function CoachPage() {
     e.preventDefault()
     setError(null)
     try {
-      await addCoach(session, cName, cEmail, cPassword)
+      await addCoach(session, cName, cEmail, cPassword, cRole, cNote)
       setCName("")
       setCEmail("")
       setCPassword("")
+      setCNote("")
+      setCRole("coach")
       setCoachFormOpen(false)
       await loadCoaches()
+      if (externi !== null) await loadExterni()
     } catch (err) {
       setError(chybaText(err, "Kouče se nepodařilo přidat."))
     }
@@ -375,16 +392,18 @@ export default function CoachPage() {
         <button type="button" data-active={tab === "invites"} onClick={() => setTab("invites")}>
           {t.tabInvites}
         </button>
-        <button
-          type="button"
-          data-active={tab === "norms"}
-          onClick={() => {
-            setTab("norms")
-            if (norms === null) void loadNorms()
-          }}
-        >
-          {t.tabNorms}
-        </button>
+        {meInfo.role !== "external" && (
+          <button
+            type="button"
+            data-active={tab === "norms"}
+            onClick={() => {
+              setTab("norms")
+              if (norms === null) void loadNorms()
+            }}
+          >
+            {t.tabNorms}
+          </button>
+        )}
         {meInfo.role === "master" && (
           <button
             type="button"
@@ -397,9 +416,27 @@ export default function CoachPage() {
             Kouči
           </button>
         )}
+        {meInfo.role === "master" && (
+          <button
+            type="button"
+            data-active={tab === "externi"}
+            onClick={() => {
+              setTab("externi")
+              if (externi === null) void loadExterni()
+            }}
+          >
+            Externí kouči
+          </button>
+        )}
       </div>
 
-      {tab === "norms" && (
+      {tab === "externi" && meInfo.role === "master" && (
+        <div className="mb-8">
+          <ExternalPanel data={externi} lang={lang} />
+        </div>
+      )}
+
+      {tab === "norms" && meInfo.role !== "external" && (
         <NormsPanel
           stats={norms}
           lang={lang}
@@ -421,10 +458,35 @@ export default function CoachPage() {
           ) : (
             <form onSubmit={submitCoach} className="diag-card p-6">
               <h2 className="text-[16px] font-semibold">Přidat kouče</h2>
-              <p className="mt-1 text-[13px] text-[var(--wm-text-2)]">
-                Nový kouč uvidí vyplněné diagnostiky a bude moci vytvářet pozvánky. Spravovat účty
+              <p className="mt-1 max-w-[74ch] text-[13px] leading-relaxed text-[var(--wm-text-2)]">
+                Náš kouč sdílí přehled klientů s tebou. Externí kouč dostane vlastní větev: uvidí
+                jen to, co sám založí, a do našich klientů nevidí. Ty na jeho klienty také ne,
+                v záložce Externí kouči uvidíš jen počty testů, jejich typ a data. Spravovat účty
                 může dál pouze master.
               </p>
+
+              <div className="mt-4">
+                <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">
+                  Druh účtu
+                </span>
+                <div className="diag-segment">
+                  <button
+                    type="button"
+                    data-active={cRole === "coach"}
+                    onClick={() => setCRole("coach")}
+                  >
+                    Náš kouč
+                  </button>
+                  <button
+                    type="button"
+                    data-active={cRole === "external"}
+                    onClick={() => setCRole("external")}
+                  >
+                    Externí kouč
+                  </button>
+                </div>
+              </div>
+
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 <label className="block">
                   <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">Jméno</span>
@@ -439,6 +501,17 @@ export default function CoachPage() {
                   <input type="password" className="diag-input" value={cPassword} onChange={(e) => setCPassword(e.target.value)} />
                 </label>
               </div>
+              <label className="mt-4 block">
+                <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">
+                  Poznámka {cRole === "external" ? "(např. sazba za test, smluvní podmínky)" : "(nepovinná)"}
+                </span>
+                <input
+                  className="diag-input"
+                  value={cNote}
+                  onChange={(e) => setCNote(e.target.value)}
+                  placeholder={cRole === "external" ? "Např. 900 Kč za vyhodnocení, fakturace měsíčně" : ""}
+                />
+              </label>
               <div className="mt-5 flex items-center gap-3">
                 <button
                   type="submit"
@@ -464,13 +537,16 @@ export default function CoachPage() {
                 <div className="min-w-[180px] flex-1">
                   <h3 className="text-[16px] font-semibold tracking-tight">
                     {c.name}
-                    {c.role === "master" && (
+                    {c.role !== "coach" && (
                       <span className="ml-2 rounded-full bg-[var(--wm-fill-4)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--wm-text-2)]">
-                        master
+                        {c.role === "master" ? "master" : "externí"}
                       </span>
                     )}
                   </h3>
                   <p className="mt-0.5 text-[13px] text-[var(--wm-text-2)]">{c.email}</p>
+                  {c.note && (
+                    <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--wm-text-3)]">{c.note}</p>
+                  )}
                 </div>
                 {c.role !== "master" && (
                   <button

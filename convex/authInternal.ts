@@ -51,7 +51,8 @@ export const insertCoach = internalMutation({
     name: v.string(),
     passwordHash: v.string(),
     salt: v.string(),
-    role: v.union(v.literal("master"), v.literal("coach")),
+    role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
+    note: v.optional(v.string()),
   },
   returns: v.id("coaches"),
   handler: async (ctx, args) => {
@@ -66,6 +67,7 @@ export const insertCoach = internalMutation({
       passwordHash: args.passwordHash,
       salt: args.salt,
       role: args.role,
+      note: args.note,
       active: true,
       createdAt: Date.now(),
     })

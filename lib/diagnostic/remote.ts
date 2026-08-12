@@ -61,6 +61,7 @@ const changePasswordRef = makeFunctionReference<"action">("auth:changePassword")
 const removeRef = makeFunctionReference<"mutation">("eliteDiagnostic:removeForCoach")
 const normStatsRef = makeFunctionReference<"query">("eliteDiagnostic:normStats")
 const normExportRef = makeFunctionReference<"query">("eliteDiagnostic:normExport")
+const externalUsageRef = makeFunctionReference<"query">("eliteDiagnostic:externalUsage")
 
 function client(): ConvexHttpClient | null {
   if (!convexUrl) return null
@@ -192,14 +193,18 @@ export async function revokeInvite(sessionToken: string, id: string): Promise<vo
 
 // ── Účty a přihlášení ────────────────────────────────────────────
 
+export type CoachRole = "master" | "coach" | "external"
+
 export interface CoachIdentity {
   name: string
   email: string
-  role: "master" | "coach"
+  role: CoachRole
 }
 
 export interface CoachRow extends CoachIdentity {
   id: string
+  /** interní poznámka mastera, například smluvní podmínky */
+  note?: string
   active: boolean
   createdAt: number
   lastLoginAt?: number
@@ -277,10 +282,12 @@ export async function addCoach(
   name: string,
   email: string,
   password: string,
+  role: "coach" | "external" = "coach",
+  note?: string,
 ): Promise<void> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  await c.action(addCoachRef, { sessionToken, name, email, password })
+  await c.action(addCoachRef, { sessionToken, name, email, password, role, note })
 }
 
 /** Zapnutí/vypnutí přístupu kouče – pouze master. */
@@ -350,4 +357,44 @@ export async function normExport(sessionToken: string): Promise<unknown[]> {
   const c = client()
   if (!c) throw new Error("not-configured")
   return (await c.query(normExportRef, { sessionToken })) as unknown[]
+}
+
+// ── Větve externích koučů ──────────────────────────────────────────
+
+/** Jeden počet u jednoho testu. */
+export interface PocetTestu {
+  testId: string
+  pocet: number
+}
+
+/**
+ * Podklad pro fakturaci externímu kouči.
+ *
+ * Bez jakéhokoli osobního údaje: jen typ testu, datum a úplnost. Do klientů
+ * externího kouče nevidíme, na účtování to ale stačí.
+ */
+export interface ExternalUsage {
+  coachId: string
+  name: string
+  email: string
+  note?: string
+  active: boolean
+  createdAt: number
+  celkem: number
+  podleTestu: PocetTestu[]
+  podleMesice: { mesic: string; pocet: number; podleTestu: PocetTestu[] }[]
+  zaznamy: {
+    testId: string
+    lang: string
+    createdAt: number
+    complete: boolean
+    answeredCount: number
+  }[]
+}
+
+/** Přehled větví externích koučů. Vidí ho pouze master. */
+export async function externalUsage(sessionToken: string): Promise<ExternalUsage[]> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(externalUsageRef, { sessionToken })) as ExternalUsage[]
 }

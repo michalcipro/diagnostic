@@ -16,14 +16,14 @@ type CoachZaznam = {
   name: string
   passwordHash: string
   salt: string
-  role: "master" | "coach"
+  role: "master" | "coach" | "external"
   active: boolean
 } | null
 type Identita = {
   id: Id<"coaches">
   email: string
   name: string
-  role: "master" | "coach"
+  role: "master" | "coach" | "external"
 } | null
 
 // Přihlašování koučů. Běží v Node prostředí, aby šlo použít pořádnou
@@ -181,6 +181,9 @@ export const addCoach = action({
     name: v.string(),
     email: v.string(),
     password: v.string(),
+    /** externí kouč dostane vlastní větev klientů, na kterou my nevidíme */
+    role: v.optional(v.union(v.literal("coach"), v.literal("external"))),
+    note: v.optional(v.string()),
   },
   returns: v.object({ ok: v.boolean() }),
   handler: async (ctx, args): Promise<{ ok: boolean }> => {
@@ -200,7 +203,8 @@ export const addCoach = action({
       name: args.name.trim(),
       passwordHash: hashPassword(args.password, salt),
       salt,
-      role: "coach",
+      role: args.role ?? "coach",
+      note: args.note?.trim() || undefined,
     })
     return { ok: true }
   },

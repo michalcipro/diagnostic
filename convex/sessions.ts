@@ -1,12 +1,46 @@
 import { ConvexError, v } from "convex/values"
 import { internalQuery, mutation, query } from "./_generated/server"
 import type { QueryCtx } from "./_generated/server"
-import type { Doc } from "./_generated/dataModel"
+import type { Doc, Id } from "./_generated/dataModel"
 
 // Ověřování přihlášené relace. Sdílí ho všechny funkce, které pracují
 // s daty koučů – bez platné relace nevrátí žádná data.
 
 export type Coach = Doc<"coaches">
+
+/**
+ * Kdo na čí vyplnění vidí.
+ *
+ * Externí kouč je samostatná větev: vidí výhradně to, co sám založil, a nikdo
+ * z našich na jeho klienty nevidí. Uvnitř firmy zůstává přehled společný,
+ * jak byl dosud, takže master i náš kouč vidí na všechna naše vyplnění.
+ *
+ * Vrací funkci, ne pole, aby se seznam externích účtů načetl jednou za dotaz;
+ * tabulka koučů je malá, ale volat ji na každý řádek by bylo zbytečné.
+ */
+export async function filtrViditelnosti(
+  ctx: QueryCtx,
+  me: Coach,
+): Promise<(vlastnik: Id<"coaches"> | undefined) => boolean> {
+  if (me.role === "external") {
+    const mujId = me._id
+    return (vlastnik) => vlastnik === mujId
+  }
+  const vsichni = await ctx.db.query("coaches").collect()
+  const externi = new Set(vsichni.filter((c) => c.role === "external").map((c) => String(c._id)))
+  // Vyplnění bez vlastníka vzniklo dřív, než externí kouči existovali; je naše.
+  return (vlastnik) => vlastnik === undefined || !externi.has(String(vlastnik))
+}
+
+/** Vyhodí chybu, pokud přihlášený není master. */
+export function vyzadujMastera(me: Coach): void {
+  if (me.role !== "master") throw new ConvexError("Přístup má pouze master účet.")
+}
+
+/** Vyhodí chybu, pokud je přihlášený externí kouč. Chrání naše společná data. */
+export function odmitniExterniho(me: Coach): void {
+  if (me.role === "external") throw new ConvexError("Externí účet sem přístup nemá.")
+}
 
 /**
  * Vrátí přihlášeného kouče, nebo vyhodí chybu. Používá se všude, kde se
@@ -32,7 +66,7 @@ export const whoAmI = internalQuery({
       id: v.id("coaches"),
       email: v.string(),
       name: v.string(),
-      role: v.union(v.literal("master"), v.literal("coach")),
+      role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
     }),
     v.null(),
   ),
@@ -73,7 +107,7 @@ export const me = query({
     v.object({
       name: v.string(),
       email: v.string(),
-      role: v.union(v.literal("master"), v.literal("coach")),
+      role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
     }),
     v.null(),
   ),
@@ -109,7 +143,8 @@ export const listCoaches = query({
       id: v.id("coaches"),
       name: v.string(),
       email: v.string(),
-      role: v.union(v.literal("master"), v.literal("coach")),
+      role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
+      note: v.optional(v.string()),
       active: v.boolean(),
       createdAt: v.number(),
       lastLoginAt: v.optional(v.number()),
@@ -117,13 +152,14 @@ export const listCoaches = query({
   ),
   handler: async (ctx, args) => {
     const me = await requireCoach(ctx, args.sessionToken)
-    if (me.role !== "master") throw new ConvexError("Přístup má pouze master účet.")
+    vyzadujMastera(me)
     const all = await ctx.db.query("coaches").collect()
     return all.map((c) => ({
       id: c._id,
       name: c.name,
       email: c.email,
       role: c.role,
+      note: c.note,
       active: c.active,
       createdAt: c.createdAt,
       lastLoginAt: c.lastLoginAt,
@@ -137,7 +173,7 @@ export const setCoachActive = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const me = await requireCoach(ctx, args.sessionToken)
-    if (me.role !== "master") throw new ConvexError("Přístup má pouze master účet.")
+    vyzadujMastera(me)
     if (me._id === args.coachId) throw new ConvexError("Vlastní účet vypnout nelze.")
     await ctx.db.patch(args.coachId, { active: args.active })
     if (!args.active) {
