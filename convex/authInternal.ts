@@ -52,6 +52,7 @@ export const insertCoach = internalMutation({
     passwordHash: v.string(),
     salt: v.string(),
     role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
+    phone: v.optional(v.string()),
     note: v.optional(v.string()),
   },
   returns: v.id("coaches"),
@@ -67,6 +68,7 @@ export const insertCoach = internalMutation({
       passwordHash: args.passwordHash,
       salt: args.salt,
       role: args.role,
+      phone: args.phone,
       note: args.note,
       active: true,
       createdAt: Date.now(),
@@ -95,6 +97,59 @@ export const openSession = internalMutation({
       if (s.expiresAt < now) await ctx.db.delete(s._id)
     }
     return null
+  },
+})
+
+/**
+ * Úprava profilu kouče. Volá ji master.
+ *
+ * E-mail je zároveň přihlašovací jméno, takže se hlídá jeho jedinečnost;
+ * bez toho by se dva účty přebily a jeden by přestal jít přihlásit.
+ */
+export const updateCoachProfile = internalMutation({
+  args: {
+    coachId: v.id("coaches"),
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    note: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const coach = await ctx.db.get(args.coachId)
+    if (!coach) throw new ConvexError("Účet nenalezen.")
+    if (args.email !== coach.email) {
+      const kolize = await ctx.db
+        .query("coaches")
+        .withIndex("by_email", (q) => q.eq("email", args.email))
+        .unique()
+      if (kolize) throw new ConvexError("Účet s tímto e-mailem už existuje.")
+    }
+    await ctx.db.patch(args.coachId, {
+      name: args.name,
+      email: args.email,
+      phone: args.phone,
+      note: args.note,
+    })
+    return null
+  },
+})
+
+/** Účet podle id. Master si jím ověří, koho vlastně mění. */
+export const getCoachById = internalQuery({
+  args: { coachId: v.id("coaches") },
+  returns: v.union(
+    v.object({
+      id: v.id("coaches"),
+      email: v.string(),
+      name: v.string(),
+      role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
+    }),
+    v.null(),
+  ),
+  handler: async (ctx, args) => {
+    const c = await ctx.db.get(args.coachId)
+    return c ? { id: c._id, email: c.email, name: c.name, role: c.role } : null
   },
 })
 

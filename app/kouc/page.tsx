@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { LangToggle } from "@/components/diagnostic/lang-toggle"
+import { CoachCard } from "@/components/diagnostic/coach-card"
 import { ExternalPanel } from "@/components/diagnostic/external-panel"
 import { ReportView } from "@/components/diagnostic/report-view"
 import { VzorceReport } from "@/components/vzorce/report"
@@ -12,6 +13,8 @@ import { testMeta } from "@/lib/diagnostic/test-meta"
 import {
   addCoach,
   chybaText,
+  resetCoachPassword,
+  updateCoach,
   externalUsage,
   type ExternalUsage,
   createInvite,
@@ -61,6 +64,7 @@ export default function CoachPage() {
   const [cPassword, setCPassword] = useState("")
   const [cRole, setCRole] = useState<"coach" | "external">("coach")
   const [cNote, setCNote] = useState("")
+  const [cPhone, setCPhone] = useState("")
 
   const [rows, setRows] = useState<ResultSummary[] | null>(null)
   const [detail, setDetail] = useState<ResultDetail | null>(null)
@@ -196,11 +200,12 @@ export default function CoachPage() {
     e.preventDefault()
     setError(null)
     try {
-      await addCoach(session, cName, cEmail, cPassword, cRole, cNote)
+      await addCoach(session, cName, cEmail, cPassword, cRole, cNote, cPhone)
       setCName("")
       setCEmail("")
       setCPassword("")
       setCNote("")
+      setCPhone("")
       setCRole("coach")
       setCoachFormOpen(false)
       await loadCoaches()
@@ -504,6 +509,12 @@ export default function CoachPage() {
               </div>
               <label className="mt-4 block">
                 <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">
+                  Telefon (nepovinný)
+                </span>
+                <input className="diag-input" value={cPhone} onChange={(e) => setCPhone(e.target.value)} />
+              </label>
+              <label className="mt-4 block">
+                <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">
                   Poznámka {cRole === "external" ? "(např. sazba za test, smluvní podmínky)" : "(nepovinná)"}
                 </span>
                 <input
@@ -534,34 +545,21 @@ export default function CoachPage() {
 
           <div className="mt-5 flex flex-col gap-3">
             {(coaches ?? []).map((c) => (
-              <article key={c.id} className="diag-card diag-card-hover flex flex-wrap items-center gap-4 p-5">
-                <div className="min-w-[180px] flex-1">
-                  <h3 className="text-[16px] font-semibold tracking-tight">
-                    {c.name}
-                    {c.role !== "coach" && (
-                      <span className="ml-2 rounded-full bg-[var(--wm-fill-4)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--wm-text-2)]">
-                        {c.role === "master" ? "master" : "externí"}
-                      </span>
-                    )}
-                  </h3>
-                  <p className="mt-0.5 text-[13px] text-[var(--wm-text-2)]">{c.email}</p>
-                  {c.note && (
-                    <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--wm-text-3)]">{c.note}</p>
-                  )}
-                </div>
-                {c.role !== "master" && (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      await setCoachActive(session, c.id, !c.active)
-                      await loadCoaches()
-                    }}
-                    className="diag-press inline-flex h-10 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
-                  >
-                    {c.active ? "Zablokovat" : "Obnovit přístup"}
-                  </button>
-                )}
-              </article>
+              <CoachCard
+                key={c.id}
+                coach={c}
+                jaSam={c.email === meInfo.email}
+                onSave={async (data) => {
+                  await updateCoach(session, c.id, data)
+                  await loadCoaches()
+                  if (externi !== null) await loadExterni()
+                }}
+                onReset={async () => (await resetCoachPassword(session, c.id)).password}
+                onToggleActive={async () => {
+                  await setCoachActive(session, c.id, !c.active)
+                  await loadCoaches()
+                }}
+              />
             ))}
           </div>
         </div>

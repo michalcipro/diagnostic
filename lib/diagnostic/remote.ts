@@ -58,6 +58,8 @@ const listCoachesRef = makeFunctionReference<"query">("sessions:listCoaches")
 const addCoachRef = makeFunctionReference<"action">("auth:addCoach")
 const setCoachActiveRef = makeFunctionReference<"mutation">("sessions:setCoachActive")
 const changePasswordRef = makeFunctionReference<"action">("auth:changePassword")
+const resetCoachPasswordRef = makeFunctionReference<"action">("auth:resetCoachPassword")
+const updateCoachRef = makeFunctionReference<"action">("auth:updateCoach")
 const removeRef = makeFunctionReference<"mutation">("eliteDiagnostic:removeForCoach")
 const normStatsRef = makeFunctionReference<"query">("eliteDiagnostic:normStats")
 const normExportRef = makeFunctionReference<"query">("eliteDiagnostic:normExport")
@@ -203,6 +205,7 @@ export interface CoachIdentity {
 
 export interface CoachRow extends CoachIdentity {
   id: string
+  phone?: string
   /** interní poznámka mastera, například smluvní podmínky */
   note?: string
   active: boolean
@@ -284,10 +287,11 @@ export async function addCoach(
   password: string,
   role: "coach" | "external" = "coach",
   note?: string,
+  phone?: string,
 ): Promise<void> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  await c.action(addCoachRef, { sessionToken, name, email, password, role, note })
+  await c.action(addCoachRef, { sessionToken, name, email, password, role, note, phone })
 }
 
 /** Zapnutí/vypnutí přístupu kouče – pouze master. */
@@ -397,4 +401,34 @@ export async function externalUsage(sessionToken: string): Promise<ExternalUsage
   const c = client()
   if (!c) throw new Error("not-configured")
   return (await c.query(externalUsageRef, { sessionToken })) as ExternalUsage[]
+}
+
+/**
+ * Vystaví kouči nové heslo. Smí jen master.
+ *
+ * Vrací ho v čitelné podobě, protože uložené je jen jako hash a jinde se už
+ * nikdy nezobrazí. Předej ho kouči a nikam si ho neukládej.
+ */
+export async function resetCoachPassword(
+  sessionToken: string,
+  coachId: string,
+): Promise<{ password: string; name: string; email: string }> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.action(resetCoachPasswordRef, { sessionToken, coachId })) as {
+    password: string
+    name: string
+    email: string
+  }
+}
+
+/** Úprava jména a kontaktních údajů kouče. Smí jen master. */
+export async function updateCoach(
+  sessionToken: string,
+  coachId: string,
+  data: { name: string; email: string; phone?: string; note?: string },
+): Promise<void> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  await c.action(updateCoachRef, { sessionToken, coachId, ...data })
 }

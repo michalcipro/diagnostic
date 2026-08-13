@@ -183,6 +183,7 @@ export const addCoach = action({
     password: v.string(),
     /** externí kouč dostane vlastní větev klientů, na kterou my nevidíme */
     role: v.optional(v.union(v.literal("coach"), v.literal("external"))),
+    phone: v.optional(v.string()),
     note: v.optional(v.string()),
   },
   returns: v.object({ ok: v.boolean() }),
@@ -204,6 +205,7 @@ export const addCoach = action({
       passwordHash: hashPassword(args.password, salt),
       salt,
       role: args.role ?? "coach",
+      phone: args.phone?.trim() || undefined,
       note: args.note?.trim() || undefined,
     })
     return { ok: true }
@@ -232,6 +234,95 @@ export const changePassword = action({
       coachId: coach.id,
       passwordHash: hashPassword(args.newPassword, salt),
       salt,
+    })
+    return { ok: true }
+  },
+})
+
+/**
+ * Nové heslo pro cizí účet. Smí jen master.
+ *
+ * Hesla jsou uložená hashovaná, takže se stávající heslo nedá přečíst ani
+ * poslat znovu. Místo toho se vygeneruje nové, jednou se zobrazí masterovi
+ * a ten ho předá kouči. Změna hesla ukončí všechny relace daného účtu, takže
+ * kdo byl přihlášený na cizím zařízení, vypadne.
+ *
+ * Vlastní heslo si tudy master změnit nemůže: na to slouží changePassword,
+ * který vyžaduje znalost stávajícího hesla. Jinak by stačil ukradený
+ * přihlášený prohlížeč k tomu, aby se účet dal nadobro převzít.
+ */
+export const resetCoachPassword = action({
+  args: { sessionToken: v.string(), coachId: v.id("coaches") },
+  returns: v.object({ password: v.string(), name: v.string(), email: v.string() }),
+  handler: async (ctx, args): Promise<{ password: string; name: string; email: string }> => {
+    const me: Identita = await ctx.runQuery(internal.sessions.whoAmI, {
+      sessionToken: args.sessionToken,
+    })
+    if (!me || me.role !== "master") {
+      throw new ConvexError("Nové heslo může vystavit pouze master účet.")
+    }
+    if (me.id === args.coachId) {
+      throw new ConvexError(
+        "Vlastní heslo si tudy změnit nelze. Použij změnu hesla, která se ptá na to stávající.",
+      )
+    }
+    const coach = await ctx.runQuery(internal.authInternal.getCoachById, { coachId: args.coachId })
+    if (!coach) throw new ConvexError("Účet nenalezen.")
+
+    const heslo = generujHeslo()
+    const salt = crypto.randomBytes(16).toString("hex")
+    await ctx.runMutation(internal.authInternal.setPassword, {
+      coachId: args.coachId,
+      passwordHash: hashPassword(heslo, salt),
+      salt,
+    })
+    return { password: heslo, name: coach.name, email: coach.email }
+  },
+})
+
+/**
+ * Nové heslo ve tvaru čtyř skupin po čtyřech znacích.
+ *
+ * Bez podobných znaků (0/O, 1/l), aby se dalo bez chyby nadiktovat do
+ * telefonu. Devatenáct znaků z dvaatřicetiznakové abecedy dává kolem osmdesáti
+ * bitů entropie, což je na dočasné heslo víc než dost.
+ */
+function generujHeslo(): string {
+  const abeceda = "abcdefghijkmnpqrstuvwxyz23456789"
+  const bajty = crypto.randomBytes(16)
+  const znaky = [...bajty].map((b) => abeceda[b % abeceda.length])
+  return [0, 4, 8, 12].map((i) => znaky.slice(i, i + 4).join("")).join("-")
+}
+
+/** Úprava jména a kontaktních údajů kouče. Smí jen master. */
+export const updateCoach = action({
+  args: {
+    sessionToken: v.string(),
+    coachId: v.id("coaches"),
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    note: v.optional(v.string()),
+  },
+  returns: v.object({ ok: v.boolean() }),
+  handler: async (ctx, args): Promise<{ ok: boolean }> => {
+    const me: Identita = await ctx.runQuery(internal.sessions.whoAmI, {
+      sessionToken: args.sessionToken,
+    })
+    if (!me || me.role !== "master") {
+      throw new ConvexError("Upravovat účty může pouze master účet.")
+    }
+    const jmeno = args.name.trim()
+    if (jmeno.length < 2) throw new ConvexError("Zadej jméno.")
+    const email = normalizeEmail(args.email)
+    if (!email.includes("@")) throw new ConvexError("Zadej platný e-mail.")
+
+    await ctx.runMutation(internal.authInternal.updateCoachProfile, {
+      coachId: args.coachId,
+      name: jmeno,
+      email,
+      phone: args.phone?.trim() || undefined,
+      note: args.note?.trim() || undefined,
     })
     return { ok: true }
   },

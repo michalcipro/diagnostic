@@ -23,6 +23,8 @@ export default defineSchema({
      *   větvi zná jen počty, typy testů a data, aby mohl vystavit fakturu.
      */
     role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
+    /** telefon, ať má master kontakt na jednom místě s účtem */
+    phone: v.optional(v.string()),
     /** interní poznámka mastera k účtu, například smluvní podmínky */
     note: v.optional(v.string()),
     active: v.boolean(),
