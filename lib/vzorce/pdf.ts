@@ -9,8 +9,10 @@ import {
   datumLokalne,
   novyDokument,
 } from "../diagnostic/pdf/sazba"
-import type { Gender, PersonInfo } from "../diagnostic/types"
-import { OBSAH } from "./data/obsah"
+import { TEST_NAMES, UI } from "../diagnostic/i18n"
+import type { Gender, Lang, PersonInfo } from "../diagnostic/types"
+import { obsahVzorce, nazevVzorce } from "./content"
+import { UI_VZORCE } from "./i18n"
 import { vyhodnot } from "./scoring"
 import {
   NAZVY_DOMEN,
@@ -46,6 +48,7 @@ function prstenec(
   polomer: number,
   podil: number,
   skore: number,
+  popisSkaly: string,
 ) {
   const doc = s.doc
   const tloustka = 3.4
@@ -80,11 +83,12 @@ function prstenec(
   s.pismo(19, true, BARVA.text)
   doc.text(String(skore), stred.x, stred.y + 1.4, { align: "center" })
   s.pismo(7, false, BARVA.slaba)
-  doc.text("z 60", stred.x, stred.y + 6, { align: "center" })
+  doc.text(popisSkaly, stred.x, stred.y + 6, { align: "center" })
 }
 
 /** Tři prstence vedle sebe s popiskem pod nimi. Vrací spotřebovanou výšku. */
-function trojicePrstencu(s: Sazba, top3: VzorecSkore[], g: (t: string) => string) {
+function trojicePrstencu(s: Sazba, top3: VzorecSkore[], g: (t: string) => string, lang: Lang) {
+  const t = UI_VZORCE[lang]
   const polomer = 13
   const vyskaBloku = 2 * polomer + 22
   s.misto(vyskaBloku + 4)
@@ -92,15 +96,18 @@ function trojicePrstencu(s: Sazba, top3: VzorecSkore[], g: (t: string) => string
   const sloupec = SIRKA / top3.length
   top3.forEach((v, i) => {
     const stredX = OKRAJ.levy + sloupec * (i + 0.5)
-    prstenec(s, { x: stredX, y: horni + polomer }, polomer, (v.skore - OSA_MIN) / 50, v.skore)
+    prstenec(s, { x: stredX, y: horni + polomer }, polomer, (v.skore - OSA_MIN) / 50, v.skore, t.z60)
     const zakladPopisku = horni + 2 * polomer + 6
     s.pismo(6.8, true, BARVA.slaba)
-    s.doc.text(`${i + 1}. MÍSTO`, stredX, zakladPopisku, { align: "center", charSpace: 0.35 })
+    s.doc.text(t.misto(i + 1).toUpperCase(), stredX, zakladPopisku, {
+      align: "center",
+      charSpace: 0.35,
+    })
     s.pismo(9.6, true, BARVA.text)
-    const nazev = s.doc.splitTextToSize(g(OBSAH[v.id].nazev), sloupec - 6) as string[]
+    const nazev = s.doc.splitTextToSize(g(nazevVzorce(v.id, lang)), sloupec - 6) as string[]
     nazev.forEach((r, k) => s.doc.text(r, stredX, zakladPopisku + 5 + k * 4.6, { align: "center" }))
     s.pismo(8, false, BARVA.text2)
-    s.doc.text(NAZVY_PASEM[v.pasmo], stredX, zakladPopisku + 5 + nazev.length * 4.6 + 3.4, {
+    s.doc.text(NAZVY_PASEM[lang][v.pasmo], stredX, zakladPopisku + 5 + nazev.length * 4.6 + 3.4, {
       align: "center",
     })
   })
@@ -110,13 +117,14 @@ function trojicePrstencu(s: Sazba, top3: VzorecSkore[], g: (t: string) => string
 export interface VzorcePdfVstup {
   person: PersonInfo
   answers: OdpovediMapa
+  lang: Lang
   durationSec?: number
 }
 
-/** Název souboru: test, klient, datum. */
+/** Název souboru: test, klient, datum. Bez diakritiky, ať projde kdekoli. */
 export function vzorcePdfFileName(vstup: VzorcePdfVstup): string {
   return (
-    ["Emocionalne-destruktivni vzorce", vstup.person.name, vstup.person.fillDate]
+    [UI_VZORCE[vstup.lang].nazevSouboru, vstup.person.name, vstup.person.fillDate]
       .filter(Boolean)
       .join(" - ")
       .replace(/[/\\?%*:|"<>]/g, "-")
@@ -125,30 +133,31 @@ export function vzorcePdfFileName(vstup: VzorcePdfVstup): string {
 }
 
 export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
-  const { person, answers, durationSec } = vstup
+  const { person, answers, lang, durationSec } = vstup
   const gender: Gender = person.gender ?? "male"
-  const g = (t: string) => applyGender(t, gender)
+  const g = (x: string) => applyGender(x, gender)
   const v = vyhodnot(answers, durationSec)
-  const spojeni = propoj(v)
+  const spojeni = propoj(v, lang)
+  const t = UI_VZORCE[lang]
 
   const doc = novyDokument()
   const s = new Sazba(doc)
 
   // ---------- hlavička ----------
-  s.text("WINNING MINDS", {
+  s.text(UI[lang].brand, {
     velikost: 7.6,
     tucne: true,
     barva: BARVA.slaba,
     prostrkani: 0.6,
   })
   s.mezera(2.5)
-  s.text("Emocionálně-destruktivní vzorce · Vyhodnocení", {
+  s.text(`${TEST_NAMES.vzorce[lang]} · ${UI[lang].reportTitle}`, {
     velikost: 18,
     tucne: true,
     radek: 8,
   })
   s.mezera(1.5)
-  s.text("Diagnostický profil automatických emočních reakcí, vztahových strategií a výkonových bloků", {
+  s.text(t.podnadpis, {
     velikost: 10,
     barva: BARVA.text2,
     radek: 5,
@@ -158,38 +167,34 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
   s.mezera(7)
 
   s.mrizkaUdaju([
-    { popis: "Respondent", hodnota: person.name || "–" },
-    { popis: "Role / oblast", hodnota: person.role || "–" },
-    { popis: "Datum vyplnění", hodnota: datumLokalne(person.fillDate, "cs") },
+    { popis: t.respondent, hodnota: person.name || "–" },
+    { popis: t.role, hodnota: person.role || "–" },
+    { popis: t.datum, hodnota: datumLokalne(person.fillDate, lang) },
   ])
   s.mezera(6)
 
   if (!v.kompletni) {
-    s.ramecek(
-      `Dotazník není kompletní (${v.zodpovezeno} ze ${POCET_POLOZEK}). U vzorců s chybějícími odpověďmi je skóre dopočítané z průměru zodpovězených položek. Vzorce, kde chybí víc než pětina odpovědí, se do pořadí nezařazují.`,
-      { velikost: 9 },
-    )
+    s.ramecek(`${t.neuplnyTitulek(v.zodpovezeno, POCET_POLOZEK)} ${t.neuplnyPopis}`, {
+      velikost: 9,
+    })
     s.mezera(3)
   }
 
   // ---------- profil všech vzorců ----------
-  s.nadpis("Profil všech vzorců")
-  s.text(
-    "Skóre jednoho vzorce je součet deseti odpovědí, tedy 10 až 60 bodů. Číslo v závorce ukazuje, kolik tvrzení respondent označil hodnotou 5 nebo 6; ta jsou významná i tehdy, když celkové skóre vysoké není.",
-    { velikost: 9, barva: BARVA.text2, radek: 4.4 },
-  )
+  s.nadpis(t.profilTitulek)
+  s.text(t.profilPopisPdf, { velikost: 9, barva: BARVA.text2, radek: 4.4 })
   s.mezera(5)
 
   const vBoji = new Set(v.top3.map((x) => x.id))
   for (const x of v.vsechny) {
-    const nazev = OBSAH[x.id].nazev
+    const nazev = nazevVzorce(x.id, lang)
     if (!x.vykazuje) {
-      s.radekChybi(nazev, `zodpovězeno ${x.zodpovezeno} z ${x.celkem} položek`)
+      s.radekChybi(nazev, t.zodpovezenoZ(x.zodpovezeno, x.celkem))
       continue
     }
     const duraz = vBoji.has(x.id)
     const hodnota = x.silnychOdpovedi > 0 ? `${x.skore} (${x.silnychOdpovedi})` : String(x.skore)
-    s.radekSkore(nazev, hodnota, NAZVY_PASEM[x.pasmo], STITEK_NEUTRALNI, procenta(x.skore), {
+    s.radekSkore(nazev, hodnota, NAZVY_PASEM[lang][x.pasmo], STITEK_NEUTRALNI, procenta(x.skore), {
       tucne: duraz,
       mezeraPo: 7,
       barvaPruhu: duraz ? BARVA.znacka : BARVA.tlumena,
@@ -214,16 +219,13 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
 
   if (oblasti.length) {
     if (s.zbyva() < 70) s.zalom()
-    s.nadpis("Zatížení oblastí")
-    s.text(
-      "Tentýž profil po oblastech, ze kterých vzorce pocházejí. Když je zatížená jedna oblast, nejde o několik problémů, ale o jedno téma ve více podobách. V závorce je počet vzorců, ze kterých se průměr počítá.",
-      { velikost: 9, barva: BARVA.text2, radek: 4.4 },
-    )
+    s.nadpis(t.oblastiTitulek)
+    s.text(t.oblastiPopisPdf, { velikost: 9, barva: BARVA.text2, radek: 4.4 })
     s.mezera(5)
     const nejvic = oblasti[0].prumer
     for (const o of oblasti) {
       s.radekSkore(
-        `${NAZVY_DOMEN_KRATCE[o.domena]} (${o.pocet})`,
+        `${NAZVY_DOMEN_KRATCE[lang][o.domena]} (${o.pocet})`,
         String(o.prumer),
         "",
         STITEK_NEUTRALNI,
@@ -241,22 +243,19 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
   // ---------- tři nejaktivnější ----------
   if (v.top3.length) {
     s.zalom()
-    s.nadpis("Tři nejaktivnější vzorce", 15)
-    s.text(
-      "Tohle jsou vzorce, které se u respondenta aktivují nejsilněji. Nejsou to nálepky ani diagnóza. Je to popis mechanismu, který se spouští pod tlakem.",
-      { velikost: 9.4, barva: BARVA.text2, radek: 4.5 },
-    )
+    s.nadpis(t.top3Titulek, 15)
+    s.text(t.top3Popis, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
     s.mezera(6)
-    trojicePrstencu(s, v.top3, g)
+    trojicePrstencu(s, v.top3, g, lang)
 
     v.top3.forEach((x, i) => {
-      const o = OBSAH[x.id]
+      const o = obsahVzorce(x.id, lang)
       const d = vzorec(x.id).domena
       s.misto(60)
       s.mezera(2)
       s.linka()
       s.mezera(7)
-      s.text(`${i + 1}. MÍSTO · ${NAZVY_DOMEN[d].toUpperCase()}`, {
+      s.text(`${t.misto(i + 1).toUpperCase()} · ${NAZVY_DOMEN[lang][d].toUpperCase()}`, {
         velikost: 7,
         tucne: true,
         barva: BARVA.slaba,
@@ -269,7 +268,7 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
       s.text(o.tema, { velikost: 8.8, barva: BARVA.slaba, radek: 4.1 })
       s.mezera(4)
 
-      s.radekSkore("", `${x.skore}/60`, NAZVY_PASEM[x.pasmo], STITEK_NEUTRALNI, procenta(x.skore), {
+      s.radekSkore("", `${x.skore}/60`, NAZVY_PASEM[lang][x.pasmo], STITEK_NEUTRALNI, procenta(x.skore), {
         tucne: true,
         mezeraPo: 6.5,
       })
@@ -279,15 +278,15 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
 
       const silne =
         x.silnychOdpovedi > 0
-          ? ` Hodnotou 5 nebo 6 označeno ${x.silnychOdpovedi} z 10 tvrzení, konkrétně ${x.silnePolozky.join(", ")}.`
+          ? ` ${t.silneOdpovedi(x.silnychOdpovedi, x.silnePolozky.join(", "))}`
           : ""
-      s.ramecek(`${NAZVY_PASEM[x.pasmo]}. ${g(o.pasma[x.pasmo])}${silne}`, { velikost: 9.2 })
+      s.ramecek(`${NAZVY_PASEM[lang][x.pasmo]}. ${g(o.pasma[x.pasmo])}${silne}`, { velikost: 9.2 })
       s.mezera(4)
 
       for (const [titulek, obsah, tlumeny] of [
-        ["Jak to vypadá zevnitř", o.prozitek, false],
-        ["Co dělá pod tlakem", o.podTlakem, false],
-        ["Odkud se to vzalo", o.puvod, true],
+        [t.jakVypada, o.prozitek, false],
+        [t.podTlakem, o.podTlakem, false],
+        [t.odkud, o.puvod, true],
       ] as [string, string, boolean][]) {
         s.misto(20)
         s.text(titulek.toUpperCase(), {
@@ -312,24 +311,22 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
   if (v.situacni.length) {
     if (s.zbyva() < 60) s.zalom()
     s.mezera(2)
-    s.nadpis("Situačně aktivované vzorce")
-    s.text(
-      "Tyhle vzorce se nedostaly do první trojice, ale mají tři a více tvrzení označených nejvyššími hodnotami. To znamená, že se neaktivují trvale, zato v konkrétních situacích silně. Stojí za to se na ně v rozhovoru zeptat.",
-      { velikost: 9.4, barva: BARVA.text2, radek: 4.5 },
-    )
+    s.nadpis(t.situacniTitulek)
+    s.text(t.situacniPopis, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
     s.mezera(5)
     for (const x of v.situacni) {
       s.misto(12)
       const zaklad = s.y
       s.pismo(9.8, true, BARVA.text)
-      s.doc.text(OBSAH[x.id].nazev, OKRAJ.levy, zaklad)
+      s.doc.text(nazevVzorce(x.id, lang), OKRAJ.levy, zaklad)
       s.pismo(9.4, true, BARVA.text)
       s.doc.text(`${x.skore}/60`, PRAVY_KRAJ, zaklad, { align: "right" })
       s.y = zaklad + 4.4
-      s.text(
-        `${x.silnychOdpovedi}× hodnota 5 nebo 6 · položky ${x.silnePolozky.join(", ")}`,
-        { velikost: 8.6, barva: BARVA.slaba, radek: 4.2 },
-      )
+      s.text(t.situacniRadek(x.silnychOdpovedi, x.silnePolozky.join(", ")), {
+        velikost: 8.6,
+        barva: BARVA.slaba,
+        radek: 4.2,
+      })
       s.mezera(3.5)
     }
     s.mezera(3)
@@ -339,17 +336,14 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
   if (spojeni) {
     // Shrnutí je pro klienta to nejdůležitější a musí držet pohromadě.
     s.zalom()
-    s.text("Jak to funguje dohromady", {
+    s.text(t.spojeniTitulek, {
       velikost: 16,
       tucne: true,
       barva: BARVA.znacka,
       radek: 7.5,
     })
     s.mezera(1.5)
-    s.text(
-      "Tři vzorce nejsou tři oddělené problémy. Teprve jejich spojení vysvětluje chování, kterému člověk sám nerozumí.",
-      { velikost: 9, barva: BARVA.slaba, radek: 4.4 },
-    )
+    s.text(t.spojeniPopis, { velikost: 9, barva: BARVA.slaba, radek: 4.4 })
     s.mezera(3)
     s.linka()
     s.mezera(7)
@@ -357,7 +351,7 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
     s.text(g(spojeni.domeny), { velikost: 10.2, radek: 5.1 })
     s.mezera(6)
 
-    s.text("KDE SE NAVZÁJEM ŽIVÍ", {
+    s.text(t.kdeSeZivi.toUpperCase(), {
       velikost: 7,
       tucne: true,
       barva: BARVA.slaba,
@@ -378,12 +372,9 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
 
   // ---------- poznámka na závěr ----------
   s.mezera(6)
-  s.text(
-    "Tento profil není nálepka ani diagnóza. Je to mapa. Smyslem není člověka ve vzorci zafixovat, ale pojmenovat mechanismus, který se aktivuje pod tlakem, a vytvořit prostor pro přesnější práci. Výsledek nenahrazuje psychologické ani lékařské vyšetření a slouží jako podklad pro rozhovor s koučem.",
-    { velikost: 8.6, barva: BARVA.slaba, radek: 4.2 },
-  )
+  s.text(t.zaverPdf, { velikost: 8.6, barva: BARVA.slaba, radek: 4.2 })
 
-  s.paticka("Winning Minds s.r.o. · Praha 6 · winningminds.cz · Důvěrný dokument")
+  s.paticka(UI[lang].confidential)
 
   return doc.output("blob")
 }

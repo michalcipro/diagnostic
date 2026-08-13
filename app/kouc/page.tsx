@@ -340,6 +340,7 @@ export default function CoachPage() {
           <VzorceReport
             person={detail.person}
             answers={detail.answers}
+            lang={detailLang}
             durationSec={detail.durationSec}
           />
         ) : (
@@ -852,6 +853,7 @@ async function exportPdf(detail: ResultDetail, lang: Lang): Promise<void> {
       // Škála vzorců má šest stupňů, ELITE pět; uložené odpovědi jsou v obou
       // případech čísla, typ se liší jen rozsahem.
       answers: detail.answers as unknown as OdpovediMapa,
+      lang,
       durationSec: detail.durationSec,
     }
     blob = buildVzorcePdf(vstup)

@@ -17,7 +17,7 @@ export const OBSAH: Record<VzorecId, VzorecObsah> = {
     podTlakem:
       "Pod tlakem se zkracuje tvoje tolerance k nejistotě. Nepřijatá zpráva, změněný tón hlasu nebo pár dní bez kontaktu se okamžitě čtou jako začátek konce. Rozhodnutí pak neděláš podle toho, co chceš, ale podle toho, co udrží druhého na místě.",
     puvod:
-      "Za vzorcem stojí zkušenost, že blízkost je nespolehlivá. Nemusí jít o dramatickou ztrátu. Stačí rodič, který byl jednou vřelý a podruhé nedostupný, nemoc v rodině, opakované stěhování a ztráta kamarádů, nebo dospělý, jehož nálada se nedala předvídat. Dítě si z toho neodnese myšlenku, ale tělesnou zkušenost: to, co mám rád, se může každou chvíli ztratit. A protože se to naučilo dřív než slova, nedá se to přepsat argumentem.",
+      "Za vzorcem stojí zkušenost, že blízkost je nespolehlivá. Nemusí jít o dramatickou ztrátu. Stačí rodič, který byl jednou vřelý a podruhé nedostupný, nemoc v rodině, opakované stěhování a ztráta kamarádů, nebo dospělý, jehož nálada se nedala předvídat. Dítě si z toho neodnese myšlenku, ale tělesnou zkušenost: to, co mám {rád|ráda}, se může každou chvíli ztratit. A protože se to naučilo dřív než slova, nedá se to přepsat argumentem.",
     pasma: {
       "velmi-nizka":
         "Tenhle vzorec u tebe prakticky nesvítí. Ztráty tě zasahují, ale nedefinují tvoje vztahy.",
@@ -83,7 +83,7 @@ export const OBSAH: Record<VzorecId, VzorecObsah> = {
     pasma: {
       "velmi-nizka": "Vzorec je prakticky neaktivní. Ve skupině se pohybuješ přirozeně.",
       nizka: "Objevuje se okrajově, v novém nebo hodně formálním prostředí.",
-      stredni: "Vzorec je aktivní. Ve skupinách stojíš spíš stranou, než bys chtěl.",
+      stredni: "Vzorec je aktivní. Ve skupinách stojíš spíš stranou, než bys {chtěl|chtěla}.",
       vysoka: "Vzorec výrazně ovlivňuje, kam chodíš, co si dovolíš říct a jak velkou skupinu uneseš.",
       dominantni: "Vzorec je dominantní. Pocit, že nepatříš, je stálý a řídí tvoje volby.",
     },
@@ -94,17 +94,17 @@ export const OBSAH: Record<VzorecId, VzorecObsah> = {
     tema: "Nejistota v samostatnosti a rozhodování",
     motto: "Já {sám|sama} to nezvládnu.",
     prozitek:
-      "Běžný život ti připadá jako něco, na co nemáš dost sil. Nejde o lenost ani o skutečnou neschopnost, často zvládáš mnohem víc, než si připouštíš. Jde o pocit, že bez druhého to neustojíš. Nová situace vyvolá úzkost, rozhodnutí se odkládají, dokud někdo neporadí, a i po rozhodnutí zůstává pochybnost, jestli to nebyla chyba. Vlastnímu úsudku nevěříš, a tak si ho necháváš potvrzovat. Existuje i obrácená podoba, která vypadá jako pravý opak: nezávislost tak zásadová, že nepřijmeš pomoc, ani když ji opravdu potřebuješ. Není to síla, je to stejný vzorec z druhé strany. Přijmout pomoc by totiž znamenalo připustit, že sám nestačíš, a to je nesnesitelné. Obě podoby stojí na stejné větě: sám na to nemám.",
+      "Běžný život ti připadá jako něco, na co nemáš dost sil. Nejde o lenost ani o skutečnou neschopnost, často zvládáš mnohem víc, než si připouštíš. Jde o pocit, že bez druhého to neustojíš. Nová situace vyvolá úzkost, rozhodnutí se odkládají, dokud někdo neporadí, a i po rozhodnutí zůstává pochybnost, jestli to nebyla chyba. Vlastnímu úsudku nevěříš, a tak si ho necháváš potvrzovat. Existuje i obrácená podoba, která vypadá jako pravý opak: nezávislost tak zásadová, že nepřijmeš pomoc, ani když ji opravdu potřebuješ. Není to síla, je to stejný vzorec z druhé strany. Přijmout pomoc by totiž znamenalo připustit, že {sám|sama} nestačíš, a to je nesnesitelné. Obě podoby stojí na stejné větě: {sám|sama} na to nemám.",
     podTlakem:
       "Pod tlakem se rozhodování zastaví. Hledáš někoho, kdo to rozhodne za tebe, nebo se rozhodnutí vyhneš tak dlouho, až ho udělá čas. Odpovědnost se přesouvá jinam a s ní i pocit, že máš na svůj život vliv.",
     puvod:
       "Vzorec obvykle nevzniká z nedostatku péče, ale z jejího přebytku. Rodič, který dělal věci za tebe rychleji a lépe, který tě chránil před chybou, který dával najevo úzkost, kdykoli jsi něco {zkusil|zkusila} {sám|sama}. Dítě z toho vyvodí, že svět je nebezpečnější a ono samo méně schopné, než je pravda. Někdy působí i opak: prostředí tak nepředvídatelné, že se samostatnost nedala bezpečně vyzkoušet.",
     pasma: {
-      "velmi-nizka": "Vzorec je prakticky neaktivní. Rozhodnutí děláš sám a stojíš si za nimi.",
+      "velmi-nizka": "Vzorec je prakticky neaktivní. Rozhodnutí děláš {sám|sama} a stojíš si za nimi.",
       nizka: "Objevuje se okrajově, u velkých nebo neznámých rozhodnutí.",
       stredni: "Vzorec je aktivní. Bez potvrzení zvenčí se rozhoduje výrazně hůř.",
       vysoka: "Vzorec výrazně ovlivňuje tvoji samostatnost a míru, do jaké řídíš vlastní život.",
-      dominantni: "Vzorec je dominantní. Otázka, jestli to zvládneš sám, stojí pod většinou rozhodnutí.",
+      dominantni: "Vzorec je dominantní. Otázka, jestli to zvládneš {sám|sama}, stojí pod většinou rozhodnutí.",
     },
   },
 
@@ -115,7 +115,7 @@ export const OBSAH: Record<VzorecId, VzorecObsah> = {
     prozitek:
       "Očekáváš, že se stane něco zlého, a zároveň že tomu nedokážeš zabránit. Vzorec pracuje ve dvou směrech najednou: zvětšuje nebezpečí a zmenšuje tvoji schopnost mu čelit. Proto nepomáhá, když si spočítáš, jak je něco nepravděpodobné. Ohrožení mívá čtyři obvyklé oblasti a nemusíš mít všechny. Zdraví a nemoc, kdy sleduješ tělesné projevy a hledáš, co znamenají. Nebezpečí zvenčí, tedy nehody, přepadení, létání, cestování. Peníze, tedy strach, že o všechno přijdeš. A ztráta kontroly, tedy obava, že se před lidmi neudržíš, zhroutíš nebo se zblázníš. Nejnáročnější na tom bývá, že úzkost neubývá tím, že se nic nestane. Každý den bez katastrofy je jen den, kdy zatím nepřišla.",
     podTlakem:
-      "Pod tlakem se zužuje výběr. Rozhoduješ se tak, abys minimalizoval riziko, ne abys něčeho dosáhl. Příležitosti se odmítají dřív, než se stihnou zvážit, a pozornost se drží u toho, co by se mohlo pokazit.",
+      "Pod tlakem se zužuje výběr. Rozhoduješ se tak, abys {minimalizoval|minimalizovala} riziko, ne abys něčeho {dosáhl|dosáhla}. Příležitosti se odmítají dřív, než se stihnou zvážit, a pozornost se drží u toho, co by se mohlo pokazit.",
     puvod:
       "Za vzorcem obvykle stojí dospělý, který svět ukazoval jako nebezpečné místo. Přehnaně ochraňující rodič, který varoval před vším, sám žil v úzkosti a dával najevo, že venku číhá pohroma. Nebo naopak skutečné ohrožení v dětství: vážná nemoc v rodině, nehoda, chudoba, nestabilní domov. Dítě si z toho odnese dvě přesvědčení najednou, že svět je nebezpečný a že ono na něj nestačí.",
     pasma: {

@@ -1,3 +1,4 @@
+import type { Lang } from "../diagnostic/types"
 import type { Domena, PasmoRozsah, VzorecDef, VzorecId } from "./types"
 
 // Struktura testu emocionálně-destruktivních vzorců.
@@ -37,7 +38,18 @@ export const PASMA: PasmoRozsah[] = [
   { min: 50, max: 60, pasmo: "dominantni" },
 ]
 
-export const NAZVY_PASEM: Record<PasmoRozsah["pasmo"], string> = {
+// ---------------------------------------------------------------------------
+// Názvy, které vidí kouč ve vyhodnocení, tedy ve všech jazycích aplikace.
+//
+// Angličtinu obsah vzorců zatím nemá, takže na ni ukazuje česká tabulka. Je to
+// vědomá náhrada podle stejného pravidla jako v lib/diagnostic/lang.ts: radši
+// srozumitelný text v příbuzném jazyce než prázdno. Až překlad přijde, změní
+// se u každé tabulky jediný řádek.
+// ---------------------------------------------------------------------------
+
+type Pasmo = PasmoRozsah["pasmo"]
+
+const PASMA_CS: Record<Pasmo, string> = {
   "velmi-nizka": "Velmi nízká aktivace",
   nizka: "Nízká aktivace",
   stredni: "Střední aktivace",
@@ -45,12 +57,52 @@ export const NAZVY_PASEM: Record<PasmoRozsah["pasmo"], string> = {
   dominantni: "Dominantní aktivace",
 }
 
+const PASMA_SK: Record<Pasmo, string> = {
+  "velmi-nizka": "Veľmi nízka aktivácia",
+  nizka: "Nízka aktivácia",
+  stredni: "Stredná aktivácia",
+  vysoka: "Vysoká aktivácia",
+  dominantni: "Dominantná aktivácia",
+}
+
+export const NAZVY_PASEM: Record<Lang, Record<Pasmo, string>> = {
+  cs: PASMA_CS,
+  sk: PASMA_SK,
+  en: PASMA_CS,
+}
+
+/**
+ * Zkrácené názvy pásem do legendy grafu, kde stojí za rozsahem („20–29 nízká“).
+ * Vlastní tabulka, ne uříznuté slovo z názvu: každý jazyk krátí jinde.
+ */
+const PASMA_KRATCE_CS: Record<Pasmo, string> = {
+  "velmi-nizka": "velmi nízká",
+  nizka: "nízká",
+  stredni: "střední",
+  vysoka: "vysoká",
+  dominantni: "dominantní",
+}
+
+const PASMA_KRATCE_SK: Record<Pasmo, string> = {
+  "velmi-nizka": "veľmi nízka",
+  nizka: "nízka",
+  stredni: "stredná",
+  vysoka: "vysoká",
+  dominantni: "dominantná",
+}
+
+export const NAZVY_PASEM_KRATCE: Record<Lang, Record<Pasmo, string>> = {
+  cs: PASMA_KRATCE_CS,
+  sk: PASMA_KRATCE_SK,
+  en: PASMA_KRATCE_CS,
+}
+
 /**
  * Zkrácené názvy oblastí pro popisky v grafu. Plný název se do sloupce vedle
  * osy nevejde a useknutý popisek je horší než kratší, ale celý; plné znění
  * zůstává v textu a v bublině nad řádkem.
  */
-export const NAZVY_DOMEN_KRATCE: Record<Domena, string> = {
+const DOMENY_KRATCE_CS: Record<Domena, string> = {
   odpojeni: "Odpojení a odmítnutí",
   autonomie: "Autonomie a výkon",
   hranice: "Narušené hranice",
@@ -58,7 +110,21 @@ export const NAZVY_DOMEN_KRATCE: Record<Domena, string> = {
   ostrazitost: "Ostražitost a nároky",
 }
 
-export const NAZVY_DOMEN: Record<Domena, string> = {
+const DOMENY_KRATCE_SK: Record<Domena, string> = {
+  odpojeni: "Odpojenie a odmietnutie",
+  autonomie: "Autonómia a výkon",
+  hranice: "Narušené hranice",
+  zamereni: "Zameranie na druhých",
+  ostrazitost: "Ostražitosť a nároky",
+}
+
+export const NAZVY_DOMEN_KRATCE: Record<Lang, Record<Domena, string>> = {
+  cs: DOMENY_KRATCE_CS,
+  sk: DOMENY_KRATCE_SK,
+  en: DOMENY_KRATCE_CS,
+}
+
+const DOMENY_CS: Record<Domena, string> = {
   odpojeni: "Odpojení a odmítnutí",
   autonomie: "Narušená autonomie a výkon",
   hranice: "Narušené hranice",
@@ -66,16 +132,45 @@ export const NAZVY_DOMEN: Record<Domena, string> = {
   ostrazitost: "Přehnaná ostražitost a nároky",
 }
 
+const DOMENY_SK: Record<Domena, string> = {
+  odpojeni: "Odpojenie a odmietnutie",
+  autonomie: "Narušená autonómia a výkon",
+  hranice: "Narušené hranice",
+  zamereni: "Zameranie na druhých",
+  ostrazitost: "Prehnaná ostražitosť a nároky",
+}
+
+export const NAZVY_DOMEN: Record<Lang, Record<Domena, string>> = {
+  cs: DOMENY_CS,
+  sk: DOMENY_SK,
+  en: DOMENY_CS,
+}
+
 /**
  * Co v dětství zůstalo nenaplněné. Používá se v propojeném shrnutí, aby
- * několik vzorců ze stejné domény dalo jednu větu místo tří.
+ * několik vzorců ze stejné domény dalo jednu větu místo tří. Tvar je vždycky
+ * první pád, protože se doplňuje za sloveso „chybí“.
  */
-export const POTREBA_DOMENY: Record<Domena, string> = {
+const POTREBA_CS: Record<Domena, string> = {
   odpojeni: "bezpečná a spolehlivá blízkost",
   autonomie: "podpora k samostatnosti a důvěra ve vlastní síly",
   hranice: "laskavé, ale pevné hranice",
   zamereni: "právo mít vlastní potřeby a říkat je nahlas",
   ostrazitost: "přijetí bez podmínek a bez výkonu",
+}
+
+const POTREBA_SK: Record<Domena, string> = {
+  odpojeni: "bezpečná a spoľahlivá blízkosť",
+  autonomie: "podpora k samostatnosti a dôvera vo vlastné sily",
+  hranice: "láskavé, ale pevné hranice",
+  zamereni: "právo mať vlastné potreby a hovoriť ich nahlas",
+  ostrazitost: "prijatie bez podmienok a bez výkonu",
+}
+
+export const POTREBA_DOMENY: Record<Lang, Record<Domena, string>> = {
+  cs: POTREBA_CS,
+  sk: POTREBA_SK,
+  en: POTREBA_CS,
 }
 
 /** Minimální podíl zodpovězených položek, aby se skóre vzorce vykázalo. */

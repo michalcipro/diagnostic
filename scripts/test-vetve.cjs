@@ -76,7 +76,7 @@ const hodi = (fn) => {
   }
 }
 
-console.log("— seznam vyplnění —")
+console.log("– seznam vyplnění –")
 rekni(
   JSON.stringify(listForCoach(KOUCI.M)) === JSON.stringify(["v-stare", "v-master", "v-kouc"]),
   "master vidí naše a stará, ne externí",
@@ -88,7 +88,7 @@ rekni(
 rekni(JSON.stringify(listForCoach(KOUCI.E1)) === JSON.stringify(["v-e1"]), "externí 1 vidí jen své")
 rekni(JSON.stringify(listForCoach(KOUCI.E2)) === JSON.stringify(["v-e2"]), "externí 2 vidí jen své")
 
-console.log("\n— detail na přímý dotaz (uhodnuté id) —")
+console.log("\n– detail na přímý dotaz (uhodnuté id) –")
 rekni(getForCoach(KOUCI.E1, "v-master") === null, "externí nedostane naše vyplnění")
 rekni(getForCoach(KOUCI.E1, "v-stare") === null, "externí nedostane ani stará vyplnění")
 rekni(getForCoach(KOUCI.E1, "v-e2") === null, "externí nedostane vyplnění druhého externího")
@@ -96,12 +96,12 @@ rekni(getForCoach(KOUCI.E1, "v-e1") === "v-e1", "externí dostane své vlastní"
 rekni(getForCoach(KOUCI.M, "v-e1") === null, "master nedostane vyplnění externího")
 rekni(getForCoach(KOUCI.K, "v-e1") === null, "náš kouč nedostane vyplnění externího")
 
-console.log("\n— mazání —")
+console.log("\n– mazání –")
 rekni(hodi(() => removeForCoach(KOUCI.E1, "v-master")), "externí nesmaže naše vyplnění")
 rekni(hodi(() => removeForCoach(KOUCI.M, "v-e1")), "master nesmaže vyplnění externího")
 rekni(removeForCoach(KOUCI.E1, "v-e1") === "ok", "externí smaže své vlastní")
 
-console.log("\n— normy a přehled větví —")
+console.log("\n– normy a přehled větví –")
 rekni(hodi(() => normStats(KOUCI.E1)), "externí nevidí na naše normy")
 rekni(normStats(KOUCI.K) === "data norem", "náš kouč na normy vidí")
 rekni(hodi(() => externalUsage(KOUCI.K)), "náš kouč nevidí přehled větví")
@@ -121,7 +121,7 @@ const createInvite = (me) => ({ coachId: me.id })
 /** convex/eliteDiagnostic.ts: submitWithInvite – vyplnění dědí vlastníka. */
 const submitWithInvite = (pozvanka) => ({ coachId: pozvanka.coachId })
 
-console.log("\n— budoucí vyplnění: pozvánka předá vlastníka —")
+console.log("\n– budoucí vyplnění: pozvánka předá vlastníka –")
 for (const [kdo, popis] of [
   ["M", "master"],
   ["K", "náš kouč"],
@@ -139,7 +139,7 @@ rekni(odExterniho.coachId === "E1", "pozvánka od externího dá vyplnění vlas
 rekni(filtrViditelnosti(KOUCI.E1)(odExterniho.coachId), "externí na své budoucí vyplnění vidí")
 rekni(!filtrViditelnosti(KOUCI.M)(odExterniho.coachId), "master na jeho budoucí vyplnění nevidí")
 
-console.log("\n— stará pozvánka bez vlastníka, vyplněná až teď —")
+console.log("\n– stará pozvánka bez vlastníka, vyplněná až teď –")
 // Odkazy rozeslané před zavedením vlastnictví vlastníka nemají. Když je klient
 // vyplní až po nasazení, vyplnění zůstane bez vlastníka, tedy naše.
 const zeStarePozvanky = submitWithInvite({ coachId: undefined })

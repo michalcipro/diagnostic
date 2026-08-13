@@ -4,11 +4,14 @@ import {
   NAZVY_DOMEN,
   NAZVY_DOMEN_KRATCE,
   NAZVY_PASEM,
+  NAZVY_PASEM_KRATCE,
   PASMA,
   VZORCE,
   vzorec,
 } from "@/lib/vzorce/structure"
-import { OBSAH } from "@/lib/vzorce/data/obsah"
+import { nazevVzorce } from "@/lib/vzorce/content"
+import { UI_VZORCE } from "@/lib/vzorce/i18n"
+import type { Lang } from "@/lib/diagnostic/types"
 import type { Domena, Pasmo, VzorecSkore } from "@/lib/vzorce/types"
 
 // Grafy k profilu vzorců.
@@ -126,11 +129,11 @@ function Stupnice() {
 }
 
 /** Kolečko s počtem tvrzení označených hodnotou 5 nebo 6. */
-function Odznak({ pocet }: { pocet: number }) {
+function Odznak({ pocet, lang }: { pocet: number; lang: Lang }) {
   return (
     <span
       className="inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-[var(--wm-track)] text-[11px] font-semibold leading-none tabular-nums text-[var(--wm-text-2)]"
-      title={`${pocet} tvrzení označeno hodnotou 5 nebo 6`}
+      title={UI_VZORCE[lang].odznakTitulek(pocet)}
     >
       {pocet}
     </span>
@@ -138,16 +141,18 @@ function Odznak({ pocet }: { pocet: number }) {
 }
 
 /** Klíč k pásmům. Stojí v patce grafu, takže se nemá s čím překrýt. */
-function KlicPasem() {
+function KlicPasem({ lang }: { lang: Lang }) {
   return (
     <span className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
-      <span className="text-[10.5px] font-bold uppercase tracking-[0.1em]">Pásma</span>
+      <span className="text-[10.5px] font-bold uppercase tracking-[0.1em]">
+        {UI_VZORCE[lang].pasmaKlic}
+      </span>
       {PASMA.map((p) => (
         <span
           key={p.pasmo}
           className="whitespace-nowrap rounded-full bg-[var(--wm-track)] px-2 py-[3px] text-[11px] font-medium tabular-nums text-[var(--wm-text-2)]"
         >
-          {p.min}–{p.max} {NAZVY_PASEM[p.pasmo].replace(" aktivace", "").toLowerCase()}
+          {p.min}–{p.max} {NAZVY_PASEM_KRATCE[lang][p.pasmo]}
         </span>
       ))}
     </span>
@@ -183,10 +188,12 @@ function Patka({ children }: { children: React.ReactNode }) {
 export function Prstenec({
   skore,
   pasmo,
+  lang,
   velikost = 128,
 }: {
   skore: number
   pasmo: Pasmo
+  lang: Lang
   velikost?: number
 }) {
   const polomer = 54
@@ -198,7 +205,7 @@ export function Prstenec({
     <div
       className="relative shrink-0"
       style={{ width: velikost, height: velikost }}
-      title={`${skore} bodů z 60, ${NAZVY_PASEM[pasmo].toLowerCase()}`}
+      title={UI_VZORCE[lang].bodyZ60(skore, NAZVY_PASEM[lang][pasmo].toLowerCase())}
     >
       <svg viewBox="0 0 128 128" className="h-full w-full -rotate-90">
         <defs>
@@ -223,25 +230,30 @@ export function Prstenec({
         <span className="text-[30px] font-bold leading-none tracking-tight tabular-nums">
           {skore}
         </span>
-        <span className="mt-1 text-[11px] leading-none text-[var(--wm-text-3)]">z 60</span>
+        <span className="mt-1 text-[11px] leading-none text-[var(--wm-text-3)]">
+          {UI_VZORCE[lang].z60}
+        </span>
       </div>
     </div>
   )
 }
 
 /** Tři prstence vedle sebe: rychlý obraz toho, kde vzorce stojí. */
-export function TrojicePrstencu({ top3 }: { top3: VzorecSkore[] }) {
+export function TrojicePrstencu({ top3, lang }: { top3: VzorecSkore[]; lang: Lang }) {
   if (!top3.length) return null
+  const t = UI_VZORCE[lang]
   return (
     <div className="grid gap-7 sm:grid-cols-3">
       {top3.map((s, i) => (
         <div key={s.id} className="flex flex-col items-center text-center">
-          <Prstenec skore={s.skore} pasmo={s.pasmo} />
+          <Prstenec skore={s.skore} pasmo={s.pasmo} lang={lang} />
           <p className="mt-3.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--wm-text-3)]">
-            {i + 1}. místo
+            {t.misto(i + 1)}
           </p>
-          <p className="mt-1 text-[15.5px] font-semibold leading-tight">{OBSAH[s.id].nazev}</p>
-          <p className="mt-1 text-[12.5px] text-[var(--wm-text-2)]">{NAZVY_PASEM[s.pasmo]}</p>
+          <p className="mt-1 text-[15.5px] font-semibold leading-tight">
+            {nazevVzorce(s.id, lang)}
+          </p>
+          <p className="mt-1 text-[12.5px] text-[var(--wm-text-2)]">{NAZVY_PASEM[lang][s.pasmo]}</p>
         </div>
       ))}
     </div>
@@ -249,8 +261,17 @@ export function TrojicePrstencu({ top3 }: { top3: VzorecSkore[] }) {
 }
 
 /** Profil všech jedenácti vzorců. */
-export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: VzorecSkore[] }) {
+export function ProfilGraf({
+  vsechny,
+  top3,
+  lang,
+}: {
+  vsechny: VzorecSkore[]
+  top3: VzorecSkore[]
+  lang: Lang
+}) {
   const vBoji = new Set(top3.map((v) => v.id))
+  const t = UI_VZORCE[lang]
 
   return (
     <figure className="m-0">
@@ -259,7 +280,7 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
         <div className={MRIZKA}>
           {vsechny.map((v) => {
             const duraz = vBoji.has(v.id)
-            const nazev = OBSAH[v.id].nazev
+            const nazev = nazevVzorce(v.id, lang)
             return (
               <div key={v.id} className="contents">
                 <div className={`flex min-w-0 items-center ${RADEK}`}>
@@ -277,11 +298,11 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
                   <Pruh
                     skore={v.skore}
                     duraz={duraz}
-                    popis={`${nazev}: ${v.skore} bodů z 60, ${NAZVY_PASEM[v.pasmo].toLowerCase()}`}
+                    popis={`${nazev}: ${t.bodyZ60(v.skore, NAZVY_PASEM[lang][v.pasmo].toLowerCase())}`}
                   />
                 ) : (
                   <PruhChybi
-                    popis={`${nazev}: zodpovězeno ${v.zodpovezeno} z ${v.celkem} položek, do pořadí se nezařazuje`}
+                    popis={`${nazev}: ${t.zodpovezenoZ(v.zodpovezeno, v.celkem)}, ${t.nezarazuje}`}
                   />
                 )}
 
@@ -298,7 +319,7 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
                 </div>
 
                 <div className={`flex items-center justify-center ${RADEK}`}>
-                  {v.silnychOdpovedi > 0 && <Odznak pocet={v.silnychOdpovedi} />}
+                  {v.silnychOdpovedi > 0 && <Odznak pocet={v.silnychOdpovedi} lang={lang} />}
                 </div>
               </div>
             )
@@ -315,7 +336,7 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
       <div className="flex flex-col gap-4 sm:hidden">
         {vsechny.map((v) => {
           const duraz = vBoji.has(v.id)
-          const nazev = OBSAH[v.id].nazev
+          const nazev = nazevVzorce(v.id, lang)
           return (
             <div key={v.id}>
               <div className="flex items-baseline justify-between gap-3">
@@ -327,7 +348,7 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
                   {nazev}
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
-                  {v.silnychOdpovedi > 0 && <Odznak pocet={v.silnychOdpovedi} />}
+                  {v.silnychOdpovedi > 0 && <Odznak pocet={v.silnychOdpovedi} lang={lang} />}
                   <span
                     className={`tabular-nums ${
                       duraz
@@ -346,8 +367,8 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
               )}
               <p className="text-[12px] leading-none text-[var(--wm-text-3)]">
                 {v.vykazuje
-                  ? NAZVY_PASEM[v.pasmo]
-                  : `zodpovězeno ${v.zodpovezeno} z ${v.celkem} položek`}
+                  ? NAZVY_PASEM[lang][v.pasmo]
+                  : t.zodpovezenoZ(v.zodpovezeno, v.celkem)}
               </p>
             </div>
           )
@@ -359,18 +380,18 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
         <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <span className="flex items-center gap-2">
             <Vzorek duraz />
-            tři nejaktivnější vzorce
+            {t.legendaTop3}
           </span>
           <span className="flex items-center gap-2">
             <Vzorek duraz={false} />
-            ostatní
+            {t.legendaOstatni}
           </span>
           <span className="flex items-center gap-2">
-            <Odznak pocet={5} />
-            počet tvrzení s hodnotou 5 nebo 6
+            <Odznak pocet={5} lang={lang} />
+            {t.legendaOdznak}
           </span>
         </span>
-        <KlicPasem />
+        <KlicPasem lang={lang} />
       </Patka>
     </figure>
   )
@@ -383,7 +404,8 @@ export function ProfilGraf({ vsechny, top3 }: { vsechny: VzorecSkore[]; top3: Vz
  * ze kterých pocházejí. Právě tohle rozhoduje o tom, jestli jde o jedno téma
  * ve třech podobách, nebo o tři nezávislé věci.
  */
-export function DomenyGraf({ vsechny }: { vsechny: VzorecSkore[] }) {
+export function DomenyGraf({ vsechny, lang }: { vsechny: VzorecSkore[]; lang: Lang }) {
+  const t = UI_VZORCE[lang]
   const podleDomen = new Map<Domena, VzorecSkore[]>()
   for (const v of vsechny) {
     if (!v.vykazuje) continue
@@ -401,7 +423,7 @@ export function DomenyGraf({ vsechny }: { vsechny: VzorecSkore[] }) {
 
   if (!radky.length) return null
   const nejvic = radky[0].prumer
-  const pocetSlovy = (n: number) => (n === 1 ? "1 vzorec" : n < 5 ? `${n} vzorce` : `${n} vzorců`)
+  const pocetSlovy = t.pocetVzorcu
 
   return (
     <figure className="m-0">
@@ -409,7 +431,7 @@ export function DomenyGraf({ vsechny }: { vsechny: VzorecSkore[] }) {
         <div className={MRIZKA_OBLASTI}>
           {radky.map((r) => {
             const duraz = r.prumer === nejvic
-            const nazev = NAZVY_DOMEN[r.domena]
+            const nazev = NAZVY_DOMEN[lang][r.domena]
             return (
               <div key={r.domena} className="contents">
                 <div className={`flex min-w-0 items-center ${RADEK}`}>
@@ -419,7 +441,7 @@ export function DomenyGraf({ vsechny }: { vsechny: VzorecSkore[] }) {
                     }`}
                     title={`${nazev}, ${pocetSlovy(r.pocet)}`}
                   >
-                    {NAZVY_DOMEN_KRATCE[r.domena]}{" "}
+                    {NAZVY_DOMEN_KRATCE[lang][r.domena]}{" "}
                     <span className="font-normal text-[var(--wm-text-3)]">({r.pocet})</span>
                   </span>
                 </div>
@@ -427,7 +449,7 @@ export function DomenyGraf({ vsechny }: { vsechny: VzorecSkore[] }) {
                 <Pruh
                   skore={r.prumer}
                   duraz={duraz}
-                  popis={`${nazev}: průměr ${r.prumer} bodů z ${pocetSlovy(r.pocet)}`}
+                  popis={`${nazev}: ${t.prumerZ(r.prumer, pocetSlovy(r.pocet))}`}
                 />
 
                 <div className={`flex items-center justify-end ${RADEK}`}>
@@ -463,13 +485,13 @@ export function DomenyGraf({ vsechny }: { vsechny: VzorecSkore[] }) {
                     duraz ? "font-semibold text-[var(--wm-text)]" : "text-[var(--wm-text-2)]"
                   }`}
                 >
-                  {NAZVY_DOMEN[r.domena]}
+                  {NAZVY_DOMEN[lang][r.domena]}
                 </span>
                 <span className="shrink-0 text-[15px] font-medium tabular-nums text-[var(--wm-text-2)]">
                   {r.prumer}
                 </span>
               </div>
-              <Pruh skore={r.prumer} duraz={duraz} popis={NAZVY_DOMEN[r.domena]} />
+              <Pruh skore={r.prumer} duraz={duraz} popis={NAZVY_DOMEN[lang][r.domena]} />
               <p className="text-[12px] leading-none text-[var(--wm-text-3)]">
                 {pocetSlovy(r.pocet)}
               </p>
@@ -480,12 +502,8 @@ export function DomenyGraf({ vsechny }: { vsechny: VzorecSkore[] }) {
       </div>
 
       <Patka>
-        <span>
-          Průměrné skóre vzorců v dané oblasti; v závorce je počet vzorců, ze kterých se počítá.
-          Vzorce se sdružují podle toho, která dětská potřeba zůstala nenaplněná, takže zatížená
-          oblast říká víc než jednotlivé skóre.
-        </span>
-        <KlicPasem />
+        <span>{t.oblastiPatka}</span>
+        <KlicPasem lang={lang} />
       </Patka>
     </figure>
   )

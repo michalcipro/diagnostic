@@ -13,7 +13,8 @@ Kontrola (hledá se U+2014, ne U+2013):
 
 ```bash
 grep -rnP "\x{2014}" --include="*.ts" --include="*.tsx" --include="*.css" \
-  --include="*.md" --include="*.json" . | grep -v node_modules | grep -v "\.next"
+  --include="*.cjs" --include="*.md" --include="*.json" . \
+  | grep -v node_modules | grep -v "\.next"
 ```
 
 nesmí vrátit nic.
