@@ -22,7 +22,10 @@ export const findByEmail = internalQuery({
       name: v.string(),
       passwordHash: v.string(),
       salt: v.string(),
-      role: v.union(v.literal("master"), v.literal("coach")),
+      // Musí obsahovat všechny role. Convex ověřuje i návratovou hodnotu,
+      // takže chybějící varianta neshodí zápis, ale až čtení: účet se založí
+      // v pořádku a teprve přihlášení spadne dřív, než se vůbec ověří heslo.
+      role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
       active: v.boolean(),
     }),
     v.null(),

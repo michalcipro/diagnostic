@@ -181,7 +181,11 @@ export const addCoach = action({
     name: v.string(),
     email: v.string(),
     password: v.string(),
-    /** externí kouč dostane vlastní větev klientů, na kterou my nevidíme */
+    /**
+     * Externí kouč dostane vlastní větev klientů, na kterou my nevidíme.
+     * Druhý master tudy vzniknout nesmí, proto tu "master" schválně chybí.
+     * audit-role-neuplny
+     */
     role: v.optional(v.union(v.literal("coach"), v.literal("external"))),
     phone: v.optional(v.string()),
     note: v.optional(v.string()),
