@@ -5,15 +5,21 @@ import elite200Business from "./data/items/elite200-business.json"
 import elite100Sport from "./data/items/elite100-sport.json"
 import elite100Business from "./data/items/elite100-business.json"
 import vzorce from "../vzorce/data/polozky.json"
+import vzorceSk from "../vzorce/data/polozky-sk.json"
 
 type ItemsFile = Record<string, Localized>
 
 /**
- * Vzorce mají položky jen česky, protože zdrojový dotazník existuje jen v této
- * podobě. Ostatní jazyky se zatím doplní z češtiny; překlad je samostatný krok.
+ * Vzorce mají zdrojový dotazník česky a slovenský překlad ve vlastním souboru.
+ * Angličtina zatím chybí, doplní se z češtiny; přeložit ji je samostatný krok.
  */
 const VZORCE_ITEMS: ItemsFile = doplnJazykyPolozek(
-  Object.fromEntries(Object.entries(vzorce as Record<string, string>).map(([id, cs]) => [id, { cs }])),
+  Object.fromEntries(
+    Object.entries(vzorce as Record<string, string>).map(([id, cs]) => [
+      id,
+      { cs, sk: (vzorceSk as Record<string, string>)[id] },
+    ]),
+  ),
 )
 
 const FILES: Record<TestId, ItemsFile> = {

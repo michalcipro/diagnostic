@@ -1,402 +1,502 @@
 {
- "1": {
-  "cs": "Mám jasnou představu o tom, kým se chci v příštích letech stát, a to nejen profesně, ale i lidsky.",
-  "en": "I have a clear idea of who I want to become in the coming years, not only professionally but also as a person."
- },
- "2": {
-  "cs": "Před důležitým jednáním, prezentací nebo zkouškou věřím, že mám na to uspět.",
-  "en": "Before an important meeting, presentation, or exam, I believe I have what it takes to succeed."
- },
- "3": {
-  "cs": "Dokážu udržet pozornost na důležitém úkolu i v rušivém prostředí.",
-  "en": "I can keep my attention on an important task even in a distracting environment."
- },
- "4": {
-  "cs": "V rozhodujících momentech dokážu regulovat emoce tak, aby nesnižovaly kvalitu mého jednání.",
-  "en": "In decisive moments, I can regulate my emotions so that they do not reduce the quality of my actions."
- },
- "5": {
-  "cs": "Neúspěch beru především jako informaci pro další rozvoj, ne jako důkaz neschopnosti.",
-  "en": "I treat failure primarily as information for further development, not as proof of incompetence."
- },
- "6": {
-  "cs": "Moje každodenní návyky odpovídají úrovni, na kterou se chci dostat.",
-  "en": "My daily habits match the level I want to reach."
- },
- "7": {
-  "cs": "Vztahy s klíčovými lidmi v práci jsou založené na důvěře a otevřené komunikaci.",
-  "en": "My relationships with key people at work are built on trust and open communication."
- },
- "8": {
-  "cs": "Svou práci dělám především proto, že mi dává smysl, ne pouze kvůli penězům nebo očekávání okolí.",
-  "en": "I do my work primarily because it feels meaningful to me, not merely for the money or because of other people's expectations."
- },
- "9": {
-  "cs": "Moje sebedůvěra vychází z kvality mé přípravy, ne pouze z posledního výsledku.",
-  "en": "My self-confidence comes from the quality of my preparation, not just from my latest result."
- },
- "10": {
-  "cs": "Nikdy jsem o žádném kolegovi nebo konkurentovi neřekl nic negativního.",
-  "en": "I have never said anything negative about any colleague or competitor."
- },
- "11": {
-  "cs": "Vím přesně, co je v daném dni nebo týdnu moje priorita číslo jedna.",
-  "en": "I know exactly what my number one priority is on any given day or week."
- },
- "12": {
-  "cs": "Poznám první tělesné signály narůstajícího napětí, například změnu dechu nebo ztuhlé svaly.",
-  "en": "I recognize the first physical signals of rising tension, such as a change in my breathing or tight muscles."
- },
- "13": {
-  "cs": "Věřím, že mentální dovednosti lze trénovat stejně systematicky jako odborné znalosti.",
-  "en": "I believe mental skills can be trained just as systematically as professional expertise."
- },
- "14": {
-  "cs": "Dodržuji dohodnuté procesy a závazky i ve dnech, kdy se mi do nich nechce.",
-  "en": "I stick to agreed processes and commitments even on days when I don't feel like it."
- },
- "15": {
-  "cs": "V napětí nebo konfliktu dokážu komunikovat věcně a klidně.",
-  "en": "In tense situations or conflict, I can communicate calmly and stick to the facts."
- },
- "16": {
-  "cs": "Dokážu vyjmenovat tři konkrétní hodnoty, podle kterých se rozhoduji v práci i v osobním životě.",
-  "en": "I can name three specific values that guide my decisions both at work and in my personal life."
- },
- "17": {
-  "cs": "Jedna nepovedená situace dokáže zbořit moji důvěru na zbytek dne.",
-  "en": "A single situation that goes badly can destroy my confidence for the rest of the day."
- },
- "18": {
-  "cs": "Během práce mě odvádějí myšlenky na to, jak dopadnu nebo jak mě hodnotí ostatní.",
-  "en": "While working, I get distracted by thoughts about how I will do or how others are judging me."
- },
- "19": {
-  "cs": "Mám ověřenou techniku, kterou dokážu snížit napětí přímo v průběhu náročné situace.",
-  "en": "I have a proven technique I can use to reduce tension right in the middle of a demanding situation."
- },
- "20": {
-  "cs": "Když dlouho nevidím pokrok, ztrácím víru ve svůj rozvojový proces.",
-  "en": "When I don't see progress for a long time, I lose faith in my development process."
- },
- "21": {
-  "cs": "Pracuji vždy naplno, bez jediné výjimky.",
-  "en": "I always work at full effort, without a single exception."
- },
- "22": {
-  "cs": "Kvalita mé práce výrazně kolísá podle momentální nálady.",
-  "en": "The quality of my work fluctuates significantly depending on my current mood."
- },
- "23": {
-  "cs": "Negativní komentáře okolí ovlivňují moji sebedůvěru ještě dlouho poté.",
-  "en": "Negative comments from others affect my self-confidence for a long time afterwards."
- },
- "24": {
-  "cs": "Když se mi delší dobu nedaří, pochybuji o tom, jestli má smysl v mé cestě pokračovat.",
-  "en": "When things aren't going well for an extended period, I doubt whether it makes sense to continue on my path."
- },
- "25": {
-  "cs": "Můj vnitřní dialog v náročných situacích je převážně konstruktivní a zaměřený na řešení.",
-  "en": "My inner dialogue in demanding situations is mostly constructive and solution-focused."
- },
- "26": {
-  "cs": "Když má pozornost klesne, všimnu si toho rychle a vrátím ji k úkolu.",
-  "en": "When my attention drops, I notice it quickly and bring it back to the task."
- },
- "27": {
-  "cs": "Pod tlakem dělám rozhodnutí, kterých později lituji.",
-  "en": "Under pressure, I make decisions that I later regret."
- },
- "28": {
-  "cs": "Po nezdaru dokážu do 24 hodin konkrétně pojmenovat, co si z něj beru.",
-  "en": "Within 24 hours of a setback, I can name specifically what I am taking away from it."
- },
- "29": {
-  "cs": "Spánek a regeneraci plánuji stejně vážně jako pracovní schůzky.",
-  "en": "I plan sleep and recovery as seriously as I plan work meetings."
- },
- "30": {
-  "cs": "Dokážu si nastavit hranice a říct ne, když na mě okolí vyvíjí nezdravý tlak.",
-  "en": "I can set boundaries and say no when others put unhealthy pressure on me."
- },
- "31": {
-  "cs": "Moje hodnota jako člověka nezávisí na mém posledním pracovním výsledku.",
-  "en": "My worth as a person does not depend on my most recent work result."
- },
- "32": {
-  "cs": "Nikdy jsem nepocítil závist vůči úspěchu druhého člověka.",
-  "en": "I have never felt envy of another person's success."
- },
- "33": {
-  "cs": "Dokážu vědomě nahradit negativní myšlenku konkrétní pomocnou instrukcí.",
-  "en": "I can consciously replace a negative thought with a specific helpful instruction."
- },
- "34": {
-  "cs": "Mám konkrétní rutinu, kterou používám pro návrat do plného soustředění.",
-  "en": "I have a specific routine I use to return to full concentration."
- },
- "35": {
-  "cs": "Tlak důležitých momentů vnímám spíše jako výzvu než jako hrozbu.",
-  "en": "I perceive the pressure of important moments more as a challenge than as a threat."
- },
- "36": {
-  "cs": "Vyhledávám náročné úkoly, protože vím, že mě posouvají.",
-  "en": "I seek out demanding tasks because I know they push me forward."
- },
- "37": {
-  "cs": "Stravuji se, hydratuji a hýbu způsobem, který dlouhodobě podporuje moji energii.",
-  "en": "I eat, hydrate, and move in a way that supports my energy over the long term."
- },
- "38": {
-  "cs": "Tato položka ověřuje pozornost při čtení. Zaškrtni prosím možnost číslo 2.",
-  "en": "This item checks your attention while reading. Please select option number 2."
- },
- "39": {
-  "cs": "Moji blízcí podporují můj rozvoj, aniž by na mě vytvářeli nadměrný tlak.",
-  "en": "The people close to me support my development without putting excessive pressure on me."
- },
- "40": {
-  "cs": "Vím, čeho chci dosáhnout v horizontu dvou až pěti let.",
-  "en": "I know what I want to achieve over the next two to five years."
- },
- "41": {
-  "cs": "Mluvím se sebou slovy, která bych nikdy nepoužil vůči kolegovi nebo blízkému člověku.",
-  "en": "I talk to myself in words I would never use toward a colleague or someone close to me."
- },
- "42": {
-  "cs": "Notifikace, e-maily a podněty okolí mě snadno vytrhnou z rozdělané práce.",
-  "en": "Notifications, emails, and outside stimuli easily pull me away from work in progress."
- },
- "43": {
-  "cs": "Nervozita před důležitou situací mě často svazuje natolik, že nepodám svůj standard.",
-  "en": "Nervousness before an important situation often holds me back so much that I don't perform to my usual standard."
- },
- "44": {
-  "cs": "Každou svou chybu přiznám okamžitě, vždy a bez výmluv.",
-  "en": "I admit every mistake I make immediately, always, and without excuses."
- },
- "45": {
-  "cs": "Kritice se raději vyhýbám, protože mě dokáže dlouho rozhodit.",
-  "en": "I prefer to avoid criticism because it can throw me off balance for a long time."
- },
- "46": {
-  "cs": "Večer před důležitým dnem ponocuji u telefonu nebo obrazovky.",
-  "en": "The evening before an important day, I stay up late on my phone or in front of a screen."
- },
- "47": {
-  "cs": "Dokážu si říct o pomoc nebo podporu, když jsem pod dlouhodobým tlakem.",
-  "en": "I can ask for help or support when I am under prolonged pressure."
- },
- "48": {
-  "cs": "Výkon podávám hlavně proto, aby ostatní viděli, že na to mám.",
-  "en": "I perform mainly so that others can see I have what it takes."
- },
- "49": {
-  "cs": "Znám své silné stránky a vědomě je využívám jako konkurenční výhodu.",
-  "en": "I know my strengths and consciously use them as a competitive advantage."
- },
- "50": {
-  "cs": "Dokážu udržet stabilní koncentraci i při dlouhé a náročné práci.",
-  "en": "I can maintain stable concentration even during long and demanding work."
- },
- "51": {
-  "cs": "Po chybě nebo nepříjemném momentu se dokážu rychle vrátit plnou pozorností k práci.",
-  "en": "After a mistake or an unpleasant moment, I can quickly return my full attention to my work."
- },
- "52": {
-  "cs": "Dokážu pracovat na cíli celé měsíce i bez okamžitě viditelného pokroku.",
-  "en": "I can work toward a goal for months on end, even without immediately visible progress."
- },
- "53": {
-  "cs": "Mám pravidelnou ranní nebo předstartovní rutinu, která mě spolehlivě připraví na výkon.",
-  "en": "I have a regular morning or pre-performance routine that reliably prepares me to perform."
- },
- "54": {
-  "cs": "Srovnávání s ostatními, například na sociálních sítích, mi bere energii a klid.",
-  "en": "Comparing myself with others, for example on social media, drains my energy and peace of mind."
- },
- "55": {
-  "cs": "Nikdy jsem neporušil žádné pravidlo, ani drobné.",
-  "en": "I have never broken any rule, not even a minor one."
- },
- "56": {
-  "cs": "Cítím, že to, čím se živím, je v souladu s tím, kdo jsem.",
-  "en": "I feel that what I do for a living is aligned with who I am."
- },
- "57": {
-  "cs": "Když jednám s někým zkušenějším nebo výše postaveným, soustředím se na svůj výkon, ne na jeho status.",
-  "en": "When dealing with someone more experienced or more senior, I focus on my own performance, not on their status."
- },
- "58": {
-  "cs": "Dokážu vědomě přepínat mezi hlubokou soustředěnou prací a uvolněním.",
-  "en": "I can consciously switch between deep, focused work and relaxation."
- },
- "59": {
-  "cs": "Dokážu oddělit emoci, kterou právě cítím, od rozhodnutí, které dělám.",
-  "en": "I can separate the emotion I am feeling in the moment from the decision I am making."
- },
- "60": {
-  "cs": "Když ostatní pochybují o mé cestě, dokážu si udržet vlastní směr.",
-  "en": "When others doubt my path, I can stay on my own course."
- },
- "61": {
-  "cs": "Dokážu zůstat disciplinovaný i tehdy, když mě nikdo nekontroluje.",
-  "en": "I can stay disciplined even when no one is checking on me."
- },
- "62": {
-  "cs": "Aktivně si vytvářím prostředí, které podporuje můj růst.",
-  "en": "I actively create an environment that supports my growth."
- },
- "63": {
-  "cs": "I kdyby mě nikdo nechválil ani neoceňoval, pracoval bych se stejným nasazením.",
-  "en": "Even if no one praised or recognized me, I would work with the same level of commitment."
- },
- "64": {
-  "cs": "Před důležitou situací si častěji představuji, co se může pokazit, než to, co chci předvést.",
-  "en": "Before an important situation, I more often imagine what could go wrong than what I want to deliver."
- },
- "65": {
-  "cs": "Přistihnu se, že velkou část dne jedu na autopilota, bez konkrétního záměru.",
-  "en": "I catch myself running on autopilot for a large part of the day, without a specific intention."
- },
- "66": {
-  "cs": "Nikdy nemám myšlenky, za které bych se styděl.",
-  "en": "I never have thoughts I would be ashamed of."
- },
- "67": {
-  "cs": "Když se mi daří, udržím si stejnou disciplínu a pokoru jako v těžších obdobích.",
-  "en": "When things are going well, I maintain the same discipline and humility as in harder times."
- },
- "68": {
-  "cs": "Jeden velký neúspěch by pro mě byl důkazem, že na to nemám.",
-  "en": "One major failure would be proof to me that I don't have what it takes."
- },
- "69": {
-  "cs": "Vím, které návyky mě oslabují, a aktivně je omezuji.",
-  "en": "I know which habits weaken me, and I actively limit them."
- },
- "70": {
-  "cs": "Umím otevřeně mluvit o svých obavách s někým, komu důvěřuji.",
-  "en": "I can talk openly about my worries with someone I trust."
- },
- "71": {
-  "cs": "Kdyby zmizelo vnější uznání a srovnávání s ostatními, ztratil bych motivaci na sobě pracovat.",
-  "en": "If external recognition and comparison with others disappeared, I would lose my motivation to work on myself."
- },
- "72": {
-  "cs": "Umím si připomenout minulé úspěchy ve chvíli, kdy potřebuji podpořit důvěru.",
-  "en": "I can recall past successes at the moment I need to boost my confidence."
- },
- "73": {
-  "cs": "Před důležitou činností si stanovuji jednoduchý záměr, na co se budu soustředit.",
-  "en": "Before an important activity, I set a simple intention for what I will focus on."
- },
- "74": {
-  "cs": "Když se situace vyvíjí špatně, mám tendenci panikařit a opouštět původní plán.",
-  "en": "When a situation starts going badly, I tend to panic and abandon the original plan."
- },
- "75": {
-  "cs": "Tato položka ověřuje pozornost při čtení. Zaškrtni prosím možnost číslo 4.",
-  "en": "This item checks your attention while reading. Please select option number 4."
- },
- "76": {
-  "cs": "Zvládnu přijmout nepříjemnou zpětnou vazbu bez pocitu osobního ohrožení.",
-  "en": "I can accept unpleasant feedback without feeling personally threatened."
- },
- "77": {
-  "cs": "Své týdny plánuji dopředu s jasnými prioritami.",
-  "en": "I plan my weeks in advance with clear priorities."
- },
- "78": {
-  "cs": "Vždy splním na sto procent úplně všechno, co slíbím.",
-  "en": "I always deliver one hundred percent of absolutely everything I promise."
- },
- "79": {
-  "cs": "Vím, jaké prostředí a podmínky mi pomáhají podávat nejlepší výkon.",
-  "en": "I know what environment and conditions help me perform at my best."
- },
- "80": {
-  "cs": "Dokážu jednou nebo dvěma větami vysvětlit, proč dělám právě to, co dělám.",
-  "en": "I can explain in one or two sentences why I do what I do."
- },
- "81": {
-  "cs": "Věřím, že zvládnu i situace, na které jsem se nemohl předem připravit.",
-  "en": "I believe I can handle even situations I could not prepare for in advance."
- },
- "82": {
-  "cs": "V klíčových momentech se dokážu soustředit na proces, ne na výsledek.",
-  "en": "In key moments, I can focus on the process, not the outcome."
- },
- "83": {
-  "cs": "Frustraci dokážu pojmenovat a pracovat s ní, místo abych ji potlačoval nebo si ji vybíjel na okolí.",
-  "en": "I can name my frustration and work with it, instead of suppressing it or taking it out on the people around me."
- },
- "84": {
-  "cs": "Po úspěchu zůstávám pokorný a zaměřený na další práci.",
-  "en": "After a success, I stay humble and focused on the work ahead."
- },
- "85": {
-  "cs": "Odpočinek považuji za ztrátu času, který bych mohl věnovat práci.",
-  "en": "I consider rest a waste of time that I could be devoting to work."
- },
- "86": {
-  "cs": "Před nadřízeným, klientem nebo partnerem raději zamlčím, že něco nezvládám.",
-  "en": "With a superior, client, or partner, I would rather conceal the fact that I am struggling with something."
- },
- "87": {
-  "cs": "Své cíle si stanovuji sám, nejsou mi pouze určovány okolím.",
-  "en": "I set my own goals; they are not simply imposed on me by others."
- },
- "88": {
-  "cs": "Po sérii neúspěchů dokážu vstoupit do dalšího úkolu se stejnou důvěrou.",
-  "en": "After a series of failures, I can enter the next task with the same confidence."
- },
- "89": {
-  "cs": "Nikdy jsem neměl chuť žádnou povinnost odložit.",
-  "en": "I have never felt the urge to put off any obligation."
- },
- "90": {
-  "cs": "Dokážu odfiltrovat vnitřní rozptýlení, jako jsou vzpomínky na předchozí chybu.",
-  "en": "I can filter out internal distractions, such as memories of a previous mistake."
- },
- "91": {
-  "cs": "Umím záměrně zvýšit svou energii a aktivaci, když cítím, že jsem příliš vlažný.",
-  "en": "I can deliberately raise my energy and activation when I feel I am too flat."
- },
- "92": {
-  "cs": "Zodpovědnost za své chyby přijímám bez obviňování okolí.",
-  "en": "I take responsibility for my mistakes without blaming those around me."
- },
- "93": {
-  "cs": "Průběžně vnímám své celkové zatížení a poznám, kdy se blížím přetížení nebo vyhoření.",
-  "en": "I continuously monitor my overall load and can tell when I am approaching overload or burnout."
- },
- "94": {
-  "cs": "Úspěchem ostatních se dokážu inspirovat, místo abych se s nimi neustále srovnával.",
-  "en": "I can draw inspiration from other people's success instead of constantly comparing myself with them."
- },
- "95": {
-  "cs": "Moje pracovní nasazení nezávisí na tom, jestli mě někdo ocení nebo pochválí.",
-  "en": "My work effort does not depend on whether anyone recognizes or praises me."
- },
- "96": {
-  "cs": "I v hlučném a rušivém prostředí udržím pozornost tam, kde ji právě potřebuji.",
-  "en": "Even in a noisy, distracting environment, I can keep my attention where I need it."
- },
- "97": {
-  "cs": "Návrat plné pozornosti k práci mi po chybě trvá jen pár okamžiků.",
-  "en": "After a mistake, it takes me only a few moments to bring my full attention back to my work."
- },
- "98": {
-  "cs": "Důležité momenty vnímám spíše jako ohrožení než jako příležitost.",
-  "en": "I perceive important moments more as a threat than as an opportunity."
- },
- "99": {
-  "cs": "Když nemám náladu, dohodnuté procesy a závazky často vynechávám.",
-  "en": "When I'm not in the mood, I often skip agreed processes and commitments."
- },
- "100": {
-  "cs": "Bez vnější kontroly moje disciplína rychle klesá.",
-  "en": "Without external oversight, my discipline drops quickly."
- }
+  "1": {
+    "cs": "Mám jasnou představu o tom, kým se chci v příštích letech stát, a to nejen profesně, ale i lidsky.",
+    "en": "I have a clear idea of who I want to become in the coming years, not only professionally but also as a person.",
+    "sk": "Mám jasnú predstavu o tom, kým sa chcem v najbližších rokoch stať, a to nielen profesijne, ale aj ľudsky."
+  },
+  "2": {
+    "cs": "Před důležitým jednáním, prezentací nebo zkouškou věřím, že mám na to uspět.",
+    "en": "Before an important meeting, presentation, or exam, I believe I have what it takes to succeed.",
+    "sk": "Pred dôležitým rokovaním, prezentáciou alebo skúškou verím, že na to mám uspieť."
+  },
+  "3": {
+    "cs": "Dokážu udržet pozornost na důležitém úkolu i v rušivém prostředí.",
+    "en": "I can keep my attention on an important task even in a distracting environment.",
+    "sk": "Dokážem udržať pozornosť na dôležitej úlohe aj v rušivom prostredí."
+  },
+  "4": {
+    "cs": "V rozhodujících momentech dokážu regulovat emoce tak, aby nesnižovaly kvalitu mého jednání.",
+    "en": "In decisive moments, I can regulate my emotions so that they do not reduce the quality of my actions.",
+    "sk": "V rozhodujúcich momentoch dokážem regulovať emócie tak, aby neznižovali kvalitu môjho konania."
+  },
+  "5": {
+    "cs": "Neúspěch beru především jako informaci pro další rozvoj, ne jako důkaz neschopnosti.",
+    "en": "I treat failure primarily as information for further development, not as proof of incompetence.",
+    "sk": "Neúspech beriem predovšetkým ako informáciu pre ďalší rozvoj, nie ako dôkaz neschopnosti."
+  },
+  "6": {
+    "cs": "Moje každodenní návyky odpovídají úrovni, na kterou se chci dostat.",
+    "en": "My daily habits match the level I want to reach.",
+    "sk": "Moje každodenné návyky zodpovedajú úrovni, na ktorú sa chcem dostať."
+  },
+  "7": {
+    "cs": "Vztahy s klíčovými lidmi v práci jsou založené na důvěře a otevřené komunikaci.",
+    "en": "My relationships with key people at work are built on trust and open communication.",
+    "sk": "Vzťahy s kľúčovými ľuďmi v práci sú založené na dôvere a otvorenej komunikácii."
+  },
+  "8": {
+    "cs": "Svou práci dělám především proto, že mi dává smysl, ne pouze kvůli penězům nebo očekávání okolí.",
+    "en": "I do my work primarily because it feels meaningful to me, not merely for the money or because of other people's expectations.",
+    "sk": "Svoju prácu robím predovšetkým preto, že mi dáva zmysel, nie iba kvôli peniazom alebo očakávaniam okolia."
+  },
+  "9": {
+    "cs": "Moje sebedůvěra vychází z kvality mé přípravy, ne pouze z posledního výsledku.",
+    "en": "My self-confidence comes from the quality of my preparation, not just from my latest result.",
+    "sk": "Moja sebadôvera vychádza z kvality mojej prípravy, nie iba z posledného výsledku."
+  },
+  "10": {
+    "cs": "Nikdy jsem o žádném kolegovi nebo konkurentovi neřekl nic negativního.",
+    "en": "I have never said anything negative about any colleague or competitor.",
+    "sk": "Nikdy som o žiadnom kolegovi ani konkurentovi nepovedal nič negatívne."
+  },
+  "11": {
+    "cs": "Vím přesně, co je v daném dni nebo týdnu moje priorita číslo jedna.",
+    "en": "I know exactly what my number one priority is on any given day or week.",
+    "sk": "Viem presne, čo je v daný deň alebo týždeň moja priorita číslo jeden."
+  },
+  "12": {
+    "cs": "Poznám první tělesné signály narůstajícího napětí, například změnu dechu nebo ztuhlé svaly.",
+    "en": "I recognize the first physical signals of rising tension, such as a change in my breathing or tight muscles.",
+    "sk": "Rozpoznám prvé telesné signály narastajúceho napätia, napríklad zmenu dychu alebo stuhnuté svaly."
+  },
+  "13": {
+    "cs": "Věřím, že mentální dovednosti lze trénovat stejně systematicky jako odborné znalosti.",
+    "en": "I believe mental skills can be trained just as systematically as professional expertise.",
+    "sk": "Verím, že mentálne zručnosti sa dajú trénovať rovnako systematicky ako odborné znalosti."
+  },
+  "14": {
+    "cs": "Dodržuji dohodnuté procesy a závazky i ve dnech, kdy se mi do nich nechce.",
+    "en": "I stick to agreed processes and commitments even on days when I don't feel like it.",
+    "sk": "Dodržiavam dohodnuté procesy a záväzky aj v dňoch, keď sa mi do nich nechce."
+  },
+  "15": {
+    "cs": "V napětí nebo konfliktu dokážu komunikovat věcně a klidně.",
+    "en": "In tense situations or conflict, I can communicate calmly and stick to the facts.",
+    "sk": "V napätí alebo konflikte dokážem komunikovať vecne a pokojne."
+  },
+  "16": {
+    "cs": "Dokážu vyjmenovat tři konkrétní hodnoty, podle kterých se rozhoduji v práci i v osobním životě.",
+    "en": "I can name three specific values that guide my decisions both at work and in my personal life.",
+    "sk": "Dokážem vymenovať tri konkrétne hodnoty, podľa ktorých sa rozhodujem v práci aj v osobnom živote."
+  },
+  "17": {
+    "cs": "Jedna nepovedená situace dokáže zbořit moji důvěru na zbytek dne.",
+    "en": "A single situation that goes badly can destroy my confidence for the rest of the day.",
+    "sk": "Jedna nevydarená situácia dokáže zboriť moju dôveru na zvyšok dňa."
+  },
+  "18": {
+    "cs": "Během práce mě odvádějí myšlenky na to, jak dopadnu nebo jak mě hodnotí ostatní.",
+    "en": "While working, I get distracted by thoughts about how I will do or how others are judging me.",
+    "sk": "Počas práce ma odvádzajú myšlienky na to, ako dopadnem alebo ako ma hodnotia ostatní."
+  },
+  "19": {
+    "cs": "Mám ověřenou techniku, kterou dokážu snížit napětí přímo v průběhu náročné situace.",
+    "en": "I have a proven technique I can use to reduce tension right in the middle of a demanding situation.",
+    "sk": "Mám overenú techniku, ktorou dokážem znížiť napätie priamo v priebehu náročnej situácie."
+  },
+  "20": {
+    "cs": "Když dlouho nevidím pokrok, ztrácím víru ve svůj rozvojový proces.",
+    "en": "When I don't see progress for a long time, I lose faith in my development process.",
+    "sk": "Keď dlho nevidím pokrok, strácam vieru vo svoj rozvojový proces."
+  },
+  "21": {
+    "cs": "Pracuji vždy naplno, bez jediné výjimky.",
+    "en": "I always work at full effort, without a single exception.",
+    "sk": "Pracujem vždy naplno, bez jedinej výnimky."
+  },
+  "22": {
+    "cs": "Kvalita mé práce výrazně kolísá podle momentální nálady.",
+    "en": "The quality of my work fluctuates significantly depending on my current mood.",
+    "sk": "Kvalita mojej práce výrazne kolíše podľa momentálnej nálady."
+  },
+  "23": {
+    "cs": "Negativní komentáře okolí ovlivňují moji sebedůvěru ještě dlouho poté.",
+    "en": "Negative comments from others affect my self-confidence for a long time afterwards.",
+    "sk": "Negatívne komentáre okolia ovplyvňujú moju sebadôveru ešte dlho potom."
+  },
+  "24": {
+    "cs": "Když se mi delší dobu nedaří, pochybuji o tom, jestli má smysl v mé cestě pokračovat.",
+    "en": "When things aren't going well for an extended period, I doubt whether it makes sense to continue on my path.",
+    "sk": "Keď sa mi dlhší čas nedarí, pochybujem o tom, či má zmysel pokračovať v mojej ceste."
+  },
+  "25": {
+    "cs": "Můj vnitřní dialog v náročných situacích je převážně konstruktivní a zaměřený na řešení.",
+    "en": "My inner dialogue in demanding situations is mostly constructive and solution-focused.",
+    "sk": "Môj vnútorný dialóg v náročných situáciách je prevažne konštruktívny a zameraný na riešenie."
+  },
+  "26": {
+    "cs": "Když má pozornost klesne, všimnu si toho rychle a vrátím ji k úkolu.",
+    "en": "When my attention drops, I notice it quickly and bring it back to the task.",
+    "sk": "Keď mi pozornosť klesne, všimnem si to rýchlo a vrátim ju k úlohe."
+  },
+  "27": {
+    "cs": "Pod tlakem dělám rozhodnutí, kterých později lituji.",
+    "en": "Under pressure, I make decisions that I later regret.",
+    "sk": "Pod tlakom robím rozhodnutia, ktoré neskôr ľutujem."
+  },
+  "28": {
+    "cs": "Po nezdaru dokážu do 24 hodin konkrétně pojmenovat, co si z něj beru.",
+    "en": "Within 24 hours of a setback, I can name specifically what I am taking away from it.",
+    "sk": "Po neúspechu dokážem do 24 hodín konkrétne pomenovať, čo si z neho beriem."
+  },
+  "29": {
+    "cs": "Spánek a regeneraci plánuji stejně vážně jako pracovní schůzky.",
+    "en": "I plan sleep and recovery as seriously as I plan work meetings.",
+    "sk": "Spánok a regeneráciu plánujem rovnako vážne ako pracovné stretnutia."
+  },
+  "30": {
+    "cs": "Dokážu si nastavit hranice a říct ne, když na mě okolí vyvíjí nezdravý tlak.",
+    "en": "I can set boundaries and say no when others put unhealthy pressure on me.",
+    "sk": "Dokážem si nastaviť hranice a povedať nie, keď na mňa okolie vyvíja nezdravý tlak."
+  },
+  "31": {
+    "cs": "Moje hodnota jako člověka nezávisí na mém posledním pracovním výsledku.",
+    "en": "My worth as a person does not depend on my most recent work result.",
+    "sk": "Moja hodnota ako človeka nezávisí od môjho posledného pracovného výsledku."
+  },
+  "32": {
+    "cs": "Nikdy jsem nepocítil závist vůči úspěchu druhého člověka.",
+    "en": "I have never felt envy of another person's success.",
+    "sk": "Nikdy som nepocítil závisť voči úspechu druhého človeka."
+  },
+  "33": {
+    "cs": "Dokážu vědomě nahradit negativní myšlenku konkrétní pomocnou instrukcí.",
+    "en": "I can consciously replace a negative thought with a specific helpful instruction.",
+    "sk": "Dokážem vedome nahradiť negatívnu myšlienku konkrétnou pomocnou inštrukciou."
+  },
+  "34": {
+    "cs": "Mám konkrétní rutinu, kterou používám pro návrat do plného soustředění.",
+    "en": "I have a specific routine I use to return to full concentration.",
+    "sk": "Mám konkrétnu rutinu, ktorú používam na návrat do plného sústredenia."
+  },
+  "35": {
+    "cs": "Tlak důležitých momentů vnímám spíše jako výzvu než jako hrozbu.",
+    "en": "I perceive the pressure of important moments more as a challenge than as a threat.",
+    "sk": "Tlak dôležitých momentov vnímam skôr ako výzvu než ako hrozbu."
+  },
+  "36": {
+    "cs": "Vyhledávám náročné úkoly, protože vím, že mě posouvají.",
+    "en": "I seek out demanding tasks because I know they push me forward.",
+    "sk": "Vyhľadávam náročné úlohy, pretože viem, že ma posúvajú."
+  },
+  "37": {
+    "cs": "Stravuji se, hydratuji a hýbu způsobem, který dlouhodobě podporuje moji energii.",
+    "en": "I eat, hydrate, and move in a way that supports my energy over the long term.",
+    "sk": "Stravujem sa, hydratujem a hýbem spôsobom, ktorý dlhodobo podporuje moju energiu."
+  },
+  "38": {
+    "cs": "Tato položka ověřuje pozornost při čtení. Zaškrtni prosím možnost číslo 2.",
+    "en": "This item checks your attention while reading. Please select option number 2.",
+    "sk": "Táto položka overuje pozornosť pri čítaní. Označ prosím možnosť číslo 2."
+  },
+  "39": {
+    "cs": "Moji blízcí podporují můj rozvoj, aniž by na mě vytvářeli nadměrný tlak.",
+    "en": "The people close to me support my development without putting excessive pressure on me.",
+    "sk": "Moji blízki podporujú môj rozvoj bez toho, aby na mňa vytvárali nadmerný tlak."
+  },
+  "40": {
+    "cs": "Vím, čeho chci dosáhnout v horizontu dvou až pěti let.",
+    "en": "I know what I want to achieve over the next two to five years.",
+    "sk": "Viem, čo chcem dosiahnuť v horizonte dvoch až piatich rokov."
+  },
+  "41": {
+    "cs": "Mluvím se sebou slovy, která bych nikdy nepoužil vůči kolegovi nebo blízkému člověku.",
+    "en": "I talk to myself in words I would never use toward a colleague or someone close to me.",
+    "sk": "Hovorím so sebou slovami, ktoré by som nikdy nepoužil voči kolegovi alebo blízkemu človeku."
+  },
+  "42": {
+    "cs": "Notifikace, e-maily a podněty okolí mě snadno vytrhnou z rozdělané práce.",
+    "en": "Notifications, emails, and outside stimuli easily pull me away from work in progress.",
+    "sk": "Notifikácie, e-maily a podnety okolia ma ľahko vytrhnú z rozrobenej práce."
+  },
+  "43": {
+    "cs": "Nervozita před důležitou situací mě často svazuje natolik, že nepodám svůj standard.",
+    "en": "Nervousness before an important situation often holds me back so much that I don't perform to my usual standard.",
+    "sk": "Nervozita pred dôležitou situáciou ma často zväzuje natoľko, že nepodám svoj štandard."
+  },
+  "44": {
+    "cs": "Každou svou chybu přiznám okamžitě, vždy a bez výmluv.",
+    "en": "I admit every mistake I make immediately, always, and without excuses.",
+    "sk": "Každú svoju chybu priznám okamžite, vždy a bez výhovoriek."
+  },
+  "45": {
+    "cs": "Kritice se raději vyhýbám, protože mě dokáže dlouho rozhodit.",
+    "en": "I prefer to avoid criticism because it can throw me off balance for a long time.",
+    "sk": "Kritike sa radšej vyhýbam, pretože ma dokáže dlho rozhodiť."
+  },
+  "46": {
+    "cs": "Večer před důležitým dnem ponocuji u telefonu nebo obrazovky.",
+    "en": "The evening before an important day, I stay up late on my phone or in front of a screen.",
+    "sk": "Večer pred dôležitým dňom ponocujem pri telefóne alebo obrazovke."
+  },
+  "47": {
+    "cs": "Dokážu si říct o pomoc nebo podporu, když jsem pod dlouhodobým tlakem.",
+    "en": "I can ask for help or support when I am under prolonged pressure.",
+    "sk": "Viem si povedať o pomoc alebo podporu, keď som pod dlhodobým tlakom."
+  },
+  "48": {
+    "cs": "Výkon podávám hlavně proto, aby ostatní viděli, že na to mám.",
+    "en": "I perform mainly so that others can see I have what it takes.",
+    "sk": "Výkon podávam hlavne preto, aby ostatní videli, že na to mám."
+  },
+  "49": {
+    "cs": "Znám své silné stránky a vědomě je využívám jako konkurenční výhodu.",
+    "en": "I know my strengths and consciously use them as a competitive advantage.",
+    "sk": "Poznám svoje silné stránky a vedome ich využívam ako konkurenčnú výhodu."
+  },
+  "50": {
+    "cs": "Dokážu udržet stabilní koncentraci i při dlouhé a náročné práci.",
+    "en": "I can maintain stable concentration even during long and demanding work.",
+    "sk": "Dokážem udržať stabilnú koncentráciu aj pri dlhej a náročnej práci."
+  },
+  "51": {
+    "cs": "Po chybě nebo nepříjemném momentu se dokážu rychle vrátit plnou pozorností k práci.",
+    "en": "After a mistake or an unpleasant moment, I can quickly return my full attention to my work.",
+    "sk": "Po chybe alebo nepríjemnom momente sa dokážem rýchlo vrátiť plnou pozornosťou k práci."
+  },
+  "52": {
+    "cs": "Dokážu pracovat na cíli celé měsíce i bez okamžitě viditelného pokroku.",
+    "en": "I can work toward a goal for months on end, even without immediately visible progress.",
+    "sk": "Dokážem pracovať na cieli celé mesiace aj bez okamžite viditeľného pokroku."
+  },
+  "53": {
+    "cs": "Mám pravidelnou ranní nebo předstartovní rutinu, která mě spolehlivě připraví na výkon.",
+    "en": "I have a regular morning or pre-performance routine that reliably prepares me to perform.",
+    "sk": "Mám pravidelnú rannú alebo predštartovú rutinu, ktorá ma spoľahlivo pripraví na výkon."
+  },
+  "54": {
+    "cs": "Srovnávání s ostatními, například na sociálních sítích, mi bere energii a klid.",
+    "en": "Comparing myself with others, for example on social media, drains my energy and peace of mind.",
+    "sk": "Porovnávanie s ostatnými, napríklad na sociálnych sieťach, mi berie energiu a pokoj."
+  },
+  "55": {
+    "cs": "Nikdy jsem neporušil žádné pravidlo, ani drobné.",
+    "en": "I have never broken any rule, not even a minor one.",
+    "sk": "Nikdy som neporušil žiadne pravidlo, ani drobné."
+  },
+  "56": {
+    "cs": "Cítím, že to, čím se živím, je v souladu s tím, kdo jsem.",
+    "en": "I feel that what I do for a living is aligned with who I am.",
+    "sk": "Cítim, že to, čím sa živím, je v súlade s tým, kto som."
+  },
+  "57": {
+    "cs": "Když jednám s někým zkušenějším nebo výše postaveným, soustředím se na svůj výkon, ne na jeho status.",
+    "en": "When dealing with someone more experienced or more senior, I focus on my own performance, not on their status.",
+    "sk": "Keď rokujem s niekým skúsenejším alebo vyššie postaveným, sústredím sa na svoj výkon, nie na jeho status."
+  },
+  "58": {
+    "cs": "Dokážu vědomě přepínat mezi hlubokou soustředěnou prací a uvolněním.",
+    "en": "I can consciously switch between deep, focused work and relaxation.",
+    "sk": "Dokážem vedome prepínať medzi hlbokou sústredenou prácou a uvoľnením."
+  },
+  "59": {
+    "cs": "Dokážu oddělit emoci, kterou právě cítím, od rozhodnutí, které dělám.",
+    "en": "I can separate the emotion I am feeling in the moment from the decision I am making.",
+    "sk": "Dokážem oddeliť emóciu, ktorú práve cítim, od rozhodnutia, ktoré robím."
+  },
+  "60": {
+    "cs": "Když ostatní pochybují o mé cestě, dokážu si udržet vlastní směr.",
+    "en": "When others doubt my path, I can stay on my own course.",
+    "sk": "Keď ostatní pochybujú o mojej ceste, dokážem si udržať vlastný smer."
+  },
+  "61": {
+    "cs": "Dokážu zůstat disciplinovaný i tehdy, když mě nikdo nekontroluje.",
+    "en": "I can stay disciplined even when no one is checking on me.",
+    "sk": "Dokážem zostať disciplinovaný aj vtedy, keď ma nikto nekontroluje."
+  },
+  "62": {
+    "cs": "Aktivně si vytvářím prostředí, které podporuje můj růst.",
+    "en": "I actively create an environment that supports my growth.",
+    "sk": "Aktívne si vytváram prostredie, ktoré podporuje môj rast."
+  },
+  "63": {
+    "cs": "I kdyby mě nikdo nechválil ani neoceňoval, pracoval bych se stejným nasazením.",
+    "en": "Even if no one praised or recognized me, I would work with the same level of commitment.",
+    "sk": "Aj keby ma nikto nechválil ani neoceňoval, pracoval by som s rovnakým nasadením."
+  },
+  "64": {
+    "cs": "Před důležitou situací si častěji představuji, co se může pokazit, než to, co chci předvést.",
+    "en": "Before an important situation, I more often imagine what could go wrong than what I want to deliver.",
+    "sk": "Pred dôležitou situáciou si častejšie predstavujem, čo sa môže pokaziť, než to, čo chcem predviesť."
+  },
+  "65": {
+    "cs": "Přistihnu se, že velkou část dne jedu na autopilota, bez konkrétního záměru.",
+    "en": "I catch myself running on autopilot for a large part of the day, without a specific intention.",
+    "sk": "Pristihnem sa, že veľkú časť dňa idem na autopilota, bez konkrétneho zámeru."
+  },
+  "66": {
+    "cs": "Nikdy nemám myšlenky, za které bych se styděl.",
+    "en": "I never have thoughts I would be ashamed of.",
+    "sk": "Nikdy nemám myšlienky, za ktoré by som sa hanbil."
+  },
+  "67": {
+    "cs": "Když se mi daří, udržím si stejnou disciplínu a pokoru jako v těžších obdobích.",
+    "en": "When things are going well, I maintain the same discipline and humility as in harder times.",
+    "sk": "Keď sa mi darí, udržím si rovnakú disciplínu a pokoru ako v ťažších obdobiach."
+  },
+  "68": {
+    "cs": "Jeden velký neúspěch by pro mě byl důkazem, že na to nemám.",
+    "en": "One major failure would be proof to me that I don't have what it takes.",
+    "sk": "Jeden veľký neúspech by pre mňa bol dôkazom, že na to nemám."
+  },
+  "69": {
+    "cs": "Vím, které návyky mě oslabují, a aktivně je omezuji.",
+    "en": "I know which habits weaken me, and I actively limit them.",
+    "sk": "Viem, ktoré návyky ma oslabujú, a aktívne ich obmedzujem."
+  },
+  "70": {
+    "cs": "Umím otevřeně mluvit o svých obavách s někým, komu důvěřuji.",
+    "en": "I can talk openly about my worries with someone I trust.",
+    "sk": "Viem otvorene hovoriť o svojich obavách s niekým, komu dôverujem."
+  },
+  "71": {
+    "cs": "Kdyby zmizelo vnější uznání a srovnávání s ostatními, ztratil bych motivaci na sobě pracovat.",
+    "en": "If external recognition and comparison with others disappeared, I would lose my motivation to work on myself.",
+    "sk": "Keby zmizlo vonkajšie uznanie a porovnávanie s ostatnými, stratil by som motiváciu na sebe pracovať."
+  },
+  "72": {
+    "cs": "Umím si připomenout minulé úspěchy ve chvíli, kdy potřebuji podpořit důvěru.",
+    "en": "I can recall past successes at the moment I need to boost my confidence.",
+    "sk": "Viem si pripomenúť minulé úspechy vo chvíli, keď potrebujem podporiť dôveru."
+  },
+  "73": {
+    "cs": "Před důležitou činností si stanovuji jednoduchý záměr, na co se budu soustředit.",
+    "en": "Before an important activity, I set a simple intention for what I will focus on.",
+    "sk": "Pred dôležitou činnosťou si stanovujem jednoduchý zámer, na čo sa budem sústrediť."
+  },
+  "74": {
+    "cs": "Když se situace vyvíjí špatně, mám tendenci panikařit a opouštět původní plán.",
+    "en": "When a situation starts going badly, I tend to panic and abandon the original plan.",
+    "sk": "Keď sa situácia vyvíja zle, mám sklon panikáriť a opúšťať pôvodný plán."
+  },
+  "75": {
+    "cs": "Tato položka ověřuje pozornost při čtení. Zaškrtni prosím možnost číslo 4.",
+    "en": "This item checks your attention while reading. Please select option number 4.",
+    "sk": "Táto položka overuje pozornosť pri čítaní. Označ prosím možnosť číslo 4."
+  },
+  "76": {
+    "cs": "Zvládnu přijmout nepříjemnou zpětnou vazbu bez pocitu osobního ohrožení.",
+    "en": "I can accept unpleasant feedback without feeling personally threatened.",
+    "sk": "Zvládnem prijať nepríjemnú spätnú väzbu bez pocitu osobného ohrozenia."
+  },
+  "77": {
+    "cs": "Své týdny plánuji dopředu s jasnými prioritami.",
+    "en": "I plan my weeks in advance with clear priorities.",
+    "sk": "Svoje týždne plánujem dopredu s jasnými prioritami."
+  },
+  "78": {
+    "cs": "Vždy splním na sto procent úplně všechno, co slíbím.",
+    "en": "I always deliver one hundred percent of absolutely everything I promise.",
+    "sk": "Vždy splním na sto percent úplne všetko, čo sľúbim."
+  },
+  "79": {
+    "cs": "Vím, jaké prostředí a podmínky mi pomáhají podávat nejlepší výkon.",
+    "en": "I know what environment and conditions help me perform at my best.",
+    "sk": "Viem, aké prostredie a podmienky mi pomáhajú podávať najlepší výkon."
+  },
+  "80": {
+    "cs": "Dokážu jednou nebo dvěma větami vysvětlit, proč dělám právě to, co dělám.",
+    "en": "I can explain in one or two sentences why I do what I do.",
+    "sk": "Dokážem jednou alebo dvoma vetami vysvetliť, prečo robím práve to, čo robím."
+  },
+  "81": {
+    "cs": "Věřím, že zvládnu i situace, na které jsem se nemohl předem připravit.",
+    "en": "I believe I can handle even situations I could not prepare for in advance.",
+    "sk": "Verím, že zvládnem aj situácie, na ktoré som sa nemohol vopred pripraviť."
+  },
+  "82": {
+    "cs": "V klíčových momentech se dokážu soustředit na proces, ne na výsledek.",
+    "en": "In key moments, I can focus on the process, not the outcome.",
+    "sk": "V kľúčových momentoch sa dokážem sústrediť na proces, nie na výsledok."
+  },
+  "83": {
+    "cs": "Frustraci dokážu pojmenovat a pracovat s ní, místo abych ji potlačoval nebo si ji vybíjel na okolí.",
+    "en": "I can name my frustration and work with it, instead of suppressing it or taking it out on the people around me.",
+    "sk": "Frustráciu dokážem pomenovať a pracovať s ňou namiesto toho, aby som ju potláčal alebo si ju vybíjal na okolí."
+  },
+  "84": {
+    "cs": "Po úspěchu zůstávám pokorný a zaměřený na další práci.",
+    "en": "After a success, I stay humble and focused on the work ahead.",
+    "sk": "Po úspechu zostávam pokorný a zameraný na ďalšiu prácu."
+  },
+  "85": {
+    "cs": "Odpočinek považuji za ztrátu času, který bych mohl věnovat práci.",
+    "en": "I consider rest a waste of time that I could be devoting to work.",
+    "sk": "Odpočinok považujem za stratu času, ktorý by som mohol venovať práci."
+  },
+  "86": {
+    "cs": "Před nadřízeným, klientem nebo partnerem raději zamlčím, že něco nezvládám.",
+    "en": "With a superior, client, or partner, I would rather conceal the fact that I am struggling with something.",
+    "sk": "Pred nadriadeným, klientom alebo partnerom radšej zamlčím, že niečo nezvládam."
+  },
+  "87": {
+    "cs": "Své cíle si stanovuji sám, nejsou mi pouze určovány okolím.",
+    "en": "I set my own goals; they are not simply imposed on me by others.",
+    "sk": "Svoje ciele si stanovujem sám, nie sú mi len určované okolím."
+  },
+  "88": {
+    "cs": "Po sérii neúspěchů dokážu vstoupit do dalšího úkolu se stejnou důvěrou.",
+    "en": "After a series of failures, I can enter the next task with the same confidence.",
+    "sk": "Po sérii neúspechov dokážem vstúpiť do ďalšej úlohy s rovnakou dôverou."
+  },
+  "89": {
+    "cs": "Nikdy jsem neměl chuť žádnou povinnost odložit.",
+    "en": "I have never felt the urge to put off any obligation.",
+    "sk": "Nikdy som nemal chuť odložiť žiadnu povinnosť."
+  },
+  "90": {
+    "cs": "Dokážu odfiltrovat vnitřní rozptýlení, jako jsou vzpomínky na předchozí chybu.",
+    "en": "I can filter out internal distractions, such as memories of a previous mistake.",
+    "sk": "Dokážem odfiltrovať vnútorné rozptýlenie, ako sú spomienky na predchádzajúcu chybu."
+  },
+  "91": {
+    "cs": "Umím záměrně zvýšit svou energii a aktivaci, když cítím, že jsem příliš vlažný.",
+    "en": "I can deliberately raise my energy and activation when I feel I am too flat.",
+    "sk": "Viem zámerne zvýšiť svoju energiu a aktiváciu, keď cítim, že som príliš vlažný."
+  },
+  "92": {
+    "cs": "Zodpovědnost za své chyby přijímám bez obviňování okolí.",
+    "en": "I take responsibility for my mistakes without blaming those around me.",
+    "sk": "Zodpovednosť za svoje chyby prijímam bez obviňovania okolia."
+  },
+  "93": {
+    "cs": "Průběžně vnímám své celkové zatížení a poznám, kdy se blížím přetížení nebo vyhoření.",
+    "en": "I continuously monitor my overall load and can tell when I am approaching overload or burnout.",
+    "sk": "Priebežne vnímam svoje celkové zaťaženie a rozpoznám, kedy sa blížim k preťaženiu alebo vyhoreniu."
+  },
+  "94": {
+    "cs": "Úspěchem ostatních se dokážu inspirovat, místo abych se s nimi neustále srovnával.",
+    "en": "I can draw inspiration from other people's success instead of constantly comparing myself with them.",
+    "sk": "Úspechom ostatných sa dokážem inšpirovať namiesto toho, aby som sa s nimi neustále porovnával."
+  },
+  "95": {
+    "cs": "Moje pracovní nasazení nezávisí na tom, jestli mě někdo ocení nebo pochválí.",
+    "en": "My work effort does not depend on whether anyone recognizes or praises me.",
+    "sk": "Moje pracovné nasadenie nezávisí od toho, či ma niekto ocení alebo pochváli."
+  },
+  "96": {
+    "cs": "I v hlučném a rušivém prostředí udržím pozornost tam, kde ji právě potřebuji.",
+    "en": "Even in a noisy, distracting environment, I can keep my attention where I need it.",
+    "sk": "Aj v hlučnom a rušivom prostredí udržím pozornosť tam, kde ju práve potrebujem."
+  },
+  "97": {
+    "cs": "Návrat plné pozornosti k práci mi po chybě trvá jen pár okamžiků.",
+    "en": "After a mistake, it takes me only a few moments to bring my full attention back to my work.",
+    "sk": "Návrat plnej pozornosti k práci mi po chybe trvá len pár okamihov."
+  },
+  "98": {
+    "cs": "Důležité momenty vnímám spíše jako ohrožení než jako příležitost.",
+    "en": "I perceive important moments more as a threat than as an opportunity.",
+    "sk": "Dôležité momenty vnímam skôr ako ohrozenie než ako príležitosť."
+  },
+  "99": {
+    "cs": "Když nemám náladu, dohodnuté procesy a závazky často vynechávám.",
+    "en": "When I'm not in the mood, I often skip agreed processes and commitments.",
+    "sk": "Keď nemám náladu, dohodnuté procesy a záväzky často vynechávam."
+  },
+  "100": {
+    "cs": "Bez vnější kontroly moje disciplína rychle klesá.",
+    "en": "Without external oversight, my discipline drops quickly.",
+    "sk": "Bez vonkajšej kontroly moja disciplína rýchlo klesá."
+  }
 }
