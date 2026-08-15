@@ -19,8 +19,8 @@ export const DVOJICE_SPORT: Record<string, string> = {
   "04-07": "Tyhle dva vzorce se pletou, ale nejsou totéž a spolu jsou obzvlášť těžké. Pocit, že nepatříš, se hlásí ve skupině, stud v blízkosti. Když běží oba, nezbývá bezpečné místo: v kabině stojíš mimo a v důvěrném vztahu čekáš odhalení.",
 
   // ---- samostatnost mezi sebou ----
-  "05-06": "Sesterská dvojice. Očekávané ohrožení říká, že hra je nebezpečná, závislost na vedení říká, že na ni {sám|sama} nestačíš. Dohromady vzniká prostředí, ve kterém se nedá bezpečně rozhodnout bez pokynu, a proto se rozhodnutí buď odkládají, nebo přenášejí na lavičku.",
-  "05-08": "Nedůvěra ve vlastní úsudek se tu potkává s očekáváním neúspechu. Riziko se proto nevyhodnocuje, ale vylučuje. Výsledkem bývá kariéra, která je menší, než jakou bys {uměl|uměla} mít, a zdánlivý důkaz, že tvoje obavy byly na místě.",
+  "05-06": "Sesterská dvojice. Strach z ohrožení říká, že hra je nebezpečná, závislost na vedení říká, že na ni {sám|sama} nestačíš. Dohromady vzniká prostředí, ve kterém se nedá bezpečně rozhodnout bez pokynu, a proto se rozhodnutí buď odkládají, nebo přenášejí na lavičku.",
+  "05-08": "Nedůvěra ve vlastní úsudek se tu potkává s očekáváním neúspěchu. Riziko se proto nevyhodnocuje, ale vylučuje. Výsledkem bývá kariéra, která je menší, než jakou bys {uměl|uměla} mít, a zdánlivý důkaz, že tvoje obavy byly na místě.",
   "06-08": "Katastrofické scénáře tu obsluhují očekávaný neúspěch. Než do zápasu vstoupíš, máš dopředu představu, jak to dopadne špatně, a ta představa je živější než jakákoli dosavadní zkušenost. Příprava se pak mění v obranu místo v ladění.",
 
   // ---- bezpečí a samostatnost dohromady ----
@@ -36,10 +36,10 @@ export const DVOJICE_SPORT: Record<string, string> = {
   "07-09": "Stud tu dává přizpůsobení smysl. Když si myslíš, že {sám|sama} o sobě nestačíš, musíš si místo v týmu zasloužit tím, co uděláš pro ostatní. Vlastní potřeba se pak nejeví jako právo, ale jako drzost.",
   "09-11": "Dva protilehlé póly hranice v jednom sportovci. Většinu času ustupuješ, a pak přijde chvíle, kdy se to zlomí do nároku nebo výbuchu, často na rozhodčího nebo spoluhráče. Zvenčí to působí nevypočitatelně, uvnitř je to prosté: hněv, který se dlouho nesměl ozvat, si najde cestu.",
   "03-11": "Nárok a impulz tu zakrývají prázdno. Výjimky, úlevy a okamžité potěšení mají zaplnit něco, na co nestačí, protože chybí pochopení, ne odměna. Proto úleva nikdy nevydrží dlouho.",
-  "07-11": "Nárok na výjimku je tu nejčastěji obranou před studem. Navenek jistota a požadavky, uvnitř přesvědčení, že nestačíš. Právě proto reaguješ na zpochybnění tak prudce: nejde o spor o pravidlo, jde o obranu.",
+  "07-11": "Nárokovost je tu nejčastěji obranou před studem. Navenek jistota a požadavky, uvnitř přesvědčení, že nestačíš. Právě proto reaguješ na zpochybnění tak prudce: nejde o spor o pravidlo, jde o obranu.",
 
   // ---- kombinace, které se v praxi objevují nejčastěji ----
-  "07-08": "Stud a očekávání neúspěchu se pletou, ale nejsou totéž. Skrytá nedostatečnost říká, že je vadné to, co jsi; očekávané selhání říká, že nestačí to, co dokážeš. Když běží obojí, není kam uhnout: výsledek nezvedne pocit vlastní hodnoty a neúspěch ho okamžitě potvrdí.",
+  "07-08": "Stud a očekávání neúspěchu se pletou, ale nejsou totéž. Méněcennost říká, že je vadné to, co jsi; strach ze selhání říká, že nestačí to, co dokážeš. Když běží obojí, není kam uhnout: výsledek nezvedne pocit vlastní hodnoty a neúspěch ho okamžitě potvrdí.",
   "02-03": "Toužíš po pochopení a zároveň čekáš zradu. To je vnitřní rozpor, který drží vztahy v týmu v půli cesty: dost blízko, aby bolely, ne dost blízko, aby pomohly. Otevřít se by znamenalo dát druhému do ruky přesně to, čeho se bojíš.",
   "01-04": "Strach ze ztráty se tu pojí s pocitem, že nikam nepatříš. Jeden vztah proto nese celou váhu: nemáš širší zázemí, na které by se dalo přepnout, a tím se každá hrozba odchodu zvětší.",
   "01-06": "Očekáváš katastrofu a zároveň ztrátu, a obojí se sčítá do stálé pohotovosti. Zpoždění, nepřijatý hovor nebo změna programu se okamžitě čtou v nejhorší možné verzi. Úleva po vysvětlení vydrží krátce, protože pohotovost se nevypíná.",
@@ -51,15 +51,15 @@ export const DVOJICE_SPORT: Record<string, string> = {
   "06-09": "Úzkost a přizpůsobení se tu spojují do velké opatrnosti vůči lidem. Konflikt s trenérem je nebezpečný nejen proto, že by mohl něco zkazit, ale protože si nejsi {jistý|jistá}, že bys jeho následky {ustál|ustála}. Ustupuješ tedy dřív, než se vůbec ukáže, o co jde.",
   "08-09": "Nevěříš si ve výkonu a zároveň neumíš odmítnout. Bereš na sebe roli, o které dopředu víš, že tě přeroste, a pak ji táhneš {sám|sama}, protože říct si o pomoc by potvrdilo to nejhorší. Vyhoření i přetrénování tudy chodí velmi tiše.",
 
-  // ---- neúprosná laťka a její okolí ----
+  // ---- perfekcionismus a jeho okolí ----
   "07-10": "Klasická dvojice. Výkon je tu pokusem vyrovnat stud: kdybych {byl dost dobrý|byla dost dobrá}, možná by to vadné nebylo vidět. Jenže laťka se posouvá spolu s tebou, takže žádný výsledek nestačí. Odtud pramení kariéra, ze které nemáš radost.",
-  "08-10": "Vypadá to jako protiklad a je to protiklad, který se snadno plete. Očekávané selhání znamená čekat od sebe příliš málo ve srovnání s ostatními, neúprosná laťka příliš mnoho ve srovnání s nedosažitelnou metou. Když běží oba, jsi mezi mlýnskými kameny: nároky nahoře, důvěra dole, a odpočinek si nezasloužíš ani po vítězství.",
+  "08-10": "Vypadá to jako protiklad a je to protiklad, který se snadno plete. Strach ze selhání znamená čekat od sebe příliš málo ve srovnání s ostatními, perfekcionismus příliš mnoho ve srovnání s nedosažitelnou metou. Když běží oba, jsi mezi mlýnskými kameny: nároky nahoře, důvěra dole, a odpočinek si nezasloužíš ani po vítězství.",
   "04-10": "Výkon tu slouží jako vstupenka. Když nepatříš, dá se místo v kabině koupit tím, co dokážeš. Funguje to a zároveň nefunguje: uznání přijde, přijetí ne, protože nepatří tobě, ale tvému výsledku.",
   "09-10": "Vysoké nároky se tu potkávají s neschopností odmítnout. Bereš si víc zátěže, než unese kdokoli, a pak ji musíš odvést dokonale. To je nejrychlejší cesta k přetrénování, jakou tenhle test umí ukázat, a obvykle se pozná až na těle.",
-  "06-10": "Neúprosná laťka tu obsluhuje úzkost. Kontrola nad detailem má nahradit jistotu, kterou nemáš, takže čím větší nejistota, tím přesnější rituály. Úleva ale nepřijde, protože kontrolovat se dá vždycky ještě něco.",
+  "06-10": "Perfekcionismus tu obsluhuje úzkost. Kontrola nad detailem má nahradit jistotu, kterou nemáš, takže čím větší nejistota, tím přesnější rituály. Úleva ale nepřijde, protože kontrolovat se dá vždycky ještě něco.",
   "03-10": "Za výkonem je tu citová prázdnota. Dosahování má zaplnit místo, kde chybí blízkost, a proto ani ten největší úspěch nenasytí. Nejdřív to obvykle odnese vztah, tedy přesně to, co by pomohlo.",
   "10-11": "Nároky a nárokovost se tu spojují do velmi tvrdého nastavení. Od sebe chceš maximum a od týmu ohledy, a když se to nesejde, přijde vztek. Nejvíc to dopadá na lidi, kteří jsou nejblíž, tedy na spoluhráče a rodinu.",
-  "05-10": "Neúprosná laťka tu kryje nedůvěru ve vlastní síly. Když si nevěříš, musíš být {připravený|připravená} lépe než ostatní, a příprava nikdy nekončí. Zvenčí to vypadá jako svědomitost, zevnitř je to strach.",
+  "05-10": "Perfekcionismus tu kryje nedůvěru ve vlastní síly. Když si nevěříš, musíš být {připravený|připravená} lépe než ostatní, a příprava nikdy nekončí. Zvenčí to vypadá jako svědomitost, zevnitř je to strach.",
   "01-10": "Výkon tu drží vztahy pohromadě. Někde uvnitř je rovnice, že tě nepustí, dokud budeš {dost dobrý|dost dobrá}, a proto se laťka nedá spustit ani v přípravě. Paradox je, že právě tempo a nároky nakonec vyčerpají i vztahy, o které jde.",
-  "02-10": "Vysoké nároky tu slouží ostražitosti. Kdo je bez chyby, toho není za co chytit a nikdo mu nesebere místo. Neúprosná laťka se tak stává obranou před zranitelností, a proto se tak těžko pouští.",
+  "02-10": "Vysoké nároky tu slouží ostražitosti. Kdo je bez chyby, toho není za co chytit a nikdo mu nesebere místo. Perfekcionismus se tak stává obranou před zranitelností, a proto se tak těžko pouští.",
 }

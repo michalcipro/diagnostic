@@ -9,8 +9,8 @@ import type { VzorecId, VzorecObsah } from "../types"
 
 export const OBSAH_SPORT_SK: Record<VzorecId, VzorecObsah> = {
   "01": {
-    nazev: "Neistá opora",
-    tema: "Strach zo straty zázemia a istoty miesta",
+    nazev: "Strach z opustenia",
+    tema: "Strata zázemia a istoty miesta",
     motto: "Keď prestanem podávať výkon, zostanem {sám|sama}.",
     prozitek:
       "Niekde vnútri máš istotu, že ľudí, ktorí ťa v športe držia, nakoniec nestratíš náhodou, ale zákonite. Tréner odíde, spoluhráč prestúpi, klub zmení plány, záujem opadne. Aj v období, keď sa darí, čakáš, kedy sa to zlomí. Táto istota nestojí na tom, čo sa práve deje, a preto ju nevyvráti ani nová zmluva, ani istá pozícia v zostave. Vzniká často skôr, než si to človek pamätá, a preto je pod ňou cítiť niečo staré a naliehavé: pár dní bez pozornosti trénera spustí paniku, ktorá je na situáciu zjavne priveľká. Reakcia býva jedna z dvoch. Buď sa primkneš bližšie, overuješ, pýtaš sa, žiadaš uistenie, a čím viac ho dostaneš, tým kratšie vydrží. Alebo si naopak držíš odstup, pretože čo si nepustíš k telu, to ťa nemôže opustiť. Oboje vyzerá zvonku inak, ale robí to isté: chráni ťa pred stratou a zároveň bráni tomu, aby vzťah s trénerom alebo tímom zosilnel natoľko, že by stratu uniesol. Spoznáš to podľa nepomeru: sila reakcie nezodpovedá tomu, čo sa práve stalo.",
@@ -32,7 +32,7 @@ export const OBSAH_SPORT_SK: Record<VzorecId, VzorecObsah> = {
   },
 
   "02": {
-    nazev: "Obranná ostražitosť",
+    nazev: "Nedôvera",
     tema: "Očakávanie zrady a stráženie vlastnej pozície",
     motto: "Nikomu tu nemôžem veriť naplno.",
     prozitek:
@@ -52,7 +52,7 @@ export const OBSAH_SPORT_SK: Record<VzorecId, VzorecObsah> = {
   },
 
   "03": {
-    nazev: "Neviditeľné úsilie",
+    nazev: "Citová deprivácia",
     tema: "Emočný hlad a pocit, že nikto nevidí cenu výkonu",
     motto: "Nikto nevie, čo ma to stojí.",
     prozitek:
@@ -72,7 +72,7 @@ export const OBSAH_SPORT_SK: Record<VzorecId, VzorecObsah> = {
   },
 
   "04": {
-    nazev: "Mimo kabínu",
+    nazev: "Pocit vylúčenia",
     tema: "Pocit odlišnosti a nepatričnosti do skupiny",
     motto: "Do tejto kabíny nepatrím.",
     prozitek:
@@ -112,8 +112,8 @@ export const OBSAH_SPORT_SK: Record<VzorecId, VzorecObsah> = {
   },
 
   "06": {
-    nazev: "Očakávané ohrozenie",
-    tema: "Katastrofizácia, strach zo zranenia a straty kontroly",
+    nazev: "Strach z ohrozenia",
+    tema: "Katastrofizácia, obavy zo zranenia a zo straty kontroly",
     motto: "Niečo sa stane a ja to neustojím.",
     prozitek:
       "Očakávaš, že sa stane niečo zlé, a zároveň že tomu nedokážeš zabrániť. Vzorec pracuje v dvoch smeroch naraz: zväčšuje nebezpečenstvo a zmenšuje tvoju schopnosť čeliť mu. Preto nepomáha, keď si spočítaš, aké je niečo nepravdepodobné. V športe má obvykle štyri podoby a nemusíš mať všetky. Telo a zranenie, keď sleduješ každý signál a hľadáš, čo znamená. Nebezpečenstvo zvonku, teda cestovanie, súboje, konkrétne prvky alebo úseky trate. Existenčná rovina, teda strach, že o kariéru prídeš zo dňa na deň. A strata kontroly, teda obava, že sa v kľúčovej chvíli neudržíš alebo sa zosypeš pred ľuďmi. Najnáročnejšie na tom býva, že úzkosť neubúda tým, že sa nič nestane: každý deň bez katastrofy je len deň, keď zatiaľ neprišla. Úzkosť si totiž nemýli pravdepodobnosť s možnosťou náhodou; kým je niečo možné, telo to počíta ako hrozbu.",
@@ -132,8 +132,8 @@ export const OBSAH_SPORT_SK: Record<VzorecId, VzorecObsah> = {
   },
 
   "07": {
-    nazev: "Skrytá nedostatočnosť",
-    tema: "Hanba a strach, že sa pozná, kto naozaj som",
+    nazev: "Menejcennosť",
+    tema: "Hanba a obava, že sa pozná, kto naozaj som",
     motto: "Keby ma spoznali bližšie, prestali by si ma vážiť.",
     prozitek:
       "Hlavným pocitom je hanba. Nie vina za to, čo si {urobil|urobila}, ale hanba za to, čo si. Niekde vnútri máš presvedčenie, že je v tebe niečo chybné, a že keby to ľudia videli, odišli by. Preto sa to schováva: časti seba neukazuješ ani spoluhráčom, s ktorými tráviš viac času než s rodinou. Vzniká rozdiel medzi tým, koho tím pozná, a tým, kto si myslíš, že naozaj si. Na rozdiel od pocitu, že nepatríš do kabíny, tento vzorec silnie práve s blízkosťou: čím bližšie si niekoho pustíš, tým väčšie je riziko odhalenia. Správanie z toho plynie dvojaké a často sa strieda. Buď sa blízkosti vyhýbaš, alebo si vyberáš ľudí, ktorí ťa kritizujú, pretože ti sadnú do obrazu, ktorý o sebe máš. Pochvala sa pritom neudrží, skĺzne po povrchu; kritika zapadne presne. Rozdiel oproti zdravej sebakritike je v tom, kde sa zastaví: sebakritika skončí pri chybe, hanba pokračuje k záveru o tom, kto si.",
@@ -152,11 +152,11 @@ export const OBSAH_SPORT_SK: Record<VzorecId, VzorecObsah> = {
   },
 
   "08": {
-    nazev: "Očakávané zlyhanie",
+    nazev: "Strach zo zlyhania",
     tema: "Výkonová nedôvera a syndróm podvodníka",
     motto: "Na túto úroveň nemám.",
     prozitek:
-      "Vo výkone sa porovnávaš s ostatnými a vychádzaš z toho ako ten pod priemerom. Nejde o to, že by si sa {bál|bála} náročných úloh. Ide o istotu, že v porovnaní s rovesníkmi si {zaostal|zaostala}, aj keď čísla hovoria niečo iné. Odtiaľ pramenia dve podoby. Prvá je stiahnutie: nejdeš do situácií, ktoré by si najskôr {zvládol|zvládla}, pretože očakávaný neúspech sa nedá zniesť. Druhá je syndróm podvodníka: výsledky máš, ale nepovažuješ ich za svoje a čakáš, kedy sa príde na to, že na túto úroveň nepatríš. Vzorec pracuje ako sebanapĺňajúca predpoveď: pretože do vecí nejdeš naplno alebo do nich nejdeš vôbec, výsledky tomu zodpovedajú, a to sa potom číta ako potvrdenie. Dôležité je rozlíšenie od neúprosnej latky: zlyhanie znamená očakávať od seba príliš málo v porovnaní s ostatnými, latka príliš veľa v porovnaní s nedosiahnuteľnou métou. Sleduj pritom, s kým sa porovnávaš; vzorec si vyberá meradlo tak, aby vyšlo.",
+      "Vo výkone sa porovnávaš s ostatnými a vychádzaš z toho ako ten pod priemerom. Nejde o to, že by si sa {bál|bála} náročných úloh. Ide o istotu, že v porovnaní s rovesníkmi si {zaostal|zaostala}, aj keď čísla hovoria niečo iné. Odtiaľ pramenia dve podoby. Prvá je stiahnutie: nejdeš do situácií, ktoré by si najskôr {zvládol|zvládla}, pretože očakávaný neúspech sa nedá zniesť. Druhá je syndróm podvodníka: výsledky máš, ale nepovažuješ ich za svoje a čakáš, kedy sa príde na to, že na túto úroveň nepatríš. Vzorec pracuje ako sebanapĺňajúca predpoveď: pretože do vecí nejdeš naplno alebo do nich nejdeš vôbec, výsledky tomu zodpovedajú, a to sa potom číta ako potvrdenie. Dôležité je rozlíšenie od perfekcionizmu: strach zo zlyhania znamená očakávať od seba príliš málo v porovnaní s ostatnými, perfekcionizmus príliš veľa v porovnaní s nedosiahnuteľnou métou. Sleduj pritom, s kým sa porovnávaš; vzorec si vyberá meradlo tak, aby vyšlo.",
     podTlakem:
       "Pod tlakom príde odklad alebo únik. Do súboja sa nepridáš, riešenie sa prenechá inému, cieľ sa zníži, príležitosť sa pustí. Niekedy naopak príde prehnaná práca, ale bez radosti z výsledku, pretože žiadny výsledok nestačí na to, aby presvedčil. Nebezpečné je, že odklad sa tvári rozumne: vždy existuje dôvod, prečo práve teraz nie je vhodná chvíľa.",
     puvod:
@@ -172,7 +172,7 @@ export const OBSAH_SPORT_SK: Record<VzorecId, VzorecObsah> = {
   },
 
   "09": {
-    nazev: "Poslušný výkon",
+    nazev: "Podriadenie sa",
     tema: "Prispôsobenie, potlačenie seba a strata hraníc",
     motto: "Nakoniec urobím to, čo chcú ostatní.",
     prozitek:
@@ -192,7 +192,7 @@ export const OBSAH_SPORT_SK: Record<VzorecId, VzorecObsah> = {
   },
 
   "10": {
-    nazev: "Neúprosná latka",
+    nazev: "Perfekcionizmus",
     tema: "Nikdy nekončiace nároky a výkonová identita",
     motto: "Nikdy to nestačí.",
     prozitek:
@@ -212,8 +212,8 @@ export const OBSAH_SPORT_SK: Record<VzorecId, VzorecObsah> = {
   },
 
   "11": {
-    nazev: "Nárok na výnimku",
-    tema: "Nárokovosť, impulzivita a problém s obmedzením",
+    nazev: "Nárokovosť",
+    tema: "Nárok na výnimku, impulzivita a problém s obmedzením",
     motto: "Na mňa bežné pravidlá neplatia.",
     prozitek:
       "Máš pocit, že sa na teba bežné obmedzenia tak celkom nevzťahujú, a že tvoje potreby majú prednosť. Keď ti tréner odporuje alebo ti niečo prekazí, príde hnev, ktorý je na situáciu neprimeraný. Vzorec má tri podoby a môžu sa prekrývať. Nárokovosť, keď si žiadaš výnimku z tímových pravidiel a do druhých sa nevcítiš, pretože ťa to jednoducho nenapadne. Závislá podoba, keď sa výnimočnosť spája s očakávaním, že sa o teba klub alebo tréner postará, pretože je to jeho povinnosť. A impulzívna podoba, keď je problém vydržať nepohodlie: ťažko sa odkladá potešenie, ťažko sa dokončuje nudná časť prípravy a zle sa prestáva s tým, čo krátkodobo uľaví. Zvonku pôsobí tento vzorec sebaisto a v talentovanom športovcovi ho okolie dlho toleruje. Vnútri býva pod ním niečo celkom iné, najčastejšie hanba alebo prázdno, ktoré sa nárokovosťou prehlušuje. Najspoľahlivejšia stopa je hnev na maličkosť.",
