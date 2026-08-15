@@ -46,8 +46,12 @@ function nactiModuly() {
     vstup,
     `export { OBSAH } from "../lib/vzorce/data/obsah"
 export { OBSAH_SK } from "../lib/vzorce/data/obsah-sk"
+export { OBSAH_SPORT } from "../lib/vzorce/data/obsah-sport"
+export { OBSAH_SPORT_SK } from "../lib/vzorce/data/obsah-sport-sk"
 export { DVOJICE } from "../lib/vzorce/data/dvojice"
 export { DVOJICE_SK } from "../lib/vzorce/data/dvojice-sk"
+export { DVOJICE_SPORT } from "../lib/vzorce/data/dvojice-sport"
+export { DVOJICE_SPORT_SK } from "../lib/vzorce/data/dvojice-sport-sk"
 export {
   NAZVY_DOMEN,
   NAZVY_DOMEN_KRATCE,
@@ -87,10 +91,24 @@ function retezce(uzel, cesta = "") {
   return Object.entries(uzel).flatMap(([k, v]) => retezce(v, cesta ? `${cesta}.${k}` : k))
 }
 
+/** Co všechno se kontroluje: obecná i sportovní podoba vzorců. */
+const VARIANTY = [
+  { jmeno: "obecná", obsah: "OBSAH", obsahSk: "OBSAH_SK", dvojice: "DVOJICE", dvojiceSk: "DVOJICE_SK" },
+  {
+    jmeno: "sportovní",
+    obsah: "OBSAH_SPORT",
+    obsahSk: "OBSAH_SPORT_SK",
+    dvojice: "DVOJICE_SPORT",
+    dvojiceSk: "DVOJICE_SPORT_SK",
+  },
+]
+
 console.log("– slovenština bez českých písmen –")
 for (const [jmeno, data] of [
   ["obsah-sk", M.OBSAH_SK],
+  ["obsah-sport-sk", M.OBSAH_SPORT_SK],
   ["dvojice-sk", M.DVOJICE_SK],
+  ["dvojice-sport-sk", M.DVOJICE_SPORT_SK],
   ["pásma", M.NAZVY_PASEM.sk],
   ["pásma zkráceně", M.NAZVY_PASEM_KRATCE.sk],
   ["oblasti", M.NAZVY_DOMEN.sk],
@@ -119,38 +137,53 @@ console.log("\n– úplnost obsahu –")
 const POLE = ["nazev", "tema", "motto", "prozitek", "podTlakem", "puvod"]
 const PASMA = ["velmi-nizka", "nizka", "stredni", "vysoka", "dominantni"]
 
+for (const varianta of VARIANTY) {
 for (const v of M.VZORCE) {
-  const cs = M.OBSAH[v.id]
-  const sk = M.OBSAH_SK[v.id]
+  const cs = M[varianta.obsah][v.id]
+  const sk = M[varianta.obsahSk][v.id]
   if (!sk) {
-    rekni(false, `vzorec ${v.id} nemá slovenský obsah`)
+    rekni(false, `${varianta.jmeno}: vzorec ${v.id} nemá slovenský obsah`)
     continue
   }
   const chybi = POLE.filter((p) => !sk[p] || !sk[p].trim())
   const chybiPasma = PASMA.filter((p) => !sk.pasma?.[p] || !sk.pasma[p].trim())
   rekni(
     chybi.length === 0 && chybiPasma.length === 0,
-    `vzorec ${v.id} (${sk.nazev || "?"}) má všech ${POLE.length} polí i ${PASMA.length} pásem`,
+    `${varianta.jmeno}: vzorec ${v.id} (${sk.nazev || "?"}) má všech ${POLE.length} polí i ${PASMA.length} pásem`,
   )
   // Delší text, který zůstal doslova český, je skoro jistě nepřeložený.
   // Výjimky jsou věty, které v obou jazycích znějí opravdu stejně.
   const dlouhe = POLE.filter(
     (p) => sk[p] === cs[p] && String(cs[p]).split(" ").length > 3 && !SHODNE_JAZYKY.has(`${v.id}.${p}`),
   )
-  rekni(dlouhe.length === 0, `vzorec ${v.id}: žádné delší pole nezůstalo české${dlouhe.length ? ` (${dlouhe.join(", ")})` : ""}`)
+  rekni(
+    dlouhe.length === 0,
+    `${varianta.jmeno}: vzorec ${v.id} nemá žádné delší pole české${dlouhe.length ? ` (${dlouhe.join(", ")})` : ""}`,
+  )
+}
 }
 
 console.log("\n– dvojice vzorců –")
 const klicCs = Object.keys(M.DVOJICE).sort()
-const klicSk = Object.keys(M.DVOJICE_SK).sort()
-rekni(
-  JSON.stringify(klicCs) === JSON.stringify(klicSk),
-  `stejné klíče v obou jazycích (${klicCs.length})`,
-)
-const chybejici = klicCs.filter((k) => !M.DVOJICE_SK[k])
-rekni(chybejici.length === 0, `žádná dvojice nechybí${chybejici.length ? ` (${chybejici.join(", ")})` : ""}`)
-const stejne = klicCs.filter((k) => M.DVOJICE_SK[k] === M.DVOJICE[k])
-rekni(stejne.length === 0, `žádná dvojice nezůstala česká${stejne.length ? ` (${stejne.join(", ")})` : ""}`)
+for (const varianta of VARIANTY) {
+  const klice = Object.keys(M[varianta.dvojice]).sort()
+  const kliceSk = Object.keys(M[varianta.dvojiceSk]).sort()
+  rekni(
+    JSON.stringify(klice) === JSON.stringify(kliceSk),
+    `${varianta.jmeno}: stejné klíče v obou jazycích (${klice.length})`,
+  )
+  // Varianty se nesmí rozejít mezi sebou: chybějící dvojice ve sportovní
+  // verzi by znamenala, že se u téhle kombinace složí obecný popis z domén.
+  rekni(
+    JSON.stringify(klice) === JSON.stringify(klicCs),
+    `${varianta.jmeno}: stejné klíče jako obecná verze`,
+  )
+  const stejne = klice.filter((k) => M[varianta.dvojiceSk][k] === M[varianta.dvojice][k])
+  rekni(
+    stejne.length === 0,
+    `${varianta.jmeno}: žádná dvojice nezůstala česká${stejne.length ? ` (${stejne.join(", ")})` : ""}`,
+  )
+}
 
 // ---------------------------------------------------------------------------
 // 3) rodové značky
@@ -161,23 +194,31 @@ const ZNACKA = /\{([^{}|]*)\|([^{}|]*)\}/g
 const pocetZnacek = (t) => (String(t).match(ZNACKA) || []).length
 
 let neshodaZnacek = []
+for (const varianta of VARIANTY) {
 for (const v of M.VZORCE) {
-  const cs = M.OBSAH[v.id]
-  const sk = M.OBSAH_SK[v.id]
+  const cs = M[varianta.obsah][v.id]
+  const sk = M[varianta.obsahSk][v.id]
   if (!sk) continue
   for (const p of POLE) {
-    if (pocetZnacek(cs[p]) !== pocetZnacek(sk[p])) neshodaZnacek.push(`${v.id}.${p}`)
+    if (pocetZnacek(cs[p]) !== pocetZnacek(sk[p])) neshodaZnacek.push(`${varianta.jmeno} ${v.id}.${p}`)
   }
   for (const p of PASMA) {
-    if (pocetZnacek(cs.pasma[p]) !== pocetZnacek(sk.pasma[p])) neshodaZnacek.push(`${v.id}.pasma.${p}`)
+    if (pocetZnacek(cs.pasma[p]) !== pocetZnacek(sk.pasma[p])) {
+      neshodaZnacek.push(`${varianta.jmeno} ${v.id}.pasma.${p}`)
+    }
   }
+}
 }
 rekni(
   neshodaZnacek.length === 0,
   `obsah má v obou jazycích stejný počet značek${neshodaZnacek.length ? ` (${neshodaZnacek.join(", ")})` : ""}`,
 )
 
-const neshodaDvojic = klicCs.filter((k) => pocetZnacek(M.DVOJICE[k]) !== pocetZnacek(M.DVOJICE_SK[k]))
+const neshodaDvojic = VARIANTY.flatMap((varianta) =>
+  Object.keys(M[varianta.dvojice])
+    .filter((k) => pocetZnacek(M[varianta.dvojice][k]) !== pocetZnacek(M[varianta.dvojiceSk][k]))
+    .map((k) => `${varianta.jmeno} ${k}`),
+)
 rekni(
   neshodaDvojic.length === 0,
   `dvojice mají v obou jazycích stejný počet značek${neshodaDvojic.length ? ` (${neshodaDvojic.join(", ")})` : ""}`,
@@ -185,7 +226,12 @@ rekni(
 
 // Obě větve značky musí být neprázdné, jinak text v jednom rodě zeje.
 const prazdneVetve = []
-for (const [cesta, text] of [...retezce(M.OBSAH_SK, "obsah"), ...retezce(M.DVOJICE_SK, "dvojice")]) {
+for (const [cesta, text] of [
+  ...retezce(M.OBSAH_SK, "obsah"),
+  ...retezce(M.OBSAH_SPORT_SK, "obsah-sport"),
+  ...retezce(M.DVOJICE_SK, "dvojice"),
+  ...retezce(M.DVOJICE_SPORT_SK, "dvojice-sport"),
+]) {
   for (const m of String(text).matchAll(ZNACKA)) {
     if (!m[1].trim() || !m[2].trim()) prazdneVetve.push(cesta)
   }
@@ -216,20 +262,28 @@ const PRIPADY = [
   { popis: "tři z různých oblastí", silne: [7, 8, 10] },
 ]
 
-for (const p of PRIPADY) {
-  const v = M.vyhodnot(odpovedi(p.silne))
-  const cs = M.propoj(v, "cs")
-  const sk = M.propoj(v, "sk")
-  rekni(!!cs && !!sk, `${p.popis}: shrnutí vzniklo v obou jazycích`)
-  if (!cs || !sk) continue
-  const stejnaPole = ["domeny", "souhrn", "kdeZacit"].filter((k) => cs[k] === sk[k])
-  rekni(stejnaPole.length === 0, `${p.popis}: české a slovenské znění se liší${stejnaPole.length ? ` (${stejnaPole.join(", ")})` : ""}`)
-  rekni(
-    cs.mechanismy.length === sk.mechanismy.length,
-    `${p.popis}: stejný počet mechanismů (${cs.mechanismy.length})`,
-  )
-  const ceske = [sk.domeny, sk.souhrn, sk.kdeZacit, ...sk.mechanismy].filter((t) => CESKA_PISMENA.test(t))
-  rekni(ceske.length === 0, `${p.popis}: slovenské znění neobsahuje ř, ě ani ů`)
+for (const varianta of ["obecna", "sport"]) {
+  for (const p of PRIPADY) {
+    const v = M.vyhodnot(odpovedi(p.silne))
+    const cs = M.propoj(v, "cs", varianta)
+    const sk = M.propoj(v, "sk", varianta)
+    const kde = `${varianta} / ${p.popis}`
+    rekni(!!cs && !!sk, `${kde}: shrnutí vzniklo v obou jazycích`)
+    if (!cs || !sk) continue
+    const stejnaPole = ["domeny", "souhrn", "kdeZacit"].filter((k) => cs[k] === sk[k])
+    rekni(
+      stejnaPole.length === 0,
+      `${kde}: české a slovenské znění se liší${stejnaPole.length ? ` (${stejnaPole.join(", ")})` : ""}`,
+    )
+    rekni(
+      cs.mechanismy.length === sk.mechanismy.length,
+      `${kde}: stejný počet mechanismů (${cs.mechanismy.length})`,
+    )
+    const ceske = [sk.domeny, sk.souhrn, sk.kdeZacit, ...sk.mechanismy].filter((t) =>
+      CESKA_PISMENA.test(t),
+    )
+    rekni(ceske.length === 0, `${kde}: slovenské znění neobsahuje ř, ě ani ů`)
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -298,7 +352,16 @@ const TVARY = [
 // Věty, kde mužský tvar patří někomu jinému než čtenáři, typicky rodiči.
 const NEJDE_O_CTENARE = ["sám žil v úzkosti", "ten istý vzorec", "tej istej vete"]
 
-for (const soubor of ["obsah.ts", "obsah-sk.ts", "dvojice.ts", "dvojice-sk.ts"]) {
+for (const soubor of [
+  "obsah.ts",
+  "obsah-sk.ts",
+  "obsah-sport.ts",
+  "obsah-sport-sk.ts",
+  "dvojice.ts",
+  "dvojice-sk.ts",
+  "dvojice-sport.ts",
+  "dvojice-sport-sk.ts",
+]) {
   const zdroj = fs
     .readFileSync(path.join(KOREN, "lib", "vzorce", "data", soubor), "utf8")
     // vymaskuj jen rodové značky, ne celé objekty

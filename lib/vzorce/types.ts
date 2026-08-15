@@ -5,6 +5,12 @@
 // (pět místo čtyř) a hlavně jinou logiku vyhodnocení: nehledá se profil všech
 // škál, ale tři nejaktivnější vzorce a jejich vzájemné souvislosti.
 
+/**
+ * Podoba testu. Obě mají stejnou stavbu, stejné skórování i stejná pásma;
+ * liší se dotazník a všechny texty vyhodnocení.
+ */
+export type Varianta = "obecna" | "sport"
+
 /** Odpověď na šestibodové škále. Šestka je záměrná: nemá střed, nutí se přiklonit. */
 export type Odpoved = 1 | 2 | 3 | 4 | 5 | 6
 

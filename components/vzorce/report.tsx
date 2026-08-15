@@ -2,8 +2,9 @@
 
 import { useMemo } from "react"
 import { applyGender } from "@/lib/diagnostic/content"
-import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
-import type { Gender, Lang, PersonInfo } from "@/lib/diagnostic/types"
+import { TEST_NAMES as NAZVY_TESTU, UI } from "@/lib/diagnostic/i18n"
+import type { Gender, Lang, PersonInfo, TestId } from "@/lib/diagnostic/types"
+import { variantaVzorcu } from "@/lib/diagnostic/structure"
 import { obsahVzorce } from "@/lib/vzorce/content"
 import { UI_VZORCE } from "@/lib/vzorce/i18n"
 import { vyhodnot } from "@/lib/vzorce/scoring"
@@ -41,19 +42,23 @@ function Udaj({ popis, hodnota }: { popis: string; hodnota: string }) {
 }
 
 export function VzorceReport({
+  testId,
   person,
   answers,
   lang,
   durationSec,
 }: {
+  /** rozhoduje, jestli se čte obecná, nebo sportovní podoba vzorců */
+  testId: TestId
   person: PersonInfo
   answers: OdpovediMapa
   lang: Lang
   durationSec?: number
 }) {
+  const varianta = variantaVzorcu(testId)
   const gender: Gender = person.gender ?? "male"
   const v = useMemo(() => vyhodnot(answers, durationSec), [answers, durationSec])
-  const spojeni = useMemo(() => propoj(v, lang), [v, lang])
+  const spojeni = useMemo(() => propoj(v, lang, varianta), [v, lang, varianta])
   const g = (t: string) => applyGender(t, gender)
   const t = UI_VZORCE[lang]
 
@@ -64,12 +69,12 @@ export function VzorceReport({
           {UI[lang].brand}
         </p>
         <h1 className="mt-2 text-[28px] font-bold leading-tight tracking-tight">
-          {TEST_NAMES.vzorce[lang]} · {UI[lang].reportTitle}
+          {NAZVY_TESTU[testId][lang]} · {UI[lang].reportTitle}
         </h1>
-        <p className="mt-1 text-[15px] text-[var(--wm-text-2)]">{t.podnadpis}</p>
+        <p className="mt-1 text-[15px] text-[var(--wm-text-2)]">{t.podnadpis[varianta]}</p>
         <dl className="mt-6 grid gap-x-8 gap-y-4 border-t border-[var(--wm-border-light)] pt-5 sm:grid-cols-3">
           <Udaj popis={t.respondent} hodnota={person.name || "–"} />
-          <Udaj popis={t.role} hodnota={person.role || "–"} />
+          <Udaj popis={t.role[varianta]} hodnota={person.role || "–"} />
           <Udaj popis={t.datum} hodnota={datum(person.fillDate)} />
         </dl>
       </header>
@@ -87,7 +92,7 @@ export function VzorceReport({
         <p className="mt-1 mb-5 max-w-2xl text-[13px] leading-relaxed text-[var(--wm-text-3)]">
           {t.profilPopisWeb}
         </p>
-        <ProfilGraf vsechny={v.vsechny} top3={v.top3} lang={lang} />
+        <ProfilGraf vsechny={v.vsechny} top3={v.top3} lang={lang} varianta={varianta} />
       </section>
 
       {/* zatížení oblastí */}
@@ -96,7 +101,7 @@ export function VzorceReport({
         <p className="mt-1 mb-5 max-w-2xl text-[13px] leading-relaxed text-[var(--wm-text-3)]">
           {t.oblastiPopisWeb}
         </p>
-        <DomenyGraf vsechny={v.vsechny} lang={lang} />
+        <DomenyGraf vsechny={v.vsechny} lang={lang} varianta={varianta} />
       </section>
 
       {/* tři nejaktivnější */}
@@ -107,19 +112,19 @@ export function VzorceReport({
         </p>
 
         <div className="diag-card mb-5 px-7 py-8">
-          <TrojicePrstencu top3={v.top3} lang={lang} />
+          <TrojicePrstencu top3={v.top3} lang={lang} varianta={varianta} />
         </div>
 
         <div className="flex flex-col gap-5">
           {v.top3.map((s, i) => {
-            const o = obsahVzorce(s.id, lang)
+            const o = obsahVzorce(s.id, lang, varianta)
             const d = vzorec(s.id).domena
             return (
               <article key={s.id} className="diag-card p-7">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[var(--wm-text-3)]">
-                      {t.misto(i + 1)} · {NAZVY_DOMEN[lang][d]}
+                      {t.misto(i + 1)} · {NAZVY_DOMEN[varianta][lang][d]}
                     </p>
                     <h3 className="mt-1 text-[20px] font-bold tracking-tight">{o.nazev}</h3>
                     <p className="mt-1 text-[13px] text-[var(--wm-text-2)]">{o.tema}</p>
@@ -187,9 +192,9 @@ export function VzorceReport({
               >
                 <span
                   className="truncate text-[14px] font-medium"
-                  title={obsahVzorce(s.id, lang).nazev}
+                  title={obsahVzorce(s.id, lang, varianta).nazev}
                 >
-                  {obsahVzorce(s.id, lang).nazev}
+                  {obsahVzorce(s.id, lang, varianta).nazev}
                 </span>
                 <span className="text-right text-[14px] font-semibold tabular-nums">
                   {s.skore}

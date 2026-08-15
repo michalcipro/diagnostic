@@ -1,5 +1,5 @@
 import type { Lang } from "../diagnostic/types"
-import type { Domena, PasmoRozsah, VzorecDef, VzorecId } from "./types"
+import type { Domena, PasmoRozsah, Varianta, VzorecDef, VzorecId } from "./types"
 
 // Struktura testu emocionálně-destruktivních vzorců.
 //
@@ -118,10 +118,25 @@ const DOMENY_KRATCE_SK: Record<Domena, string> = {
   ostrazitost: "Ostražitosť a nároky",
 }
 
-export const NAZVY_DOMEN_KRATCE: Record<Lang, Record<Domena, string>> = {
-  cs: DOMENY_KRATCE_CS,
-  sk: DOMENY_KRATCE_SK,
-  en: DOMENY_KRATCE_CS,
+const DOMENY_KRATCE_SPORT_CS: Record<Domena, string> = {
+  odpojeni: "Bezpečí a přijetí",
+  autonomie: "Samostatnost a důvěra",
+  hranice: "Hranice a sebeovládání",
+  zamereni: "Zaměření na druhé",
+  ostrazitost: "Nároky a kontrola",
+}
+
+const DOMENY_KRATCE_SPORT_SK: Record<Domena, string> = {
+  odpojeni: "Bezpečie a prijatie",
+  autonomie: "Samostatnosť a dôvera",
+  hranice: "Hranice a sebaovládanie",
+  zamereni: "Zameranie na druhých",
+  ostrazitost: "Nároky a kontrola",
+}
+
+export const NAZVY_DOMEN_KRATCE: Record<Varianta, Record<Lang, Record<Domena, string>>> = {
+  obecna: { cs: DOMENY_KRATCE_CS, sk: DOMENY_KRATCE_SK, en: DOMENY_KRATCE_CS },
+  sport: { cs: DOMENY_KRATCE_SPORT_CS, sk: DOMENY_KRATCE_SPORT_SK, en: DOMENY_KRATCE_SPORT_CS },
 }
 
 const DOMENY_CS: Record<Domena, string> = {
@@ -140,16 +155,39 @@ const DOMENY_SK: Record<Domena, string> = {
   ostrazitost: "Prehnaná ostražitosť a nároky",
 }
 
-export const NAZVY_DOMEN: Record<Lang, Record<Domena, string>> = {
-  cs: DOMENY_CS,
-  sk: DOMENY_SK,
-  en: DOMENY_CS,
+/**
+ * Sportovní verze pojmenovává oblasti jazykem, kterým se mluví v kabině.
+ * Obsahově jde o tytéž skupiny schémat, jen popsané tím, co v nich sportovec
+ * skutečně řeší: jistotu místa, samostatnost na hřišti, hranice, nároky.
+ */
+const DOMENY_SPORT_CS: Record<Domena, string> = {
+  odpojeni: "Bezpečí ve vztazích a přijetí",
+  autonomie: "Samostatnost a důvěra ve vlastní síly",
+  hranice: "Hranice a sebeovládání",
+  zamereni: "Zaměření na druhé",
+  ostrazitost: "Nároky a kontrola",
+}
+
+const DOMENY_SPORT_SK: Record<Domena, string> = {
+  odpojeni: "Bezpečie vo vzťahoch a prijatie",
+  autonomie: "Samostatnosť a dôvera vo vlastné sily",
+  hranice: "Hranice a sebaovládanie",
+  zamereni: "Zameranie na druhých",
+  ostrazitost: "Nároky a kontrola",
+}
+
+export const NAZVY_DOMEN: Record<Varianta, Record<Lang, Record<Domena, string>>> = {
+  obecna: { cs: DOMENY_CS, sk: DOMENY_SK, en: DOMENY_CS },
+  sport: { cs: DOMENY_SPORT_CS, sk: DOMENY_SPORT_SK, en: DOMENY_SPORT_CS },
 }
 
 /**
  * Co v dětství zůstalo nenaplněné. Používá se v propojeném shrnutí, aby
  * několik vzorců ze stejné domény dalo jednu větu místo tří. Tvar je vždycky
  * první pád, protože se doplňuje za sloveso „chybí“.
+ *
+ * Společné oběma variantám: mluví se o dětské potřebě, a ta se nemění tím,
+ * jestli z dítěte vyrostl sportovec, nebo manažer.
  */
 const POTREBA_CS: Record<Domena, string> = {
   odpojeni: "bezpečná a spolehlivá blízkost",

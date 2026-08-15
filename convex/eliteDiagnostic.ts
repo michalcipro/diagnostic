@@ -23,6 +23,7 @@ const TEST_IDS = new Set([
   "elite100-sport",
   "elite100-business",
   "vzorce",
+  "vzorce-sport",
 ])
 
 /**
@@ -33,7 +34,7 @@ const TEST_IDS = new Set([
  * kontrola jen v prohlížeči by se dala obejít.
  */
 function parametryTestu(testId: string): { pocet: number; maxHodnota: number } {
-  if (testId === "vzorce") return { pocet: 110, maxHodnota: 6 }
+  if (testId === "vzorce" || testId === "vzorce-sport") return { pocet: 110, maxHodnota: 6 }
   return { pocet: testId.startsWith("elite200") ? 200 : 100, maxHodnota: 5 }
 }
 
@@ -220,8 +221,11 @@ export const submitWithInvite = mutation({
     if (!inv) throw new ConvexError("Neplatný odkaz.")
     if (inv.usedAt) throw new ConvexError("Tento odkaz už byl použit.")
 
-    // Vzorce nemají variantu, proto se doplní zástupná hodnota.
-    const [model, variant] = inv.testId === "vzorce" ? ["vzorce", "vzorce"] : inv.testId.split("-")
+    // Vzorce nemají variantu v tom smyslu jako ELITE (sport nebo business),
+    // takže se pro ně doplní zástupná hodnota podle testu.
+    const [model, variant] = inv.testId.startsWith("vzorce")
+      ? ["vzorce", inv.testId === "vzorce-sport" ? "sport" : "obecna"]
+      : inv.testId.split("-")
 
     let parsed: Record<string, number>
     try {

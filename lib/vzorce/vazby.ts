@@ -1,7 +1,7 @@
 import type { Lang } from "../diagnostic/types"
 import { maVlastniPopis, nazevVzorce, popisDvojiceProJazyk } from "./content"
 import { NAZVY_DOMEN, POTREBA_DOMENY, vzorec } from "./structure"
-import type { Domena, VysledekVzorcu, VzorecId, VzorecSkore } from "./types"
+import type { Domena, Varianta, VysledekVzorcu, VzorecId, VzorecSkore } from "./types"
 
 // Souvislosti mezi vzorci.
 //
@@ -104,31 +104,40 @@ export interface Propojeni {
 }
 
 /** Název vzorce s malým počátečním písmenem, aby seděl doprostřed věty. */
-function nazevMaly(id: VzorecId, lang: Lang): string {
-  const n = nazevVzorce(id, lang)
+function nazevMaly(id: VzorecId, lang: Lang, varianta: Varianta): string {
+  const n = nazevVzorce(id, lang, varianta)
   return n.charAt(0).toLowerCase() + n.slice(1)
 }
 
 /** Popis dvojice; když pro ni není vlastní text, složí se z domén. */
-function popisDvojice(a: VzorecSkore, b: VzorecSkore, lang: Lang): string {
-  const vlastni = popisDvojiceProJazyk(paruj(a.id, b.id), lang)
+function popisDvojice(a: VzorecSkore, b: VzorecSkore, lang: Lang, varianta: Varianta): string {
+  const vlastni = popisDvojiceProJazyk(paruj(a.id, b.id), lang, varianta)
   if (vlastni) return vlastni
   const s = SABLONY[lang]
   const potreba = POTREBA_DOMENY[lang]
   const da = vzorec(a.id).domena
   const db = vzorec(b.id).domena
   if (da === db) {
-    return s.stejnaDomena(nazevMaly(a.id, lang), nazevMaly(b.id, lang), potreba[da])
+    return s.stejnaDomena(nazevMaly(a.id, lang, varianta), nazevMaly(b.id, lang, varianta), potreba[da])
   }
-  return s.ruzneDomeny(nazevMaly(a.id, lang), nazevMaly(b.id, lang), potreba[da], potreba[db])
+  return s.ruzneDomeny(
+    nazevMaly(a.id, lang, varianta),
+    nazevMaly(b.id, lang, varianta),
+    potreba[da],
+    potreba[db],
+  )
 }
 
-export function propoj(vysledek: VysledekVzorcu, lang: Lang = "cs"): Propojeni | null {
+export function propoj(
+  vysledek: VysledekVzorcu,
+  lang: Lang = "cs",
+  varianta: Varianta = "obecna",
+): Propojeni | null {
   const top = vysledek.top3
   if (top.length === 0) return null
 
   const s = SABLONY[lang]
-  const nazvyDomen = NAZVY_DOMEN[lang]
+  const nazvyDomen = NAZVY_DOMEN[varianta][lang]
   const potreba = POTREBA_DOMENY[lang]
 
   // ---- které oblasti potřeb jsou zasažené ----
@@ -146,7 +155,9 @@ export function propoj(vysledek: VysledekVzorcu, lang: Lang = "cs"): Propojeni |
   // a přesto tvoří jeden pevně spojený systém.
   const dvojicVlastnich =
     top.length >= 2
-      ? top.flatMap((a, i) => top.slice(i + 1).map((b) => (maVlastniPopis(paruj(a.id, b.id)) ? 1 : 0)))
+      ? top.flatMap((a, i) =>
+          top.slice(i + 1).map((b) => (maVlastniPopis(paruj(a.id, b.id), varianta) ? 1 : 0)),
+        )
           .reduce((x: number, y: number) => x + y, 0)
       : 0
   const vsechnyDvojicePopsane = top.length >= 3 && dvojicVlastnich >= 2
@@ -171,7 +182,7 @@ export function propoj(vysledek: VysledekVzorcu, lang: Lang = "cs"): Propojeni |
   const mechanismy: string[] = []
   for (let i = 0; i < top.length; i++) {
     for (let j = i + 1; j < top.length; j++) {
-      mechanismy.push(popisDvojice(top[i], top[j], lang))
+      mechanismy.push(popisDvojice(top[i], top[j], lang, varianta))
     }
   }
 
@@ -179,8 +190,8 @@ export function propoj(vysledek: VysledekVzorcu, lang: Lang = "cs"): Propojeni |
   const nejsilnejsi = top[0]
   const souhrn =
     top.length >= 3
-      ? s.souhrnTri(nazevMaly(nejsilnejsi.id, lang))
-      : s.souhrnJeden(nazevMaly(nejsilnejsi.id, lang))
+      ? s.souhrnTri(nazevMaly(nejsilnejsi.id, lang, varianta))
+      : s.souhrnJeden(nazevMaly(nejsilnejsi.id, lang, varianta))
 
   // ---- kde začít ----
   // Nejdostupnější je ten, který se nejvíc projevuje v konkrétním chování.
@@ -192,8 +203,8 @@ export function propoj(vysledek: VysledekVzorcu, lang: Lang = "cs"): Propojeni |
   const dostupny = kandidati[0]
 
   const kdeZacit = dostupny
-    ? s.kdeZacitDostupny(nazevMaly(dostupny.id, lang))
-    : s.kdeZacitJenNejsilnejsi(nazevMaly(nejsilnejsi.id, lang))
+    ? s.kdeZacitDostupny(nazevMaly(dostupny.id, lang, varianta))
+    : s.kdeZacitJenNejsilnejsi(nazevMaly(nejsilnejsi.id, lang, varianta))
 
   return { domeny, mechanismy, souhrn, kdeZacit }
 }

@@ -10,7 +10,8 @@ import {
   novyDokument,
 } from "../diagnostic/pdf/sazba"
 import { TEST_NAMES, UI } from "../diagnostic/i18n"
-import type { Gender, Lang, PersonInfo } from "../diagnostic/types"
+import { variantaVzorcu } from "../diagnostic/structure"
+import type { Gender, Lang, PersonInfo, TestId } from "../diagnostic/types"
 import { obsahVzorce, nazevVzorce } from "./content"
 import { UI_VZORCE } from "./i18n"
 import { vyhodnot } from "./scoring"
@@ -21,7 +22,7 @@ import {
   POCET_POLOZEK,
   vzorec,
 } from "./structure"
-import type { Domena, OdpovediMapa, VzorecSkore } from "./types"
+import type { Domena, OdpovediMapa, Varianta, VzorecSkore } from "./types"
 import { propoj } from "./vazby"
 
 // PDF s vyhodnocením emocionálně-destruktivních vzorců.
@@ -87,7 +88,13 @@ function prstenec(
 }
 
 /** Tři prstence vedle sebe s popiskem pod nimi. Vrací spotřebovanou výšku. */
-function trojicePrstencu(s: Sazba, top3: VzorecSkore[], g: (t: string) => string, lang: Lang) {
+function trojicePrstencu(
+  s: Sazba,
+  top3: VzorecSkore[],
+  g: (t: string) => string,
+  lang: Lang,
+  varianta: Varianta,
+) {
   const t = UI_VZORCE[lang]
   const polomer = 13
   const vyskaBloku = 2 * polomer + 22
@@ -104,7 +111,7 @@ function trojicePrstencu(s: Sazba, top3: VzorecSkore[], g: (t: string) => string
       charSpace: 0.35,
     })
     s.pismo(9.6, true, BARVA.text)
-    const nazev = s.doc.splitTextToSize(g(nazevVzorce(v.id, lang)), sloupec - 6) as string[]
+    const nazev = s.doc.splitTextToSize(g(nazevVzorce(v.id, lang, varianta)), sloupec - 6) as string[]
     nazev.forEach((r, k) => s.doc.text(r, stredX, zakladPopisku + 5 + k * 4.6, { align: "center" }))
     s.pismo(8, false, BARVA.text2)
     s.doc.text(NAZVY_PASEM[lang][v.pasmo], stredX, zakladPopisku + 5 + nazev.length * 4.6 + 3.4, {
@@ -115,6 +122,8 @@ function trojicePrstencu(s: Sazba, top3: VzorecSkore[], g: (t: string) => string
 }
 
 export interface VzorcePdfVstup {
+  /** rozhoduje o variantě textů i o názvu souboru */
+  testId: TestId
   person: PersonInfo
   answers: OdpovediMapa
   lang: Lang
@@ -124,7 +133,11 @@ export interface VzorcePdfVstup {
 /** Název souboru: test, klient, datum. Bez diakritiky, ať projde kdekoli. */
 export function vzorcePdfFileName(vstup: VzorcePdfVstup): string {
   return (
-    [UI_VZORCE[vstup.lang].nazevSouboru, vstup.person.name, vstup.person.fillDate]
+    [
+      UI_VZORCE[vstup.lang].nazevSouboru[variantaVzorcu(vstup.testId)],
+      vstup.person.name,
+      vstup.person.fillDate,
+    ]
       .filter(Boolean)
       .join(" - ")
       .replace(/[/\\?%*:|"<>]/g, "-")
@@ -133,11 +146,12 @@ export function vzorcePdfFileName(vstup: VzorcePdfVstup): string {
 }
 
 export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
-  const { person, answers, lang, durationSec } = vstup
+  const { testId, person, answers, lang, durationSec } = vstup
+  const varianta = variantaVzorcu(testId)
   const gender: Gender = person.gender ?? "male"
   const g = (x: string) => applyGender(x, gender)
   const v = vyhodnot(answers, durationSec)
-  const spojeni = propoj(v, lang)
+  const spojeni = propoj(v, lang, varianta)
   const t = UI_VZORCE[lang]
 
   const doc = novyDokument()
@@ -151,13 +165,13 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
     prostrkani: 0.6,
   })
   s.mezera(2.5)
-  s.text(`${TEST_NAMES.vzorce[lang]} · ${UI[lang].reportTitle}`, {
+  s.text(`${TEST_NAMES[testId][lang]} · ${UI[lang].reportTitle}`, {
     velikost: 18,
     tucne: true,
     radek: 8,
   })
   s.mezera(1.5)
-  s.text(t.podnadpis, {
+  s.text(t.podnadpis[varianta], {
     velikost: 10,
     barva: BARVA.text2,
     radek: 5,
@@ -168,7 +182,7 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
 
   s.mrizkaUdaju([
     { popis: t.respondent, hodnota: person.name || "–" },
-    { popis: t.role, hodnota: person.role || "–" },
+    { popis: t.role[varianta], hodnota: person.role || "–" },
     { popis: t.datum, hodnota: datumLokalne(person.fillDate, lang) },
   ])
   s.mezera(6)
@@ -187,7 +201,7 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
 
   const vBoji = new Set(v.top3.map((x) => x.id))
   for (const x of v.vsechny) {
-    const nazev = nazevVzorce(x.id, lang)
+    const nazev = nazevVzorce(x.id, lang, varianta)
     if (!x.vykazuje) {
       s.radekChybi(nazev, t.zodpovezenoZ(x.zodpovezeno, x.celkem))
       continue
@@ -225,7 +239,7 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
     const nejvic = oblasti[0].prumer
     for (const o of oblasti) {
       s.radekSkore(
-        `${NAZVY_DOMEN_KRATCE[lang][o.domena]} (${o.pocet})`,
+        `${NAZVY_DOMEN_KRATCE[varianta][lang][o.domena]} (${o.pocet})`,
         String(o.prumer),
         "",
         STITEK_NEUTRALNI,
@@ -246,16 +260,16 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
     s.nadpis(t.top3Titulek, 15)
     s.text(t.top3Popis, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
     s.mezera(6)
-    trojicePrstencu(s, v.top3, g, lang)
+    trojicePrstencu(s, v.top3, g, lang, varianta)
 
     v.top3.forEach((x, i) => {
-      const o = obsahVzorce(x.id, lang)
+      const o = obsahVzorce(x.id, lang, varianta)
       const d = vzorec(x.id).domena
       s.misto(60)
       s.mezera(2)
       s.linka()
       s.mezera(7)
-      s.text(`${t.misto(i + 1).toUpperCase()} · ${NAZVY_DOMEN[lang][d].toUpperCase()}`, {
+      s.text(`${t.misto(i + 1).toUpperCase()} · ${NAZVY_DOMEN[varianta][lang][d].toUpperCase()}`, {
         velikost: 7,
         tucne: true,
         barva: BARVA.slaba,
@@ -318,7 +332,7 @@ export function buildVzorcePdf(vstup: VzorcePdfVstup): Blob {
       s.misto(12)
       const zaklad = s.y
       s.pismo(9.8, true, BARVA.text)
-      s.doc.text(nazevVzorce(x.id, lang), OKRAJ.levy, zaklad)
+      s.doc.text(nazevVzorce(x.id, lang, varianta), OKRAJ.levy, zaklad)
       s.pismo(9.4, true, BARVA.text)
       s.doc.text(`${x.skore}/60`, PRAVY_KRAJ, zaklad, { align: "right" })
       s.y = zaklad + 4.4

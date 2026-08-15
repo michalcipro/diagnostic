@@ -338,6 +338,7 @@ export default function CoachPage() {
         </div>
         {jeVzorce(detail.testId) ? (
           <VzorceReport
+            testId={detail.testId}
             person={detail.person}
             answers={detail.answers}
             lang={detailLang}
@@ -849,6 +850,7 @@ async function exportPdf(detail: ResultDetail, lang: Lang): Promise<void> {
   if (jeVzorce(detail.testId)) {
     const { buildVzorcePdf, vzorcePdfFileName } = await import("@/lib/vzorce/pdf")
     const vstup = {
+      testId: detail.testId,
       person: detail.person,
       // Škála vzorců má šest stupňů, ELITE pět; uložené odpovědi jsou v obou
       // případech čísla, typ se liší jen rozsahem.

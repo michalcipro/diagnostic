@@ -105,6 +105,11 @@ export const TEST_NAMES: Record<TestId, Record<Lang, string>> = {
     en: "Emotionally destructive patterns",
     sk: "Emocionálne-deštruktívne vzorce",
   },
+  "vzorce-sport": {
+    cs: "Emocionálně-destruktivní vzorce · Sport",
+    en: "Emotionally destructive patterns · Sport",
+    sk: "Emocionálne-deštruktívne vzorce · Šport",
+  },
 }
 
 /**

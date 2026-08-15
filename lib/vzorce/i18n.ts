@@ -1,4 +1,5 @@
 import type { Lang } from "../diagnostic/types"
+import type { Varianta } from "./types"
 
 // Texty rozhraní vyhodnocení emocionálně-destruktivních vzorců.
 //
@@ -11,10 +12,11 @@ import type { Lang } from "../diagnostic/types"
 // poctivá čeština v celém dokumentu.
 
 export interface VzorceUI {
-  /** podnadpis pod názvem testu */
-  podnadpis: string
+  /** podnadpis pod názvem testu; sportovní verze má vlastní */
+  podnadpis: Record<Varianta, string>
   respondent: string
-  role: string
+  /** popisek druhého údaje v hlavičce; sport se ptá na disciplínu */
+  role: Record<Varianta, string>
   datum: string
 
   neuplnyTitulek: (zodpovezeno: number, celkem: number) => string
@@ -64,14 +66,18 @@ export interface VzorceUI {
   pocetVzorcu: (n: number) => string
 
   /** začátek názvu staženého PDF */
-  nazevSouboru: string
+  nazevSouboru: Record<Varianta, string>
 }
 
 const CS: VzorceUI = {
-  podnadpis:
-    "Diagnostický profil automatických emočních reakcí, vztahových strategií a výkonových bloků",
+  podnadpis: {
+    obecna:
+      "Diagnostický profil automatických emočních reakcí, vztahových strategií a výkonových bloků",
+    sport:
+      "Diagnostický profil automatických emočních reakcí, vztahových strategií a výkonových bloků ve sportu",
+  },
   respondent: "Respondent",
-  role: "Role / oblast",
+  role: { obecna: "Role / oblast", sport: "Sportovní disciplína a úroveň" },
   datum: "Datum vyplnění",
 
   neuplnyTitulek: (zodpovezeno, celkem) => `Dotazník není kompletní (${zodpovezeno} ze ${celkem}).`,
@@ -132,14 +138,21 @@ const CS: VzorceUI = {
   prumerZ: (prumer, vzorcu) => `průměr ${prumer} bodů z ${vzorcu}`,
   pocetVzorcu: (n) => (n === 1 ? "1 vzorec" : n < 5 ? `${n} vzorce` : `${n} vzorců`),
 
-  nazevSouboru: "Emocionalne-destruktivni vzorce",
+  nazevSouboru: {
+    obecna: "Emocionalne-destruktivni vzorce",
+    sport: "Emocionalne-destruktivni vzorce - Sport",
+  },
 }
 
 const SK: VzorceUI = {
-  podnadpis:
-    "Diagnostický profil automatických emočných reakcií, vzťahových stratégií a výkonových blokov",
+  podnadpis: {
+    obecna:
+      "Diagnostický profil automatických emočných reakcií, vzťahových stratégií a výkonových blokov",
+    sport:
+      "Diagnostický profil automatických emočných reakcií, vzťahových stratégií a výkonových blokov v športe",
+  },
   respondent: "Respondent",
-  role: "Rola / oblasť",
+  role: { obecna: "Rola / oblasť", sport: "Športová disciplína a úroveň" },
   datum: "Dátum vyplnenia",
 
   neuplnyTitulek: (zodpovezeno, celkem) => `Dotazník nie je kompletný (${zodpovezeno} zo ${celkem}).`,
@@ -200,7 +213,10 @@ const SK: VzorceUI = {
   prumerZ: (prumer, vzorcu) => `priemer ${prumer} bodov z ${vzorcu}`,
   pocetVzorcu: (n) => (n === 1 ? "1 vzorec" : n < 5 ? `${n} vzorce` : `${n} vzorcov`),
 
-  nazevSouboru: "Emocionalne-destruktivne vzorce",
+  nazevSouboru: {
+    obecna: "Emocionalne-destruktivne vzorce",
+    sport: "Emocionalne-destruktivne vzorce - Sport",
+  },
 }
 
 export const UI_VZORCE: Record<Lang, VzorceUI> = { cs: CS, sk: SK, en: CS }

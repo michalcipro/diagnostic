@@ -12,7 +12,7 @@ import {
 import { nazevVzorce } from "@/lib/vzorce/content"
 import { UI_VZORCE } from "@/lib/vzorce/i18n"
 import type { Lang } from "@/lib/diagnostic/types"
-import type { Domena, Pasmo, VzorecSkore } from "@/lib/vzorce/types"
+import type { Domena, Pasmo, Varianta, VzorecSkore } from "@/lib/vzorce/types"
 
 // Grafy k profilu vzorců.
 //
@@ -239,7 +239,15 @@ export function Prstenec({
 }
 
 /** Tři prstence vedle sebe: rychlý obraz toho, kde vzorce stojí. */
-export function TrojicePrstencu({ top3, lang }: { top3: VzorecSkore[]; lang: Lang }) {
+export function TrojicePrstencu({
+  top3,
+  lang,
+  varianta,
+}: {
+  top3: VzorecSkore[]
+  lang: Lang
+  varianta: Varianta
+}) {
   if (!top3.length) return null
   const t = UI_VZORCE[lang]
   return (
@@ -251,7 +259,7 @@ export function TrojicePrstencu({ top3, lang }: { top3: VzorecSkore[]; lang: Lan
             {t.misto(i + 1)}
           </p>
           <p className="mt-1 text-[15.5px] font-semibold leading-tight">
-            {nazevVzorce(s.id, lang)}
+            {nazevVzorce(s.id, lang, varianta)}
           </p>
           <p className="mt-1 text-[12.5px] text-[var(--wm-text-2)]">{NAZVY_PASEM[lang][s.pasmo]}</p>
         </div>
@@ -265,10 +273,12 @@ export function ProfilGraf({
   vsechny,
   top3,
   lang,
+  varianta,
 }: {
   vsechny: VzorecSkore[]
   top3: VzorecSkore[]
   lang: Lang
+  varianta: Varianta
 }) {
   const vBoji = new Set(top3.map((v) => v.id))
   const t = UI_VZORCE[lang]
@@ -280,7 +290,7 @@ export function ProfilGraf({
         <div className={MRIZKA}>
           {vsechny.map((v) => {
             const duraz = vBoji.has(v.id)
-            const nazev = nazevVzorce(v.id, lang)
+            const nazev = nazevVzorce(v.id, lang, varianta)
             return (
               <div key={v.id} className="contents">
                 <div className={`flex min-w-0 items-center ${RADEK}`}>
@@ -336,7 +346,7 @@ export function ProfilGraf({
       <div className="flex flex-col gap-4 sm:hidden">
         {vsechny.map((v) => {
           const duraz = vBoji.has(v.id)
-          const nazev = nazevVzorce(v.id, lang)
+          const nazev = nazevVzorce(v.id, lang, varianta)
           return (
             <div key={v.id}>
               <div className="flex items-baseline justify-between gap-3">
@@ -404,7 +414,15 @@ export function ProfilGraf({
  * ze kterých pocházejí. Právě tohle rozhoduje o tom, jestli jde o jedno téma
  * ve třech podobách, nebo o tři nezávislé věci.
  */
-export function DomenyGraf({ vsechny, lang }: { vsechny: VzorecSkore[]; lang: Lang }) {
+export function DomenyGraf({
+  vsechny,
+  lang,
+  varianta,
+}: {
+  vsechny: VzorecSkore[]
+  lang: Lang
+  varianta: Varianta
+}) {
   const t = UI_VZORCE[lang]
   const podleDomen = new Map<Domena, VzorecSkore[]>()
   for (const v of vsechny) {
@@ -431,7 +449,7 @@ export function DomenyGraf({ vsechny, lang }: { vsechny: VzorecSkore[]; lang: La
         <div className={MRIZKA_OBLASTI}>
           {radky.map((r) => {
             const duraz = r.prumer === nejvic
-            const nazev = NAZVY_DOMEN[lang][r.domena]
+            const nazev = NAZVY_DOMEN[varianta][lang][r.domena]
             return (
               <div key={r.domena} className="contents">
                 <div className={`flex min-w-0 items-center ${RADEK}`}>
@@ -441,7 +459,7 @@ export function DomenyGraf({ vsechny, lang }: { vsechny: VzorecSkore[]; lang: La
                     }`}
                     title={`${nazev}, ${pocetSlovy(r.pocet)}`}
                   >
-                    {NAZVY_DOMEN_KRATCE[lang][r.domena]}{" "}
+                    {NAZVY_DOMEN_KRATCE[varianta][lang][r.domena]}{" "}
                     <span className="font-normal text-[var(--wm-text-3)]">({r.pocet})</span>
                   </span>
                 </div>
@@ -485,13 +503,13 @@ export function DomenyGraf({ vsechny, lang }: { vsechny: VzorecSkore[]; lang: La
                     duraz ? "font-semibold text-[var(--wm-text)]" : "text-[var(--wm-text-2)]"
                   }`}
                 >
-                  {NAZVY_DOMEN[lang][r.domena]}
+                  {NAZVY_DOMEN[varianta][lang][r.domena]}
                 </span>
                 <span className="shrink-0 text-[15px] font-medium tabular-nums text-[var(--wm-text-2)]">
                   {r.prumer}
                 </span>
               </div>
-              <Pruh skore={r.prumer} duraz={duraz} popis={NAZVY_DOMEN[lang][r.domena]} />
+              <Pruh skore={r.prumer} duraz={duraz} popis={NAZVY_DOMEN[varianta][lang][r.domena]} />
               <p className="text-[12px] leading-none text-[var(--wm-text-3)]">
                 {pocetSlovy(r.pocet)}
               </p>

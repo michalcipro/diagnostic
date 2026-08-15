@@ -85,8 +85,12 @@ function texty_vzorce() {
     vstup,
     `export { OBSAH } from "../lib/vzorce/data/obsah"
 export { OBSAH_SK } from "../lib/vzorce/data/obsah-sk"
+export { OBSAH_SPORT } from "../lib/vzorce/data/obsah-sport"
+export { OBSAH_SPORT_SK } from "../lib/vzorce/data/obsah-sport-sk"
 export { DVOJICE } from "../lib/vzorce/data/dvojice"
 export { DVOJICE_SK } from "../lib/vzorce/data/dvojice-sk"
+export { DVOJICE_SPORT } from "../lib/vzorce/data/dvojice-sport"
+export { DVOJICE_SPORT_SK } from "../lib/vzorce/data/dvojice-sport-sk"
 `,
   )
   let M
@@ -99,21 +103,26 @@ export { DVOJICE_SK } from "../lib/vzorce/data/dvojice-sk"
     fs.rmSync(vstup, { force: true })
   }
 
+  // Sportovní verze má vlastní klíče (vzorce-sport, dvojice-sport). Do výchozího
+  // stavu se nedostane, protože vznikla až po něm; měří se, aby byl přehled úplný.
   const out = {}
-  for (const [jazyk, obsah, dvojice] of [
-    ["cs", M.OBSAH, M.DVOJICE],
-    ["sk", M.OBSAH_SK, M.DVOJICE_SK],
+  for (const [skupina, jazyk, obsah, dvojice] of [
+    ["vzorce", "cs", M.OBSAH, M.DVOJICE],
+    ["vzorce", "sk", M.OBSAH_SK, M.DVOJICE_SK],
+    ["vzorce-sport", "cs", M.OBSAH_SPORT, M.DVOJICE_SPORT],
+    ["vzorce-sport", "sk", M.OBSAH_SPORT_SK, M.DVOJICE_SPORT_SK],
   ]) {
+    const dvojiceKlic = skupina === "vzorce" ? "dvojice" : "dvojice-sport"
     for (const [id, o] of Object.entries(obsah)) {
       for (const pole of ["prozitek", "podTlakem", "puvod"]) {
-        out[`vzorce.${id}.${pole}|${jazyk}`] = slova(o[pole])
+        out[`${skupina}.${id}.${pole}|${jazyk}`] = slova(o[pole])
       }
       for (const [pasmo, text] of Object.entries(o.pasma)) {
-        out[`vzorce.${id}.pasma.${pasmo}|${jazyk}`] = slova(text)
+        out[`${skupina}.${id}.pasma.${pasmo}|${jazyk}`] = slova(text)
       }
     }
     for (const [klic, text] of Object.entries(dvojice)) {
-      out[`dvojice.${klic}|${jazyk}`] = slova(text)
+      out[`${dvojiceKlic}.${klic}|${jazyk}`] = slova(text)
     }
   }
   return out

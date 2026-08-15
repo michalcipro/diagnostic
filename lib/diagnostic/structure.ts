@@ -1,3 +1,4 @@
+import type { Varianta as VariantaVzorcu } from "../vzorce/types"
 import type { DimensionDef, FacetDef, StructureDef, TestId, TestModel, Variant } from "./types"
 
 // Přepis vyhodnocovacích klíčů ELITE 200™ a ELITE 100™ (Winning Minds).
@@ -180,14 +181,23 @@ export const TEST_IDS: TestId[] = [
   "elite100-sport",
   "elite100-business",
   "vzorce",
+  "vzorce-sport",
 ]
 
 /** Testy z rodiny ELITE, tedy ty, které mají dimenze, fazety a škálu 1-5. */
-export const ELITE_TEST_IDS = TEST_IDS.filter((t) => t !== "vzorce")
+export const ELITE_TEST_IDS = TEST_IDS.filter((t) => !jeVzorce(t))
 
 /** Emocionálně-destruktivní vzorce se skórují jinde, v lib/vzorce. */
 export function jeVzorce(testId: string): boolean {
-  return testId === "vzorce"
+  return testId === "vzorce" || testId === "vzorce-sport"
+}
+
+/**
+ * Která podoba vzorců to je. Stavba i skórování jsou shodné, liší se dotazník
+ * a celý výklad, takže se varianta táhne až do vyhodnocení a do PDF.
+ */
+export function variantaVzorcu(testId: string): VariantaVzorcu {
+  return testId === "vzorce-sport" ? "sport" : "obecna"
 }
 
 export function parseTestId(testId: string): { model: TestModel; variant: Variant } | null {
