@@ -1,7 +1,7 @@
 // Slovenské znenie popisov dvojíc v športovej verzii. Zrkadlí
 // dvojice-sport.ts kľúč po kľúči; kontrolu robí scripts/test-vzorce-sk.cjs.
 
-export const DVOJICE_SPORT_SK: Record<string, string> = {
+export const DVOJICE_SPORT_TYM_SK: Record<string, string> = {
   // ---- bezpečie vo vzťahoch medzi sebou ----
   "01-02": "Strach zo straty sa tu stretáva s očakávaním zrady, a to je kombinácia, ktorá drží vzťah s trénerom aj tímom v trvalom napätí. Potrebuješ istotu a zároveň jej neveríš, takže sa strieda primknutie s ostražitosťou. Druhý dostáva protichodné signály a jeho zmätená reakcia potom oboje potvrdí.",
   "01-03": "Zišiel sa tu strach, že o zázemie prídeš, s pocitom, že ťa aj tak nikto naozaj nevidí. Vzťah preto nemôže uspieť ani vtedy, keď vydrží: kým trvá, chýba v ňom pochopenie, a keby skončil, potvrdí sa strata. Odtiaľ pramení väzba na ľudí, ktorí sú dostupní práve tak akurát.",

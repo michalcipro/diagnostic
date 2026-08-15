@@ -85,12 +85,16 @@ function texty_vzorce() {
     vstup,
     `export { OBSAH } from "../lib/vzorce/data/obsah"
 export { OBSAH_SK } from "../lib/vzorce/data/obsah-sk"
-export { OBSAH_SPORT } from "../lib/vzorce/data/obsah-sport"
-export { OBSAH_SPORT_SK } from "../lib/vzorce/data/obsah-sport-sk"
+export { OBSAH_SPORT_INDIVIDUAL } from "../lib/vzorce/data/obsah-sport-individual"
+export { OBSAH_SPORT_INDIVIDUAL_SK } from "../lib/vzorce/data/obsah-sport-individual-sk"
+export { OBSAH_SPORT_TYM } from "../lib/vzorce/data/obsah-sport-tym"
+export { OBSAH_SPORT_TYM_SK } from "../lib/vzorce/data/obsah-sport-tym-sk"
 export { DVOJICE } from "../lib/vzorce/data/dvojice"
 export { DVOJICE_SK } from "../lib/vzorce/data/dvojice-sk"
-export { DVOJICE_SPORT } from "../lib/vzorce/data/dvojice-sport"
-export { DVOJICE_SPORT_SK } from "../lib/vzorce/data/dvojice-sport-sk"
+export { DVOJICE_SPORT_INDIVIDUAL } from "../lib/vzorce/data/dvojice-sport-individual"
+export { DVOJICE_SPORT_INDIVIDUAL_SK } from "../lib/vzorce/data/dvojice-sport-individual-sk"
+export { DVOJICE_SPORT_TYM } from "../lib/vzorce/data/dvojice-sport-tym"
+export { DVOJICE_SPORT_TYM_SK } from "../lib/vzorce/data/dvojice-sport-tym-sk"
 `,
   )
   let M
@@ -109,10 +113,12 @@ export { DVOJICE_SPORT_SK } from "../lib/vzorce/data/dvojice-sport-sk"
   for (const [skupina, jazyk, obsah, dvojice] of [
     ["vzorce", "cs", M.OBSAH, M.DVOJICE],
     ["vzorce", "sk", M.OBSAH_SK, M.DVOJICE_SK],
-    ["vzorce-sport", "cs", M.OBSAH_SPORT, M.DVOJICE_SPORT],
-    ["vzorce-sport", "sk", M.OBSAH_SPORT_SK, M.DVOJICE_SPORT_SK],
+    ["vzorce-sport-individual", "cs", M.OBSAH_SPORT_INDIVIDUAL, M.DVOJICE_SPORT_INDIVIDUAL],
+    ["vzorce-sport-individual", "sk", M.OBSAH_SPORT_INDIVIDUAL_SK, M.DVOJICE_SPORT_INDIVIDUAL_SK],
+    ["vzorce-sport-tym", "cs", M.OBSAH_SPORT_TYM, M.DVOJICE_SPORT_TYM],
+    ["vzorce-sport-tym", "sk", M.OBSAH_SPORT_TYM_SK, M.DVOJICE_SPORT_TYM_SK],
   ]) {
-    const dvojiceKlic = skupina === "vzorce" ? "dvojice" : "dvojice-sport"
+    const dvojiceKlic = skupina === "vzorce" ? "dvojice" : `dvojice-${skupina.slice(7)}`
     for (const [id, o] of Object.entries(obsah)) {
       for (const pole of ["prozitek", "podTlakem", "puvod"]) {
         out[`${skupina}.${id}.${pole}|${jazyk}`] = slova(o[pole])

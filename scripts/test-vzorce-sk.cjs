@@ -46,12 +46,16 @@ function nactiModuly() {
     vstup,
     `export { OBSAH } from "../lib/vzorce/data/obsah"
 export { OBSAH_SK } from "../lib/vzorce/data/obsah-sk"
-export { OBSAH_SPORT } from "../lib/vzorce/data/obsah-sport"
-export { OBSAH_SPORT_SK } from "../lib/vzorce/data/obsah-sport-sk"
+export { OBSAH_SPORT_INDIVIDUAL } from "../lib/vzorce/data/obsah-sport-individual"
+export { OBSAH_SPORT_INDIVIDUAL_SK } from "../lib/vzorce/data/obsah-sport-individual-sk"
+export { OBSAH_SPORT_TYM } from "../lib/vzorce/data/obsah-sport-tym"
+export { OBSAH_SPORT_TYM_SK } from "../lib/vzorce/data/obsah-sport-tym-sk"
 export { DVOJICE } from "../lib/vzorce/data/dvojice"
 export { DVOJICE_SK } from "../lib/vzorce/data/dvojice-sk"
-export { DVOJICE_SPORT } from "../lib/vzorce/data/dvojice-sport"
-export { DVOJICE_SPORT_SK } from "../lib/vzorce/data/dvojice-sport-sk"
+export { DVOJICE_SPORT_INDIVIDUAL } from "../lib/vzorce/data/dvojice-sport-individual"
+export { DVOJICE_SPORT_INDIVIDUAL_SK } from "../lib/vzorce/data/dvojice-sport-individual-sk"
+export { DVOJICE_SPORT_TYM } from "../lib/vzorce/data/dvojice-sport-tym"
+export { DVOJICE_SPORT_TYM_SK } from "../lib/vzorce/data/dvojice-sport-tym-sk"
 export {
   NAZVY_DOMEN,
   NAZVY_DOMEN_KRATCE,
@@ -95,20 +99,29 @@ function retezce(uzel, cesta = "") {
 const VARIANTY = [
   { jmeno: "obecná", obsah: "OBSAH", obsahSk: "OBSAH_SK", dvojice: "DVOJICE", dvojiceSk: "DVOJICE_SK" },
   {
-    jmeno: "sportovní",
-    obsah: "OBSAH_SPORT",
-    obsahSk: "OBSAH_SPORT_SK",
-    dvojice: "DVOJICE_SPORT",
-    dvojiceSk: "DVOJICE_SPORT_SK",
+    jmeno: "individuální sport",
+    obsah: "OBSAH_SPORT_INDIVIDUAL",
+    obsahSk: "OBSAH_SPORT_INDIVIDUAL_SK",
+    dvojice: "DVOJICE_SPORT_INDIVIDUAL",
+    dvojiceSk: "DVOJICE_SPORT_INDIVIDUAL_SK",
+  },
+  {
+    jmeno: "týmový sport",
+    obsah: "OBSAH_SPORT_TYM",
+    obsahSk: "OBSAH_SPORT_TYM_SK",
+    dvojice: "DVOJICE_SPORT_TYM",
+    dvojiceSk: "DVOJICE_SPORT_TYM_SK",
   },
 ]
 
 console.log("– slovenština bez českých písmen –")
 for (const [jmeno, data] of [
   ["obsah-sk", M.OBSAH_SK],
-  ["obsah-sport-sk", M.OBSAH_SPORT_SK],
+  ["obsah-sport-individual-sk", M.OBSAH_SPORT_INDIVIDUAL_SK],
+  ["obsah-sport-tym-sk", M.OBSAH_SPORT_TYM_SK],
   ["dvojice-sk", M.DVOJICE_SK],
-  ["dvojice-sport-sk", M.DVOJICE_SPORT_SK],
+  ["dvojice-sport-individual-sk", M.DVOJICE_SPORT_INDIVIDUAL_SK],
+  ["dvojice-sport-tym-sk", M.DVOJICE_SPORT_TYM_SK],
   ["pásma", M.NAZVY_PASEM.sk],
   ["pásma zkráceně", M.NAZVY_PASEM_KRATCE.sk],
   ["oblasti", M.NAZVY_DOMEN.sk],
@@ -262,7 +275,7 @@ const PRIPADY = [
   { popis: "tři z různých oblastí", silne: [7, 8, 10] },
 ]
 
-for (const varianta of ["obecna", "sport"]) {
+for (const varianta of ["obecna", "sport-individual", "sport-tym"]) {
   for (const p of PRIPADY) {
     const v = M.vyhodnot(odpovedi(p.silne))
     const cs = M.propoj(v, "cs", varianta)
@@ -355,12 +368,16 @@ const NEJDE_O_CTENARE = ["sám žil v úzkosti", "ten istý vzorec", "tej istej 
 for (const soubor of [
   "obsah.ts",
   "obsah-sk.ts",
-  "obsah-sport.ts",
-  "obsah-sport-sk.ts",
+  "obsah-sport-individual.ts",
+  "obsah-sport-individual-sk.ts",
+  "obsah-sport-tym.ts",
+  "obsah-sport-tym-sk.ts",
   "dvojice.ts",
   "dvojice-sk.ts",
-  "dvojice-sport.ts",
-  "dvojice-sport-sk.ts",
+  "dvojice-sport-individual.ts",
+  "dvojice-sport-individual-sk.ts",
+  "dvojice-sport-tym.ts",
+  "dvojice-sport-tym-sk.ts",
 ]) {
   const zdroj = fs
     .readFileSync(path.join(KOREN, "lib", "vzorce", "data", soubor), "utf8")

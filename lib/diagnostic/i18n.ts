@@ -110,6 +110,16 @@ export const TEST_NAMES: Record<TestId, Record<Lang, string>> = {
     en: "Emotionally destructive patterns · Sport",
     sk: "Emocionálne-deštruktívne vzorce · Šport",
   },
+  "vzorce-sport-individual": {
+    cs: "Emocionálně-destruktivní vzorce · Individuální sport",
+    en: "Emotionally destructive patterns · Individual sport",
+    sk: "Emocionálne-deštruktívne vzorce · Individuálny šport",
+  },
+  "vzorce-sport-tym": {
+    cs: "Emocionálně-destruktivní vzorce · Týmový sport",
+    en: "Emotionally destructive patterns · Team sport",
+    sk: "Emocionálne-deštruktívne vzorce · Tímový šport",
+  },
 }
 
 /**

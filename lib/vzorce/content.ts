@@ -1,12 +1,16 @@
 import type { Lang } from "../diagnostic/types"
 import { OBSAH } from "./data/obsah"
 import { OBSAH_SK } from "./data/obsah-sk"
-import { OBSAH_SPORT } from "./data/obsah-sport"
-import { OBSAH_SPORT_SK } from "./data/obsah-sport-sk"
+import { OBSAH_SPORT_INDIVIDUAL } from "./data/obsah-sport-individual"
+import { OBSAH_SPORT_INDIVIDUAL_SK } from "./data/obsah-sport-individual-sk"
+import { OBSAH_SPORT_TYM } from "./data/obsah-sport-tym"
+import { OBSAH_SPORT_TYM_SK } from "./data/obsah-sport-tym-sk"
 import { DVOJICE } from "./data/dvojice"
 import { DVOJICE_SK } from "./data/dvojice-sk"
-import { DVOJICE_SPORT } from "./data/dvojice-sport"
-import { DVOJICE_SPORT_SK } from "./data/dvojice-sport-sk"
+import { DVOJICE_SPORT_INDIVIDUAL } from "./data/dvojice-sport-individual"
+import { DVOJICE_SPORT_INDIVIDUAL_SK } from "./data/dvojice-sport-individual-sk"
+import { DVOJICE_SPORT_TYM } from "./data/dvojice-sport-tym"
+import { DVOJICE_SPORT_TYM_SK } from "./data/dvojice-sport-tym-sk"
 import type { Varianta, VzorecId, VzorecObsah } from "./types"
 
 // Výběr textů vyhodnocení podle varianty a jazyka.
@@ -21,12 +25,14 @@ import type { Varianta, VzorecId, VzorecObsah } from "./types"
 
 const OBSAHY: Record<Varianta, Record<"cs" | "sk", Record<VzorecId, VzorecObsah>>> = {
   obecna: { cs: OBSAH, sk: OBSAH_SK },
-  sport: { cs: OBSAH_SPORT, sk: OBSAH_SPORT_SK },
+  "sport-individual": { cs: OBSAH_SPORT_INDIVIDUAL, sk: OBSAH_SPORT_INDIVIDUAL_SK },
+  "sport-tym": { cs: OBSAH_SPORT_TYM, sk: OBSAH_SPORT_TYM_SK },
 }
 
 const DVOJICE_VSE: Record<Varianta, Record<"cs" | "sk", Record<string, string>>> = {
   obecna: { cs: DVOJICE, sk: DVOJICE_SK },
-  sport: { cs: DVOJICE_SPORT, sk: DVOJICE_SPORT_SK },
+  "sport-individual": { cs: DVOJICE_SPORT_INDIVIDUAL, sk: DVOJICE_SPORT_INDIVIDUAL_SK },
+  "sport-tym": { cs: DVOJICE_SPORT_TYM, sk: DVOJICE_SPORT_TYM_SK },
 }
 
 const jazyk = (lang: Lang): "cs" | "sk" => (lang === "sk" ? "sk" : "cs")

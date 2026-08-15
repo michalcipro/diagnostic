@@ -6,10 +6,13 @@
 // škál, ale tři nejaktivnější vzorce a jejich vzájemné souvislosti.
 
 /**
- * Podoba testu. Obě mají stejnou stavbu, stejné skórování i stejná pásma;
- * liší se dotazník a všechny texty vyhodnocení.
+ * Podoba testu. Všechny mají stejnou stavbu, stejné skórování i stejná pásma;
+ * liší se dotazník a texty vyhodnocení. Sport je rozdělený na individuální
+ * a týmový, protože se vzorec projevuje jinak v kabině a jinak na okruhu:
+ * týmová verze mluví o sestavě a spoluhráčích, individuální o nominaci,
+ * koučovi a závodech.
  */
-export type Varianta = "obecna" | "sport"
+export type Varianta = "obecna" | "sport-individual" | "sport-tym"
 
 /** Odpověď na šestibodové škále. Šestka je záměrná: nemá střed, nutí se přiklonit. */
 export type Odpoved = 1 | 2 | 3 | 4 | 5 | 6

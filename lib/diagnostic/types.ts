@@ -8,12 +8,23 @@ export type TestModel = "elite200" | "elite100"
  * Emocionálně-destruktivní vzorce. Samostatný test s jinou škálou i logikou,
  * proto stojí vedle rodiny ELITE, ne uvnitř ní.
  *
- * Má dvě podoby se shodnou stavbou i skórováním, ale s vlastním dotazníkem
- * i výkladem: obecnou (`vzorce`) a sportovní (`vzorce-sport`). Sportovní verze
- * není přebarvená obecná, položky i texty popisují tréninkové a zápasové
- * situace, protože vzorec se v kabině projeví jinak než v kanceláři.
+ * Má víc podob se shodnou stavbou i skórováním, ale s vlastním dotazníkem
+ * i výkladem: obecnou (`vzorce`), individuální sport (`vzorce-sport-individual`)
+ * a týmový sport (`vzorce-sport-tym`). Sportovní verze nejsou přebarvená
+ * obecná: položky i texty popisují situace, které daný sportovec skutečně
+ * zná, protože vzorec se v kabině projeví jinak než na okruhu a jinak než
+ * v kanceláři.
+ *
+ * `vzorce-sport` je původní nerozdělená sportovní verze. Nové pozvánky se na
+ * ni nevystavují, ale zůstává platná kvůli už rozeslaným odkazům a hotovým
+ * vyplněním; čte se jako týmová.
  */
-export type TestId = `${TestModel}-${Variant}` | "vzorce" | "vzorce-sport"
+export type TestId =
+  | `${TestModel}-${Variant}`
+  | "vzorce"
+  | "vzorce-sport"
+  | "vzorce-sport-individual"
+  | "vzorce-sport-tym"
 
 /**
  * Rod respondenta. Řídí gramatické tvary v českém vyhodnocení – žena nesmí

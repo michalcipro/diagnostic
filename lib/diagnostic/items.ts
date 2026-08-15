@@ -6,8 +6,10 @@ import elite100Sport from "./data/items/elite100-sport.json"
 import elite100Business from "./data/items/elite100-business.json"
 import vzorce from "../vzorce/data/polozky.json"
 import vzorceSk from "../vzorce/data/polozky-sk.json"
-import vzorceSport from "../vzorce/data/polozky-sport.json"
-import vzorceSportSk from "../vzorce/data/polozky-sport-sk.json"
+import vzorceSportIndividual from "../vzorce/data/polozky-sport-individual.json"
+import vzorceSportIndividualSk from "../vzorce/data/polozky-sport-individual-sk.json"
+import vzorceSportTym from "../vzorce/data/polozky-sport-tym.json"
+import vzorceSportTymSk from "../vzorce/data/polozky-sport-tym-sk.json"
 
 type ItemsFile = Record<string, Localized>
 
@@ -26,13 +28,19 @@ const VZORCE_ITEMS: ItemsFile = spojJazyky(
 )
 
 /**
- * Sportovní verze má vlastní dotazník, ne přeformulovaný obecný. Vzorec se
- * v kabině projeví jinak než v kanceláři, takže se každá položka ptá na
- * situaci, kterou sportovec zná.
+ * Sportovní verze mají vlastní dotazníky, ne přeformulovaný obecný. Vzorec se
+ * v kabině projeví jinak než na okruhu a jinak než v kanceláři, takže se
+ * každá položka ptá na situaci, kterou daný sportovec skutečně zná. Položky
+ * si mezi variantami odpovídají číslo po čísle, míří na stejné schéma.
  */
-const VZORCE_SPORT_ITEMS: ItemsFile = spojJazyky(
-  vzorceSport as Record<string, string>,
-  vzorceSportSk as Record<string, string>,
+const VZORCE_SPORT_INDIVIDUAL_ITEMS: ItemsFile = spojJazyky(
+  vzorceSportIndividual as Record<string, string>,
+  vzorceSportIndividualSk as Record<string, string>,
+)
+
+const VZORCE_SPORT_TYM_ITEMS: ItemsFile = spojJazyky(
+  vzorceSportTym as Record<string, string>,
+  vzorceSportTymSk as Record<string, string>,
 )
 
 const FILES: Record<TestId, ItemsFile> = {
@@ -41,7 +49,10 @@ const FILES: Record<TestId, ItemsFile> = {
   "elite100-sport": doplnJazykyPolozek(elite100Sport),
   "elite100-business": doplnJazykyPolozek(elite100Business),
   vzorce: VZORCE_ITEMS,
-  "vzorce-sport": VZORCE_SPORT_ITEMS,
+  // původní nerozdělená sportovní verze, kvůli už rozeslaným odkazům
+  "vzorce-sport": VZORCE_SPORT_TYM_ITEMS,
+  "vzorce-sport-individual": VZORCE_SPORT_INDIVIDUAL_ITEMS,
+  "vzorce-sport-tym": VZORCE_SPORT_TYM_ITEMS,
 }
 
 export interface Item {

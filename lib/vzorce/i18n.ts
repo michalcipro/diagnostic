@@ -73,11 +73,17 @@ const CS: VzorceUI = {
   podnadpis: {
     obecna:
       "Diagnostický profil automatických emočních reakcí, vztahových strategií a výkonových bloků",
-    sport:
-      "Diagnostický profil automatických emočních reakcí, vztahových strategií a výkonových bloků ve sportu",
+    "sport-individual":
+      "Diagnostický profil automatických emočních reakcí, vztahových strategií a výkonových bloků v individuálním sportu",
+    "sport-tym":
+      "Diagnostický profil automatických emočních reakcí, vztahových strategií a výkonových bloků v týmovém sportu",
   },
   respondent: "Respondent",
-  role: { obecna: "Role / oblast", sport: "Sportovní disciplína a úroveň" },
+  role: {
+    obecna: "Role / oblast",
+    "sport-individual": "Sportovní disciplína a úroveň",
+    "sport-tym": "Sportovní disciplína a úroveň",
+  },
   datum: "Datum vyplnění",
 
   neuplnyTitulek: (zodpovezeno, celkem) => `Dotazník není kompletní (${zodpovezeno} ze ${celkem}).`,
@@ -140,7 +146,8 @@ const CS: VzorceUI = {
 
   nazevSouboru: {
     obecna: "Emocionalne-destruktivni vzorce",
-    sport: "Emocionalne-destruktivni vzorce - Sport",
+    "sport-individual": "Emocionalne-destruktivni vzorce - Individualni sport",
+    "sport-tym": "Emocionalne-destruktivni vzorce - Tymovy sport",
   },
 }
 
@@ -148,11 +155,17 @@ const SK: VzorceUI = {
   podnadpis: {
     obecna:
       "Diagnostický profil automatických emočných reakcií, vzťahových stratégií a výkonových blokov",
-    sport:
-      "Diagnostický profil automatických emočných reakcií, vzťahových stratégií a výkonových blokov v športe",
+    "sport-individual":
+      "Diagnostický profil automatických emočných reakcií, vzťahových stratégií a výkonových blokov v individuálnom športe",
+    "sport-tym":
+      "Diagnostický profil automatických emočných reakcií, vzťahových stratégií a výkonových blokov v tímovom športe",
   },
   respondent: "Respondent",
-  role: { obecna: "Rola / oblasť", sport: "Športová disciplína a úroveň" },
+  role: {
+    obecna: "Rola / oblasť",
+    "sport-individual": "Športová disciplína a úroveň",
+    "sport-tym": "Športová disciplína a úroveň",
+  },
   datum: "Dátum vyplnenia",
 
   neuplnyTitulek: (zodpovezeno, celkem) => `Dotazník nie je kompletný (${zodpovezeno} zo ${celkem}).`,
@@ -215,7 +228,8 @@ const SK: VzorceUI = {
 
   nazevSouboru: {
     obecna: "Emocionalne-destruktivne vzorce",
-    sport: "Emocionalne-destruktivne vzorce - Sport",
+    "sport-individual": "Emocionalne-destruktivne vzorce - Individualny sport",
+    "sport-tym": "Emocionalne-destruktivne vzorce - Timovy sport",
   },
 }
 

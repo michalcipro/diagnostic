@@ -134,9 +134,17 @@ const DOMENY_KRATCE_SPORT_SK: Record<Domena, string> = {
   ostrazitost: "Nároky a kontrola",
 }
 
+const KRATCE_SPORT = {
+  cs: DOMENY_KRATCE_SPORT_CS,
+  sk: DOMENY_KRATCE_SPORT_SK,
+  en: DOMENY_KRATCE_SPORT_CS,
+}
+
 export const NAZVY_DOMEN_KRATCE: Record<Varianta, Record<Lang, Record<Domena, string>>> = {
   obecna: { cs: DOMENY_KRATCE_CS, sk: DOMENY_KRATCE_SK, en: DOMENY_KRATCE_CS },
-  sport: { cs: DOMENY_KRATCE_SPORT_CS, sk: DOMENY_KRATCE_SPORT_SK, en: DOMENY_KRATCE_SPORT_CS },
+  // oblasti jsou pro oba sporty stejné: mluví o potřebách, ne o prostředí
+  "sport-individual": KRATCE_SPORT,
+  "sport-tym": KRATCE_SPORT,
 }
 
 const DOMENY_CS: Record<Domena, string> = {
@@ -176,9 +184,12 @@ const DOMENY_SPORT_SK: Record<Domena, string> = {
   ostrazitost: "Nároky a kontrola",
 }
 
+const DOMENY_SPORT = { cs: DOMENY_SPORT_CS, sk: DOMENY_SPORT_SK, en: DOMENY_SPORT_CS }
+
 export const NAZVY_DOMEN: Record<Varianta, Record<Lang, Record<Domena, string>>> = {
   obecna: { cs: DOMENY_CS, sk: DOMENY_SK, en: DOMENY_CS },
-  sport: { cs: DOMENY_SPORT_CS, sk: DOMENY_SPORT_SK, en: DOMENY_SPORT_CS },
+  "sport-individual": DOMENY_SPORT,
+  "sport-tym": DOMENY_SPORT,
 }
 
 /**

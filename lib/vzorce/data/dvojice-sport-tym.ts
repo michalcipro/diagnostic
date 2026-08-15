@@ -8,7 +8,7 @@
 // a tady chybí, sportovní vyhodnocení se u ní vrátí k obecnému popisu.
 // Rodové tvary jsou označené {mužský|ženský}.
 
-export const DVOJICE_SPORT: Record<string, string> = {
+export const DVOJICE_SPORT_TYM: Record<string, string> = {
   // ---- bezpečí ve vztazích mezi sebou ----
   "01-02": "Strach ze ztráty se tu potkává s očekáváním zrady, a to je kombinace, která drží vztah s trenérem i týmem v trvalém napětí. Potřebuješ jistotu a zároveň jí nevěříš, takže se střídá přimknutí s ostražitostí. Druhý dostává protichůdné signály a jeho zmatená reakce pak obojí potvrdí.",
   "01-03": "Sešel se tu strach, že o zázemí přijdeš, s pocitem, že tě stejně nikdo doopravdy nevidí. Vztah proto nemůže uspět ani tehdy, když vydrží: dokud trvá, chybí v něm pochopení, a kdyby skončil, potvrdí se ztráta. Odtud pramení vazba na lidi, kteří jsou dostupní právě tak akorát.",

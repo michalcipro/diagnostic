@@ -23,7 +23,11 @@ const TEST_IDS = new Set([
   "elite100-sport",
   "elite100-business",
   "vzorce",
+  // původní nerozdělená sportovní verze; nové pozvánky se nevystavují,
+  // ale rozeslané odkazy musí jít dokončit
   "vzorce-sport",
+  "vzorce-sport-individual",
+  "vzorce-sport-tym",
 ])
 
 /**
@@ -34,7 +38,7 @@ const TEST_IDS = new Set([
  * kontrola jen v prohlížeči by se dala obejít.
  */
 function parametryTestu(testId: string): { pocet: number; maxHodnota: number } {
-  if (testId === "vzorce" || testId === "vzorce-sport") return { pocet: 110, maxHodnota: 6 }
+  if (testId.startsWith("vzorce")) return { pocet: 110, maxHodnota: 6 }
   return { pocet: testId.startsWith("elite200") ? 200 : 100, maxHodnota: 5 }
 }
 
@@ -224,7 +228,14 @@ export const submitWithInvite = mutation({
     // Vzorce nemají variantu v tom smyslu jako ELITE (sport nebo business),
     // takže se pro ně doplní zástupná hodnota podle testu.
     const [model, variant] = inv.testId.startsWith("vzorce")
-      ? ["vzorce", inv.testId === "vzorce-sport" ? "sport" : "obecna"]
+      ? [
+          "vzorce",
+          inv.testId === "vzorce"
+            ? "obecna"
+            : inv.testId === "vzorce-sport-individual"
+              ? "sport-individual"
+              : "sport-tym",
+        ]
       : inv.testId.split("-")
 
     let parsed: Record<string, number>

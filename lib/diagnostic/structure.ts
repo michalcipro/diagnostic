@@ -181,15 +181,22 @@ export const TEST_IDS: TestId[] = [
   "elite100-sport",
   "elite100-business",
   "vzorce",
-  "vzorce-sport",
+  "vzorce-sport-individual",
+  "vzorce-sport-tym",
 ]
+
+/**
+ * `vzorce-sport` v nabídce není: nahradily ho dvě sportovní verze. Stará
+ * pozvánka i hotové vyplnění ale musí dál fungovat, proto zůstává v typu
+ * a čte se jako týmová verze.
+ */
 
 /** Testy z rodiny ELITE, tedy ty, které mají dimenze, fazety a škálu 1-5. */
 export const ELITE_TEST_IDS = TEST_IDS.filter((t) => !jeVzorce(t))
 
 /** Emocionálně-destruktivní vzorce se skórují jinde, v lib/vzorce. */
 export function jeVzorce(testId: string): boolean {
-  return testId === "vzorce" || testId === "vzorce-sport"
+  return testId.startsWith("vzorce")
 }
 
 /**
@@ -197,7 +204,9 @@ export function jeVzorce(testId: string): boolean {
  * a celý výklad, takže se varianta táhne až do vyhodnocení a do PDF.
  */
 export function variantaVzorcu(testId: string): VariantaVzorcu {
-  return testId === "vzorce-sport" ? "sport" : "obecna"
+  if (testId === "vzorce-sport-individual") return "sport-individual"
+  if (testId === "vzorce-sport" || testId === "vzorce-sport-tym") return "sport-tym"
+  return "obecna"
 }
 
 export function parseTestId(testId: string): { model: TestModel; variant: Variant } | null {
