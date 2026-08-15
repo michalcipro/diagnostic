@@ -8,3 +8,6 @@ next-env.d.ts
 .vercel
 .DS_Store
 *.tsbuildinfo
+
+# pracovní soubory s doplňky textů
+scripts/.doplnky-*.json

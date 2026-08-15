@@ -44,6 +44,32 @@ Každé vyhodnocení musí končit **srozumitelným shrnutím pro klienta**. Ne 
 řešit jako první. Píše se tak, aby tomu rozuměl člověk bez psychologického
 vzdělání.
 
+## Objem textu ve vyhodnocení
+
+**Texty vyhodnocení mají mít aspoň o čtvrtinu víc obsahu než původní verze.**
+Platí to pro všechny testy (ELITE 200, ELITE 100, sport i business,
+emocionálně-destruktivní vzorce) a pro všechny jazyky.
+
+Výchozí stav je zapsaný v `scripts/objem-vychozi.json` a měří se proti němu:
+
+```bash
+node scripts/objem-textu.cjs
+```
+
+Čtvrtina navíc znamená víc obsahu, ne delší věty o tomtéž. Přidává se to, co
+text posouvá od popisu k použitelnosti:
+
+- jak se to projeví v konkrétní situaci, ne jen obecně,
+- příklad, na kterém to klient pozná u sebe,
+- co s tím udělat jako první krok a podle čeho pozná, že to zabírá,
+- kde se ta vlastnost plete s jinou a jak je od sebe odlišit.
+
+Nepřidává se vata, opakování už řečeného ani obecné povzbuzení. Když se text
+nedá poctivě rozšířit, je to signál, že chybí obsah, ne že je pravidlo špatné.
+
+Stavba zůstává: stejné klíče, stejné sekce, stejné rozdělení sport a business.
+Rodové značky se v rozšířeném textu doplňují stejně jako jinde.
+
 ## Ověřování
 
 Před commitem musí projít:
