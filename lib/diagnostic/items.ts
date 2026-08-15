@@ -10,6 +10,8 @@ import vzorceSportIndividual from "../vzorce/data/polozky-sport-individual.json"
 import vzorceSportIndividualSk from "../vzorce/data/polozky-sport-individual-sk.json"
 import vzorceSportTym from "../vzorce/data/polozky-sport-tym.json"
 import vzorceSportTymSk from "../vzorce/data/polozky-sport-tym-sk.json"
+import archetypy from "../archetypy/data/polozky.json"
+import archetypySk from "../archetypy/data/polozky-sk.json"
 
 type ItemsFile = Record<string, Localized>
 
@@ -43,6 +45,11 @@ const VZORCE_SPORT_TYM_ITEMS: ItemsFile = spojJazyky(
   vzorceSportTymSk as Record<string, string>,
 )
 
+const ARCHETYPY_ITEMS: ItemsFile = spojJazyky(
+  archetypy as Record<string, string>,
+  archetypySk as Record<string, string>,
+)
+
 const FILES: Record<TestId, ItemsFile> = {
   "elite200-sport": doplnJazykyPolozek(elite200Sport),
   "elite200-business": doplnJazykyPolozek(elite200Business),
@@ -53,6 +60,7 @@ const FILES: Record<TestId, ItemsFile> = {
   "vzorce-sport": VZORCE_SPORT_TYM_ITEMS,
   "vzorce-sport-individual": VZORCE_SPORT_INDIVIDUAL_ITEMS,
   "vzorce-sport-tym": VZORCE_SPORT_TYM_ITEMS,
+  archetypy: ARCHETYPY_ITEMS,
 }
 
 export interface Item {

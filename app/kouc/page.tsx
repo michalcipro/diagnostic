@@ -6,9 +6,10 @@ import { CoachCard } from "@/components/diagnostic/coach-card"
 import { ExternalPanel } from "@/components/diagnostic/external-panel"
 import { ReportView } from "@/components/diagnostic/report-view"
 import { VzorceReport } from "@/components/vzorce/report"
+import { ArchetypyReport } from "@/components/archetypy/report"
 import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
 import { JAZYKY } from "@/lib/diagnostic/lang"
-import { jeVzorce } from "@/lib/diagnostic/structure"
+import { jeArchetypy, jeVzorce } from "@/lib/diagnostic/structure"
 import { testMeta } from "@/lib/diagnostic/test-meta"
 import {
   addCoach,
@@ -336,7 +337,15 @@ export default function CoachPage() {
             </button>
           </div>
         </div>
-        {jeVzorce(detail.testId) ? (
+        {jeArchetypy(detail.testId) ? (
+          <ArchetypyReport
+            testId={detail.testId}
+            person={detail.person}
+            answers={detail.answers}
+            lang={detailLang}
+            durationSec={detail.durationSec}
+          />
+        ) : jeVzorce(detail.testId) ? (
           <VzorceReport
             testId={detail.testId}
             person={detail.person}
@@ -844,10 +853,23 @@ function NormsPanel({
  * Knihovna se načítá až při kliknutí, aby nezdržovala první zobrazení stránky.
  */
 async function exportPdf(detail: ResultDetail, lang: Lang): Promise<void> {
-  // Oba testy maji vlastni generator, ale stejnou sazbu.
+  // Kazda rodina testu ma vlastni generator, ale stejnou sazbu.
   let blob: Blob
   let nazev: string
-  if (jeVzorce(detail.testId)) {
+  if (jeArchetypy(detail.testId)) {
+    const { buildArchetypyPdf, archetypyPdfFileName } = await import("@/lib/archetypy/pdf")
+    const vstup = {
+      testId: detail.testId,
+      person: detail.person,
+      // Škála archetypů má šest stupňů; uložené odpovědi jsou čísla, typ se
+      // liší jen rozsahem.
+      answers: detail.answers as unknown as OdpovediMapa,
+      lang,
+      durationSec: detail.durationSec,
+    }
+    blob = buildArchetypyPdf(vstup)
+    nazev = archetypyPdfFileName(vstup)
+  } else if (jeVzorce(detail.testId)) {
     const { buildVzorcePdf, vzorcePdfFileName } = await import("@/lib/vzorce/pdf")
     const vstup = {
       testId: detail.testId,

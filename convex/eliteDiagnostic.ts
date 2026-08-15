@@ -28,16 +28,19 @@ const TEST_IDS = new Set([
   "vzorce-sport",
   "vzorce-sport-individual",
   "vzorce-sport-tym",
+  "archetypy",
 ])
 
 /**
  * Počet položek a rozsah škály podle testu.
  *
- * Emocionálně-destruktivní vzorce mají 110 položek a škálu 1-6, rodina ELITE
- * 100 nebo 200 položek a škálu 1-5. Kontroluje se to tady na serveru, protože
- * kontrola jen v prohlížeči by se dala obejít.
+ * Emocionálně-destruktivní vzorce mají 110 položek a škálu 1-6, archetypy
+ * značky 96 položek a škálu 1-6, rodina ELITE 100 nebo 200 položek a škálu
+ * 1-5. Kontroluje se to tady na serveru, protože kontrola jen v prohlížeči
+ * by se dala obejít.
  */
 function parametryTestu(testId: string): { pocet: number; maxHodnota: number } {
+  if (testId === "archetypy") return { pocet: 96, maxHodnota: 6 }
   if (testId.startsWith("vzorce")) return { pocet: 110, maxHodnota: 6 }
   return { pocet: testId.startsWith("elite200") ? 200 : 100, maxHodnota: 5 }
 }
@@ -225,18 +228,21 @@ export const submitWithInvite = mutation({
     if (!inv) throw new ConvexError("Neplatný odkaz.")
     if (inv.usedAt) throw new ConvexError("Tento odkaz už byl použit.")
 
-    // Vzorce nemají variantu v tom smyslu jako ELITE (sport nebo business),
-    // takže se pro ně doplní zástupná hodnota podle testu.
-    const [model, variant] = inv.testId.startsWith("vzorce")
-      ? [
-          "vzorce",
-          inv.testId === "vzorce"
-            ? "obecna"
-            : inv.testId === "vzorce-sport-individual"
-              ? "sport-individual"
-              : "sport-tym",
-        ]
-      : inv.testId.split("-")
+    // Vzorce ani archetypy nemají variantu v tom smyslu jako ELITE (sport
+    // nebo business), takže se pro ně doplní zástupná hodnota podle testu.
+    const [model, variant] =
+      inv.testId === "archetypy"
+        ? ["archetypy", "obecna"]
+        : inv.testId.startsWith("vzorce")
+          ? [
+              "vzorce",
+              inv.testId === "vzorce"
+                ? "obecna"
+                : inv.testId === "vzorce-sport-individual"
+                  ? "sport-individual"
+                  : "sport-tym",
+            ]
+          : inv.testId.split("-")
 
     let parsed: Record<string, number>
     try {

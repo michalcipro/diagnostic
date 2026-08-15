@@ -183,6 +183,7 @@ export const TEST_IDS: TestId[] = [
   "vzorce",
   "vzorce-sport-individual",
   "vzorce-sport-tym",
+  "archetypy",
 ]
 
 /**
@@ -192,11 +193,16 @@ export const TEST_IDS: TestId[] = [
  */
 
 /** Testy z rodiny ELITE, tedy ty, které mají dimenze, fazety a škálu 1-5. */
-export const ELITE_TEST_IDS = TEST_IDS.filter((t) => !jeVzorce(t))
+export const ELITE_TEST_IDS = TEST_IDS.filter((t) => !jeVzorce(t) && !jeArchetypy(t))
 
 /** Emocionálně-destruktivní vzorce se skórují jinde, v lib/vzorce. */
 export function jeVzorce(testId: string): boolean {
   return testId.startsWith("vzorce")
+}
+
+/** Archetypy značky se skórují v lib/archetypy. */
+export function jeArchetypy(testId: string): boolean {
+  return testId === "archetypy"
 }
 
 /**

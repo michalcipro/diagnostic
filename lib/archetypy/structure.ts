@@ -1,0 +1,86 @@
+import type { Lang } from "../diagnostic/types"
+import type { ArchetypDef, ArchetypId, Motivace } from "./types"
+
+// Struktura testu archetypů značky.
+//
+// 12 archetypů po 8 položkách, škála 1-6, skóre archetypu 8 až 48. Položky
+// jsou číslované průběžně 1-96: archetyp v pořadí registru má položky
+// (n-1)*8+1 až n*8. Pořadí registru sleduje knihu: čtyři motivační skupiny
+// po třech archetypech.
+
+export const POCET_POLOZEK = 96
+export const POLOZEK_NA_ARCHETYP = 8
+
+const rozsah = (poradi: number): number[] => {
+  const zacatek = (poradi - 1) * POLOZEK_NA_ARCHETYP
+  return Array.from({ length: POLOZEK_NA_ARCHETYP }, (_, i) => zacatek + i + 1)
+}
+
+export const ARCHETYPY: ArchetypDef[] = [
+  // nezávislost a naplnění
+  { id: "nevinatko", motivace: "nezavislost", polozky: rozsah(1) },
+  { id: "objevitel", motivace: "nezavislost", polozky: rozsah(2) },
+  { id: "mudrc", motivace: "nezavislost", polozky: rozsah(3) },
+  // riziko a mistrovství
+  { id: "hrdina", motivace: "mistrovstvi", polozky: rozsah(4) },
+  { id: "rebel", motivace: "mistrovstvi", polozky: rozsah(5) },
+  { id: "mag", motivace: "mistrovstvi", polozky: rozsah(6) },
+  // sounáležitost a potěšení
+  { id: "jeden-z-nas", motivace: "sounalezitost", polozky: rozsah(7) },
+  { id: "milenec", motivace: "sounalezitost", polozky: rozsah(8) },
+  { id: "sprymar", motivace: "sounalezitost", polozky: rozsah(9) },
+  // stabilita a kontrola
+  { id: "pecovatel", motivace: "rad", polozky: rozsah(10) },
+  { id: "tvurce", motivace: "rad", polozky: rozsah(11) },
+  { id: "vladce", motivace: "rad", polozky: rozsah(12) },
+]
+
+export function archetyp(id: ArchetypId): ArchetypDef {
+  return ARCHETYPY.find((a) => a.id === id)!
+}
+
+// ---------------------------------------------------------------------------
+// Názvy motivačních skupin. Angličtina zatím sahá po češtině, stejné pravidlo
+// jako u vzorců.
+// ---------------------------------------------------------------------------
+
+const MOTIVACE_CS: Record<Motivace, string> = {
+  nezavislost: "Nezávislost a naplnění",
+  mistrovstvi: "Riziko a mistrovství",
+  sounalezitost: "Sounáležitost a potěšení",
+  rad: "Stabilita a kontrola",
+}
+
+const MOTIVACE_SK: Record<Motivace, string> = {
+  nezavislost: "Nezávislosť a naplnenie",
+  mistrovstvi: "Riziko a majstrovstvo",
+  sounalezitost: "Spolupatričnosť a potešenie",
+  rad: "Stabilita a kontrola",
+}
+
+export const NAZVY_MOTIVACI: Record<Lang, Record<Motivace, string>> = {
+  cs: MOTIVACE_CS,
+  sk: MOTIVACE_SK,
+  en: MOTIVACE_CS,
+}
+
+/** Čemu skupina odpovídá v praxi; ukazuje se pod grafem motivací. */
+const MOTIVACE_POPIS_CS: Record<Motivace, string> = {
+  nezavislost: "být svůj, rozumět světu a žít podle vlastního přesvědčení",
+  mistrovstvi: "dokázat něco, změnit svět a nechat po sobě stopu",
+  sounalezitost: "patřit k lidem, mít je rád a užívat si s nimi",
+  rad: "postarat se, vybudovat a udržet věci pod kontrolou",
+}
+
+const MOTIVACE_POPIS_SK: Record<Motivace, string> = {
+  nezavislost: "byť svoj, rozumieť svetu a žiť podľa vlastného presvedčenia",
+  mistrovstvi: "dokázať niečo, zmeniť svet a nechať po sebe stopu",
+  sounalezitost: "patriť k ľuďom, mať ich rád a užívať si s nimi",
+  rad: "postarať sa, vybudovať a udržať veci pod kontrolou",
+}
+
+export const POPISY_MOTIVACI: Record<Lang, Record<Motivace, string>> = {
+  cs: MOTIVACE_POPIS_CS,
+  sk: MOTIVACE_POPIS_SK,
+  en: MOTIVACE_POPIS_CS,
+}

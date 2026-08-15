@@ -1,6 +1,8 @@
 import { SCALE_LABELS, SCALE_LABELS_6 } from "./i18n"
-import { getStructure, jeVzorce, parseTestId } from "./structure"
+import { getStructure, jeArchetypy, jeVzorce, parseTestId } from "./structure"
 import { POCET_POLOZEK } from "../vzorce/structure"
+import { POCET_POLOZEK as POCET_POLOZEK_ARCHETYPY } from "../archetypy/structure"
+import { INSTRUKCE_ARCHETYPY, SKALA_ARCHETYPY } from "../archetypy/i18n"
 import type { Answer, Lang, TestId } from "./types"
 
 // Společné údaje o testu na jednom místě.
@@ -49,6 +51,15 @@ const INSTRUKCE_VZORCE: Record<Lang, string[]> = {
 }
 
 export function testMeta(testId: TestId): TestMeta {
+  if (jeArchetypy(testId)) {
+    return {
+      pocetPolozek: POCET_POLOZEK_ARCHETYPY,
+      maxOdpoved: 6,
+      popiskySkaly: (lang) => SKALA_ARCHETYPY[lang],
+      hodnoty: [1, 2, 3, 4, 5, 6],
+      instrukceProJazyk: (lang: Lang) => INSTRUKCE_ARCHETYPY[lang],
+    }
+  }
   if (jeVzorce(testId)) {
     return {
       pocetPolozek: POCET_POLOZEK,

@@ -19,12 +19,18 @@ export type TestModel = "elite200" | "elite100"
  * ni nevystavují, ale zůstává platná kvůli už rozeslaným odkazům a hotovým
  * vyplněním; čte se jako týmová.
  */
+/**
+ * Archetypy značky podle Mark & Pearson (The Hero and the Outlaw). Také
+ * samostatný test: neměří problém ani výkon, ale identitu, takže má vlastní
+ * logiku vyhodnocení v lib/archetypy.
+ */
 export type TestId =
   | `${TestModel}-${Variant}`
   | "vzorce"
   | "vzorce-sport"
   | "vzorce-sport-individual"
   | "vzorce-sport-tym"
+  | "archetypy"
 
 /**
  * Rod respondenta. Řídí gramatické tvary v českém vyhodnocení – žena nesmí
