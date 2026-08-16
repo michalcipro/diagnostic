@@ -59,6 +59,9 @@ const listCoachesRef = makeFunctionReference<"query">("sessions:listCoaches")
 const addCoachRef = makeFunctionReference<"action">("auth:addCoach")
 const setCoachActiveRef = makeFunctionReference<"mutation">("sessions:setCoachActive")
 const changePasswordRef = makeFunctionReference<"action">("auth:changePassword")
+const zacniTotpRef = makeFunctionReference<"action">("auth:zacniNastaveniTotp")
+const potvrdTotpRef = makeFunctionReference<"action">("auth:potvrdTotp")
+const vypniTotpRef = makeFunctionReference<"action">("auth:vypniTotp")
 const resetCoachPasswordRef = makeFunctionReference<"action">("auth:resetCoachPassword")
 const updateCoachRef = makeFunctionReference<"action">("auth:updateCoach")
 const removeRef = makeFunctionReference<"mutation">("eliteDiagnostic:removeForCoach")
@@ -204,6 +207,10 @@ export interface CoachIdentity {
   name: string
   email: string
   role: CoachRole
+  /** má zapnutý druhý faktor */
+  totpAktivni?: boolean
+  /** kolik zbývá nepoužitých záložních kódů */
+  zbyvaZalozníchKodu?: number
 }
 
 export interface CoachRow extends CoachIdentity {
@@ -245,17 +252,23 @@ export async function createMaster(
 }
 
 /** Přihlášení e-mailem a heslem. */
+/**
+ * Přihlášení. Když má účet zapnutý druhý faktor a kód nepřišel, vrátí se
+ * `stav: "potreba-kod"` a obrazovka se doptá; kód se pak posílá spolu
+ * s heslem v druhém volání.
+ */
+export type VysledekPrihlaseni =
+  | { stav: "ok"; sessionToken: string; name: string; role: string }
+  | { stav: "potreba-kod" }
+
 export async function login(
   email: string,
   password: string,
-): Promise<{ sessionToken: string; name: string; role: string }> {
+  kod?: string,
+): Promise<VysledekPrihlaseni> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  return (await c.action(loginRef, { email, password })) as {
-    sessionToken: string
-    name: string
-    role: string
-  }
+  return (await c.action(loginRef, { email, password, kod })) as VysledekPrihlaseni
 }
 
 /** Ověří relaci a vrátí přihlášeného kouče (null, pokud vypršela). */
@@ -459,4 +472,36 @@ export async function pristupovyLog(sessionToken: string): Promise<PristupZaznam
   const c = client()
   if (!c) throw new Error("not-configured")
   return (await c.query(pristupovyLogRef, { sessionToken })) as PristupZaznam[]
+}
+
+// ── Druhý faktor ───────────────────────────────────────────────────
+
+/** Krok 1: vydá tajemství k opsání do autentizační aplikace. Nic nezapíná. */
+export async function zacniNastaveniTotp(
+  sessionToken: string,
+): Promise<{ secret: string; uri: string }> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.action(zacniTotpRef, { sessionToken })) as { secret: string; uri: string }
+}
+
+/** Krok 2: ověří první kód, zapne druhý faktor a vrátí záložní kódy. */
+export async function potvrdTotp(
+  sessionToken: string,
+  secret: string,
+  kod: string,
+): Promise<string[]> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  const r = (await c.action(potvrdTotpRef, { sessionToken, secret, kod })) as {
+    zalozniKody: string[]
+  }
+  return r.zalozniKody
+}
+
+/** Vypnutí druhého faktoru. Vyžaduje heslo. */
+export async function vypniTotp(sessionToken: string, heslo: string): Promise<void> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  await c.action(vypniTotpRef, { sessionToken, heslo })
 }

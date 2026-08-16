@@ -165,13 +165,23 @@ export const me = query({
       name: v.string(),
       email: v.string(),
       role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
+      /** má zapnutý druhý faktor; řídí, co se nabízí v nastavení účtu */
+      totpAktivni: v.boolean(),
+      /** kolik zbývá nepoužitých záložních kódů */
+      zbyvaZalozníchKodu: v.number(),
     }),
     v.null(),
   ),
   handler: async (ctx, args) => {
     try {
       const coach = await requireCoach(ctx, args.sessionToken)
-      return { name: coach.name, email: coach.email, role: coach.role }
+      return {
+        name: coach.name,
+        email: coach.email,
+        role: coach.role,
+        totpAktivni: coach.totpAktivni === true,
+        zbyvaZalozníchKodu: coach.totpZalozniKody?.length ?? 0,
+      }
     } catch {
       return null
     }

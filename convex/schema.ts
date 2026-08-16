@@ -30,6 +30,19 @@ export default defineSchema({
     active: v.boolean(),
     createdAt: v.number(),
     lastLoginAt: v.optional(v.number()),
+
+    // --- druhý faktor (TOTP) ---
+    //
+    // Nepovinný: kdo si ho nezapne, přihlašuje se jako dřív. Tajemství se
+    // ukládá až po ověření prvním kódem, aby se nikdo nezamkl kvůli špatně
+    // opsanému řetězci nebo rozejitým hodinám.
+    /** base32 tajemství sdílené s aplikací v telefonu */
+    totpSecret: v.optional(v.string()),
+    /** true = při přihlášení se vyžaduje kód */
+    totpAktivni: v.optional(v.boolean()),
+    /** otisky záložních kódů; každý se dá použít jednou */
+    totpZalozniKody: v.optional(v.array(v.string())),
+    totpZapnutoAt: v.optional(v.number()),
   }).index("by_email", ["email"]),
 
   // Přihlášené relace. Token drží prohlížeč, platnost je omezená.
