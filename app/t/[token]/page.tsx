@@ -7,7 +7,7 @@ import { testMeta } from "@/lib/diagnostic/test-meta"
 import { applyGender } from "@/lib/diagnostic/content"
 import { getItems, itemText } from "@/lib/diagnostic/items"
 import { jeVzorce, parseTestId } from "@/lib/diagnostic/structure"
-import { loadSession, newSession, saveSession } from "@/lib/diagnostic/storage"
+import { clearSession, loadSession, newSession, saveSession } from "@/lib/diagnostic/storage"
 import { fetchInvite, isRemoteEnabled, submitWithInvite, type Invite } from "@/lib/diagnostic/remote"
 import type { Answer, Lang, StoredSession, TestId } from "@/lib/diagnostic/types"
 
@@ -158,6 +158,10 @@ function Questionnaire({
     setSubmitting(true)
     const ok = isRemoteEnabled() ? await submitWithInvite(token, done) : false
     setSubmitting(false)
+    // Po úspěšném odeslání odpovědi z prohlížeče zmizí. Na sdíleném počítači
+    // by je jinak našel další, kdo si stránku otevře; server je má a klient
+    // se k nim stejně nevrací. Když odeslání selže, zůstávají kvůli záloze.
+    if (ok) clearSession(token)
     setStage(ok ? "sent" : "sendFailed")
     requestAnimationFrame(() => topRef.current?.scrollIntoView({ behavior: "smooth" }))
   }

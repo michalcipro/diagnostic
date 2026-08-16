@@ -55,6 +55,43 @@ const personValidator = v.object({
   fillDate: v.string(),
 })
 
+// ---------------------------------------------------------------------------
+// Meze délky vstupů
+//
+// Convex ověřuje typ, ne rozsah: `v.string()` propustí i řetězec o velikosti
+// megabajtu. Odesílat dotazník smí kdokoli s platnou pozvánkou, takže bez
+// těchhle mezí by šlo databázi zaplnit jedním voláním. Hodnoty jsou velkoryse
+// nad tím, co dává smysl vyplnit, aby nikoho neomezily.
+// ---------------------------------------------------------------------------
+
+const MEZ = {
+  jmeno: 120,
+  role: 200,
+  datum: 40,
+  /** 200 položek jako {"200":5} se vejde s velkou rezervou */
+  odpovedi: 8_000,
+  poznamka: 2_000,
+} as const
+
+/** Zkontroluje délku textu; prázdný a nevyplněný vstup projde. */
+function delka(hodnota: string | undefined, mez: number, popis: string): void {
+  if (hodnota !== undefined && hodnota.length > mez) {
+    throw new ConvexError(`${popis} je příliš dlouhé (nejvýš ${mez} znaků).`)
+  }
+}
+
+function zkontrolujOsobu(person: {
+  name: string
+  birthDate?: string
+  role?: string
+  fillDate: string
+}): void {
+  delka(person.name, MEZ.jmeno, "Jméno")
+  delka(person.role, MEZ.role, "Role")
+  delka(person.birthDate, MEZ.datum, "Datum narození")
+  delka(person.fillDate, MEZ.datum, "Datum vyplnění")
+}
+
 /**
  * Rok narození z data ve tvaru „YYYY-MM-DD".
  *
@@ -80,14 +117,46 @@ function collectedMonth(now: number): string {
   return new Date(now).toISOString().slice(0, 7)
 }
 
-/** Token do odkazu. Bez podobných znaků (0/O, 1/l), ať se dá případně přečíst. */
+/**
+ * Token do odkazu. Bez podobných znaků (0/O, 1/l), ať se dá případně přečíst.
+ *
+ * Musí pocházet z kryptografického zdroje: token je jediné, co chrání přístup
+ * k dotazníku. Math.random() se tu použít nesmí – jednak to není kryptografický
+ * generátor, jednak ho Convex uvnitř transakce nahrazuje deterministickým, aby
+ * šly funkce opakovat, což je pro tvorbu tajemství přesně obrácený požadavek.
+ *
+ * Dvacet čtyři znaků po pěti bitech dává 120 bitů entropie. Abeceda má 32
+ * znaků, takže 256 hodnot bajtu se na ni dělí beze zbytku a modulo nezavádí
+ * zkreslení ve prospěch části znaků.
+ */
 function makeToken(): string {
   const alphabet = "abcdefghijkmnpqrstuvwxyz23456789"
-  let out = ""
-  for (let i = 0; i < 16; i++) {
-    out += alphabet[Math.floor(Math.random() * alphabet.length)]
+  return Array.from(kryptoBajty(24), (b) => alphabet[b % alphabet.length]).join("")
+}
+
+/**
+ * Kryptograficky náhodné bajty z Web Crypto.
+ *
+ * Bere se, co runtime nabízí: primárně getRandomValues, jinak randomUUID
+ * (verze 4 nese 122 bitů z kryptografického zdroje). Když není ani jedno,
+ * funkce záměrně spadne. Tiché sáhnutí po Math.random() by vypadalo jako
+ * fungující kód a přitom by vrátilo předvídatelné tajemství, což je horší
+ * než viditelná chyba při vystavování pozvánky.
+ */
+function kryptoBajty(kolik: number): Uint8Array {
+  const c: Crypto | undefined = globalThis.crypto
+  if (typeof c?.getRandomValues === "function") {
+    return c.getRandomValues(new Uint8Array(kolik))
   }
-  return out
+  if (typeof c?.randomUUID === "function") {
+    const hex = Array.from({ length: Math.ceil(kolik / 16) }, () =>
+      c.randomUUID().replace(/-/g, ""),
+    ).join("")
+    return Uint8Array.from({ length: kolik }, (_, i) => parseInt(hex.slice(i * 2, i * 2 + 2), 16))
+  }
+  throw new ConvexError(
+    "Server nemá k dispozici Web Crypto, takže nejde bezpečně vygenerovat odkaz. Ozvi se prosím správci aplikace.",
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -109,6 +178,8 @@ export const createInvite = mutation({
     if (!TEST_IDS.has(args.testId)) {
       throw new ConvexError(`Neznámý testId: ${args.testId}`)
     }
+    delka(args.clientName, MEZ.jmeno, "Jméno klienta")
+    delka(args.note, MEZ.poznamka, "Poznámka")
     const token = makeToken()
     await ctx.db.insert("invitations", {
       token,
@@ -229,6 +300,10 @@ export const submitWithInvite = mutation({
     if (!inv) throw new ConvexError("Neplatný odkaz.")
     if (inv.usedAt) throw new ConvexError("Tento odkaz už byl použit.")
 
+    // Meze délky dřív než cokoli dalšího: co se sem dostane, to se ukládá.
+    zkontrolujOsobu(args.person)
+    delka(args.answers, MEZ.odpovedi, "Odpovědi")
+
     // Vzorce ani archetypy nemají variantu v tom smyslu jako ELITE (sport
     // nebo business), takže se pro ně doplní zástupná hodnota podle testu.
     const [model, variant] =
@@ -253,15 +328,21 @@ export const submitWithInvite = mutation({
     }
     const { pocet: itemCount, maxHodnota } = parametryTestu(inv.testId)
     let answeredCount = 0
+    // Ukládá se tahle přeskládaná mapa, ne původní řetězec od klienta: co
+    // neprošlo kontrolou položku po položce, se do databáze nedostane. Bez
+    // toho by šlo do `answers` přibalit cokoli navíc mimo očekávané klíče.
+    const ciste: Record<string, number> = {}
     for (let i = 1; i <= itemCount; i++) {
       const value = parsed[String(i)]
       if (value !== undefined) {
         if (typeof value !== "number" || !Number.isInteger(value) || value < 1 || value > maxHodnota) {
           throw new ConvexError(`Neplatná odpověď u položky ${i}`)
         }
+        ciste[String(i)] = value
         answeredCount++
       }
     }
+    const answers = JSON.stringify(ciste)
 
     const now = Date.now()
     // Nesmyslné hodnoty (záporné, absurdně dlouhé) zahoď – index tempa se pak
@@ -277,7 +358,7 @@ export const submitWithInvite = mutation({
       variant,
       lang: inv.lang,
       person: args.person,
-      answers: args.answers,
+      answers,
       answeredCount,
       complete: answeredCount === itemCount,
       durationSec,
@@ -298,7 +379,7 @@ export const submitWithInvite = mutation({
       birthYear: birthYearOnly(args.person.birthDate),
       gender: args.person.gender,
       role: shortRole(args.person.role),
-      answers: args.answers,
+      answers,
       answeredCount,
       complete: answeredCount === itemCount,
       durationSec,

@@ -26,7 +26,19 @@ const nextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          // Prohlížeč si zapamatuje, že sem chodí výhradně přes HTTPS, takže
+          // ani první požadavek nejde nešifrovaně.
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
         ],
+      },
+      {
+        // Odkaz na dotazník i sekce kouče nemají co dělat ve vyhledávačích.
+        // Token v adrese se do indexu dostat nesmí.
+        source: "/(t|kouc|setup)/:cesta*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" }],
       },
     ]
   },

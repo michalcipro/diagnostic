@@ -2,6 +2,9 @@
 
 Stav ke dni 16. 8. 2026, revize `5563268`.
 
+**Aktualizace téhož dne:** nálezy K1, V2, V4, V5, S4, S5 a N1 jsou opravené,
+viz sekci „Co už je hotové" níže. Zbytek zůstává v platnosti.
+
 Auditovaná aplikace: Performance Diagnostic ELITE (elitediagnostic.cz), Next.js
 na Vercelu, Convex jako backend a databáze.
 
@@ -27,6 +30,27 @@ a soulad se zpracováním zvláštní kategorie údajů.
 
 Nešlo o penetrační test proti běžícímu prostředí; nálezy vycházejí ze zdrojového
 kódu a konfigurace.
+
+---
+
+## Co už je hotové
+
+Následující nálezy byly opravené hned po auditu. Šlo o změny, které nemění
+chování aplikace pro uživatele, takže je bylo možné nasadit bez přípravy.
+
+| Nález | Co se změnilo |
+|---|---|
+| K1 | Tokeny pozvánek pocházejí z Web Crypto a mají 120 bitů entropie. Když by runtime Web Crypto neměl, vystavení pozvánky selže s hláškou; tiché sáhnutí po Math.random() je vyloučené. |
+| V2 | Zabudovaný zakládací token je pryč, bere se výhradně ze `SETUP_TOKEN`. Bez proměnné se zakládání odmítne. Pořadí kontrol se změnilo tak, aby existující master vracel srozumitelnou hlášku. |
+| V4 | Meze délky u jména, role, dat, odpovědí, poznámek, hesla a údajů účtu. Do `answers` se navíc ukládá až přeskládaná mapa po kontrole položku po položce, ne původní řetězec od klienta. |
+| V5 | `npm audit` hlásí nula zranitelností (bylo 5, z toho 4 vysoké). |
+| S4 | Přibylo HSTS a `X-Robots-Tag: noindex` pro `/t/`, `/kouc` a `/setup`. |
+| S5 | Text vnitřní chyby už neputuje ke klientovi; jde do logu, ven jde obecná hláška. Ověřené hlášky zůstávají beze změny. |
+| N1 | Rozpracované odpovědi se po úspěšném odeslání mažou z prohlížeče. Při neúspěchu zůstávají kvůli záloze. |
+
+**Pozor při nasazení V2:** `SETUP_TOKEN` musí být nastavený v Convexu dřív, než
+bude potřeba založit master účet. Na existující instalaci se nic nezmění, master
+už existuje a zakládání je tak jako tak zavřené.
 
 ---
 
@@ -75,6 +99,8 @@ nález zneužít.
 ### KRITICKÉ
 
 #### K1 – Tokeny pozvánek se generují nekryptografickým generátorem
+
+> **Opraveno.** Viz sekci „Co už je hotové".
 
 `convex/eliteDiagnostic.ts`, funkce `makeToken()`:
 
@@ -152,6 +178,8 @@ ať je poznat neobvyklý přístup.
 
 #### V2 – Zakládací token master účtu je natvrdo v kódu
 
+> **Opraveno.** Viz sekci „Co už je hotové".
+
 `convex/auth.ts`:
 
 ```ts
@@ -205,6 +233,8 @@ proti XSS dává.
 
 #### V4 – Vstupy od respondenta nemají omezenou délku
 
+> **Opraveno.** Viz sekci „Co už je hotové".
+
 `convex/eliteDiagnostic.ts`, `personValidator` a `submitWithInvite`: `name`,
 `role`, `answers` i `note` jsou `v.string()` bez horní hranice.
 
@@ -232,6 +262,8 @@ Stejné omezení patří na `clientName` a `note` v `createInvite` a na `name`,
 klienta, ať se do databáze nedostane nic navíc.
 
 #### V5 – Zranitelné závislosti v produkčním sestavení
+
+> **Opraveno.** Viz sekci „Co už je hotové".
 
 `npm audit --omit=dev` hlásí 5 zranitelností (4 vysoké, 1 střední):
 
@@ -320,6 +352,8 @@ platnost při vystavení nastavit, kdyby bylo potřeba delší okno.
 
 #### S4 – Chybí HSTS
 
+> **Opraveno.** Viz sekci „Co už je hotové".
+
 `next.config.js` nastavuje pět hlaviček, ale ne `Strict-Transport-Security`.
 
 **Náprava.** Přidat:
@@ -332,6 +366,8 @@ Doporučuju také `X-Robots-Tag: noindex, nofollow` pro cesty `/t/` a `/kouc`,
 aby se odkazy nedostaly do vyhledávačů.
 
 #### S5 – Text vnitřních chyb se posílá klientovi
+
+> **Opraveno.** Viz sekci „Co už je hotové".
 
 `convex/auth.ts`, obal `sConvexChybou` převádí libovolnou chybu na `ConvexError`
 s jejím původním textem.
@@ -408,23 +444,24 @@ posuzuje i to, co je sepsané.
 
 ## Doporučené pořadí prací
 
-| Pořadí | Nález | Práce | Dopad |
+| Pořadí | Nález | Práce | Stav |
 |---|---|---|---|
-| 1 | K1 tokeny pozvánek | asi hodina | odstraní jedinou kritickou slabinu |
-| 2 | V5 závislosti | asi hodina | zavře známé zranitelnosti |
-| 3 | V4 limity vstupů | asi 2 hodiny | zabrání zneužití zápisu |
-| 4 | V1 omezení pokusů o přihlášení | asi půl dne | zavře brute force |
-| 5 | V2 zakládací token | asi hodina | odstraní tajemství z kódu |
-| 6 | S4 HSTS a noindex | pár minut | drobnost s velkým poměrem přínosu |
-| 7 | S3 platnost pozvánek | asi 2 hodiny | zúží okno zneužití odkazů |
-| 8 | V3 CSP s nonce, kratší relace | asi den | výrazně ztíží XSS |
-| 9 | S2 záznam přístupů | asi půl dne | doložitelnost, detekce |
-| 10 | S1 anonymita vzorku | asi den | soulad s právem na výmaz |
-| 11 | GDPR dokumenty | mimo vývoj | zákonná povinnost |
-| 12 | N1 až N5 | průběžně | dotažení detailů |
+| 1 | K1 tokeny pozvánek | asi hodina | hotovo |
+| 2 | V5 závislosti | asi hodina | hotovo |
+| 3 | V4 limity vstupů | asi 2 hodiny | hotovo |
+| 4 | V2 zakládací token | asi hodina | hotovo |
+| 5 | S4 HSTS a noindex | pár minut | hotovo |
+| 6 | S5 chybové hlášky, N1 úklid prohlížeče | pár minut | hotovo |
+| 7 | V1 omezení pokusů o přihlášení | asi půl dne | zbývá |
+| 8 | S3 platnost pozvánek | asi 2 hodiny | zbývá |
+| 9 | V3 CSP s nonce, kratší relace | asi den | zbývá |
+| 10 | S2 záznam přístupů | asi půl dne | zbývá |
+| 11 | S1 anonymita vzorku | asi den | zbývá |
+| 12 | GDPR dokumenty | mimo vývoj | zbývá |
+| 13 | N2 až N5 | průběžně | zbývá |
 
-Prvních šest bodů je práce zhruba na dva dny a pokryje všechno, co je dnes
-skutečně nebezpečné.
+Body 1 až 6 jsou nasazené. Ze zbývajících je nejdůležitější V1: přihlašování
+zatím nemá strop na počet pokusů.
 
 ## Závěr
 

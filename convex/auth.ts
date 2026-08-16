@@ -35,14 +35,19 @@ const SESSION_DAYS = 30
 /**
  * Zakládací token pro master účet.
  *
- * Skutečnou pojistkou proti vzniku druhého účtu je podmínka „zatím neexistuje
- * žádný kouč" – ta platí vždy a token hned po prvním použití ztrácí jakoukoli
- * moc. Proto je zabudovaný přímo v kódu: aplikace se rozjede bez nastavování
- * serverových proměnných a nemůže se stát, že zakládací odkaz přestane platit
- * kvůli chybějící konfiguraci. Kdo chce vlastní hodnotu, nastaví SETUP_TOKEN –
- * ta se pak přijímá také.
+ * Bere se výhradně z proměnné prostředí SETUP_TOKEN. Dřív tu stála zabudovaná
+ * hodnota, aby se aplikace rozjela bez konfigurace; jenže tajemství ve zdrojovém
+ * kódu vidí každý, kdo uvidí repozitář, a zůstane v historii gitu navždy.
+ * U funkce, která vytváří nejvyšší oprávnění, se to nevyplatí.
+ *
+ * Druhou pojistkou zůstává podmínka „zatím neexistuje žádný kouč": jakmile
+ * master vznikne, token ztrácí jakoukoli moc. Když proměnná není nastavená,
+ * zakládání se odmítne – raději nefunkční odkaz než odkaz, který zná kdokoli.
  */
-const ZAKLADACI_TOKEN = "9nnh1p1l1gup8tz0r10s69li0axdee0b8dxkfha6"
+function zakladaciToken(): string | undefined {
+  const t = process.env.SETUP_TOKEN?.trim()
+  return t && t.length >= 20 ? t : undefined
+}
 
 function hashPassword(password: string, salt: string): string {
   return crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, 32, "sha256").toString("hex")
@@ -65,31 +70,35 @@ function normalizeEmail(email: string): string {
 }
 
 /**
- * Porovná token z odkazu se zabudovanou i se serverovou hodnotou.
+ * Porovná token z odkazu se serverovou hodnotou.
  *
  * Oba konce se ořezávají – do proměnné nastavené přes dashboard se snadno
  * dostane mezera nebo konec řádku a odkaz by pak bez viditelného důvodu
  * přestal platit.
  */
 function tokenSedi(zadany: string): boolean {
-  const a = zadany.trim()
-  return [ZAKLADACI_TOKEN, process.env.SETUP_TOKEN].some(
-    (povoleny) => !!povoleny && safeEqual(a, povoleny.trim()),
-  )
+  const povoleny = zakladaciToken()
+  if (!povoleny) return false
+  return safeEqual(zadany.trim(), povoleny)
 }
 
 /**
- * Convex v produkci nahrazuje text obyčejné chyby hláškou „Server Error".
- * Tenhle obal proto každou chybu převede na ConvexError ještě uvnitř akce,
- * takže se skutečná příčina ke klientovi dostane.
+ * Ošetření neočekávané chyby uvnitř akce.
+ *
+ * Ověřené hlášky (ConvexError vyhozené naším kódem) jdou ven beze změny, ty
+ * jsou psané klientovi. Cokoli jiného se ven posílá jen obecně a podrobnost
+ * míří do logu: text vnitřní chyby prozrazuje o chodu serveru víc, než je
+ * zdrávo, a útočníkovi usnadňuje mapování. V Convexu je vidět v Logs.
  */
 async function sConvexChybou<T>(jmeno: string, fn: () => Promise<T>): Promise<T> {
   try {
     return await fn()
   } catch (e) {
     if (e instanceof ConvexError) throw e
-    const detail = e instanceof Error ? e.message : String(e)
-    throw new ConvexError(`Chyba při volání ${jmeno}: ${detail}`)
+    console.error(`Chyba při volání ${jmeno}:`, e)
+    throw new ConvexError(
+      `Operace ${jmeno} selhala z technických důvodů. Podrobnost je v Convexu v záložce Logs.`,
+    )
   }
 }
 
@@ -97,6 +106,19 @@ function validatePassword(password: string) {
   if (password.length < 10) {
     throw new ConvexError("Heslo musí mít alespoň 10 znaků.")
   }
+  // Horní mez: PBKDF2 počítá z celého vstupu, takže bez ní by šlo voláním
+  // s obřím heslem vytížit server.
+  if (password.length > 200) {
+    throw new ConvexError("Heslo je příliš dlouhé (nejvýš 200 znaků).")
+  }
+}
+
+/** Meze délky textových údajů účtu. Convex ověřuje typ, ne rozsah. */
+function validateProfil(name: string, email: string, phone?: string, note?: string) {
+  if (name.length > 120) throw new ConvexError("Jméno je příliš dlouhé (nejvýš 120 znaků).")
+  if (email.length > 200) throw new ConvexError("E-mail je příliš dlouhý (nejvýš 200 znaků).")
+  if ((phone?.length ?? 0) > 40) throw new ConvexError("Telefon je příliš dlouhý (nejvýš 40 znaků).")
+  if ((note?.length ?? 0) > 2000) throw new ConvexError("Poznámka je příliš dlouhá (nejvýš 2000 znaků).")
 }
 
 /**
@@ -116,19 +138,27 @@ export const createMaster = action({
   returns: v.object({ sessionToken: v.string(), name: v.string(), role: v.string() }),
   handler: async (ctx, args): Promise<Prihlaseni> =>
     sConvexChybou("createMaster", async () => {
+      // Pořadí kontrol: existence mastera první. Je to nejsrozumitelnější
+      // hláška a nic tím neuniká – totéž vrací veřejná sessions.setupStatus.
+      const exists: boolean = await ctx.runQuery(internal.authInternal.anyCoachExists, {})
+      if (exists) {
+        throw new ConvexError("Master účet už existuje. Tento odkaz je neplatný.")
+      }
+      if (!zakladaciToken()) {
+        throw new ConvexError(
+          "Zakládání účtu není povolené: na serveru chybí proměnná SETUP_TOKEN. Nastav ji v Convexu (Settings → Environment Variables) na náhodnou hodnotu delší než 20 znaků a odkaz otevři s ní.",
+        )
+      }
       if (!tokenSedi(args.setupToken)) {
         throw new ConvexError(
           "Tenhle zakládací odkaz neplatí. Otevři přesně ten, který k aplikaci patří – na konci adresy musí být celý token.",
         )
       }
-      const exists: boolean = await ctx.runQuery(internal.authInternal.anyCoachExists, {})
-      if (exists) {
-        throw new ConvexError("Master účet už existuje. Tento odkaz je neplatný.")
-      }
       validatePassword(args.password)
       const email = normalizeEmail(args.email)
       if (!email.includes("@")) throw new ConvexError("Zadej platný e-mail.")
       if (args.name.trim().length < 2) throw new ConvexError("Zadej své jméno.")
+      validateProfil(args.name, email)
 
       const salt = crypto.randomBytes(16).toString("hex")
       const coachId: Id<"coaches"> = await ctx.runMutation(internal.authInternal.insertCoach, {
@@ -201,6 +231,7 @@ export const addCoach = action({
     validatePassword(args.password)
     const email = normalizeEmail(args.email)
     if (!email.includes("@")) throw new ConvexError("Zadej platný e-mail.")
+    validateProfil(args.name, email, args.phone, args.note)
 
     const salt = crypto.randomBytes(16).toString("hex")
     await ctx.runMutation(internal.authInternal.insertCoach, {
@@ -320,6 +351,7 @@ export const updateCoach = action({
     if (jmeno.length < 2) throw new ConvexError("Zadej jméno.")
     const email = normalizeEmail(args.email)
     if (!email.includes("@")) throw new ConvexError("Zadej platný e-mail.")
+    validateProfil(jmeno, email, args.phone, args.note)
 
     await ctx.runMutation(internal.authInternal.updateCoachProfile, {
       coachId: args.coachId,
