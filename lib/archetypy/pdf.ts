@@ -10,12 +10,13 @@ import {
 } from "../diagnostic/pdf/sazba"
 import { TEST_NAMES, UI } from "../diagnostic/i18n"
 import type { Gender, Lang, PersonInfo, TestId } from "../diagnostic/types"
+import { variantaArchetypu } from "../diagnostic/structure"
 import { nazevArchetypu, obsahArchetypu } from "./content"
 import { UI_ARCHETYPY } from "./i18n"
 import { spojArchetypy } from "./kombinace"
 import { vyhodnotArchetypy } from "./scoring"
 import { NAZVY_MOTIVACI, POCET_POLOZEK, archetyp } from "./structure"
-import type { ArchetypSkore, Motivace, OdpovediMapa } from "./types"
+import type { ArchetypSkore, Motivace, OdpovediMapa, Varianta } from "./types"
 
 // PDF s vyhodnocením archetypů značky.
 //
@@ -79,7 +80,7 @@ function prstenec(
 }
 
 /** Dva prstence vedle sebe: primární a sekundární archetyp. */
-function dvojicePrstencu(s: Sazba, dvojice: ArchetypSkore[], lang: Lang) {
+function dvojicePrstencu(s: Sazba, dvojice: ArchetypSkore[], lang: Lang, varianta: Varianta) {
   const t = UI_ARCHETYPY[lang]
   const popisy = [t.primarniTitulek, t.sekundarniTitulek]
   const polomer = 13
@@ -104,7 +105,7 @@ function dvojicePrstencu(s: Sazba, dvojice: ArchetypSkore[], lang: Lang) {
       charSpace: 0.35,
     })
     s.pismo(9.6, true, BARVA.text)
-    const nazev = s.doc.splitTextToSize(nazevArchetypu(v.id, lang), sloupec - 6) as string[]
+    const nazev = s.doc.splitTextToSize(nazevArchetypu(v.id, lang, varianta), sloupec - 6) as string[]
     nazev.forEach((r, k) => s.doc.text(r, stredX, zakladPopisku + 5 + k * 4.6, { align: "center" }))
   })
   s.y = horni + vyskaBloku + 8
@@ -121,7 +122,11 @@ export interface ArchetypyPdfVstup {
 /** Název souboru: test, klient, datum. Bez diakritiky, ať projde kdekoli. */
 export function archetypyPdfFileName(vstup: ArchetypyPdfVstup): string {
   return (
-    [UI_ARCHETYPY[vstup.lang].nazevSouboru, vstup.person.name, vstup.person.fillDate]
+    [
+      UI_ARCHETYPY[vstup.lang].nazevSouboru[variantaArchetypu(vstup.testId)],
+      vstup.person.name,
+      vstup.person.fillDate,
+    ]
       .filter(Boolean)
       .join(" - ")
       .replace(/[/\\?%*:|"<>]/g, "-")
@@ -131,10 +136,11 @@ export function archetypyPdfFileName(vstup: ArchetypyPdfVstup): string {
 
 export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
   const { testId, person, answers, lang, durationSec } = vstup
+  const varianta = variantaArchetypu(testId)
   const gender: Gender = person.gender ?? "male"
   const g = (x: string) => applyGender(x, gender)
   const v = vyhodnotArchetypy(answers, durationSec)
-  const spojeni = spojArchetypy(v, lang)
+  const spojeni = spojArchetypy(v, lang, varianta)
   const t = UI_ARCHETYPY[lang]
 
   const doc = novyDokument()
@@ -154,7 +160,7 @@ export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
     radek: 8,
   })
   s.mezera(1.5)
-  s.text(t.podnadpis, {
+  s.text(t.podnadpis[varianta], {
     velikost: 10,
     barva: BARVA.text2,
     radek: 5,
@@ -165,7 +171,7 @@ export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
 
   s.mrizkaUdaju([
     { popis: t.respondent, hodnota: person.name || "–" },
-    { popis: t.role, hodnota: person.role || "–" },
+    { popis: t.role[varianta], hodnota: person.role || "–" },
     { popis: t.datum, hodnota: datumLokalne(person.fillDate, lang) },
   ])
   s.mezera(6)
@@ -179,12 +185,12 @@ export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
 
   // ---------- profil všech dvanácti ----------
   s.nadpis(t.profilTitulek)
-  s.text(t.profilPopisPdf, { velikost: 9, barva: BARVA.text2, radek: 4.4 })
+  s.text(t.profilPopisPdf[varianta], { velikost: 9, barva: BARVA.text2, radek: 4.4 })
   s.mezera(5)
 
   const vyzdvizene = new Set([v.primarni.id, v.sekundarni.id])
   for (const x of v.vsechny) {
-    const nazev = nazevArchetypu(x.id, lang)
+    const nazev = nazevArchetypu(x.id, lang, varianta)
     if (!x.vykazuje) {
       s.radekChybi(nazev, t.zodpovezenoZ(x.zodpovezeno, x.celkem))
       continue
@@ -221,14 +227,14 @@ export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
 
   // ---------- primární a sekundární ----------
   s.zalom()
-  s.nadpis(`${t.primarniTitulek}: ${obsahArchetypu(v.primarni.id, lang).nazev}`, 15)
+  s.nadpis(`${t.primarniTitulek}: ${obsahArchetypu(v.primarni.id, lang, varianta).nazev}`, 15)
   s.text(`${t.vyhraneniStitek[v.vyhraneni]} · ${g(spojeni.vyhraneni)}`, {
     velikost: 9.4,
     barva: BARVA.text2,
     radek: 4.5,
   })
   s.mezera(6)
-  dvojicePrstencu(s, [v.primarni, v.sekundarni], lang)
+  dvojicePrstencu(s, [v.primarni, v.sekundarni], lang, varianta)
 
   const clanky: { skore: ArchetypSkore; stitek: string; plny: boolean }[] = [
     { skore: v.primarni, stitek: t.primarniTitulek, plny: true },
@@ -236,7 +242,7 @@ export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
   ]
 
   for (const { skore, stitek, plny } of clanky) {
-    const o = obsahArchetypu(skore.id, lang)
+    const o = obsahArchetypu(skore.id, lang, varianta)
     const skupina = NAZVY_MOTIVACI[lang][archetyp(skore.id).motivace]
     s.misto(60)
     s.mezera(2)
@@ -264,22 +270,29 @@ export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
     s.mezera(4)
 
     s.ramecek(
-      `${t.touhaStitek}: ${g(o.touha)}. ${t.strachStitek}: ${g(o.strach)}. ${t.darStitek}: ${g(o.dar)}.`,
+      `${t.touhaStitek}: ${g(o.touha)}. ${t.strachStitek}: ${g(o.strach)}. ${t.darStitek[varianta]}: ${g(o.dar)}.`,
       { velikost: 9.2 },
     )
     s.mezera(4)
 
-    const oddily: [string, string, boolean][] = plny
-      ? [
-          [t.podstataTitulek, o.podstata, false],
-          [t.vPodnikaniTitulek, o.vPodnikani, false],
-          [t.stinTitulek, o.stin, false],
-          [t.pastiTitulek, o.pasti, true],
-        ]
-      : [
-          [t.sekundarniRoleStitek, o.sekundarniRole, false],
-          [t.stinTitulek, o.stin, true],
-        ]
+    // Sportovní varianta má navíc roli a tření s trenérem; v byznysové jsou
+    // tahle pole prázdná a z výpisu vypadnou.
+    const oddily = (
+      plny
+        ? [
+            [t.podstataTitulek, o.podstata, false],
+            [t.vPodnikaniTitulek[varianta], o.vPodnikani, false],
+            [t.roleTitulek, o.role ?? "", false],
+            [t.stinTitulek, o.stin, false],
+            [t.sTreneremTitulek, o.sTrenerem ?? "", false],
+            [t.pastiTitulek[varianta], o.pasti, true],
+          ]
+        : [
+            [t.sekundarniRoleStitek, o.sekundarniRole, false],
+            [t.roleTitulek, o.role ?? "", false],
+            [t.stinTitulek, o.stin, true],
+          ]
+    ).filter((radek) => String(radek[1]).trim() !== "") as [string, string, boolean][]
 
     for (const [titulek, obsah, tlumeny] of oddily) {
       s.misto(20)
@@ -301,7 +314,7 @@ export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
 
     if (plny) {
       s.misto(24)
-      s.text(t.navodTitulek.toUpperCase(), {
+      s.text(t.navodTitulek[varianta].toUpperCase(), {
         velikost: 7,
         tucne: true,
         barva: BARVA.slaba,
@@ -313,8 +326,22 @@ export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
         s.ramecek(`${i + 1}. ${g(krok)}`, { velikost: 9.2 })
         s.mezera(2.5)
       })
+      if (o.znacka) {
+        s.misto(20)
+        s.text(t.znackaTitulek.toUpperCase(), {
+          velikost: 7,
+          tucne: true,
+          barva: BARVA.slaba,
+          prostrkani: 0.4,
+          radek: 4,
+        })
+        s.mezera(1.5)
+        s.text(g(o.znacka), { velikost: 9.6, radek: 4.8, barva: BARVA.text2 })
+        s.mezera(4.5)
+      }
+
       s.mezera(2)
-      s.text(`${t.prikladyStitek}: ${o.priklady}`, {
+      s.text(`${t.prikladyStitek[varianta]}: ${o.priklady}`, {
         velikost: 8.6,
         barva: BARVA.slaba,
         radek: 4.2,
@@ -327,7 +354,7 @@ export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
   if (s.zbyva() < 60) s.zalom()
   s.mezera(2)
   s.nadpis(t.kombinaceTitulek)
-  s.text(t.kombinacePopis, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
+  s.text(t.kombinacePopis[varianta], { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
   s.mezera(5)
   s.text(g(spojeni.kombinace), { velikost: 9.6, radek: 4.8 })
   s.mezera(5)
@@ -352,7 +379,7 @@ export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
     radek: 7.5,
   })
   s.mezera(1.5)
-  s.text(t.souhrnPopis, { velikost: 9, barva: BARVA.slaba, radek: 4.4 })
+  s.text(t.souhrnPopis[varianta], { velikost: 9, barva: BARVA.slaba, radek: 4.4 })
   s.mezera(3)
   s.linka()
   s.mezera(7)
@@ -372,7 +399,7 @@ export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
 
   // ---------- poznámka na závěr ----------
   s.mezera(6)
-  s.text(t.zaverPdf, { velikost: 8.6, barva: BARVA.slaba, radek: 4.2 })
+  s.text(t.zaverPdf[varianta], { velikost: 8.6, barva: BARVA.slaba, radek: 4.2 })
 
   s.paticka(UI[lang].confidential)
 

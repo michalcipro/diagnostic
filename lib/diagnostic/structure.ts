@@ -1,4 +1,5 @@
 import type { Varianta as VariantaVzorcu } from "../vzorce/types"
+import type { Varianta as VariantaArchetypu } from "../archetypy/types"
 import type { DimensionDef, FacetDef, StructureDef, TestId, TestModel, Variant } from "./types"
 
 // Přepis vyhodnocovacích klíčů ELITE 200™ a ELITE 100™ (Winning Minds).
@@ -184,6 +185,7 @@ export const TEST_IDS: TestId[] = [
   "vzorce-sport-individual",
   "vzorce-sport-tym",
   "archetypy",
+  "archetypy-sport",
 ]
 
 /**
@@ -200,9 +202,17 @@ export function jeVzorce(testId: string): boolean {
   return testId.startsWith("vzorce")
 }
 
-/** Archetypy značky se skórují v lib/archetypy. */
+/** Archetypy se skórují v lib/archetypy; byznysová i sportovní podoba. */
 export function jeArchetypy(testId: string): boolean {
-  return testId === "archetypy"
+  return testId.startsWith("archetypy")
+}
+
+/**
+ * Která podoba archetypů to je. Stavba i skórování jsou shodné, liší se
+ * dotazník a celý výklad, takže se varianta táhne až do vyhodnocení a do PDF.
+ */
+export function variantaArchetypu(testId: string): VariantaArchetypu {
+  return testId === "archetypy-sport" ? "sport" : "business"
 }
 
 /**

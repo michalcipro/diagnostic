@@ -29,6 +29,7 @@ const TEST_IDS = new Set([
   "vzorce-sport-individual",
   "vzorce-sport-tym",
   "archetypy",
+  "archetypy-sport",
 ])
 
 /**
@@ -40,7 +41,7 @@ const TEST_IDS = new Set([
  * by se dala obejít.
  */
 function parametryTestu(testId: string): { pocet: number; maxHodnota: number } {
-  if (testId === "archetypy") return { pocet: 96, maxHodnota: 6 }
+  if (testId.startsWith("archetypy")) return { pocet: 96, maxHodnota: 6 }
   if (testId.startsWith("vzorce")) return { pocet: 110, maxHodnota: 6 }
   return { pocet: testId.startsWith("elite200") ? 200 : 100, maxHodnota: 5 }
 }
@@ -231,8 +232,8 @@ export const submitWithInvite = mutation({
     // Vzorce ani archetypy nemají variantu v tom smyslu jako ELITE (sport
     // nebo business), takže se pro ně doplní zástupná hodnota podle testu.
     const [model, variant] =
-      inv.testId === "archetypy"
-        ? ["archetypy", "obecna"]
+      inv.testId.startsWith("archetypy")
+        ? ["archetypy", inv.testId === "archetypy-sport" ? "sport" : "business"]
         : inv.testId.startsWith("vzorce")
           ? [
               "vzorce",

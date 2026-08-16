@@ -1,5 +1,5 @@
 import type { Lang } from "../diagnostic/types"
-import type { ArchetypDef, ArchetypId, Motivace } from "./types"
+import type { ArchetypDef, ArchetypId, Motivace, Varianta } from "./types"
 
 // Struktura testu archetypů značky.
 //
@@ -79,8 +79,30 @@ const MOTIVACE_POPIS_SK: Record<Motivace, string> = {
   rad: "postarať sa, vybudovať a udržať veci pod kontrolou",
 }
 
-export const POPISY_MOTIVACI: Record<Lang, Record<Motivace, string>> = {
-  cs: MOTIVACE_POPIS_CS,
-  sk: MOTIVACE_POPIS_SK,
-  en: MOTIVACE_POPIS_CS,
+/** Táž čtveřice ve sportovním jazyce: motiv se nemění, mění se hřiště. */
+const MOTIVACE_POPIS_SPORT_CS: Record<Motivace, string> = {
+  nezavislost: "být sám sebou, rozumět svému sportu a jít vlastní cestou",
+  mistrovstvi: "dokázat, co ve mně je, překonávat hranice a vyhrávat",
+  sounalezitost: "patřit do party, mít lidi kolem sebe rád a užívat si sport",
+  rad: "držet řád, starat se o ostatní a mít přípravu pod kontrolou",
+}
+
+const MOTIVACE_POPIS_SPORT_SK: Record<Motivace, string> = {
+  nezavislost: "byť sám sebou, rozumieť svojmu športu a ísť vlastnou cestou",
+  mistrovstvi: "dokázať, čo vo mne je, prekonávať hranice a vyhrávať",
+  sounalezitost: "patriť do party, mať ľudí okolo seba rád a užívať si šport",
+  rad: "držať poriadok, starať sa o ostatných a mať prípravu pod kontrolou",
+}
+
+export const POPISY_MOTIVACI: Record<Varianta, Record<Lang, Record<Motivace, string>>> = {
+  business: {
+    cs: MOTIVACE_POPIS_CS,
+    sk: MOTIVACE_POPIS_SK,
+    en: MOTIVACE_POPIS_CS,
+  },
+  sport: {
+    cs: MOTIVACE_POPIS_SPORT_CS,
+    sk: MOTIVACE_POPIS_SPORT_SK,
+    en: MOTIVACE_POPIS_SPORT_CS,
+  },
 }

@@ -3,6 +3,7 @@ import { getStructure, jeArchetypy, jeVzorce, parseTestId } from "./structure"
 import { POCET_POLOZEK } from "../vzorce/structure"
 import { POCET_POLOZEK as POCET_POLOZEK_ARCHETYPY } from "../archetypy/structure"
 import { INSTRUKCE_ARCHETYPY, SKALA_ARCHETYPY } from "../archetypy/i18n"
+import { variantaArchetypu } from "./structure"
 import type { Answer, Lang, TestId } from "./types"
 
 // Společné údaje o testu na jednom místě.
@@ -57,7 +58,7 @@ export function testMeta(testId: TestId): TestMeta {
       maxOdpoved: 6,
       popiskySkaly: (lang) => SKALA_ARCHETYPY[lang],
       hodnoty: [1, 2, 3, 4, 5, 6],
-      instrukceProJazyk: (lang: Lang) => INSTRUKCE_ARCHETYPY[lang],
+      instrukceProJazyk: (lang: Lang) => INSTRUKCE_ARCHETYPY[variantaArchetypu(testId)][lang],
     }
   }
   if (jeVzorce(testId)) {

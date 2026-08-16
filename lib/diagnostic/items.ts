@@ -12,6 +12,8 @@ import vzorceSportTym from "../vzorce/data/polozky-sport-tym.json"
 import vzorceSportTymSk from "../vzorce/data/polozky-sport-tym-sk.json"
 import archetypy from "../archetypy/data/polozky.json"
 import archetypySk from "../archetypy/data/polozky-sk.json"
+import archetypySport from "../archetypy/data/polozky-sport.json"
+import archetypySportSk from "../archetypy/data/polozky-sport-sk.json"
 
 type ItemsFile = Record<string, Localized>
 
@@ -50,6 +52,15 @@ const ARCHETYPY_ITEMS: ItemsFile = spojJazyky(
   archetypySk as Record<string, string>,
 )
 
+/**
+ * Sportovní verze má vlastní dotazník, ne přeformulovaný byznysový: archetyp
+ * je týž, ale ptát se majitele firmy a sportovce stejnými slovy nejde.
+ */
+const ARCHETYPY_SPORT_ITEMS: ItemsFile = spojJazyky(
+  archetypySport as Record<string, string>,
+  archetypySportSk as Record<string, string>,
+)
+
 const FILES: Record<TestId, ItemsFile> = {
   "elite200-sport": doplnJazykyPolozek(elite200Sport),
   "elite200-business": doplnJazykyPolozek(elite200Business),
@@ -61,6 +72,7 @@ const FILES: Record<TestId, ItemsFile> = {
   "vzorce-sport-individual": VZORCE_SPORT_INDIVIDUAL_ITEMS,
   "vzorce-sport-tym": VZORCE_SPORT_TYM_ITEMS,
   archetypy: ARCHETYPY_ITEMS,
+  "archetypy-sport": ARCHETYPY_SPORT_ITEMS,
 }
 
 export interface Item {

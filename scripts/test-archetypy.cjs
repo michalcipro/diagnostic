@@ -1,14 +1,16 @@
-// Kontrola testu archetypů značky.
+// Kontrola testu archetypů: byznysová i sportovní varianta.
 //
 // Hlídá to, co se okem nepohlídá:
 //
 // 1) Stavba: každá z 96 položek patří právě jednomu archetypu.
-// 2) Dotazníky: oba jazyky mají položky 1 až 96 a slovenská verze je opravdu
-//    slovenská (bez ř, ě a ů, žádná položka nezůstala česky).
+// 2) Dotazníky: obě varianty mají v obou jazycích položky 1 až 96, slovenská
+//    verze je opravdu slovenská (bez ř, ě a ů) a varianty se navzájem liší.
 // 3) Obsah: všech dvanáct archetypů má v obou jazycích všechna pole, návod
-//    o pěti krocích a stejný počet rodových značek {mužský|ženský}.
+//    o pěti krocích a stejný počet rodových značek {mužský|ženský}; sportovní
+//    varianta má navíc přezdívku, roli, tření s trenérem a osobní značku.
 // 4) Skládané věty: vyhranění, kombinace, potlačený archetyp i shrnutí
-//    vznikají v obou jazycích, liší se mezi sebou a slovenština je čistá.
+//    vznikají v obou jazycích i variantách, liší se mezi sebou a slovenština
+//    je čistá.
 // 5) Rozhraní: slovenské UI má všechny klíče a nezůstalo české.
 //
 // Spouští se `node scripts/test-archetypy.cjs`.
@@ -42,6 +44,8 @@ function nactiModuly() {
     vstup,
     `export { OBSAH_ARCHETYPU } from "../lib/archetypy/data/obsah"
 export { OBSAH_ARCHETYPU_SK } from "../lib/archetypy/data/obsah-sk"
+export { OBSAH_ARCHETYPU_SPORT } from "../lib/archetypy/data/obsah-sport"
+export { OBSAH_ARCHETYPU_SPORT_SK } from "../lib/archetypy/data/obsah-sport-sk"
 export { ARCHETYPY, NAZVY_MOTIVACI, POPISY_MOTIVACI, POCET_POLOZEK } from "../lib/archetypy/structure"
 export { UI_ARCHETYPY, SKALA_ARCHETYPY, INSTRUKCE_ARCHETYPY } from "../lib/archetypy/i18n"
 export { vyhodnotArchetypy, kontrolaStruktury } from "../lib/archetypy/scoring"
@@ -61,6 +65,8 @@ export { spojArchetypy } from "../lib/archetypy/kombinace"
 const M = nactiModuly()
 
 const CESKA_PISMENA = /[řěůŘĚŮ]/
+const ZNACKA = /\{([^{}|]*)\|([^{}|]*)\}/g
+const pocetZnacek = (t) => (String(t).match(ZNACKA) || []).length
 
 /** Projde rekurzivně cokoli a vrátí dvojice [cesta, řetězec]. */
 function retezce(uzel, cesta = "") {
@@ -84,27 +90,57 @@ rekni(M.ARCHETYPY.length === 12, `archetypů je 12 (${M.ARCHETYPY.length})`)
 // ---------------------------------------------------------------------------
 
 console.log("\n– dotazníky –")
-const polozkyCs = JSON.parse(fs.readFileSync(path.join(KOREN, "lib", "archetypy", "data", "polozky.json"), "utf8"))
-const polozkySk = JSON.parse(fs.readFileSync(path.join(KOREN, "lib", "archetypy", "data", "polozky-sk.json"), "utf8"))
 
-for (const [jmeno, data] of [
-  ["polozky.json", polozkyCs],
-  ["polozky-sk.json", polozkySk],
-]) {
-  const klice = Object.keys(data).map(Number).sort((a, b) => a - b)
-  const uplne = klice.length === M.POCET_POLOZEK && klice.every((k, i) => k === i + 1)
-  rekni(uplne, `${jmeno}: položky 1 až ${M.POCET_POLOZEK}`)
-  const prazdne = Object.entries(data).filter(([, t]) => !String(t).trim())
-  rekni(prazdne.length === 0, `${jmeno}: žádná položka není prázdná`)
+const nactiPolozky = (jmeno) =>
+  JSON.parse(fs.readFileSync(path.join(KOREN, "lib", "archetypy", "data", jmeno), "utf8"))
+
+const DOTAZNIKY = [
+  { varianta: "business", cs: "polozky.json", sk: "polozky-sk.json" },
+  { varianta: "sport", cs: "polozky-sport.json", sk: "polozky-sport-sk.json" },
+]
+
+for (const d of DOTAZNIKY) {
+  const cs = nactiPolozky(d.cs)
+  const sk = nactiPolozky(d.sk)
+  for (const [jmeno, data] of [
+    [d.cs, cs],
+    [d.sk, sk],
+  ]) {
+    const klice = Object.keys(data)
+      .map(Number)
+      .sort((a, b) => a - b)
+    const uplne = klice.length === M.POCET_POLOZEK && klice.every((k, i) => k === i + 1)
+    rekni(uplne, `${jmeno}: položky 1 až ${M.POCET_POLOZEK}`)
+    const prazdne = Object.entries(data).filter(([, t]) => !String(t).trim())
+    rekni(prazdne.length === 0, `${jmeno}: žádná položka není prázdná`)
+  }
+
+  const ceskeVSk = Object.entries(sk).filter(([, t]) => CESKA_PISMENA.test(t))
+  rekni(
+    ceskeVSk.length === 0,
+    `${d.sk}: bez ř, ě a ů${ceskeVSk.length ? ` (${ceskeVSk.slice(0, 3).map(([k]) => k).join(", ")})` : ""}`,
+  )
+  const shodne = Object.keys(cs).filter((k) => cs[k] === sk[k])
+  rekni(shodne.length === 0, `${d.cs}: žádná položka nezůstala česky${shodne.length ? ` (${shodne.join(", ")})` : ""}`)
+
+  // Rodové značky musí sedět položku po položce, jinak dostane žena mužský tvar.
+  const neshoda = Object.keys(cs).filter((k) => pocetZnacek(cs[k]) !== pocetZnacek(sk[k]))
+  rekni(
+    neshoda.length === 0,
+    `${d.cs}: stejný počet rodových značek v obou jazycích${neshoda.length ? ` (${neshoda.join(", ")})` : ""}`,
+  )
 }
 
-const ceskeVSk = Object.entries(polozkySk).filter(([, t]) => CESKA_PISMENA.test(t))
-rekni(
-  ceskeVSk.length === 0,
-  `polozky-sk.json: bez ř, ě a ů${ceskeVSk.length ? ` (${ceskeVSk.slice(0, 3).map(([k]) => k).join(", ")})` : ""}`,
-)
-const shodne = Object.keys(polozkyCs).filter((k) => polozkyCs[k] === polozkySk[k])
-rekni(shodne.length === 0, `žádná položka nezůstala česky${shodne.length ? ` (${shodne.join(", ")})` : ""}`)
+// Sportovní dotazník nesmí být přebarvený byznysový.
+{
+  const business = nactiPolozky("polozky.json")
+  const sport = nactiPolozky("polozky-sport.json")
+  const stejne = Object.keys(business).filter((k) => business[k] === sport[k])
+  rekni(
+    stejne.length === 0,
+    `sportovní dotazník se liší od byznysového${stejne.length ? ` (${stejne.join(", ")})` : ""}`,
+  )
+}
 
 // ---------------------------------------------------------------------------
 // 3) obsah
@@ -126,59 +162,81 @@ const POLE = [
   "sekundarniRole",
 ]
 
+/** Pole, která má navíc jen sportovní varianta. */
+const POLE_SPORT = ["prezdivka", "role", "sTrenerem", "znacka"]
+
 // Pole, kde smí být slovenský text shodný s českým: anglický název z knihy,
 // jména značek a názvy, které jsou v obou jazycích stejné slovo.
-const SMI_BYT_SHODNA = new Set(["puvodni", "priklady", "nazev", "motto"])
+const SMI_BYT_SHODNA = new Set(["puvodni", "priklady", "nazev", "motto", "prezdivka"])
 
-const ZNACKA = /\{([^{}|]*)\|([^{}|]*)\}/g
-const pocetZnacek = (t) => (String(t).match(ZNACKA) || []).length
+const VARIANTY = [
+  { jmeno: "byznys", cs: M.OBSAH_ARCHETYPU, sk: M.OBSAH_ARCHETYPU_SK, sport: false },
+  { jmeno: "sport", cs: M.OBSAH_ARCHETYPU_SPORT, sk: M.OBSAH_ARCHETYPU_SPORT_SK, sport: true },
+]
 
-for (const a of M.ARCHETYPY) {
-  const cs = M.OBSAH_ARCHETYPU[a.id]
-  const sk = M.OBSAH_ARCHETYPU_SK[a.id]
-  if (!cs || !sk) {
-    rekni(false, `archetyp ${a.id} chybí v ${!cs ? "češtině" : "slovenštině"}`)
-    continue
+for (const varianta of VARIANTY) {
+  const pole = varianta.sport ? [...POLE, ...POLE_SPORT] : POLE
+  for (const a of M.ARCHETYPY) {
+    const cs = varianta.cs[a.id]
+    const sk = varianta.sk[a.id]
+    if (!cs || !sk) {
+      rekni(false, `${varianta.jmeno}: archetyp ${a.id} chybí v ${!cs ? "češtině" : "slovenštině"}`)
+      continue
+    }
+    const chybi = [
+      ...pole.filter((p) => !cs[p] || !String(cs[p]).trim()),
+      ...pole.filter((p) => !sk[p] || !String(sk[p]).trim()).map((p) => `sk.${p}`),
+    ]
+    rekni(
+      chybi.length === 0 && cs.navod.length === 5 && sk.navod.length === 5,
+      `${varianta.jmeno} ${a.id} (${cs.nazev}): všechna pole a návod o 5 krocích v obou jazycích${chybi.length ? ` (${chybi.join(", ")})` : ""}`,
+    )
+    const nepreloz = pole.filter(
+      (p) => !SMI_BYT_SHODNA.has(p) && sk[p] === cs[p] && String(cs[p]).split(" ").length > 3,
+    )
+    const nepredolozNavod = cs.navod.filter((krok, i) => sk.navod[i] === krok)
+    rekni(
+      nepreloz.length === 0 && nepredolozNavod.length === 0,
+      `${varianta.jmeno} ${a.id}: žádné delší pole nezůstalo české${nepreloz.length ? ` (${nepreloz.join(", ")})` : ""}`,
+    )
+    const neshodaZnacek = [
+      ...pole.filter((p) => pocetZnacek(cs[p]) !== pocetZnacek(sk[p])),
+      ...cs.navod
+        .map((krok, i) => (pocetZnacek(krok) !== pocetZnacek(sk.navod[i]) ? `navod.${i + 1}` : null))
+        .filter(Boolean),
+    ]
+    rekni(
+      neshodaZnacek.length === 0,
+      `${varianta.jmeno} ${a.id}: stejný počet rodových značek v obou jazycích${neshodaZnacek.length ? ` (${neshodaZnacek.join(", ")})` : ""}`,
+    )
   }
-  const chybi = [
-    ...POLE.filter((p) => !cs[p] || !String(cs[p]).trim()),
-    ...POLE.filter((p) => !sk[p] || !String(sk[p]).trim()).map((p) => `sk.${p}`),
-  ]
+
+  const ceskeVObsahu = retezce(varianta.sk).filter(([, t]) => CESKA_PISMENA.test(t))
   rekni(
-    chybi.length === 0 && cs.navod.length === 5 && sk.navod.length === 5,
-    `${a.id} (${cs.nazev}): všechna pole a návod o 5 krocích v obou jazycích${chybi.length ? ` (${chybi.join(", ")})` : ""}`,
-  )
-  const nepreloz = POLE.filter(
-    (p) => !SMI_BYT_SHODNA.has(p) && sk[p] === cs[p] && String(cs[p]).split(" ").length > 3,
-  )
-  const nepredolozNavod = cs.navod.filter((krok, i) => sk.navod[i] === krok)
-  rekni(
-    nepreloz.length === 0 && nepredolozNavod.length === 0,
-    `${a.id}: žádné delší pole nezůstalo české${nepreloz.length ? ` (${nepreloz.join(", ")})` : ""}`,
-  )
-  const neshodaZnacek = [
-    ...POLE.filter((p) => pocetZnacek(cs[p]) !== pocetZnacek(sk[p])),
-    ...cs.navod.map((krok, i) => (pocetZnacek(krok) !== pocetZnacek(sk.navod[i]) ? `navod.${i + 1}` : null)).filter(Boolean),
-  ]
-  rekni(
-    neshodaZnacek.length === 0,
-    `${a.id}: stejný počet rodových značek v obou jazycích${neshodaZnacek.length ? ` (${neshodaZnacek.join(", ")})` : ""}`,
+    ceskeVObsahu.length === 0,
+    `${varianta.jmeno}: slovenský obsah bez ř, ě a ů${ceskeVObsahu.length ? ` (${ceskeVObsahu.slice(0, 3).map(([c]) => c).join(", ")})` : ""}`,
   )
 }
 
-const ceskeVObsahu = retezce(M.OBSAH_ARCHETYPU_SK).filter(([, t]) => CESKA_PISMENA.test(t))
-rekni(
-  ceskeVObsahu.length === 0,
-  `obsah-sk: bez ř, ě a ů${ceskeVObsahu.length ? ` (${ceskeVObsahu.slice(0, 3).map(([c]) => c).join(", ")})` : ""}`,
-)
+// Sportovní výklad nesmí být přebarvený byznysový.
+{
+  const stejne = M.ARCHETYPY.filter(
+    (a) => M.OBSAH_ARCHETYPU[a.id].podstata === M.OBSAH_ARCHETYPU_SPORT[a.id].podstata,
+  ).map((a) => a.id)
+  rekni(stejne.length === 0, `sportovní výklad se liší od byznysového${stejne.length ? ` (${stejne.join(", ")})` : ""}`)
+  const bezPolí = M.ARCHETYPY.filter((a) => M.OBSAH_ARCHETYPU[a.id].role !== undefined).map((a) => a.id)
+  rekni(bezPolí.length === 0, "byznysový výklad nemá sportovní pole navíc")
+}
 
 const prazdneVetve = []
-for (const [cesta, text] of [
-  ...retezce(M.OBSAH_ARCHETYPU, "cs"),
-  ...retezce(M.OBSAH_ARCHETYPU_SK, "sk"),
-]) {
-  for (const m of String(text).matchAll(ZNACKA)) {
-    if (!m[1].trim() || !m[2].trim()) prazdneVetve.push(cesta)
+for (const varianta of VARIANTY) {
+  for (const [cesta, text] of [
+    ...retezce(varianta.cs, `${varianta.jmeno}.cs`),
+    ...retezce(varianta.sk, `${varianta.jmeno}.sk`),
+  ]) {
+    for (const m of String(text).matchAll(ZNACKA)) {
+      if (!m[1].trim() || !m[2].trim()) prazdneVetve.push(cesta)
+    }
   }
 }
 rekni(prazdneVetve.length === 0, `žádná značka nemá prázdnou větev${prazdneVetve.length ? ` (${prazdneVetve.join(", ")})` : ""}`)
@@ -198,7 +256,7 @@ const PRIPADY = [
 ]
 
 const texty = ["vyhraneni", "kombinace", "potlaceny", "souhrn", "kdeZacit"]
-const kombinaceCs = []
+const kombinaceCs = { business: [], sport: [] }
 for (const p of PRIPADY) {
   // Odpovědi: archetyp z mapy dostane svou hodnotu (číslo, nebo osm hodnot
   // po položkách), všechny ostatní položky dvojku.
@@ -212,20 +270,30 @@ for (const p of PRIPADY) {
   const v = M.vyhodnotArchetypy(odp)
   rekni(v.primarni.id === p.primarni, `${p.popis}: primární je ${p.primarni} (${v.primarni.id})`)
   rekni(v.vyhraneni === p.vyhraneni, `${p.popis}: vyhranění je ${p.vyhraneni} (${v.vyhraneni})`)
-  const cs = M.spojArchetypy(v, "cs")
-  const sk = M.spojArchetypy(v, "sk")
-  const prazdna = texty.filter((k) => !cs[k].trim() || !sk[k].trim())
-  rekni(prazdna.length === 0, `${p.popis}: všechny věty vznikly v obou jazycích`)
-  const stejna = texty.filter((k) => cs[k] === sk[k])
-  rekni(stejna.length === 0, `${p.popis}: české a slovenské znění se liší${stejna.length ? ` (${stejna.join(", ")})` : ""}`)
-  const ceska = texty.filter((k) => CESKA_PISMENA.test(sk[k]))
-  rekni(ceska.length === 0, `${p.popis}: slovenské znění bez ř, ě a ů${ceska.length ? ` (${ceska.join(", ")})` : ""}`)
-  kombinaceCs.push(cs.kombinace)
+  for (const varianta of ["business", "sport"]) {
+    const kde = `${varianta} / ${p.popis}`
+    const cs = M.spojArchetypy(v, "cs", varianta)
+    const sk = M.spojArchetypy(v, "sk", varianta)
+    const prazdna = texty.filter((k) => !cs[k].trim() || !sk[k].trim())
+    rekni(prazdna.length === 0, `${kde}: všechny věty vznikly v obou jazycích`)
+    const stejna = texty.filter((k) => cs[k] === sk[k])
+    rekni(stejna.length === 0, `${kde}: české a slovenské znění se liší${stejna.length ? ` (${stejna.join(", ")})` : ""}`)
+    const ceska = texty.filter((k) => CESKA_PISMENA.test(sk[k]))
+    rekni(ceska.length === 0, `${kde}: slovenské znění bez ř, ě a ů${ceska.length ? ` (${ceska.join(", ")})` : ""}`)
+    kombinaceCs[varianta].push(cs.kombinace)
+  }
+  // Výklad se musí lišit i mezi variantami, jinak by sport četl byznysový text.
+  const cs = M.spojArchetypy(v, "cs", "business")
+  const csSport = M.spojArchetypy(v, "cs", "sport")
+  const shodne = texty.filter((k) => cs[k] === csSport[k])
+  rekni(shodne.length === 0, `${p.popis}: byznys a sport se liší${shodne.length ? ` (${shodne.join(", ")})` : ""}`)
 }
-rekni(
-  kombinaceCs[0] !== kombinaceCs[1],
-  "kombinace pro stejnou a různou skupinu se liší",
-)
+for (const varianta of ["business", "sport"]) {
+  rekni(
+    kombinaceCs[varianta][0] !== kombinaceCs[varianta][1],
+    `${varianta}: kombinace pro stejnou a různou skupinu se liší`,
+  )
+}
 
 // ---------------------------------------------------------------------------
 // 5) rozhraní
@@ -255,6 +323,7 @@ const VSTUPY = [
   [5, "1, 2, 3, 4, 5"],
   [96, "7"],
 ]
+/** Popisky vedené po variantách: porovnávají se hodnota po hodnotě. */
 const nepreloz = Object.keys(cs).filter((k) => {
   if (SHODNE_ZAMERNE.has(k)) return false
   if (typeof cs[k] === "function") {
@@ -283,23 +352,34 @@ rekni(
   retezce(M.SKALA_ARCHETYPY.sk).every(([, t]) => !CESKA_PISMENA.test(t)),
   "slovenská škála bez ř, ě a ů",
 )
-rekni(
-  M.INSTRUKCE_ARCHETYPY.cs.length === M.INSTRUKCE_ARCHETYPY.sk.length &&
-    M.INSTRUKCE_ARCHETYPY.cs.length === M.INSTRUKCE_ARCHETYPY.en.length,
-  `instrukce mají ve všech jazycích stejný počet vět (${M.INSTRUKCE_ARCHETYPY.cs.length})`,
-)
-rekni(
-  M.INSTRUKCE_ARCHETYPY.cs.every((v, i) => pocetZnacek(v) === pocetZnacek(M.INSTRUKCE_ARCHETYPY.sk[i])),
-  "instrukce mají v češtině a slovenštině stejný počet rodových značek",
-)
-rekni(
-  M.INSTRUKCE_ARCHETYPY.en.every((v) => pocetZnacek(v) === 0),
-  "anglické instrukce nemají rodové značky",
-)
+for (const varianta of ["business", "sport"]) {
+  const i = M.INSTRUKCE_ARCHETYPY[varianta]
+  rekni(
+    i.cs.length === i.sk.length && i.cs.length === i.en.length,
+    `${varianta}: instrukce mají ve všech jazycích stejný počet vět (${i.cs.length})`,
+  )
+  rekni(
+    i.cs.every((v, k) => pocetZnacek(v) === pocetZnacek(i.sk[k])),
+    `${varianta}: instrukce mají v češtině a slovenštině stejný počet rodových značek`,
+  )
+  rekni(i.en.every((v) => pocetZnacek(v) === 0), `${varianta}: anglické instrukce nemají rodové značky`)
+  rekni(
+    i.sk.every((v) => !CESKA_PISMENA.test(v)),
+    `${varianta}: slovenské instrukce bez ř, ě a ů`,
+  )
+}
 rekni(
   retezce(M.NAZVY_MOTIVACI.sk).every(([, t]) => !CESKA_PISMENA.test(t)) &&
-    retezce(M.POPISY_MOTIVACI.sk).every(([, t]) => !CESKA_PISMENA.test(t)),
+    ["business", "sport"].every((v) =>
+      retezce(M.POPISY_MOTIVACI[v].sk).every(([, t]) => !CESKA_PISMENA.test(t)),
+    ),
   "slovenské názvy a popisy motivací bez ř, ě a ů",
+)
+rekni(
+  Object.keys(M.POPISY_MOTIVACI.business.cs).every(
+    (m) => M.POPISY_MOTIVACI.business.cs[m] !== M.POPISY_MOTIVACI.sport.cs[m],
+  ),
+  "popisy motivací se mezi variantami liší",
 )
 
 // ---------------------------------------------------------------------------
@@ -325,9 +405,11 @@ const NEJDE_O_CTENARE = [
   "zákazník povie",
   "popírá sám sebe",
   "popiera sám seba",
+  // typové portréty v příkladech mluví o třetí osobě, ne o respondentovi
+  "priklady:",
 ]
 
-for (const soubor of ["obsah.ts", "obsah-sk.ts"]) {
+for (const soubor of ["obsah.ts", "obsah-sk.ts", "obsah-sport.ts", "obsah-sport-sk.ts"]) {
   const zdroj = fs
     .readFileSync(path.join(KOREN, "lib", "archetypy", "data", soubor), "utf8")
     // vymaskuj jen rodové značky, ne celé objekty

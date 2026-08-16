@@ -3,7 +3,7 @@
 import { nazevArchetypu, obsahArchetypu } from "@/lib/archetypy/content"
 import { UI_ARCHETYPY } from "@/lib/archetypy/i18n"
 import { NAZVY_MOTIVACI, POPISY_MOTIVACI } from "@/lib/archetypy/structure"
-import type { ArchetypSkore, Motivace } from "@/lib/archetypy/types"
+import type { ArchetypSkore, Motivace, Varianta } from "@/lib/archetypy/types"
 import type { Lang } from "@/lib/diagnostic/types"
 
 // Grafy k profilu archetypů.
@@ -198,10 +198,12 @@ export function DvojicePrstencu({
   primarni,
   sekundarni,
   lang,
+  varianta,
 }: {
   primarni: ArchetypSkore
   sekundarni: ArchetypSkore
   lang: Lang
+  varianta: Varianta
 }) {
   const t = UI_ARCHETYPY[lang]
   const dvojice = [
@@ -217,10 +219,10 @@ export function DvojicePrstencu({
             {popis}
           </p>
           <p className="mt-1 text-[15.5px] font-semibold leading-tight">
-            {nazevArchetypu(skore.id, lang)}
+            {nazevArchetypu(skore.id, lang, varianta)}
           </p>
           <p className="mt-1 text-[12.5px] text-[var(--wm-text-2)]">
-            „{obsahArchetypu(skore.id, lang).motto}“
+            „{obsahArchetypu(skore.id, lang, varianta).motto}“
           </p>
         </div>
       ))}
@@ -234,11 +236,13 @@ export function ProfilArchetypuGraf({
   primarni,
   sekundarni,
   lang,
+  varianta,
 }: {
   vsechny: ArchetypSkore[]
   primarni: ArchetypSkore
   sekundarni: ArchetypSkore
   lang: Lang
+  varianta: Varianta
 }) {
   const vyzdvizene = new Set([primarni.id, sekundarni.id])
   const t = UI_ARCHETYPY[lang]
@@ -250,7 +254,7 @@ export function ProfilArchetypuGraf({
         <div className={MRIZKA}>
           {vsechny.map((v) => {
             const duraz = vyzdvizene.has(v.id)
-            const nazev = nazevArchetypu(v.id, lang)
+            const nazev = nazevArchetypu(v.id, lang, varianta)
             return (
               <div key={v.id} className="contents">
                 <div className={`flex min-w-0 items-center ${RADEK}`}>
@@ -306,7 +310,7 @@ export function ProfilArchetypuGraf({
       <div className="flex flex-col gap-4 sm:hidden">
         {vsechny.map((v) => {
           const duraz = vyzdvizene.has(v.id)
-          const nazev = nazevArchetypu(v.id, lang)
+          const nazev = nazevArchetypu(v.id, lang, varianta)
           return (
             <div key={v.id}>
               <div className="flex items-baseline justify-between gap-3">
@@ -369,9 +373,11 @@ export function ProfilArchetypuGraf({
 export function MotivaceGraf({
   motivace,
   lang,
+  varianta,
 }: {
   motivace: Record<Motivace, number>
   lang: Lang
+  varianta: Varianta
 }) {
   const t = UI_ARCHETYPY[lang]
   const radky = (Object.entries(motivace) as [Motivace, number][])
@@ -393,7 +399,7 @@ export function MotivaceGraf({
                     className={`truncate text-[14px] ${
                       duraz ? "font-semibold text-[var(--wm-text)]" : "text-[var(--wm-text-2)]"
                     }`}
-                    title={`${nazev}: ${POPISY_MOTIVACI[lang][r.m]}`}
+                    title={`${nazev}: ${POPISY_MOTIVACI[varianta][lang][r.m]}`}
                   >
                     {nazev}
                   </span>
@@ -446,7 +452,7 @@ export function MotivaceGraf({
               </div>
               <Pruh podil={r.procenta} duraz={duraz} popis={nazev} />
               <p className="text-[12px] leading-relaxed text-[var(--wm-text-3)]">
-                {POPISY_MOTIVACI[lang][r.m]}
+                {POPISY_MOTIVACI[varianta][lang][r.m]}
               </p>
             </div>
           )

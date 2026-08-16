@@ -74,27 +74,46 @@ export interface VysledekArchetypu {
   dobaSek?: number
 }
 
+/**
+ * Které podobě testu obsah patří.
+ *
+ * Skórování i stavba jsou v obou shodné, liší se dotazník a celý výklad:
+ * byznysová verze hledá hlas značky, sportovní soutěžní identitu. Archetyp
+ * je přitom táž věc, jen se v obou světech projevuje jinak.
+ */
+export type Varianta = "business" | "sport"
+
 /** Obsah jednoho archetypu pro vyhodnocení. */
 export interface ArchetypObsah {
   nazev: string
   /** anglický název z knihy, pro dohledání v literatuře */
   puvodni: string
+  /** sportovní přezdívka archetypu; jen sportovní varianta */
+  prezdivka?: string
   motto: string
   touha: string
   strach: string
   dar: string
   /** kdo ten archetyp je, 150-250 slov */
   podstata: string
-  /** jak se projevuje ve firmě, značce a vedení lidí */
+  /** byznys: jak se projevuje ve firmě a značce; sport: v tréninku a v soutěži */
   vPodnikani: string
   /** do čeho sklouzne pod tlakem nebo při přehnání */
   stin: string
-  /** nejčastější chyby při komunikaci značky s tímto archetypem */
+  /** byznys: chyby v komunikaci značky; sport: čím se dá tenhle typ pokazit */
   pasti: string
-  /** konkrétní kroky: hlas značky, co dělat a co ne */
+  /** konkrétní kroky, co dělat a co ne */
   navod: string[]
-  /** známé značky z knihy a praxe, pro rychlé ukotvení */
+  /** byznys: známé značky; sport: typové portréty sportovců */
   priklady: string
   /** co archetyp přidává, když je druhý v pořadí */
   sekundarniRole: string
+
+  // --- jen sportovní varianta ---
+  /** role v týmu i v individuální přípravě */
+  role?: string
+  /** typické tření mezi tímto sportovcem a trenérem */
+  sTrenerem?: string
+  /** osobní značka a komunikace navenek: médiá, sítě, partneři */
+  znacka?: string
 }

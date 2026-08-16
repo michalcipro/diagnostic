@@ -9,7 +9,8 @@ import { UI_ARCHETYPY } from "@/lib/archetypy/i18n"
 import { spojArchetypy } from "@/lib/archetypy/kombinace"
 import { vyhodnotArchetypy } from "@/lib/archetypy/scoring"
 import { NAZVY_MOTIVACI, POCET_POLOZEK, archetyp } from "@/lib/archetypy/structure"
-import type { ArchetypId, ArchetypSkore, OdpovediMapa } from "@/lib/archetypy/types"
+import type { ArchetypId, ArchetypSkore, OdpovediMapa, Varianta } from "@/lib/archetypy/types"
+import { variantaArchetypu } from "@/lib/diagnostic/structure"
 import {
   DvojicePrstencu,
   MotivaceGraf,
@@ -57,17 +58,19 @@ function Mezititulek({ text }: { text: string }) {
 function Jadro({
   o,
   lang,
+  varianta,
   g,
 }: {
   o: ReturnType<typeof obsahArchetypu>
   lang: Lang
+  varianta: Varianta
   g: (t: string) => string
 }) {
   const t = UI_ARCHETYPY[lang]
   const radky = [
     { popis: t.touhaStitek, hodnota: o.touha },
     { popis: t.strachStitek, hodnota: o.strach },
-    { popis: t.darStitek, hodnota: o.dar },
+    { popis: t.darStitek[varianta], hodnota: o.dar },
   ]
   return (
     <div className="mt-4 grid gap-3 rounded-xl bg-[var(--wm-surface-2)] p-4 sm:grid-cols-3">
@@ -110,14 +113,15 @@ export function ArchetypyReport({
   lang: Lang
   durationSec?: number
 }) {
+  const varianta: Varianta = variantaArchetypu(testId)
   const gender: Gender = person.gender ?? "male"
   const v = useMemo(() => vyhodnotArchetypy(answers, durationSec), [answers, durationSec])
-  const spojeni = useMemo(() => spojArchetypy(v, lang), [v, lang])
+  const spojeni = useMemo(() => spojArchetypy(v, lang, varianta), [v, lang, varianta])
   const g = (t: string) => applyGender(t, gender)
   const t = UI_ARCHETYPY[lang]
 
-  const oP = obsahArchetypu(v.primarni.id, lang)
-  const oS = obsahArchetypu(v.sekundarni.id, lang)
+  const oP = obsahArchetypu(v.primarni.id, lang, varianta)
+  const oS = obsahArchetypu(v.sekundarni.id, lang, varianta)
   /** čísla položek archetypu označená hodnotou 5 nebo 6, pro rozhovor s koučem */
   const silnePolozky = (id: ArchetypId) =>
     archetyp(id)
@@ -135,10 +139,10 @@ export function ArchetypyReport({
         <h1 className="mt-2 text-[28px] font-bold leading-tight tracking-tight">
           {NAZVY_TESTU[testId][lang]} · {UI[lang].reportTitle}
         </h1>
-        <p className="mt-1 text-[15px] text-[var(--wm-text-2)]">{t.podnadpis}</p>
+        <p className="mt-1 text-[15px] text-[var(--wm-text-2)]">{t.podnadpis[varianta]}</p>
         <dl className="mt-6 grid gap-x-8 gap-y-4 border-t border-[var(--wm-border-light)] pt-5 sm:grid-cols-3">
           <Udaj popis={t.respondent} hodnota={person.name || "–"} />
-          <Udaj popis={t.role} hodnota={person.role || "–"} />
+          <Udaj popis={t.role[varianta]} hodnota={person.role || "–"} />
           <Udaj popis={t.datum} hodnota={datum(person.fillDate)} />
         </dl>
       </header>
@@ -154,13 +158,14 @@ export function ArchetypyReport({
       <section className="diag-card mt-5 p-7">
         <h2 className="text-[18px] font-bold tracking-tight">{t.profilTitulek}</h2>
         <p className="mt-1 mb-5 max-w-2xl text-[13px] leading-relaxed text-[var(--wm-text-3)]">
-          {t.profilPopisWeb}
+          {t.profilPopisWeb[varianta]}
         </p>
         <ProfilArchetypuGraf
           vsechny={v.vsechny}
           primarni={v.primarni}
           sekundarni={v.sekundarni}
           lang={lang}
+          varianta={varianta}
         />
       </section>
 
@@ -170,7 +175,7 @@ export function ArchetypyReport({
         <p className="mt-1 mb-5 max-w-2xl text-[13px] leading-relaxed text-[var(--wm-text-3)]">
           {t.motivacePopis}
         </p>
-        <MotivaceGraf motivace={v.motivace} lang={lang} />
+        <MotivaceGraf motivace={v.motivace} lang={lang} varianta={varianta} />
       </section>
 
       {/* dvojice, se kterou se pracuje */}
@@ -185,7 +190,12 @@ export function ArchetypyReport({
         </div>
 
         <div className="diag-card mb-5 px-7 py-8">
-          <DvojicePrstencu primarni={v.primarni} sekundarni={v.sekundarni} lang={lang} />
+          <DvojicePrstencu
+            primarni={v.primarni}
+            sekundarni={v.sekundarni}
+            lang={lang}
+            varianta={varianta}
+          />
           <p className="mx-auto mt-6 max-w-[74ch] text-center text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
             {g(spojeni.vyhraneni)}
           </p>
@@ -210,7 +220,7 @@ export function ArchetypyReport({
             „{g(oP.motto)}“
           </p>
 
-          <Jadro o={oP} lang={lang} g={g} />
+          <Jadro o={oP} lang={lang} varianta={varianta} g={g} />
 
           {v.primarni.silnychOdpovedi > 0 && (
             <p className="mt-3 text-[12.5px] leading-relaxed text-[var(--wm-text-3)]">
@@ -221,16 +231,31 @@ export function ArchetypyReport({
           <Mezititulek text={t.podstataTitulek} />
           <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed">{g(oP.podstata)}</p>
 
-          <Mezititulek text={t.vPodnikaniTitulek} />
+          <Mezititulek text={t.vPodnikaniTitulek[varianta]} />
           <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed">{g(oP.vPodnikani)}</p>
+
+          {/* sportovní verze má navíc roli a vztah s trenérem */}
+          {oP.role && (
+            <>
+              <Mezititulek text={t.roleTitulek} />
+              <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed">{g(oP.role)}</p>
+            </>
+          )}
 
           <Mezititulek text={t.stinTitulek} />
           <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed">{g(oP.stin)}</p>
 
-          <Mezititulek text={t.pastiTitulek} />
+          {oP.sTrenerem && (
+            <>
+              <Mezititulek text={t.sTreneremTitulek} />
+              <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed">{g(oP.sTrenerem)}</p>
+            </>
+          )}
+
+          <Mezititulek text={t.pastiTitulek[varianta]} />
           <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed">{g(oP.pasti)}</p>
 
-          <Mezititulek text={t.navodTitulek} />
+          <Mezititulek text={t.navodTitulek[varianta]} />
           <ol className="mt-2 flex max-w-[74ch] flex-col gap-2.5">
             {oP.navod.map((krok, i) => (
               <li
@@ -245,8 +270,17 @@ export function ArchetypyReport({
             ))}
           </ol>
 
+          {oP.znacka && (
+            <>
+              <Mezititulek text={t.znackaTitulek} />
+              <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed text-[var(--wm-text-2)]">
+                {g(oP.znacka)}
+              </p>
+            </>
+          )}
+
           <p className="mt-4 text-[12.5px] leading-relaxed text-[var(--wm-text-3)]">
-            {t.prikladyStitek}: {oP.priklady}
+            {t.prikladyStitek[varianta]}: {oP.priklady}
           </p>
         </article>
 
@@ -269,10 +303,17 @@ export function ArchetypyReport({
             „{g(oS.motto)}“
           </p>
 
-          <Jadro o={oS} lang={lang} g={g} />
+          <Jadro o={oS} lang={lang} varianta={varianta} g={g} />
 
           <Mezititulek text={t.sekundarniRoleStitek} />
           <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed">{g(oS.sekundarniRole)}</p>
+
+          {oS.role && (
+            <>
+              <Mezititulek text={t.roleTitulek} />
+              <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed">{g(oS.role)}</p>
+            </>
+          )}
 
           <Mezititulek text={t.stinTitulek} />
           <p className="mt-1.5 max-w-[74ch] text-[14.5px] leading-relaxed text-[var(--wm-text-2)]">
@@ -284,7 +325,7 @@ export function ArchetypyReport({
       {/* jak spolu hrají */}
       <section className="diag-card mt-8 p-7">
         <h2 className="text-[18px] font-bold tracking-tight">{t.kombinaceTitulek}</h2>
-        <p className="mt-1 max-w-[74ch] text-[13px] text-[var(--wm-text-3)]">{t.kombinacePopis}</p>
+        <p className="mt-1 max-w-[74ch] text-[13px] text-[var(--wm-text-3)]">{t.kombinacePopis[varianta]}</p>
 
         <p className="mt-4 max-w-[74ch] text-[14.5px] leading-relaxed">{g(spojeni.kombinace)}</p>
 
@@ -299,7 +340,7 @@ export function ArchetypyReport({
       {/* shrnutí pro klienta */}
       <section className="diag-card diag-print-break mt-8 border-2 border-[var(--wm-brand)] p-7">
         <h2 className="text-[22px] font-bold tracking-tight">{t.souhrnTitulek}</h2>
-        <p className="mt-1 max-w-[74ch] text-[13px] text-[var(--wm-text-3)]">{t.souhrnPopis}</p>
+        <p className="mt-1 max-w-[74ch] text-[13px] text-[var(--wm-text-3)]">{t.souhrnPopis[varianta]}</p>
 
         <p className="mt-4 max-w-[74ch] text-[15px] leading-relaxed">{g(spojeni.souhrn)}</p>
 
@@ -312,7 +353,7 @@ export function ArchetypyReport({
       </section>
 
       <section className="mt-6 flex flex-col gap-3 text-[13px] leading-relaxed text-[var(--wm-text-2)]">
-        {t.zaverWeb.map((odstavec, i) => (
+        {t.zaverWeb[varianta].map((odstavec, i) => (
           <p key={i}>{odstavec}</p>
         ))}
       </section>

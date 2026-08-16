@@ -336,6 +336,9 @@ function Questionnaire({
               {blockItems.map((item, i) => {
                 const value = session.answers[item.id]
                 const missed = showMissing && value === undefined
+                // Tvrzení psaná v první osobě potřebují rod respondenta stejně
+                // jako instrukce; dotazníky bez značek projdou beze změny.
+                const zneni = applyGender(itemText(item, lang), session.person.gender ?? "male")
                 return (
                   <div
                     key={item.id}
@@ -349,11 +352,11 @@ function Questionnaire({
                   >
                     <p className="text-[15px] leading-relaxed">
                       <span className="mr-2 font-semibold tabular-nums text-[var(--wm-text-3)]">{item.id}</span>
-                      {itemText(item, lang)}
+                      {zneni}
                     </p>
 
                     <div className="mt-5">
-                      <div className="diag-scale-row" role="radiogroup" aria-label={itemText(item, lang)}>
+                      <div className="diag-scale-row" role="radiogroup" aria-label={zneni}>
                         {meta.hodnoty.map((v) => (
                           <button
                             key={v}
