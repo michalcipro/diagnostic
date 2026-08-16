@@ -37,6 +37,7 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
   if (invite === null) return null
   if (invite === "error" || invite.status === "notfound") return <InviteProblem kind="invalid" />
   if (invite.status === "used") return <InviteProblem kind="used" />
+  if (invite.status === "expired") return <InviteProblem kind="expired" />
 
   return (
     <Questionnaire
@@ -48,24 +49,34 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
   )
 }
 
-/** Neplatný nebo už použitý odkaz – srozumitelně, dvojjazyčně. */
-function InviteProblem({ kind }: { kind: "invalid" | "used" }) {
+/** Neplatný, vypršelý nebo už použitý odkaz – srozumitelně, dvojjazyčně. */
+function InviteProblem({ kind }: { kind: "invalid" | "used" | "expired" }) {
+  const texty = {
+    used: {
+      nadpis: "Tento odkaz už byl použit",
+      cs: "Dotazník z tohoto odkazu už byl vyplněn a odeslán. Pokud potřebuješ vyplnit další, požádej svého kouče o nový odkaz.",
+      en: "This link has already been used. Please ask your coach for a new one.",
+    },
+    expired: {
+      nadpis: "Platnost odkazu vypršela",
+      cs: "Odkazy platí omezenou dobu, aby se nedaly použít po letech ležení ve schránce. Požádej prosím svého kouče o nový.",
+      en: "This link has expired. Links are valid for a limited time; please ask your coach for a new one.",
+    },
+    invalid: {
+      nadpis: "Odkaz není platný",
+      cs: "Odkaz je neplatný nebo byl zrušen. Požádej prosím svého kouče o nový.",
+      en: "This link is not valid or has been revoked. Please ask your coach for a new one.",
+    },
+  }[kind]
+
   return (
     <div className="diag-container flex min-h-screen items-center justify-center py-20">
       <div className="diag-card max-w-md p-8 text-center">
         <p className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text-3)]">WINNING MINDS</p>
-        <h1 className="mt-3 text-[20px] font-bold tracking-tight">
-          {kind === "used" ? "Tento odkaz už byl použit" : "Odkaz není platný"}
-        </h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-[var(--wm-text-2)]">
-          {kind === "used"
-            ? "Dotazník z tohoto odkazu už byl vyplněn a odeslán. Pokud potřebuješ vyplnit další, požádej svého kouče o nový odkaz."
-            : "Odkaz je neplatný nebo byl zrušen. Požádej prosím svého kouče o nový."}
-        </p>
+        <h1 className="mt-3 text-[20px] font-bold tracking-tight">{texty.nadpis}</h1>
+        <p className="mt-3 text-[15px] leading-relaxed text-[var(--wm-text-2)]">{texty.cs}</p>
         <p className="mt-4 border-t border-[var(--wm-border-light)] pt-4 text-[13px] leading-relaxed text-[var(--wm-text-3)]">
-          {kind === "used"
-            ? "This link has already been used. Please ask your coach for a new one."
-            : "This link is not valid or has been revoked. Please ask your coach for a new one."}
+          {texty.en}
         </p>
       </div>
     </div>

@@ -170,3 +170,96 @@ export const setPassword = internalMutation({
     return null
   },
 })
+
+// ---------------------------------------------------------------------------
+// Omezení pokusů o přihlášení
+//
+// Bez stropu jde hesla zkoušet ve smyčce: auth:login je veřejné API a PBKDF2
+// útok jen zpomalí. Zámek se váže na e-mail, ne na IP – tu si útočník mění,
+// jak potřebuje. Aby zámek neprozradil, které e-maily existují, vrací
+// přihlášení pořád stejnou hlášku; rozdíl je jen v tom, že se u zamčeného
+// účtu heslo vůbec nepočítá.
+// ---------------------------------------------------------------------------
+
+/** Po kolika neúspěších v okně se zamyká. */
+const PRAH = 5
+/** Okno, ve kterém se neúspěchy sčítají. */
+const OKNO_MS = 15 * 60 * 1000
+/** Délka zámku podle toho, po kolikáté se zamyká. */
+const ZAMKY_MS = [15 * 60 * 1000, 60 * 60 * 1000, 4 * 60 * 60 * 1000]
+
+export const jeZamceno = internalQuery({
+  args: { email: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const z = await ctx.db
+      .query("loginAttempts")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique()
+    return !!z?.lockedUntil && z.lockedUntil > Date.now()
+  },
+})
+
+/** Zapíše neúspěšný pokus a případně zamkne. */
+export const zaznamenejNeuspech = internalMutation({
+  args: { email: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const now = Date.now()
+    const z = await ctx.db
+      .query("loginAttempts")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique()
+
+    if (!z) {
+      await ctx.db.insert("loginAttempts", {
+        email: args.email,
+        failedCount: 1,
+        firstFailedAt: now,
+        lastFailedAt: now,
+      })
+      return null
+    }
+
+    // Staré okno se zahazuje, jinak by se pokusy sčítaly přes celé měsíce
+    // a účet by zamkla i běžná zapomnětlivost.
+    const vOkne = now - z.firstFailedAt <= OKNO_MS
+    const pocet = vOkne ? z.failedCount + 1 : 1
+    const patro = Math.min(Math.floor(pocet / PRAH) - 1, ZAMKY_MS.length - 1)
+    await ctx.db.patch(z._id, {
+      failedCount: pocet,
+      firstFailedAt: vOkne ? z.firstFailedAt : now,
+      lastFailedAt: now,
+      lockedUntil: pocet >= PRAH && patro >= 0 ? now + ZAMKY_MS[patro] : z.lockedUntil,
+    })
+    return null
+  },
+})
+
+/** Úspěšné přihlášení počítadlo maže. */
+export const vynulujPokusy = internalMutation({
+  args: { email: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const z = await ctx.db
+      .query("loginAttempts")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique()
+    if (z) await ctx.db.delete(z._id)
+    return null
+  },
+})
+
+/** Zápis do přístupového logu z akce (přihlášení). */
+export const zaznamenejPrihlaseni = internalMutation({
+  args: { coachId: v.id("coaches") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await ctx.db.insert("pristupovyLog", {
+      coachId: args.coachId,
+      akce: "prihlaseni",
+      at: Date.now(),
+    })
+    return null
+  },
+})

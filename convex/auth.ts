@@ -30,7 +30,13 @@ type Identita = {
 // kryptografii – hesla se nikdy neukládají v čitelné podobě.
 
 const PBKDF2_ITERATIONS = 210_000
-const SESSION_DAYS = 30
+/**
+ * Platnost relace. Klouzavá: každé použití ji posune, takže kdo aplikaci
+ * používá, zůstává přihlášený, a kdo ji nechá ležet, vypadne. Třicet dní
+ * bylo na relaci, která leží v localStorage a odemyká cizí psychologické
+ * profily, zbytečně dlouho.
+ */
+const SESSION_DAYS = 7
 
 /**
  * Zakládací token pro master účet.
@@ -102,9 +108,37 @@ async function sConvexChybou<T>(jmeno: string, fn: () => Promise<T>): Promise<T>
   }
 }
 
-function validatePassword(password: string) {
+/**
+ * Hesla, která projdou délkou, ale nedají útočníkovi žádnou práci. Seznam je
+ * krátký schválně: nemá nahradit správce hesel, jen zachytit ta nejlínější.
+ */
+const CASTA_HESLA = [
+  "heslo",
+  "password",
+  "qwertz",
+  "qwerty",
+  "12345",
+  "abcdef",
+  "admin",
+  "winning",
+  "diagnostic",
+  "elite",
+]
+
+function validatePassword(password: string, email?: string, name?: string) {
   if (password.length < 10) {
     throw new ConvexError("Heslo musí mít alespoň 10 znaků.")
+  }
+  const male = password.toLowerCase()
+  if (CASTA_HESLA.some((h) => male.includes(h))) {
+    throw new ConvexError(
+      "Heslo obsahuje příliš obvyklé slovo. Zvol něco, co se nedá uhodnout ze slovníku.",
+    )
+  }
+  // Heslo odvozené z e-mailu nebo jména je první, co útočník zkusí.
+  const zakazane = [email?.split("@")[0], name].filter((x): x is string => !!x && x.length >= 3)
+  if (zakazane.some((x) => male.includes(x.toLowerCase()))) {
+    throw new ConvexError("Heslo nesmí obsahovat tvoje jméno ani část e-mailu.")
   }
   // Horní mez: PBKDF2 počítá z celého vstupu, takže bez ní by šlo voláním
   // s obřím heslem vytížit server.
@@ -154,8 +188,8 @@ export const createMaster = action({
           "Tenhle zakládací odkaz neplatí. Otevři přesně ten, který k aplikaci patří – na konci adresy musí být celý token.",
         )
       }
-      validatePassword(args.password)
       const email = normalizeEmail(args.email)
+      validatePassword(args.password, email, args.name)
       if (!email.includes("@")) throw new ConvexError("Zadej platný e-mail.")
       if (args.name.trim().length < 2) throw new ConvexError("Zadej své jméno.")
       validateProfil(args.name, email)
@@ -179,27 +213,45 @@ export const createMaster = action({
     }),
 })
 
-/** Přihlášení e-mailem a heslem. */
+/**
+ * Přihlášení e-mailem a heslem.
+ *
+ * Po pěti neúspěších v patnácti minutách se účet na čas zamkne, aby nešlo
+ * hesla zkoušet ve smyčce. Zamčení se navenek neprojeví jinou hláškou:
+ * kdyby ano, dalo by se přes ně zjišťovat, které e-maily existují.
+ */
 export const login = action({
   args: { email: v.string(), password: v.string() },
   returns: v.object({ sessionToken: v.string(), name: v.string(), role: v.string() }),
   handler: async (ctx, args): Promise<Prihlaseni> => {
-    const coach: CoachZaznam = await ctx.runQuery(internal.authInternal.findByEmail, {
-      email: normalizeEmail(args.email),
-    })
-    // Stejná hláška pro neexistující účet i špatné heslo – ať nejde zjišťovat,
-    // které e-maily jsou zaregistrované.
+    const email = normalizeEmail(args.email)
+    // Stejná hláška pro neexistující účet, špatné heslo i zamčený účet – ať
+    // nejde zjišťovat, které e-maily jsou zaregistrované.
     const chyba = "Nesprávný e-mail nebo heslo."
-    if (!coach || !coach.active) throw new ConvexError(chyba)
-    if (!safeEqual(hashPassword(args.password, coach.salt), coach.passwordHash)) {
+
+    const zamceno: boolean = await ctx.runQuery(internal.authInternal.jeZamceno, { email })
+    if (zamceno) throw new ConvexError(chyba)
+
+    const coach: CoachZaznam = await ctx.runQuery(internal.authInternal.findByEmail, { email })
+    // Neexistující účet se počítá taky: jinak by šlo podle toho, jestli se
+    // zamyká, poznat, které e-maily v databázi jsou.
+    if (!coach || !coach.active) {
+      await ctx.runMutation(internal.authInternal.zaznamenejNeuspech, { email })
       throw new ConvexError(chyba)
     }
+    if (!safeEqual(hashPassword(args.password, coach.salt), coach.passwordHash)) {
+      await ctx.runMutation(internal.authInternal.zaznamenejNeuspech, { email })
+      throw new ConvexError(chyba)
+    }
+
+    await ctx.runMutation(internal.authInternal.vynulujPokusy, { email })
     const sessionToken = newToken()
     await ctx.runMutation(internal.authInternal.openSession, {
       coachId: coach.id,
       token: sessionToken,
       days: SESSION_DAYS,
     })
+    await ctx.runMutation(internal.authInternal.zaznamenejPrihlaseni, { coachId: coach.id })
     return { sessionToken, name: coach.name, role: coach.role }
   },
 })
@@ -228,8 +280,8 @@ export const addCoach = action({
     if (!me || me.role !== "master") {
       throw new ConvexError("Přidávat kouče může pouze master účet.")
     }
-    validatePassword(args.password)
     const email = normalizeEmail(args.email)
+    validatePassword(args.password, email, args.name)
     if (!email.includes("@")) throw new ConvexError("Zadej platný e-mail.")
     validateProfil(args.name, email, args.phone, args.note)
 
@@ -263,7 +315,7 @@ export const changePassword = action({
     if (!safeEqual(hashPassword(args.currentPassword, coach.salt), coach.passwordHash)) {
       throw new ConvexError("Stávající heslo nesouhlasí.")
     }
-    validatePassword(args.newPassword)
+    validatePassword(args.newPassword, me.email, me.name)
     const salt = crypto.randomBytes(16).toString("hex")
     await ctx.runMutation(internal.authInternal.setPassword, {
       coachId: coach.id,

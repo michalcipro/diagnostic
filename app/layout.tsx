@@ -11,6 +11,17 @@ export const metadata: Metadata = {
   robots: { index: false },
 }
 
+/**
+ * Stránky se vykreslují na každý požadavek, ne dopředu do statického HTML.
+ *
+ * Vynucuje si to Content-Security-Policy s nonce (viz middleware.ts): nonce je
+ * pro každý požadavek jiný a do předgenerovaného HTML ho vložit nelze. Bez
+ * toho by CSP s `strict-dynamic` zablokovala vlastní skripty aplikace.
+ * Aplikace je celá klientská a data si stahuje z Convexu, takže se tím
+ * nepřenáší žádná práce navíc, jen se HTML skládá až při požadavku.
+ */
+export const dynamic = "force-dynamic"
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="cs">

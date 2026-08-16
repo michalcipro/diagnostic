@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values"
 import { internalQuery, mutation, query } from "./_generated/server"
-import type { QueryCtx } from "./_generated/server"
+import type { MutationCtx, QueryCtx } from "./_generated/server"
 import type { Doc, Id } from "./_generated/dataModel"
 
 // Ověřování přihlášené relace. Sdílí ho všechny funkce, které pracují
@@ -56,6 +56,63 @@ export async function requireCoach(ctx: QueryCtx, sessionToken: string): Promise
   const coach = await ctx.db.get(session.coachId)
   if (!coach || !coach.active) throw new ConvexError("Účet není aktivní.")
   return coach
+}
+
+/**
+ * Totéž pro mutace, navíc s posunutím platnosti relace a s možností zapsat
+ * do přístupového logu.
+ *
+ * Platnost je klouzavá: kdo aplikaci používá, zůstává přihlášený, kdo ji nechá
+ * ležet, vypadne. Posouvá se až ve druhé polovině platnosti, ať se nezapisuje
+ * při každém kliknutí.
+ */
+export async function requireCoachProZapis(
+  ctx: MutationCtx,
+  sessionToken: string,
+): Promise<Coach> {
+  const session = await ctx.db
+    .query("coachSessions")
+    .withIndex("by_token", (q) => q.eq("token", sessionToken))
+    .unique()
+  if (!session) throw new ConvexError("Nejsi přihlášený.")
+  const now = Date.now()
+  if (session.expiresAt < now) throw new ConvexError("Přihlášení vypršelo, přihlas se prosím znovu.")
+  const coach = await ctx.db.get(session.coachId)
+  if (!coach || !coach.active) throw new ConvexError("Účet není aktivní.")
+
+  const platnost = session.expiresAt - session.createdAt
+  if (session.expiresAt - now < platnost / 2) {
+    await ctx.db.patch(session._id, { expiresAt: now + platnost, lastSeenAt: now })
+  } else if (!session.lastSeenAt || now - session.lastSeenAt > 60 * 60 * 1000) {
+    await ctx.db.patch(session._id, { lastSeenAt: now })
+  }
+  return coach
+}
+
+/**
+ * Zápis do přístupového logu.
+ *
+ * U zvláštní kategorie údajů je záznam o přístupu základní detekční opatření:
+ * bez něj nejde zjistit, co se stalo, ani doložit, že se nestalo nic. Ukládá
+ * se jen kdo, co a kdy, žádné osobní údaje v hodnotách.
+ */
+export async function zaznamenejPristup(
+  ctx: MutationCtx,
+  coachId: Id<"coaches">,
+  akce: "otevreni-vysledku" | "export-vzorku" | "smazani-vysledku" | "vytvoreni-pozvanky",
+  resultId?: Id<"eliteDiagnosticResults">,
+): Promise<void> {
+  await ctx.db.insert("pristupovyLog", { coachId, akce, resultId, at: Date.now() })
+}
+
+/** Ukončí všechny relace daného kouče. Používá se při „odhlásit všude". */
+export async function ukonciRelace(ctx: MutationCtx, coachId: Id<"coaches">): Promise<number> {
+  const relace = await ctx.db
+    .query("coachSessions")
+    .withIndex("by_coach", (q) => q.eq("coachId", coachId))
+    .collect()
+  for (const r of relace) await ctx.db.delete(r._id)
+  return relace.length
 }
 
 /** Interní varianta pro akce – vrací null místo chyby. */
@@ -186,5 +243,49 @@ export const setCoachActive = mutation({
       for (const s of sessions) await ctx.db.delete(s._id)
     }
     return null
+  },
+})
+
+/**
+ * Odhlášení ze všech zařízení.
+ *
+ * Kdo má podezření, že mu někdo kouká do účtu, tím ukončí i relaci, ke které
+ * se sám nedostane. Ruší i tu vlastní, takže se po ní přihlašuje znovu.
+ */
+export const logoutAll = mutation({
+  args: { sessionToken: v.string() },
+  returns: v.object({ ukonceno: v.number() }),
+  handler: async (ctx, args) => {
+    const me = await requireCoach(ctx, args.sessionToken)
+    const ukonceno = await ukonciRelace(ctx, me._id)
+    return { ukonceno }
+  },
+})
+
+/**
+ * Přehled přístupů k výsledkům. Vidí ho pouze master.
+ *
+ * Slouží ke kontrole, kdo se kdy díval na klientské profily. Vrací posledních
+ * 500 záznamů, novější první.
+ */
+export const pristupovyLog = query({
+  args: { sessionToken: v.string() },
+  returns: v.array(
+    v.object({
+      coachName: v.string(),
+      akce: v.string(),
+      at: v.number(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    vyzadujMastera(await requireCoach(ctx, args.sessionToken))
+    const zaznamy = await ctx.db.query("pristupovyLog").withIndex("by_at").order("desc").take(500)
+    const jmena = new Map<string, string>()
+    for (const c of await ctx.db.query("coaches").collect()) jmena.set(String(c._id), c.name)
+    return zaznamy.map((z) => ({
+      coachName: jmena.get(String(z.coachId)) ?? "neznámý účet",
+      akce: z.akce,
+      at: z.at,
+    }))
   },
 })

@@ -1,6 +1,13 @@
 import { ConvexError, v } from "convex/values"
 import { mutation, query } from "./_generated/server"
-import { filtrViditelnosti, odmitniExterniho, requireCoach, vyzadujMastera } from "./sessions"
+import {
+  filtrViditelnosti,
+  odmitniExterniho,
+  requireCoach,
+  requireCoachProZapis,
+  vyzadujMastera,
+  zaznamenejPristup,
+} from "./sessions"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ELITE Performance Diagnostic – backend.
@@ -64,6 +71,9 @@ const personValidator = v.object({
 // nad tím, co dává smysl vyplnit, aby nikoho neomezily.
 // ---------------------------------------------------------------------------
 
+/** Jak dlouho platí nepoužitá pozvánka. */
+const PLATNOST_POZVANKY_DNI = 30
+
 const MEZ = {
   jmeno: 120,
   role: 200,
@@ -115,6 +125,39 @@ function shortRole(role?: string): string | undefined {
 /** Měsíc pořízení, „2026-07". Přesný čas by šel spárovat s vyplněním. */
 function collectedMonth(now: number): string {
   return new Date(now).toISOString().slice(0, 7)
+}
+
+/**
+ * Čtvrtletí pořízení, „2026-Q3".
+ *
+ * Hrubší než měsíc schválně. Kombinace „rok narození + disciplína + měsíc" je
+ * u malého vzorku prakticky identifikátor: lidí, na které sedí, bývá jednotky.
+ * Čtvrtletí spolu s pětiletým pásmem narození ten okruh podstatně rozšíří,
+ * aniž by se ztratila hodnota pro tvorbu norem.
+ */
+function collectedQuarter(now: number): string {
+  const d = new Date(now)
+  return `${d.getUTCFullYear()}-Q${Math.floor(d.getUTCMonth() / 3) + 1}`
+}
+
+/** Pětileté pásmo narození, „1990-1994". Přesný rok se do vzorku neukládá. */
+function ageBand(birthDate?: string): string | undefined {
+  const rok = birthYearOnly(birthDate)
+  if (rok === undefined) return undefined
+  const zacatek = Math.floor(rok / 5) * 5
+  return `${zacatek}-${zacatek + 4}`
+}
+
+/**
+ * Náhodný klíč, který spojí vyplnění s jeho anonymní kopií ve vzorku.
+ *
+ * Sám o sobě neprozrazuje nic a nedá se z něj nic odvodit, ale umožní vzorek
+ * smazat spolu s výsledkem. Bez něj by po uplatnění práva na výmaz zůstaly
+ * odpovědi ve vzorku napořád: jiná vazba tu vědomě není, aby nešlo záznam
+ * spárovat zpět s člověkem.
+ */
+function vymazovyKlic(): string {
+  return Array.from(kryptoBajty(16), (b) => b.toString(16).padStart(2, "0")).join("")
 }
 
 /**
@@ -174,13 +217,14 @@ export const createInvite = mutation({
   },
   returns: v.object({ token: v.string() }),
   handler: async (ctx, args) => {
-    const me = await requireCoach(ctx, args.sessionToken)
+    const me = await requireCoachProZapis(ctx, args.sessionToken)
     if (!TEST_IDS.has(args.testId)) {
       throw new ConvexError(`Neznámý testId: ${args.testId}`)
     }
     delka(args.clientName, MEZ.jmeno, "Jméno klienta")
     delka(args.note, MEZ.poznamka, "Poznámka")
     const token = makeToken()
+    const now = Date.now()
     await ctx.db.insert("invitations", {
       token,
       testId: args.testId,
@@ -189,8 +233,10 @@ export const createInvite = mutation({
       note: args.note,
       // Vlastník rozhoduje, do čí větve vyplnění spadne.
       coachId: me._id,
-      createdAt: Date.now(),
+      createdAt: now,
+      expiresAt: now + PLATNOST_POZVANKY_DNI * 24 * 60 * 60 * 1000,
     })
+    await zaznamenejPristup(ctx, me._id, "vytvoreni-pozvanky")
     return { token }
   },
 })
@@ -203,7 +249,12 @@ export const createInvite = mutation({
 export const getInvite = query({
   args: { token: v.string() },
   returns: v.object({
-    status: v.union(v.literal("ok"), v.literal("used"), v.literal("notfound")),
+    status: v.union(
+      v.literal("ok"),
+      v.literal("used"),
+      v.literal("expired"),
+      v.literal("notfound"),
+    ),
     testId: v.optional(v.string()),
     lang: v.optional(v.string()),
     clientName: v.optional(v.string()),
@@ -215,6 +266,10 @@ export const getInvite = query({
       .unique()
     if (!inv) return { status: "notfound" as const }
     if (inv.usedAt) return { status: "used" as const }
+    // Pozvánky vystavené dřív než platnost existovala běží dál bez omezení.
+    if (inv.expiresAt !== undefined && inv.expiresAt < Date.now()) {
+      return { status: "expired" as const }
+    }
     return {
       status: "ok" as const,
       testId: inv.testId,
@@ -233,6 +288,7 @@ const inviteValidator = v.object({
   clientName: v.optional(v.string()),
   note: v.optional(v.string()),
   createdAt: v.number(),
+  expiresAt: v.optional(v.number()),
   usedAt: v.optional(v.number()),
   resultId: v.optional(v.id("eliteDiagnosticResults")),
 })
@@ -254,6 +310,7 @@ export const listInvites = query({
       clientName: d.clientName,
       note: d.note,
       createdAt: d.createdAt,
+      expiresAt: d.expiresAt,
       usedAt: d.usedAt,
       resultId: d.resultId,
     }))
@@ -299,6 +356,9 @@ export const submitWithInvite = mutation({
       .unique()
     if (!inv) throw new ConvexError("Neplatný odkaz.")
     if (inv.usedAt) throw new ConvexError("Tento odkaz už byl použit.")
+    if (inv.expiresAt !== undefined && inv.expiresAt < Date.now()) {
+      throw new ConvexError("Platnost tohoto odkazu vypršela. Požádej kouče o nový.")
+    }
 
     // Meze délky dřív než cokoli dalšího: co se sem dostane, to se ukládá.
     zkontrolujOsobu(args.person)
@@ -352,6 +412,7 @@ export const submitWithInvite = mutation({
         ? Math.round(args.durationSec)
         : undefined
 
+    const klic = vymazovyKlic()
     const resultId = await ctx.db.insert("eliteDiagnosticResults", {
       testId: inv.testId,
       model,
@@ -363,6 +424,7 @@ export const submitWithInvite = mutation({
       complete: answeredCount === itemCount,
       durationSec,
       coachId: inv.coachId,
+      vymazovyKlic: klic,
       createdAt: now,
     })
     // Anonymní kopie do normativního vzorku.
@@ -376,7 +438,9 @@ export const submitWithInvite = mutation({
       model,
       variant,
       lang: inv.lang,
-      birthYear: birthYearOnly(args.person.birthDate),
+      // Místo přesného roku pětileté pásmo, místo měsíce čtvrtletí: vzorek
+      // má sloužit normám, ne k dohledání konkrétního člověka.
+      ageBand: ageBand(args.person.birthDate),
       gender: args.person.gender,
       role: shortRole(args.person.role),
       answers,
@@ -384,6 +448,8 @@ export const submitWithInvite = mutation({
       complete: answeredCount === itemCount,
       durationSec,
       collectedMonth: collectedMonth(now),
+      collectedQuarter: collectedQuarter(now),
+      vymazovyKlic: klic,
     })
 
     // Pozvánku spotřebuj – odkaz už podruhé nepustí.
@@ -438,7 +504,14 @@ export const listForCoach = query({
   },
 })
 
-export const getForCoach = query({
+/**
+ * Detail vyplnění pro kouče.
+ *
+ * Je to mutace, přestože jen čte: otevření cizího psychologického profilu se
+ * musí zapsat do přístupového logu a queries v Convexu zapisovat nesmějí.
+ * Klient ji volá jednorázově, takže se tím nic neztrácí.
+ */
+export const getForCoach = mutation({
   args: { sessionToken: v.string(), id: v.id("eliteDiagnosticResults") },
   returns: v.union(
     v.object({
@@ -455,12 +528,13 @@ export const getForCoach = query({
     v.null(),
   ),
   handler: async (ctx, args) => {
-    const me = await requireCoach(ctx, args.sessionToken)
+    const me = await requireCoachProZapis(ctx, args.sessionToken)
     const d = await ctx.db.get(args.id)
     if (!d) return null
     // Cizí větev se nevrací ani na přímý dotaz s uhodnutým id.
     const vidi = await filtrViditelnosti(ctx, me)
     if (!vidi(d.coachId)) return null
+    await zaznamenejPristup(ctx, me._id, "otevreni-vysledku", d._id)
     return {
       id: d._id,
       testId: d.testId,
@@ -517,7 +591,11 @@ export const normStats = query({
  * Export vzorku k analýze. Vrací přesně to, co je v tabulce – tedy bez jmen,
  * bez celých dat narození a bez vazby na konkrétní vyplnění.
  */
-export const normExport = query({
+/**
+ * Export vzorku k analýze. Mutace kvůli zápisu do přístupového logu: stáhnout
+ * celý vzorek je akce, o které má být záznam.
+ */
+export const normExport = mutation({
   args: { sessionToken: v.string() },
   returns: v.array(
     v.object({
@@ -526,45 +604,73 @@ export const normExport = query({
       variant: v.string(),
       lang: v.string(),
       birthYear: v.optional(v.number()),
+      ageBand: v.optional(v.string()),
       role: v.optional(v.string()),
       answers: v.string(),
       answeredCount: v.number(),
       complete: v.boolean(),
       durationSec: v.optional(v.number()),
       collectedMonth: v.string(),
+      collectedQuarter: v.optional(v.string()),
     }),
   ),
   handler: async (ctx, args) => {
-    odmitniExterniho(await requireCoach(ctx, args.sessionToken))
+    const me = await requireCoachProZapis(ctx, args.sessionToken)
+    odmitniExterniho(me)
     const vsechny = await ctx.db.query("normSamples").take(5000)
+    await zaznamenejPristup(ctx, me._id, "export-vzorku")
     return vsechny.map((z) => ({
       testId: z.testId,
       model: z.model,
       variant: z.variant,
       lang: z.lang,
+      // Starší záznamy mají přesný rok, nové pásmo; export vrací obojí, ať se
+      // dá vzorek analyzovat vcelku.
       birthYear: z.birthYear,
+      ageBand: z.ageBand,
       role: z.role,
       answers: z.answers,
       answeredCount: z.answeredCount,
       complete: z.complete,
       durationSec: z.durationSec,
       collectedMonth: z.collectedMonth,
+      collectedQuarter: z.collectedQuarter,
     }))
   },
 })
 
-/** Smazání vyplnění. Pouze pro kouče. */
+/**
+ * Smazání vyplnění. Pouze pro kouče.
+ *
+ * Maže i anonymní kopii ve vzorku, pokud k ní vede párovací klíč. Bez toho by
+ * po uplatnění práva na výmaz zůstaly odpovědi ve vzorku napořád. U záznamů
+ * pořízených dřív než klíč existoval se maže jen vyplnění; ty ve vzorku
+ * dohledat nejde a nikdy nepůjde.
+ */
 export const removeForCoach = mutation({
   args: { sessionToken: v.string(), id: v.id("eliteDiagnosticResults") },
-  returns: v.object({ ok: v.boolean() }),
+  returns: v.object({ ok: v.boolean(), vzorekSmazan: v.boolean() }),
   handler: async (ctx, args) => {
-    const me = await requireCoach(ctx, args.sessionToken)
+    const me = await requireCoachProZapis(ctx, args.sessionToken)
     const doc = await ctx.db.get(args.id)
-    if (!doc) return { ok: true }
+    if (!doc) return { ok: true, vzorekSmazan: false }
     const vidi = await filtrViditelnosti(ctx, me)
     if (!vidi(doc.coachId)) throw new ConvexError("Tohle vyplnění do tvé větve nepatří.")
+
+    let vzorekSmazan = false
+    if (doc.vymazovyKlic) {
+      const vzorky = await ctx.db
+        .query("normSamples")
+        .withIndex("by_vymazovy_klic", (q) => q.eq("vymazovyKlic", doc.vymazovyKlic))
+        .collect()
+      for (const z of vzorky) {
+        await ctx.db.delete(z._id)
+        vzorekSmazan = true
+      }
+    }
+    await zaznamenejPristup(ctx, me._id, "smazani-vysledku", doc._id)
     await ctx.db.delete(args.id)
-    return { ok: true }
+    return { ok: true, vzorekSmazan }
   },
 })
 

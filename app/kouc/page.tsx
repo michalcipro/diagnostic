@@ -18,10 +18,13 @@ import {
   updateCoach,
   externalUsage,
   type ExternalUsage,
+  pristupovyLog,
+  type PristupZaznam,
   createInvite,
   listCoaches,
   login as doLogin,
   logout as doLogout,
+  logoutAll,
   setCoachActive,
   whoAmI,
   type CoachIdentity,
@@ -47,6 +50,10 @@ import type { OdpovediMapa } from "@/lib/vzorce/types"
 // se drží jen po dobu relace, aby se nemuselo psát u každého kliknutí.
 
 const SESSION_KEY = "wm-diagnostic:session"
+
+/** Nepoužitá pozvánka po uplynutí platnosti; starší pozvánky ji nemají. */
+const jeVyprsela = (iv: InviteRow): boolean =>
+  !iv.usedAt && iv.expiresAt !== undefined && iv.expiresAt < Date.now()
 const LANG_KEY = "wm-diagnostic:lang"
 
 export default function CoachPage() {
@@ -71,8 +78,11 @@ export default function CoachPage() {
   const [detail, setDetail] = useState<ResultDetail | null>(null)
   const [detailLang, setDetailLang] = useState<Lang>("cs")
 
-  const [tab, setTab] = useState<"results" | "invites" | "coaches" | "norms" | "externi">("results")
+  const [tab, setTab] = useState<
+    "results" | "invites" | "coaches" | "norms" | "externi" | "pristupy"
+  >("results")
   const [externi, setExterni] = useState<ExternalUsage[] | null>(null)
+  const [pristupy, setPristupy] = useState<PristupZaznam[] | null>(null)
   const [norms, setNorms] = useState<NormStats | null>(null)
   const [exporting, setExporting] = useState(false)
   const [invites, setInvites] = useState<InviteRow[] | null>(null)
@@ -145,6 +155,27 @@ export default function CoachPage() {
 
   const signOut = async () => {
     if (session) await doLogout(session)
+    zapomenRelaci()
+  }
+
+  /**
+   * Odhlášení ze všech zařízení. Hodí se, když je podezření, že se někdo
+   * dostal k přihlášenému prohlížeči: ukončí i relace, ke kterým se odsud
+   * nedá dostat. Ruší i tu vlastní, proto se pak přihlašuje znovu.
+   */
+  const signOutEverywhere = async () => {
+    if (!session) return
+    if (!window.confirm("Odhlásit ze všech zařízení? Budeš se muset přihlásit znovu.")) return
+    try {
+      const ukonceno = await logoutAll(session)
+      zapomenRelaci()
+      setError(`Ukončeno ${ukonceno} přihlášení. Přihlas se prosím znovu.`)
+    } catch (e) {
+      setError(chybaText(e, "Odhlášení ze všech zařízení se nepodařilo."))
+    }
+  }
+
+  const zapomenRelaci = () => {
     window.localStorage.removeItem(SESSION_KEY)
     setSession("")
     setMeInfo(null)
@@ -159,6 +190,14 @@ export default function CoachPage() {
       setCoaches(await listCoaches(session))
     } catch (e) {
       setError(chybaText(e, "Seznam koučů se nepodařilo načíst."))
+    }
+  }
+
+  const loadPristupy = async () => {
+    try {
+      setPristupy(await pristupovyLog(session))
+    } catch (e) {
+      setError(chybaText(e, "Přehled přístupů se nepodařilo načíst."))
     }
   }
 
@@ -387,6 +426,14 @@ export default function CoachPage() {
           <LangToggle lang={lang} onChange={setLang} />
           <button
             type="button"
+            onClick={signOutEverywhere}
+            title="Ukončí přihlášení na všech zařízeních, i tam, kam se odsud nedostaneš."
+            className="diag-press inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text-2)] transition-colors hover:bg-[var(--wm-fill-4)]"
+          >
+            Odhlásit všude
+          </button>
+          <button
+            type="button"
             onClick={signOut}
             className="diag-press inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
           >
@@ -445,7 +492,25 @@ export default function CoachPage() {
             Externí kouči
           </button>
         )}
+        {meInfo.role === "master" && (
+          <button
+            type="button"
+            data-active={tab === "pristupy"}
+            onClick={() => {
+              setTab("pristupy")
+              if (pristupy === null) void loadPristupy()
+            }}
+          >
+            Přístupy
+          </button>
+        )}
       </div>
+
+      {tab === "pristupy" && meInfo.role === "master" && (
+        <div className="mb-8">
+          <PristupyPanel zaznamy={pristupy} />
+        </div>
+      )}
 
       {tab === "externi" && meInfo.role === "master" && (
         <div className="mb-8">
@@ -686,10 +751,17 @@ export default function CoachPage() {
                     style={
                       iv.usedAt
                         ? { color: "var(--wm-ok-fg)", background: "var(--wm-green-light)" }
-                        : { color: "var(--wm-caution-fg)", background: "var(--wm-orange-light)" }
+                        : jeVyprsela(iv)
+                          ? { color: "var(--wm-text-3)", background: "var(--wm-track)" }
+                          : { color: "var(--wm-caution-fg)", background: "var(--wm-orange-light)" }
+                    }
+                    title={
+                      iv.expiresAt && !iv.usedAt
+                        ? `${jeVyprsela(iv) ? "Vypršela" : "Platí do"} ${new Date(iv.expiresAt).toLocaleDateString("cs-CZ")}`
+                        : undefined
                     }
                   >
-                    {iv.usedAt ? t.inviteUsed : t.invitePending}
+                    {iv.usedAt ? t.inviteUsed : jeVyprsela(iv) ? "Vypršela" : t.invitePending}
                   </span>
                   {!iv.usedAt && (
                     <div className="flex items-center gap-2">
@@ -925,4 +997,53 @@ async function exportPdf(detail: ResultDetail, lang: Lang): Promise<void> {
   a.click()
   // Odvolání až po chvíli, jinak stahování v Safari nestihne začít.
   window.setTimeout(() => URL.revokeObjectURL(url), 10_000)
+}
+
+/**
+ * Přehled přístupů k výsledkům. Vidí ho pouze master.
+ *
+ * U psychologických dat je záznam o tom, kdo se kdy díval, základní kontrola:
+ * bez něj nejde zjistit, co se stalo, ani doložit, že se nestalo nic.
+ */
+function PristupyPanel({ zaznamy }: { zaznamy: PristupZaznam[] | null }) {
+  const POPIS: Record<string, string> = {
+    "otevreni-vysledku": "otevřel vyhodnocení",
+    "export-vzorku": "stáhl anonymní vzorek",
+    "smazani-vysledku": "smazal vyhodnocení",
+    "vytvoreni-pozvanky": "vystavil pozvánku",
+    prihlaseni: "přihlásil se",
+  }
+
+  if (zaznamy === null) {
+    return <p className="text-[14px] text-[var(--wm-text-3)]">Načítám…</p>
+  }
+
+  return (
+    <div className="diag-card p-6">
+      <h2 className="text-[17px] font-bold tracking-tight">Přístupy k datům</h2>
+      <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
+        Kdo se kdy díval na vyhodnocení, stahoval vzorek nebo vystavoval pozvánky.
+        Posledních 500 záznamů, novější první. Slouží ke kontrole; u údajů
+        o duševním zdraví je taková evidence namístě.
+      </p>
+
+      {zaznamy.length === 0 ? (
+        <p className="mt-5 text-[14px] text-[var(--wm-text-3)]">Zatím žádné záznamy.</p>
+      ) : (
+        <div className="mt-5 flex flex-col divide-y divide-[var(--wm-border-light)] border-t border-[var(--wm-border-light)]">
+          {zaznamy.map((z, i) => (
+            <div key={i} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2.5">
+              <span className="text-[14px]">
+                <span className="font-medium">{z.coachName}</span>{" "}
+                <span className="text-[var(--wm-text-2)]">{POPIS[z.akce] ?? z.akce}</span>
+              </span>
+              <span className="text-[12.5px] tabular-nums text-[var(--wm-text-3)]">
+                {new Date(z.at).toLocaleString("cs-CZ")}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }

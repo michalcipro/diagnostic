@@ -2,8 +2,9 @@
 
 Stav ke dni 16. 8. 2026, revize `5563268`.
 
-**Aktualizace téhož dne:** nálezy K1, V2, V4, V5, S4, S5 a N1 jsou opravené,
-viz sekci „Co už je hotové" níže. Zbytek zůstává v platnosti.
+**Aktualizace téhož dne:** opravené jsou nálezy K1, V1 až V5, S1 až S5 a N1,
+N2, N4. Viz sekci „Co už je hotové" níže. Otevřené zůstávají N3 (druhý faktor),
+N5 a dokumenty ke GDPR, ke kterým je podklad v `docs/gdpr-podklady.md`.
 
 Auditovaná aplikace: Performance Diagnostic ELITE (elitediagnostic.cz), Next.js
 na Vercelu, Convex jako backend a databáze.
@@ -48,9 +49,27 @@ chování aplikace pro uživatele, takže je bylo možné nasadit bez přípravy
 | S5 | Text vnitřní chyby už neputuje ke klientovi; jde do logu, ven jde obecná hláška. Ověřené hlášky zůstávají beze změny. |
 | N1 | Rozpracované odpovědi se po úspěšném odeslání mažou z prohlížeče. Při neúspěchu zůstávají kvůli záloze. |
 
+Druhá dávka, tentokrát se změnami, které je vidět v provozu:
+
+| Nález | Co se změnilo |
+|---|---|
+| V1 | Po pěti neúspěších v patnácti minutách se účet zamkne (15 minut, pak hodina, pak čtyři). Neúspěch se počítá i u neexistujícího e-mailu, jinak by se přes zamykání dalo zjistit, které účty existují; hláška zůstává stejná. Přihlášení se zapisuje do logu. |
+| V3 | CSP se nově skládá v `middleware.ts` a nese nonce pro každý požadavek zvlášť: `script-src 'self' 'nonce-…' 'strict-dynamic'` místo `'unsafe-inline' 'unsafe-eval'`. Vyžádalo si to přepnutí stránek na vykreslování při požadavku, protože do předgenerovaného HTML nonce vložit nejde. Platnost relace klesla z 30 dní na 7 a je klouzavá. |
+| S1 | Vzorek má místo přesného roku narození pětileté pásmo a místo měsíce čtvrtletí. Přibyl párovací klíč, díky kterému smazání vyplnění smaže i jeho anonymní kopii; u záznamů pořízených dřív to nejde a nepůjde. |
+| S2 | Otevření vyhodnocení, export vzorku, smazání, vystavení pozvánky a přihlášení se zapisují do `pristupovyLog`. Master ho vidí v záložce Přístupy. Kvůli tomu jsou `getForCoach` a `normExport` nově mutace: queries v Convexu zapisovat nesmějí. |
+| S3 | Pozvánky platí 30 dní. Vypršelý odkaz respondentovi vysvětlí, co se stalo, a v přehledu kouče je označený. |
+| N2 | Heslo neprojde, když obsahuje běžné slovo ze seznamu nebo část jména či e-mailu účtu. |
+| N4 | Tlačítko „Odhlásit všude" ukončí relace na všech zařízeních. |
+| navíc | Retenční úklid: `convex/uklid.ts` a noční cron mažou data za lhůtou (výsledky 3 roky, pozvánky 90 dní, log rok, pokusy 7 dní). |
+
 **Pozor při nasazení V2:** `SETUP_TOKEN` musí být nastavený v Convexu dřív, než
 bude potřeba založit master účet. Na existující instalaci se nic nezmění, master
 už existuje a zakládání je tak jako tak zavřené.
+
+**Ověření V3:** CSP s nonce se nedá ověřit jen buildem, protože zablokované
+skripty se projeví až v prohlížeči. Otestováno headless Chromiem proti
+produkčnímu sestavení na úvodní stránce, v sekci kouče i na stránce dotazníku:
+všechny se vykreslí, konzole nehlásí jediné porušení CSP.
 
 ---
 
@@ -148,6 +167,8 @@ tokeny zůstanou platné, změna se týká jen nově vydávaných pozvánek.
 
 #### V1 – Přihlašování nemá žádné omezení počtu pokusů
 
+> **Opraveno.** Viz sekci „Co už je hotové".
+
 `convex/auth.ts`, funkce `login`.
 
 **Proč to vadí.** Convex vystavuje `auth:login` na veřejném API. Nic nebrání
@@ -207,6 +228,8 @@ Zároveň považujte stávající hodnotu za kompromitovanou a při přechodu ji
 nepoužívejte znovu.
 
 #### V3 – Relace kouče v localStorage v kombinaci s povolujícím CSP
+
+> **Opraveno.** Viz sekci „Co už je hotové".
 
 `app/kouc/page.tsx` ukládá `sessionToken` do `localStorage`. CSP v
 `next.config.js` má `script-src 'self' 'unsafe-inline' 'unsafe-eval'`.
@@ -281,6 +304,8 @@ do `npm run audit`, aby se na to nezapomínalo.
 
 #### S1 – Normativní vzorek není plně anonymní a nejde smazat
 
+> **Opraveno.** Viz sekci „Co už je hotové".
+
 `normSamples` obsahuje rok narození, rod, povolání či disciplínu a úroveň,
 kompletní odpovědi a měsíc pořízení.
 
@@ -311,6 +336,8 @@ Doporučuju variantu 1 doplněnou o 3: je nejčistší a nejméně omezuje anal�
 
 #### S2 – Chybí záznam o přístupu k výsledkům
 
+> **Opraveno.** Viz sekci „Co už je hotové".
+
 Nikde se neeviduje, který kouč kdy otevřel který profil nebo exportoval vzorek.
 
 **Proč to vadí.** U zvláštní kategorie údajů je záznam o přístupu základní
@@ -338,6 +365,8 @@ Zapisovat v `getForCoach`, `normExport` a `removeForCoach`. Log ať vidí jen
 master a ať se po roce automaticky maže.
 
 #### S3 – Pozvánky nemají platnost
+
+> **Opraveno.** Viz sekci „Co už je hotové".
 
 `invitations` má `createdAt` a `usedAt`, ale ne expiraci. Nepoužitý odkaz platí
 navždy.
@@ -398,16 +427,16 @@ Zatím stačí vědět, že to tak je, a mít to pokryté smluvně.
 
 ### NÍZKÉ
 
-- **N1 – Rozpracované odpovědi zůstávají v prohlížeči.** `lib/diagnostic/storage.ts`
+- **N1 – Rozpracované odpovědi zůstávají v prohlížeči.** *(Opraveno.)* `lib/diagnostic/storage.ts`
   ukládá průběžné vyplnění do `localStorage` a po odeslání ho nemaže. Na
   sdíleném počítači si je přečte další uživatel. Náprava: po úspěšném odeslání
   záznam smazat.
-- **N2 – Slabá hesla.** Podmínkou je 10 znaků. `Heslo12345` projde. Náprava:
+- **N2 – Slabá hesla.** *(Opraveno.)* Podmínkou je 10 znaků. `Heslo12345` projde. Náprava:
   odmítat hesla ze seznamu nejčastějších a hesla obsahující jméno nebo e-mail
   účtu.
 - **N3 – Bez druhého faktoru.** U master účtu, který zakládá kouče a vidí vše,
   by TOTP dával smysl.
-- **N4 – Bez omezení počtu souběžných relací.** Kouč nevidí, kde všude je
+- **N4 – Bez omezení počtu souběžných relací.** *(Opraveno tlačítkem „Odhlásit všude".)* Kouč nevidí, kde všude je
   přihlášený, a nemůže vzdáleně odhlásit ostatní zařízení.
 - **N5 – Nezvaný přístup ke jménu klienta.** `getInvite` je veřejná a vrací
   `clientName`. Po nápravě K1 je uhodnutí tokenu prakticky vyloučené; přesto
@@ -452,16 +481,27 @@ posuzuje i to, co je sepsané.
 | 4 | V2 zakládací token | asi hodina | hotovo |
 | 5 | S4 HSTS a noindex | pár minut | hotovo |
 | 6 | S5 chybové hlášky, N1 úklid prohlížeče | pár minut | hotovo |
-| 7 | V1 omezení pokusů o přihlášení | asi půl dne | zbývá |
-| 8 | S3 platnost pozvánek | asi 2 hodiny | zbývá |
-| 9 | V3 CSP s nonce, kratší relace | asi den | zbývá |
-| 10 | S2 záznam přístupů | asi půl dne | zbývá |
-| 11 | S1 anonymita vzorku | asi den | zbývá |
-| 12 | GDPR dokumenty | mimo vývoj | zbývá |
-| 13 | N2 až N5 | průběžně | zbývá |
+| 7 | V1 omezení pokusů o přihlášení | asi půl dne | hotovo |
+| 8 | S3 platnost pozvánek | asi 2 hodiny | hotovo |
+| 9 | V3 CSP s nonce, kratší relace | asi den | hotovo |
+| 10 | S2 záznam přístupů | asi půl dne | hotovo |
+| 11 | S1 anonymita vzorku | asi den | hotovo |
+| 12 | N2 slabá hesla, N4 odhlášení všude | pár hodin | hotovo |
+| 13 | retenční úklid dat | asi 3 hodiny | hotovo |
+| 14 | GDPR dokumenty | mimo vývoj | podklad v `docs/gdpr-podklady.md` |
+| 15 | N3 druhý faktor | asi den | zbývá |
+| 16 | N5 jméno klienta ve veřejné pozvánce | pár minut | ponecháno vědomě |
 
-Body 1 až 6 jsou nasazené. Ze zbývajících je nejdůležitější V1: přihlašování
-zatím nemá strop na počet pokusů.
+Z technických nálezů zbývá jediný: **N3, druhý faktor u master účtu.** Nedělal
+jsem ho vědomě. Zásah do přihlašování se nedá ověřit odsud, protože k tomu je
+potřeba běžící Convex a skutečná aplikace v telefonu, a chyba v něm znamená
+ztrátu přístupu k účtu, který jako jediný spravuje ostatní. Stojí za to ho
+udělat, ale s tebou u toho a s vyzkoušenými záložními kódy.
+
+**N5 zůstává vědomě.** `getInvite` vrací jméno klienta, aby se respondentovi
+předvyplnilo. Po opravě K1 je token neuhodnutelný, takže jediný, kdo jméno
+uvidí, je ten, komu odkaz patří. Zrušit předvyplnění by zhoršilo použití
+a bezpečnosti by to prakticky nepřidalo.
 
 ## Závěr
 

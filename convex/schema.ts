@@ -38,6 +38,12 @@ export default defineSchema({
     coachId: v.id("coaches"),
     createdAt: v.number(),
     expiresAt: v.number(),
+    /**
+     * Poslední použití relace. Platnost je klouzavá: kdo aplikaci používá,
+     * zůstává přihlášený, kdo ji nechá ležet, vypadne. U starších relací
+     * chybí, tam se bere createdAt.
+     */
+    lastSeenAt: v.optional(v.number()),
   })
     .index("by_token", ["token"])
     .index("by_coach", ["coachId"]),
@@ -55,6 +61,13 @@ export default defineSchema({
      */
     coachId: v.optional(v.id("coaches")),
     createdAt: v.number(),
+    /**
+     * Do kdy odkaz platí. Nepoužitá pozvánka se po uplynutí neotevře:
+     * odkaz putuje e-mailem a chatem a zůstává v historii schránek, takže
+     * neomezená platnost je zbytečně dlouhé okno. U pozvánek vystavených
+     * dřív chybí; ty platí dál bez omezení.
+     */
+    expiresAt: v.optional(v.number()),
     usedAt: v.optional(v.number()), // vyplněno = pozvánka spotřebovaná
     resultId: v.optional(v.id("eliteDiagnosticResults")),
   })
@@ -74,8 +87,14 @@ export default defineSchema({
     model: v.string(),
     variant: v.string(),
     lang: v.string(),
-    /** rok narození, nikdy celé datum */
+    /**
+     * Rok narození. U záznamů pořízených dřív; nově se ukládá ageBand,
+     * protože přesný rok ve spojení s disciplínou zužuje okruh lidí až
+     * na jednotlivce.
+     */
     birthYear: v.optional(v.number()),
+    /** pětileté pásmo narození, „1990-1994" */
+    ageBand: v.optional(v.string()),
     /** rod – do norem patří, identifikující není */
     gender: v.optional(v.union(v.literal("male"), v.literal("female"))),
     /** povolání (business) nebo disciplína a úroveň (sport) */
@@ -87,9 +106,20 @@ export default defineSchema({
     durationSec: v.optional(v.number()),
     /** „2026-07" – na měsíc, ať nejde spárovat s časem vyplnění */
     collectedMonth: v.string(),
+    /** „2026-Q3" – nově se plní tohle, měsíc zůstává kvůli starším záznamům */
+    collectedQuarter: v.optional(v.string()),
+    /**
+     * Náhodný klíč sdílený s vyplněním, ze kterého vzorek vznikl.
+     *
+     * Sám o sobě neprozrazuje nic a nedá se z něj nic odvodit, ale umožňuje
+     * smazat vzorek spolu s výsledkem. Bez něj by po uplatnění práva na výmaz
+     * zůstaly odpovědi ve vzorku napořád, protože jiná vazba tu vědomě není.
+     */
+    vymazovyKlic: v.optional(v.string()),
   })
     .index("by_test", ["testId"])
-    .index("by_month", ["collectedMonth"]),
+    .index("by_month", ["collectedMonth"])
+    .index("by_vymazovy_klic", ["vymazovyKlic"]),
 
   eliteDiagnosticResults: defineTable({
     testId: v.string(),
@@ -117,8 +147,42 @@ export default defineSchema({
      * u záznamů z doby před externími kouči; ty patří nám.
      */
     coachId: v.optional(v.id("coaches")),
+    /** párovací klíč k anonymnímu vzorku, viz normSamples.vymazovyKlic */
+    vymazovyKlic: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_created", ["createdAt"])
     .index("by_coach", ["coachId"]),
+
+  // Neúspěšná přihlášení. Bez stropu by šlo hesla zkoušet ve smyčce: Convex
+  // vystavuje auth:login na veřejném API a PBKDF2 útok jen zpomalí.
+  loginAttempts: defineTable({
+    /** normalizovaný e-mail, na který se pokusy vážou */
+    email: v.string(),
+    failedCount: v.number(),
+    firstFailedAt: v.number(),
+    lastFailedAt: v.number(),
+    /** do kdy je účet zamčený; chybí = není zamčený */
+    lockedUntil: v.optional(v.number()),
+  }).index("by_email", ["email"]),
+
+  // Kdo se kdy podíval na výsledky.
+  //
+  // U zvláštní kategorie údajů je záznam o přístupu základní detekční
+  // opatření: bez něj nejde zjistit, co se stalo, ani doložit, že se nestalo
+  // nic. Hodnoty jsou bez osobních údajů, jen odkazy a čas.
+  pristupovyLog: defineTable({
+    coachId: v.id("coaches"),
+    akce: v.union(
+      v.literal("otevreni-vysledku"),
+      v.literal("export-vzorku"),
+      v.literal("smazani-vysledku"),
+      v.literal("vytvoreni-pozvanky"),
+      v.literal("prihlaseni"),
+    ),
+    resultId: v.optional(v.id("eliteDiagnosticResults")),
+    at: v.number(),
+  })
+    .index("by_coach", ["coachId"])
+    .index("by_at", ["at"]),
 })

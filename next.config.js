@@ -3,25 +3,13 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async headers() {
-    // Standardní bezpečnostní hlavičky.
+    // Bezpečnostní hlavičky, které nezávisí na požadavku. Content-Security-Policy
+    // mezi ně nepatří: potřebuje nonce pro každý požadavek zvlášť a nastavuje
+    // ji middleware.ts.
     return [
       {
         source: "/(.*)",
         headers: [
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob:",
-              "font-src 'self' data:",
-              "connect-src 'self' https://*.convex.cloud wss://*.convex.cloud https://*.convex.site",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "frame-ancestors 'none'",
-            ].join("; "),
-          },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },

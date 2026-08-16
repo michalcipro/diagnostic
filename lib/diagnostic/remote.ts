@@ -48,12 +48,13 @@ const getInviteRef = makeFunctionReference<"query">("eliteDiagnostic:getInvite")
 const listInvitesRef = makeFunctionReference<"query">("eliteDiagnostic:listInvites")
 const revokeInviteRef = makeFunctionReference<"mutation">("eliteDiagnostic:revokeInvite")
 const listRef = makeFunctionReference<"query">("eliteDiagnostic:listForCoach")
-const getRef = makeFunctionReference<"query">("eliteDiagnostic:getForCoach")
+const getRef = makeFunctionReference<"mutation">("eliteDiagnostic:getForCoach")
 const setupStatusRef = makeFunctionReference<"query">("sessions:setupStatus")
 const createMasterRef = makeFunctionReference<"action">("auth:createMaster")
 const loginRef = makeFunctionReference<"action">("auth:login")
 const meRef = makeFunctionReference<"query">("sessions:me")
 const logoutRef = makeFunctionReference<"mutation">("sessions:logout")
+const logoutAllRef = makeFunctionReference<"mutation">("sessions:logoutAll")
 const listCoachesRef = makeFunctionReference<"query">("sessions:listCoaches")
 const addCoachRef = makeFunctionReference<"action">("auth:addCoach")
 const setCoachActiveRef = makeFunctionReference<"mutation">("sessions:setCoachActive")
@@ -62,8 +63,9 @@ const resetCoachPasswordRef = makeFunctionReference<"action">("auth:resetCoachPa
 const updateCoachRef = makeFunctionReference<"action">("auth:updateCoach")
 const removeRef = makeFunctionReference<"mutation">("eliteDiagnostic:removeForCoach")
 const normStatsRef = makeFunctionReference<"query">("eliteDiagnostic:normStats")
-const normExportRef = makeFunctionReference<"query">("eliteDiagnostic:normExport")
+const normExportRef = makeFunctionReference<"mutation">("eliteDiagnostic:normExport")
 const externalUsageRef = makeFunctionReference<"query">("eliteDiagnostic:externalUsage")
+const pristupovyLogRef = makeFunctionReference<"query">("sessions:pristupovyLog")
 
 function client(): ConvexHttpClient | null {
   if (!convexUrl) return null
@@ -101,7 +103,7 @@ export interface ResultDetail {
 
 /** Pozvánka tak, jak ji vidí respondent – jen co je nutné k zobrazení testu. */
 export interface Invite {
-  status: "ok" | "used" | "notfound"
+  status: "ok" | "used" | "expired" | "notfound"
   testId?: TestId
   lang?: Lang
   clientName?: string
@@ -116,6 +118,7 @@ export interface InviteRow {
   clientName?: string
   note?: string
   createdAt: number
+  expiresAt?: number
   usedAt?: number
   resultId?: string
 }
@@ -316,6 +319,17 @@ export async function changePassword(
   await c.action(changePasswordRef, { sessionToken, currentPassword, newPassword })
 }
 
+/**
+ * Odhlášení ze všech zařízení. Ruší i tu relaci, ze které se volá, takže
+ * po ní následuje přihlášení znovu.
+ */
+export async function logoutAll(sessionToken: string): Promise<number> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  const r = (await c.mutation(logoutAllRef, { sessionToken })) as { ukonceno: number }
+  return r.ukonceno
+}
+
 /** Seznam všech vyplnění (pouze s platným heslem). */
 export async function listResults(sessionToken: string): Promise<ResultSummary[]> {
   const c = client()
@@ -327,7 +341,7 @@ export async function listResults(sessionToken: string): Promise<ResultSummary[]
 export async function getResult(sessionToken: string, id: string): Promise<ResultDetail | null> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  const doc = (await c.query(getRef, { sessionToken, id })) as
+  const doc = (await c.mutation(getRef, { sessionToken, id })) as
     | (Omit<ResultDetail, "answers"> & { answers: string })
     | null
   if (!doc) return null
@@ -360,7 +374,7 @@ export async function normStats(sessionToken: string): Promise<NormStats> {
 export async function normExport(sessionToken: string): Promise<unknown[]> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  return (await c.query(normExportRef, { sessionToken })) as unknown[]
+  return (await c.mutation(normExportRef, { sessionToken })) as unknown[]
 }
 
 // ── Větve externích koučů ──────────────────────────────────────────
@@ -431,4 +445,18 @@ export async function updateCoach(
   const c = client()
   if (!c) throw new Error("not-configured")
   await c.action(updateCoachRef, { sessionToken, coachId, ...data })
+}
+
+/** Jeden záznam přístupového logu. */
+export interface PristupZaznam {
+  coachName: string
+  akce: string
+  at: number
+}
+
+/** Kdo se kdy díval na výsledky. Pouze pro mastera. */
+export async function pristupovyLog(sessionToken: string): Promise<PristupZaznam[]> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(pristupovyLogRef, { sessionToken })) as PristupZaznam[]
 }
