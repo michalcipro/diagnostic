@@ -776,6 +776,16 @@ export default function CoachPage() {
 const NORM_MILNIKY = { normy: 100, cfa: 250 }
 
 /**
+ * Které testy se ve stavu vzorku vypisují.
+ *
+ * Server počítá i testy, které se už nenabízejí (původní nerozdělené sportovní
+ * vzorce), protože jejich hotová vyplnění do vzorku patří. V přehledu ale nemá
+ * smysl ukazovat prázdný řádek testu, ke kterému už nikdo pozvánku nedostane.
+ */
+const jeVeSberu = (r: { testId: string; count: number }) =>
+  r.count > 0 || TEST_IDS.includes(r.testId as TestId)
+
+/**
  * Stav anonymního normativního vzorku.
  *
  * Ukazuje, kolik dat se nasbíralo a jak daleko je to k tomu, aby šly spočítat
@@ -816,7 +826,7 @@ function NormsPanel({
         </div>
 
         <div className="mt-5 flex flex-col gap-3">
-          {stats.byTest.map((r) => {
+          {stats.byTest.filter(jeVeSberu).map((r) => {
             const podil = Math.min(100, Math.round((r.count / NORM_MILNIKY.normy) * 100))
             return (
               <div key={r.testId}>
