@@ -47,32 +47,53 @@ const CESKA_PISMENA = /[řěůŘĚŮ]/
  * skutečně staly, a patří do něj jen tvary, které ve slovenštině neexistují
  * nebo v ní znamenají něco jiného.
  */
+/**
+ * Písmena, která tvoří slovo.
+ *
+ * `\b` se tady použít nedá: v JavaScriptu se do třídy znaků slova počítá jen
+ * ASCII, takže mezi „á" a „v" ve slově „vypadávajú" vidí hranici slova a vzor
+ * „\bvypadá\b" chybně sedí. Hranice se proto skládají ručně z tohoto seznamu.
+ */
+const PISMENO = "a-zA-ZáäčďéěíĺľňóôöŕřšťúůýžÁÄČĎÉĚÍĹĽŇÓÔÖŔŘŠŤÚŮÝŽ"
+/** Vzor, který sedí jen na celé slovo (respektuje diakritiku). */
+const cele = (vzor) => new RegExp(`(?<![${PISMENO}])(?:${vzor})(?![${PISMENO}])`, "i")
+/** Vzor, který sedí na začátek slova; koncovky se neřeší. */
+const zacatek = (vzor) => new RegExp(`(?<![${PISMENO}])(?:${vzor})`, "i")
+
 const CESKA_SLOVA = [
-  [/\bmnohem\b/i, "mnohem → podstatne, o mnoho"],
-  [/nabíz/i, "nabízí → ponúka"],
-  [/\bslyš/i, "slyšet → počuť"],
-  [/zklidn/i, "zklidnit → upokojiť"],
-  [/vzpom/i, "vzpomínka → spomienka"],
-  [/\bpozde\b|\bpozdě/i, "pozdě → neskoro"],
-  [/najpozdej/i, "najpozdejšie → najneskôr"],
-  [/ztaž|ztíž/i, "ztížený → sťažený"],
-  [/neztrác/i, "neztrácať → nestrácať"],
-  [/\bzbytk/i, "zbytky → zvyšky"],
-  [/vypadá|vypadat/i, "vypadá → vyzerá"],
-  [/\bstrategi/i, "strategie → stratégia"],
-  [/\bstartom\b|\bstarte\b|\bstartu\b|\bstart\b|predstartov/i, "start → štart"],
-  [/hlíd/i, "hlídat → dávať pozor, strážiť"],
-  [/nadstandard/i, "nadstandard → nadštandard"],
-  [/rozjížd|rozjíd/i, "rozjíždění → rozbiehanie"],
-  [/\bberiaš\b/i, "beriaš → berieš"],
-  [/\bsrovná/i, "srovnat se → spamätať sa, vyrovnať sa"],
-  [/\bstahuj|\bstahuje\b/i, "stahovat → stiahnuť"],
-  [/\bboja\s+sam/i, "bojují → bojujú"],
-  [/\btiše\b/i, "tiše → potichu"],
-  [/hrútia|hroutí/i, "hroutí se → rúcajú sa"],
+  [cele("mnohem"), "mnohem → podstatne, o mnoho"],
+  [zacatek("nabíz"), "nabízí → ponúka"],
+  [zacatek("slyš"), "slyšet → počuť"],
+  [zacatek("zklidn"), "zklidnit → upokojiť"],
+  [zacatek("vzpom"), "vzpomínka → spomienka"],
+  [cele("pozde|pozdě"), "pozdě → neskoro"],
+  [zacatek("najpozdej"), "najpozdejšie → najneskôr"],
+  [zacatek("ztaž|ztíž"), "ztížený → sťažený"],
+  [zacatek("neztrác"), "neztrácať → nestrácať"],
+  [zacatek("zbytk"), "zbytky → zvyšky"],
+  // „vypadávajú" je slovenské (vypadnúť ze hry), české je jen „vypadá" ve
+  // významu vyzerá – proto celé slovo, ne začátek.
+  [cele("vypadá|vypadat"), "vypadá → vyzerá"],
+  // Slovenština má é jen v podstatném jméně: stratégia, ale strategický.
+  [zacatek("strategi[aeiuí]"), "strategie → stratégia"],
+  [zacatek("stratégick"), "stratégický → strategický (é jen v podstatném jméně)"],
+  [cele("start|startom|starte|startu|startov"), "start → štart"],
+  [zacatek("predstartov"), "předstartovní → predštartová"],
+  [zacatek("hlíd"), "hlídat → dávať pozor, strážiť"],
+  [zacatek("nadstandard"), "nadstandard → nadštandard"],
+  [zacatek("rozjížd|rozjíd"), "rozjíždění → rozbiehanie"],
+  [cele("beriaš"), "beriaš → berieš"],
+  [zacatek("srovná"), "srovnat se → spamätať sa, vyrovnať sa"],
+  [zacatek("stahuj"), "stahovat → stiahnuť"],
+  // Pozor: „ostatní sa boja urobiť chybu" je správně (báť sa). Česky zůstalo
+  // jen spojení „boja sami so sebou", kde má být „bojujú".
+  [zacatek("boja\\s+sam"), "bojují sami se sebou → bojujú sami so sebou"],
+  [cele("tiše"), "tiše → potichu"],
+  [zacatek("hrútia|hroutí"), "hroutí se → rúcajú sa"],
   // „sadzba" je slovenské slovo, ale znamená tarifu. Sázka je stávka, a jen
   // v tomhle významu se tady o penězích a rizicích mluví.
-  [/\bsadzb/i, "sázka → stávka (sadzba je tarifa)"],
+  [zacatek("sadzb"), "sázka → stávka (sadzba je tarifa)"],
+  [zacatek("složit"), "složitý → zložitý"],
 ]
 
 /** Vrátí popisy českých slov nalezených v textu. */
