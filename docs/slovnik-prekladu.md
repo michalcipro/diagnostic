@@ -13,7 +13,8 @@ rozejde text s tím, co už je v aplikaci nasazené.
 - **Žádné rodové značky.** Zápis `{mužský|ženský}` patří jen do češtiny
   a slovenštiny; angličtina rod oslovované osoby neprozradí, takže se
   značka do anglického textu nepíše a nahradí se běžným tvarem.
-- **Žádná dlouhá pomlčka** (—). Používá se krátká pomlčka – nebo čárka.
+- **Žádná dlouhá pomlčka.** Znak U+2014 se v textech nepoužívá; místo něj
+  krátká pomlčka – nebo čárka.
 - Délka odpovídá originálu zhruba na deset procent. Zkrácený výklad
   je horší produkt, ne úspornější.
 - Uvozovky se píšou anglicky: „…“ v češtině odpovídá “…” v angličtině.
