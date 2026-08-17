@@ -9,7 +9,7 @@
     "lint": "next lint",
     "convex:dev": "convex dev",
     "convex:deploy": "convex deploy",
-    "audit": "node scripts/audit-pristupu.cjs && node scripts/test-totp.cjs && node scripts/test-vetve.cjs && node scripts/test-vzorce-sk.cjs && node scripts/test-archetypy.cjs && node scripts/test-slovenstina.cjs"
+    "audit": "node scripts/audit-pristupu.cjs && node scripts/test-totp.cjs && node scripts/test-vetve.cjs && node scripts/test-vzorce-sk.cjs && node scripts/test-archetypy.cjs && node scripts/test-jazyky.cjs"
   },
   "dependencies": {
     "convex": "^1.31.7",

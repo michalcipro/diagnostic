@@ -1,4 +1,4 @@
-// Kontrola slovenštiny napříč všemi typy testu.
+// Kontrola jazyků napříč všemi typy testu.
 //
 // Slovenština se dá pokazit tiše. Chybějící překlad spadne podle
 // lib/diagnostic/lang.ts na češtinu a nikdo si toho nevšimne, protože Slovák
@@ -20,7 +20,7 @@
 // 4) Značky musí být celé: obě větve neprázdné a navzájem různé.
 // 5) Shrnutí pro klienta a rozhraní mají slovenskou větev, ne anglickou.
 //
-// Spouští se `node scripts/test-slovenstina.cjs`.
+// Spouští se `node scripts/test-jazyky.cjs`.
 
 const fs = require("fs")
 const os = require("os")
@@ -328,6 +328,7 @@ function nactiModuly() {
 export { UI, TEST_NAMES } from "../lib/diagnostic/i18n"
 export { TEST_IDS } from "../lib/diagnostic/structure"
 export { JAZYKY } from "../lib/diagnostic/lang"
+export { obsahVzorce } from "../lib/vzorce/content"
 `,
   )
   try {
@@ -381,5 +382,86 @@ rekni(!ceskeUi.length, `rozhraní: bez ř, ě a ů${ceskeUi.length ? ` (${ceskeU
 const bezNazvu = M.TEST_IDS.filter((t) => !M.TEST_NAMES[t]?.sk)
 rekni(!bezNazvu.length, `názvy testů: všech ${M.TEST_IDS.length} má slovenský název${bezNazvu.length ? ` (chybí ${bezNazvu.join(", ")})` : ""}`)
 
-console.log(chyb === 0 ? "\nslovenština sedí ve všech testech" : `\nNALEZENO CHYB: ${chyb}`)
+
+// ---------------------------------------------------------------------------
+// 5) angličtina
+//
+// Angličtina se doplňuje po částech, protože jde o desítky tisíc slov. Aby se
+// na zbytek nezapomnělo a aby zároveň nešlo tiše ubrat to, co už hotové je,
+// je stav napsaný tady. Co je v ZBYVA_ANGLICKY, smí padat na češtinu; cokoli
+// jiného padat nesmí.
+// ---------------------------------------------------------------------------
+
+console.log("\n– angličtina –")
+
+/** Části obsahu, které anglicky zatím nejsou. Seznam se má zkracovat. */
+const ZBYVA_ANGLICKY = [
+  "vzorce: výklad sportovních variant (individuální a týmová)",
+  "vzorce: popisy dvojic ve všech třech variantách",
+  "archetypy: výklad byznysové i sportovní varianty",
+]
+
+// Dotazníky anglicky být musí všechny: bez nich se test nedá ani vyplnit.
+for (const [test, csPath] of [
+  ["vzorce", "lib/vzorce/data/polozky.json"],
+  ["vzorce-sport-individual", "lib/vzorce/data/polozky-sport-individual.json"],
+  ["vzorce-sport-tym", "lib/vzorce/data/polozky-sport-tym.json"],
+  ["archetypy", "lib/archetypy/data/polozky.json"],
+  ["archetypy-sport", "lib/archetypy/data/polozky-sport.json"],
+]) {
+  const cs = JSON.parse(fs.readFileSync(path.join(KOREN, csPath), "utf8"))
+  const enPath = csPath.replace(/\.json$/, "-en.json")
+  const en = JSON.parse(fs.readFileSync(path.join(KOREN, enPath), "utf8"))
+  const chybi = Object.keys(cs).filter((k) => !en[k])
+  const shodne = Object.keys(cs).filter((k) => en[k] === cs[k])
+  // Rodová značka v angličtině by se vypsala i s závorkami: rod se tam neřeší.
+  const seZnackou = Object.entries(en).filter(([, v]) => pocetZnacek(v) > 0)
+  rekni(
+    !chybi.length,
+    `${test}: anglický dotazník má všech ${Object.keys(cs).length} položek${chybi.length ? ` (chybí ${chybi.slice(0, 3).join(", ")})` : ""}`,
+  )
+  rekni(!shodne.length, `${test}: žádná anglická položka nezůstala česky${shodne.length ? ` (${shodne.slice(0, 3).join(", ")})` : ""}`)
+  rekni(
+    !seZnackou.length,
+    `${test}: angličtina bez rodových značek${seZnackou.length ? ` (${seZnackou.slice(0, 3).map(([k]) => k).join(", ")})` : ""}`,
+  )
+}
+
+// Položky ELITE mají angličtinu ve stejném souboru jako češtinu.
+for (const test of ELITE) {
+  const d = JSON.parse(fs.readFileSync(path.join(KOREN, "lib/diagnostic/data/items", `${test}.json`), "utf8"))
+  const bezEn = Object.entries(d).filter(([, v]) => !v.en)
+  const shodne = Object.entries(d).filter(([, v]) => v.en && v.en === v.cs)
+  rekni(!bezEn.length, `${test}: každá položka má anglické znění${bezEn.length ? ` (chybí ${bezEn.length})` : ""}`)
+  rekni(!shodne.length, `${test}: anglické znění se liší od českého${shodne.length ? ` (${shodne.length})` : ""}`)
+}
+
+// Vyhodnocení ELITE anglicky.
+for (const id of DIMENZE) {
+  const d = JSON.parse(fs.readFileSync(path.join(KOREN, "lib/diagnostic/data/content", `${id}.json`), "utf8"))
+  const r = prelozene(d)
+  const bezEn = r.filter(([, o]) => !o.en)
+  rekni(!bezEn.length, `${id}: vyhodnocení má anglicky všechno${bezEn.length ? ` (chybí ${bezEn.length})` : ""}`)
+}
+
+// Shrnutí pro klienta anglicky.
+const shrnutiEnKontrola = M.buildSummary(vysledek, "en")
+for (const cast of ["overall", "strengths", "priorities", "caveat", "nextStep"]) {
+  rekni(
+    shrnutiEnKontrola[cast] && shrnutiEnKontrola[cast] !== shrnutiCs[cast],
+    `shrnutí – ${cast}: anglicky, ne česky`,
+  )
+}
+
+// Obsah vzorců: obecná varianta už anglicky je, sportovní zatím ne.
+{
+  const en = M.obsahVzorce("01", "en", "obecna")
+  const cs = M.obsahVzorce("01", "cs", "obecna")
+  rekni(en.nazev !== cs.nazev, `vzorce obecné: výklad je anglicky (${en.nazev})`)
+}
+
+console.log("\nZbývá přeložit do angličtiny:")
+for (const co of ZBYVA_ANGLICKY) console.log(`     · ${co}`)
+
+console.log(chyb === 0 ? "\njazyky sedí ve všech testech" : `\nNALEZENO CHYB: ${chyb}`)
 process.exit(chyb === 0 ? 0 : 1)
