@@ -37,6 +37,49 @@ const rekni = (ok, text) => {
 
 /** Slovenština nemá ř, ě ani ů. Jediný výskyt znamená, že tam zůstala čeština. */
 const CESKA_PISMENA = /[řěůŘĚŮ]/
+
+/**
+ * Česká slova, která se do slovenštiny protáhnou bez ř, ě a ů.
+ *
+ * Kontrola písmen sama nestačí. „Mnohem", „nabízí" nebo „strategie" projdou,
+ * protože žádné z těch tří písmen neobsahují – a přesto je to čeština, které
+ * si Slovák okamžitě všimne. Seznam vznikl z chyb, které se při překladu
+ * skutečně staly, a patří do něj jen tvary, které ve slovenštině neexistují
+ * nebo v ní znamenají něco jiného.
+ */
+const CESKA_SLOVA = [
+  [/\bmnohem\b/i, "mnohem → podstatne, o mnoho"],
+  [/nabíz/i, "nabízí → ponúka"],
+  [/\bslyš/i, "slyšet → počuť"],
+  [/zklidn/i, "zklidnit → upokojiť"],
+  [/vzpom/i, "vzpomínka → spomienka"],
+  [/\bpozde\b|\bpozdě/i, "pozdě → neskoro"],
+  [/najpozdej/i, "najpozdejšie → najneskôr"],
+  [/ztaž|ztíž/i, "ztížený → sťažený"],
+  [/neztrác/i, "neztrácať → nestrácať"],
+  [/\bzbytk/i, "zbytky → zvyšky"],
+  [/vypadá|vypadat/i, "vypadá → vyzerá"],
+  [/\bstrategi/i, "strategie → stratégia"],
+  [/\bstartom\b|\bstarte\b|\bstartu\b|\bstart\b|predstartov/i, "start → štart"],
+  [/hlíd/i, "hlídat → dávať pozor, strážiť"],
+  [/nadstandard/i, "nadstandard → nadštandard"],
+  [/rozjížd|rozjíd/i, "rozjíždění → rozbiehanie"],
+  [/\bberiaš\b/i, "beriaš → berieš"],
+  [/\bsrovná/i, "srovnat se → spamätať sa, vyrovnať sa"],
+  [/\bstahuj|\bstahuje\b/i, "stahovat → stiahnuť"],
+  [/\bboja\s+sam/i, "bojují → bojujú"],
+  [/\btiše\b/i, "tiše → potichu"],
+  [/hrútia|hroutí/i, "hroutí se → rúcajú sa"],
+  // „sadzba" je slovenské slovo, ale znamená tarifu. Sázka je stávka, a jen
+  // v tomhle významu se tady o penězích a rizicích mluví.
+  [/\bsadzb/i, "sázka → stávka (sadzba je tarifa)"],
+]
+
+/** Vrátí popisy českých slov nalezených v textu. */
+function ceskaSlova(text) {
+  const t = String(text)
+  return CESKA_SLOVA.filter(([re]) => re.test(t)).map(([, popis]) => popis)
+}
 const ZNACKA = /\{([^{}|]*)\|([^{}|]*)\}/g
 const pocetZnacek = (t) => (String(t).match(ZNACKA) || []).length
 
@@ -163,6 +206,8 @@ for (const id of DIMENZE) {
     !jineZnacky.length,
     `${id}: rodových značek není méně než česky${jineZnacky.length ? ` (${jineZnacky.slice(0, 3).map(([p]) => p).join(", ")})` : ""}`,
   )
+  const cizi = r.flatMap(([p, o]) => ceskaSlova(o.sk ?? "").map((s) => `${p}: ${s}`))
+  rekni(!cizi.length, `${id}: bez českých slov${cizi.length ? ` (${cizi.slice(0, 4).join("; ")})` : ""}`)
 
   // Každá dimenze musí mít podtitul i pásma pro obě varianty a tři fasety.
   const cesty = new Set(r.map(([p]) => p))
