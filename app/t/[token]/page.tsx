@@ -36,8 +36,8 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
 
   if (invite === null) return null
   if (invite === "error" || invite.status === "notfound") return <InviteProblem kind="invalid" />
-  if (invite.status === "used") return <InviteProblem kind="used" />
-  if (invite.status === "expired") return <InviteProblem kind="expired" />
+  if (invite.status === "used") return <InviteProblem kind="used" lang={invite.lang} />
+  if (invite.status === "expired") return <InviteProblem kind="expired" lang={invite.lang} />
 
   return (
     <Questionnaire
@@ -49,35 +49,79 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
   )
 }
 
-/** Neplatný, vypršelý nebo už použitý odkaz – srozumitelně, dvojjazyčně. */
-function InviteProblem({ kind }: { kind: "invalid" | "used" | "expired" }) {
-  const texty = {
+/**
+ * Neplatný, vypršelý nebo už použitý odkaz.
+ *
+ * Jazyk se bere z pozvánky, aby respondent dostal hlášku v tom jazyce,
+ * ve kterém mu kouč odkaz vystavil. U neexistujícího odkazu se jazyk zjistit
+ * nedá, takže se hláška ukáže ve všech třech: kdo se sem dostane, obvykle
+ * neví proč, a nemá se to dozvědět jazykem, kterému nerozumí.
+ */
+function InviteProblem({ kind, lang }: { kind: "invalid" | "used" | "expired"; lang?: Lang }) {
+  const TEXTY: Record<"invalid" | "used" | "expired", Record<Lang, { nadpis: string; text: string }>> = {
     used: {
-      nadpis: "Tento odkaz už byl použit",
-      cs: "Dotazník z tohoto odkazu už byl vyplněn a odeslán. Pokud potřebuješ vyplnit další, požádej svého kouče o nový odkaz.",
-      en: "This link has already been used. Please ask your coach for a new one.",
+      cs: {
+        nadpis: "Tento odkaz už byl použit",
+        text: "Dotazník z tohoto odkazu už byl vyplněn a odeslán. Pokud potřebuješ vyplnit další, požádej svého kouče o nový odkaz.",
+      },
+      sk: {
+        nadpis: "Tento odkaz už bol použitý",
+        text: "Dotazník z tohto odkazu už bol vyplnený a odoslaný. Ak potrebuješ vyplniť ďalší, požiadaj svojho kouča o nový odkaz.",
+      },
+      en: {
+        nadpis: "This link has already been used",
+        text: "The questionnaire behind this link has already been completed and submitted. If you need to fill in another one, please ask your coach for a new link.",
+      },
     },
     expired: {
-      nadpis: "Platnost odkazu vypršela",
-      cs: "Odkazy platí omezenou dobu, aby se nedaly použít po letech ležení ve schránce. Požádej prosím svého kouče o nový.",
-      en: "This link has expired. Links are valid for a limited time; please ask your coach for a new one.",
+      cs: {
+        nadpis: "Platnost odkazu vypršela",
+        text: "Odkazy platí omezenou dobu, aby se nedaly použít po letech ležení ve schránce. Požádej prosím svého kouče o nový.",
+      },
+      sk: {
+        nadpis: "Platnosť odkazu vypršala",
+        text: "Odkazy platia obmedzený čas, aby sa nedali použiť po rokoch ležania v schránke. Požiadaj prosím svojho kouča o nový.",
+      },
+      en: {
+        nadpis: "This link has expired",
+        text: "Links are valid for a limited time, so that they cannot be used after years sitting in an inbox. Please ask your coach for a new one.",
+      },
     },
     invalid: {
-      nadpis: "Odkaz není platný",
-      cs: "Odkaz je neplatný nebo byl zrušen. Požádej prosím svého kouče o nový.",
-      en: "This link is not valid or has been revoked. Please ask your coach for a new one.",
+      cs: {
+        nadpis: "Odkaz není platný",
+        text: "Odkaz je neplatný nebo byl zrušen. Požádej prosím svého kouče o nový.",
+      },
+      sk: {
+        nadpis: "Odkaz nie je platný",
+        text: "Odkaz je neplatný alebo bol zrušený. Požiadaj prosím svojho kouča o nový.",
+      },
+      en: {
+        nadpis: "This link is not valid",
+        text: "The link is not valid or has been revoked. Please ask your coach for a new one.",
+      },
     },
-  }[kind]
+  }
+
+  const sada = TEXTY[kind]
+  // Známý jazyk: jedna hláška. Neznámý: všechny tři, ať si respondent vybere.
+  const jazyky: Lang[] = lang ? [lang] : ["cs", "sk", "en"]
 
   return (
     <div className="diag-container flex min-h-screen items-center justify-center py-20">
       <div className="diag-card max-w-md p-8 text-center">
         <p className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text-3)]">WINNING MINDS</p>
-        <h1 className="mt-3 text-[20px] font-bold tracking-tight">{texty.nadpis}</h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-[var(--wm-text-2)]">{texty.cs}</p>
-        <p className="mt-4 border-t border-[var(--wm-border-light)] pt-4 text-[13px] leading-relaxed text-[var(--wm-text-3)]">
-          {texty.en}
-        </p>
+        <h1 className="mt-3 text-[20px] font-bold tracking-tight">{sada[jazyky[0]].nadpis}</h1>
+        <p className="mt-3 text-[15px] leading-relaxed text-[var(--wm-text-2)]">{sada[jazyky[0]].text}</p>
+        {jazyky.slice(1).map((l) => (
+          <p
+            key={l}
+            className="mt-4 border-t border-[var(--wm-border-light)] pt-4 text-[13px] leading-relaxed text-[var(--wm-text-3)]"
+          >
+            <span className="font-semibold">{sada[l].nadpis}. </span>
+            {sada[l].text}
+          </p>
+        ))}
       </div>
     </div>
   )

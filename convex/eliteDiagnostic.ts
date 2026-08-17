@@ -265,10 +265,13 @@ export const getInvite = query({
       .withIndex("by_token", (q) => q.eq("token", args.token))
       .unique()
     if (!inv) return { status: "notfound" as const }
-    if (inv.usedAt) return { status: "used" as const }
+    // Jazyk se vrací i u vyčerpané a vypršelé pozvánky, aby se hláška dala
+    // ukázat v jazyce, ve kterém byl odkaz vystavený. Není to osobní údaj:
+    // jde o volbu kouče, ne o nic, co by prozradilo respondenta.
+    if (inv.usedAt) return { status: "used" as const, lang: inv.lang }
     // Pozvánky vystavené dřív než platnost existovala běží dál bez omezení.
     if (inv.expiresAt !== undefined && inv.expiresAt < Date.now()) {
-      return { status: "expired" as const }
+      return { status: "expired" as const, lang: inv.lang }
     }
     return {
       status: "ok" as const,

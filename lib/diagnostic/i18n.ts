@@ -629,7 +629,8 @@ export const UI: Record<Lang, UIStrings> = {
     genderLabel: "Form of address",
     genderFemale: "Woman",
     genderMale: "Man",
-    genderHint: "Used to write the Czech evaluation in the correct grammatical gender.",
+    genderHint:
+      "Czech and Slovak inflect for gender, so this decides how the evaluation addresses you.",
     tabNorms: "Norms",
     loading: "Loading…",
     normsTitle: "Anonymous sample for norms",

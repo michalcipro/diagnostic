@@ -379,6 +379,46 @@ rekni(!chybejiciKlice.length, `rozhraní: slovenština má všech ${klice.length
 const ceskeUi = klice.filter((k) => typeof M.UI.sk[k] === "string" && CESKA_PISMENA.test(M.UI.sk[k]))
 rekni(!ceskeUi.length, `rozhraní: bez ř, ě a ů${ceskeUi.length ? ` (${ceskeUi.slice(0, 3).join(", ")})` : ""}`)
 
+// Čeština a slovenština si jsou blízké, takže shodných popisků je hodně
+// a všechny jsou v pořádku: „Jazyk", „Heslo", „Pásmo", „Žena" se opravdu
+// píšou stejně. Seznam je tu proto, aby nový popisek, který se přeložit
+// zapomene, mezi nimi nezapadl.
+const SHODNE_UI_SK = new Set([
+  "brand", "chooseTitle", "language", "validityAttention", "validityStatusInvalid",
+  "prioritiesTitle", "facetProfile", "band", "newTest", "personLabel",
+  "coachPassword", "colTest", "colValidity", "invitesTitle", "newInvite",
+  "inviteTest", "tabInvites", "genderFemale", "genderMale", "tabNorms",
+])
+const shodneUiSk = klice.filter(
+  (k) => !SHODNE_UI_SK.has(k) && typeof M.UI.sk[k] === "string" && M.UI.sk[k] === M.UI.cs[k],
+)
+rekni(
+  !shodneUiSk.length,
+  `rozhraní: slovenština nezůstala česky${shodneUiSk.length ? ` (${shodneUiSk.slice(0, 5).join(", ")})` : ""}`,
+)
+
+// Rozhraní anglicky: stejný rozsah jako slovenské. Klient s anglickým
+// odkazem vidí tyhle popisky u každé otázky, takže tichý pád na češtinu
+// by se projevil přesně tak, jak to reklamoval klient.
+const chybejiciEn = klice.filter((k) => !(k in M.UI.en))
+rekni(!chybejiciEn.length, `rozhraní anglicky: má všech ${klice.length} klíčů${chybejiciEn.length ? ` (chybí ${chybejiciEn.slice(0, 3).join(", ")})` : ""}`)
+const ceskeUiEn = klice.filter((k) => typeof M.UI.en[k] === "string" && CESKA_PISMENA.test(M.UI.en[k]))
+rekni(!ceskeUiEn.length, `rozhraní anglicky: bez ř, ě a ů${ceskeUiEn.length ? ` (${ceskeUiEn.slice(0, 3).join(", ")})` : ""}`)
+// Popisky, které se v obou jazycích píšou stejně: značka, název produktu
+// a slova, která angličtina převzala beze změny. Jinde by shoda znamenala,
+// že se anglický popisek nikdy nenapsal.
+const SHODNE_UI_EN = new Set(["brand", "chooseTitle", "personLabel", "colTest", "inviteTest"])
+const shodneUiEn = klice.filter(
+  (k) =>
+    !SHODNE_UI_EN.has(k) &&
+    typeof M.UI.en[k] === "string" &&
+    M.UI.en[k] === M.UI.cs[k],
+)
+rekni(
+  !shodneUiEn.length,
+  `rozhraní anglicky: nezůstalo česky${shodneUiEn.length ? ` (${shodneUiEn.slice(0, 5).join(", ")})` : ""}`,
+)
+
 // Názvy testů: každý test má slovenský název.
 const bezNazvu = M.TEST_IDS.filter((t) => !M.TEST_NAMES[t]?.sk)
 rekni(!bezNazvu.length, `názvy testů: všech ${M.TEST_IDS.length} má slovenský název${bezNazvu.length ? ` (chybí ${bezNazvu.join(", ")})` : ""}`)
