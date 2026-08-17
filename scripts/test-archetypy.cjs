@@ -338,7 +338,24 @@ rekni(nepreloz.length === 0, `žádný popisek nezůstal český${nepreloz.lengt
 const ceskeVUi = retezce(sk).filter(([, t]) => CESKA_PISMENA.test(t))
 rekni(ceskeVUi.length === 0, `slovenské rozhraní bez ř, ě a ů${ceskeVUi.length ? ` (${ceskeVUi.slice(0, 3).map(([c]) => c).join(", ")})` : ""}`)
 
-rekni(M.UI_ARCHETYPY.en === cs, "angličtina zatím sahá po češtině, jak je zamýšleno")
+// Angličtina má od února vlastní sadu. Kdyby se někdy vrátila na `en: CS`,
+// dostal by anglický klient české vyhodnocení, aniž by to build ohlásil.
+{
+  const en = M.UI_ARCHETYPY.en
+  // „Respondent" se česky i anglicky píše stejně; přeložit to jinak by bylo
+  // horší, ne lepší.
+  const shodneZamerne = new Set(["respondent"])
+  const shodne = retezce(cs).filter(([c, t]) => {
+    if (shodneZamerne.has(c)) return false
+    const v = c.split(".").reduce((o, k) => (o ? o[k] : undefined), en)
+    return typeof v === "string" && v === t
+  })
+  rekni(en !== cs, "angličtina není jen odkaz na češtinu")
+  rekni(
+    shodne.length === 0,
+    `žádný anglický popisek nezůstal český${shodne.length ? ` (${shodne.slice(0, 3).map(([c]) => c).join(", ")})` : ""}`,
+  )
+}
 
 // škála a instrukce
 for (const jazyk of ["cs", "sk", "en"]) {

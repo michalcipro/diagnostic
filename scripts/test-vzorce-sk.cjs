@@ -332,7 +332,24 @@ const nepreloz = Object.keys(cs).filter((k) => {
 })
 rekni(nepreloz.length === 0, `žádný popisek nezůstal český${nepreloz.length ? ` (${nepreloz.join(", ")})` : ""}`)
 
-rekni(M.UI_VZORCE.en === cs, "angličtina zatím sahá po češtině, jak je zamýšleno")
+// Angličtina má od února vlastní sadu. Kdyby se někdy vrátila na `en: CS`,
+// dostal by anglický klient české vyhodnocení, aniž by to build ohlásil.
+{
+  const en = M.UI_VZORCE.en
+  // „Respondent" se česky i anglicky píše stejně; přeložit to jinak by bylo
+  // horší, ne lepší.
+  const shodneZamerne = new Set(["respondent"])
+  const shodne = retezce(cs).filter(([c, t]) => {
+    if (shodneZamerne.has(c)) return false
+    const v = c.split(".").reduce((o, k) => (o ? o[k] : undefined), en)
+    return typeof v === "string" && v === t
+  })
+  rekni(en !== cs, "angličtina není jen odkaz na češtinu")
+  rekni(
+    shodne.length === 0,
+    `žádný anglický popisek nezůstal český${shodne.length ? ` (${shodne.slice(0, 3).map(([c]) => c).join(", ")})` : ""}`,
+  )
+}
 
 // ---------------------------------------------------------------------------
 // 6) mužské tvary, které zůstaly bez rodové značky
