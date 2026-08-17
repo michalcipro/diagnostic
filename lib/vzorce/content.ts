@@ -5,6 +5,7 @@ import { OBSAH_SPORT_INDIVIDUAL } from "./data/obsah-sport-individual"
 import { OBSAH_SPORT_INDIVIDUAL_SK } from "./data/obsah-sport-individual-sk"
 import { OBSAH_SPORT_TYM } from "./data/obsah-sport-tym"
 import { OBSAH_SPORT_TYM_SK } from "./data/obsah-sport-tym-sk"
+import { OBSAH_EN } from "./data/obsah-en"
 import { DVOJICE } from "./data/dvojice"
 import { DVOJICE_SK } from "./data/dvojice-sk"
 import { DVOJICE_SPORT_INDIVIDUAL } from "./data/dvojice-sport-individual"
@@ -20,25 +21,33 @@ import type { Varianta, VzorecId, VzorecObsah } from "./types"
 // každá komponenta řešila sama, dřív nebo později by se jedna zapomněla
 // a vyhodnocení by bylo napůl obecné nebo napůl české.
 //
-// Angličtina obsah vzorců zatím nemá a sahá po češtině, stejně jako to dělá
-// lok() v lib/diagnostic/lang.ts.
+// Angličtina se doplňuje po částech. Kde už anglický text je, použije se;
+// kde ještě není, sáhne se po češtině, stejně jako to dělá lok()
+// v lib/diagnostic/lang.ts. Stav hlídá scripts/test-jazyky.cjs, aby bylo
+// vidět, co ještě chybí, a aby se na to nezapomnělo.
 
-const OBSAHY: Record<Varianta, Record<"cs" | "sk", Record<VzorecId, VzorecObsah>>> = {
-  obecna: { cs: OBSAH, sk: OBSAH_SK },
+/** Anglický text je zatím jen u některých variant; `en` je proto volitelné. */
+type SadaObsahu = { cs: Record<VzorecId, VzorecObsah>; sk: Record<VzorecId, VzorecObsah>; en?: Record<VzorecId, VzorecObsah> }
+
+const OBSAHY: Record<Varianta, SadaObsahu> = {
+  obecna: { cs: OBSAH, sk: OBSAH_SK, en: OBSAH_EN },
   "sport-individual": { cs: OBSAH_SPORT_INDIVIDUAL, sk: OBSAH_SPORT_INDIVIDUAL_SK },
   "sport-tym": { cs: OBSAH_SPORT_TYM, sk: OBSAH_SPORT_TYM_SK },
 }
 
-const DVOJICE_VSE: Record<Varianta, Record<"cs" | "sk", Record<string, string>>> = {
+type SadaDvojic = { cs: Record<string, string>; sk: Record<string, string>; en?: Record<string, string> }
+
+const DVOJICE_VSE: Record<Varianta, SadaDvojic> = {
   obecna: { cs: DVOJICE, sk: DVOJICE_SK },
   "sport-individual": { cs: DVOJICE_SPORT_INDIVIDUAL, sk: DVOJICE_SPORT_INDIVIDUAL_SK },
   "sport-tym": { cs: DVOJICE_SPORT_TYM, sk: DVOJICE_SPORT_TYM_SK },
 }
 
-const jazyk = (lang: Lang): "cs" | "sk" => (lang === "sk" ? "sk" : "cs")
-
 export function obsahVzorce(id: VzorecId, lang: Lang, varianta: Varianta = "obecna"): VzorecObsah {
-  return OBSAHY[varianta][jazyk(lang)][id]
+  const sada = OBSAHY[varianta]
+  if (lang === "sk") return sada.sk[id]
+  if (lang === "en" && sada.en) return sada.en[id]
+  return sada.cs[id]
 }
 
 /** Název vzorce v daném jazyce. Zkratka pro místa, kde jde jen o popisek. */
@@ -52,7 +61,10 @@ export function popisDvojiceProJazyk(
   lang: Lang,
   varianta: Varianta = "obecna",
 ): string | undefined {
-  return DVOJICE_VSE[varianta][jazyk(lang)][klic]
+  const sada = DVOJICE_VSE[varianta]
+  if (lang === "sk") return sada.sk[klic]
+  if (lang === "en" && sada.en) return sada.en[klic]
+  return sada.cs[klic]
 }
 
 /**
