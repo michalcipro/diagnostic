@@ -10,19 +10,6 @@ import type { Id } from "./_generated/dataModel"
 // protože akce volají funkce přes `internal`, které se generují mimo jiné
 // i z tohoto souboru (Convex chyby TS7022 / TS7023).
 type Prihlaseni = { sessionToken: string; name: string; role: string }
-/**
- * Výsledek přihlášení. Když má účet zapnutý druhý faktor a kód nepřišel,
- * vrací se „potreba-kod" místo relace: přihlašovací obrazovka pak doptá kód
- * a zavolá se znovu. Chybová hláška se na to nehodí, protože tohle není chyba.
- */
-type VysledekPrihlaseni =
-  | ({ stav: "ok" } & Prihlaseni)
-  | { stav: "potreba-kod" }
-type TotpStav = {
-  totpSecret?: string
-  totpAktivni?: boolean
-  totpZalozniKody?: string[]
-} | null
 type CoachZaznam = {
   id: Id<"coaches">
   email: string
@@ -86,112 +73,6 @@ function newToken(): string {
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase()
-}
-
-// ---------------------------------------------------------------------------
-// Druhý faktor: TOTP podle RFC 6238
-//
-// Šestimístný kód, SHA-1, krok 30 sekund, tedy to, co umí Google
-// Authenticator, 1Password, Authy i Bitwarden. Implementace je pár řádků
-// a nepotřebuje závislost navíc; ověřená je proti testovacím vektorům
-// z přílohy B normy (viz scripts/test-totp.cjs).
-// ---------------------------------------------------------------------------
-
-const BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
-const TOTP_KROK_S = 30
-const TOTP_DELKA = 6
-/**
- * Kolik kroků dozadu i dopředu se ještě uzná.
- *
- * Hodiny v telefonu se běžně rozejdou o pár vteřin a kód se opisuje ručně,
- * takže bez tolerance by se lidé nepřihlásili. Jeden krok na každou stranu je
- * doporučení normy: okno 90 sekund je pořád krátké.
- */
-const TOTP_TOLERANCE = 1
-
-function base32Zakoduj(bajty: Buffer): string {
-  let bity = 0
-  let hodnota = 0
-  let out = ""
-  for (const b of bajty) {
-    hodnota = (hodnota << 8) | b
-    bity += 8
-    while (bity >= 5) {
-      out += BASE32[(hodnota >>> (bity - 5)) & 31]
-      bity -= 5
-    }
-  }
-  if (bity > 0) out += BASE32[(hodnota << (5 - bity)) & 31]
-  return out
-}
-
-function base32Dekoduj(text: string): Buffer {
-  const cisty = text.replace(/[\s=]/g, "").toUpperCase()
-  let bity = 0
-  let hodnota = 0
-  const out: number[] = []
-  for (const znak of cisty) {
-    const i = BASE32.indexOf(znak)
-    if (i === -1) throw new ConvexError("Tajemství druhého faktoru je poškozené.")
-    hodnota = (hodnota << 5) | i
-    bity += 5
-    if (bity >= 8) {
-      out.push((hodnota >>> (bity - 8)) & 0xff)
-      bity -= 8
-    }
-  }
-  return Buffer.from(out)
-}
-
-/** Kód pro daný časový krok. */
-function totpKod(secret: string, krok: number): string {
-  const buf = Buffer.alloc(8)
-  buf.writeBigUInt64BE(BigInt(krok))
-  const hmac = crypto.createHmac("sha1", base32Dekoduj(secret)).update(buf).digest()
-  const offset = hmac[hmac.length - 1] & 0x0f
-  const cislo =
-    ((hmac[offset] & 0x7f) << 24) |
-    ((hmac[offset + 1] & 0xff) << 16) |
-    ((hmac[offset + 2] & 0xff) << 8) |
-    (hmac[offset + 3] & 0xff)
-  return String(cislo % 10 ** TOTP_DELKA).padStart(TOTP_DELKA, "0")
-}
-
-/** Sedí zadaný kód v povoleném okně? */
-function totpSedi(secret: string, zadany: string): boolean {
-  const cisty = zadany.replace(/\D/g, "")
-  if (cisty.length !== TOTP_DELKA) return false
-  const ted = Math.floor(Date.now() / 1000 / TOTP_KROK_S)
-  for (let d = -TOTP_TOLERANCE; d <= TOTP_TOLERANCE; d++) {
-    if (safeEqual(cisty, totpKod(secret, ted + d))) return true
-  }
-  return false
-}
-
-/** Nové tajemství: 20 bajtů, jak doporučuje norma. */
-function noveTajemstvi(): string {
-  return base32Zakoduj(crypto.randomBytes(20))
-}
-
-/**
- * Záložní kódy pro případ ztráty telefonu.
- *
- * Deset kódů po deseti znacích; v databázi leží jen otisky, takže se z ní
- * nedají přečíst. Otisk stačí SHA-256 bez zpomalení: kód má dost entropie
- * na to, aby se nedal uhodnout hrubou silou, na rozdíl od hesla.
- */
-function noveZalozniKody(): { kody: string[]; otisky: string[] } {
-  const abeceda = "abcdefghijkmnpqrstuvwxyz23456789"
-  const kody = Array.from({ length: 10 }, () => {
-    const b = crypto.randomBytes(10)
-    const znaky = [...b].map((x) => abeceda[x % abeceda.length]).join("")
-    return `${znaky.slice(0, 5)}-${znaky.slice(5)}`
-  })
-  return { kody, otisky: kody.map(otiskKodu) }
-}
-
-function otiskKodu(kod: string): string {
-  return crypto.createHash("sha256").update(kod.trim().toLowerCase()).digest("hex")
 }
 
 /**
@@ -333,28 +214,16 @@ export const createMaster = action({
 })
 
 /**
- * Přihlášení e-mailem a heslem, případně s kódem druhého faktoru.
+ * Přihlášení e-mailem a heslem.
  *
  * Po pěti neúspěších v patnácti minutách se účet na čas zamkne, aby nešlo
  * hesla zkoušet ve smyčce. Zamčení se navenek neprojeví jinou hláškou:
  * kdyby ano, dalo by se přes ně zjišťovat, které e-maily existují.
- *
- * Když má účet zapnutý druhý faktor, vrátí se po správném heslu stav
- * „potreba-kod" a klient se doptá. Kód se posílá až v druhém volání spolu
- * s heslem, takže se na serveru nedrží žádný mezistav.
  */
 export const login = action({
-  args: { email: v.string(), password: v.string(), kod: v.optional(v.string()) },
-  returns: v.union(
-    v.object({
-      stav: v.literal("ok"),
-      sessionToken: v.string(),
-      name: v.string(),
-      role: v.string(),
-    }),
-    v.object({ stav: v.literal("potreba-kod") }),
-  ),
-  handler: async (ctx, args): Promise<VysledekPrihlaseni> => {
+  args: { email: v.string(), password: v.string() },
+  returns: v.object({ sessionToken: v.string(), name: v.string(), role: v.string() }),
+  handler: async (ctx, args): Promise<Prihlaseni> => {
     const email = normalizeEmail(args.email)
     // Stejná hláška pro neexistující účet, špatné heslo i zamčený účet – ať
     // nejde zjišťovat, které e-maily jsou zaregistrované.
@@ -375,31 +244,6 @@ export const login = action({
       throw new ConvexError(chyba)
     }
 
-    // ---- druhý faktor ----
-    const totp: TotpStav = await ctx.runQuery(internal.authInternal.najdiTotp, {
-      coachId: coach.id,
-    })
-    if (totp?.totpAktivni && totp.totpSecret) {
-      const zadany = args.kod?.trim() ?? ""
-      if (!zadany) return { stav: "potreba-kod" }
-
-      const otisk = otiskKodu(zadany)
-      const jeZalozni = (totp.totpZalozniKody ?? []).includes(otisk)
-      if (!jeZalozni && !totpSedi(totp.totpSecret, zadany)) {
-        // Špatný kód se počítá do stropu stejně jako špatné heslo, jinak by
-        // se dal šestimístný kód zkoušet donekonečna.
-        await ctx.runMutation(internal.authInternal.zaznamenejNeuspech, { email })
-        throw new ConvexError("Kód nesouhlasí. Zkontroluj čas v telefonu a zkus další kód.")
-      }
-      // Záložní kód platí jednou; po použití zmizí.
-      if (jeZalozni) {
-        await ctx.runMutation(internal.authInternal.spotrebujZalozniKod, {
-          coachId: coach.id,
-          otisk,
-        })
-      }
-    }
-
     await ctx.runMutation(internal.authInternal.vynulujPokusy, { email })
     const sessionToken = newToken()
     await ctx.runMutation(internal.authInternal.openSession, {
@@ -408,83 +252,7 @@ export const login = action({
       days: SESSION_DAYS,
     })
     await ctx.runMutation(internal.authInternal.zaznamenejPrihlaseni, { coachId: coach.id })
-    return { stav: "ok", sessionToken, name: coach.name, role: coach.role }
-  },
-})
-
-// ---------------------------------------------------------------------------
-// Správa druhého faktoru
-//
-// Zapíná se ve dvou krocích: nejdřív se vydá tajemství, pak se ověří první
-// kód z aplikace a teprve potom se faktor zapne. Bez toho by stačil překlep
-// při opisování k tomu, aby se člověk ke svému účtu už nedostal.
-// ---------------------------------------------------------------------------
-
-/** Krok 1: vydá tajemství k opsání do aplikace. Nic zatím nezapíná. */
-export const zacniNastaveniTotp = action({
-  args: { sessionToken: v.string() },
-  returns: v.object({ secret: v.string(), uri: v.string() }),
-  handler: async (ctx, args): Promise<{ secret: string; uri: string }> => {
-    const me: Identita = await ctx.runQuery(internal.sessions.whoAmI, {
-      sessionToken: args.sessionToken,
-    })
-    if (!me) throw new ConvexError("Přihlášení vypršelo.")
-    const secret = noveTajemstvi()
-    // otpauth URI umí načíst všechny běžné aplikace; kdo nemá čtečku kódů,
-    // opíše samotné tajemství ručně.
-    const popis = encodeURIComponent(`Winning Minds (${me.email})`)
-    const uri = `otpauth://totp/${popis}?secret=${secret}&issuer=Winning%20Minds&algorithm=SHA1&digits=6&period=30`
-    return { secret, uri }
-  },
-})
-
-/**
- * Krok 2: ověří první kód a zapne druhý faktor.
- *
- * Vrací záložní kódy. Ukazují se jednou a v databázi po nich zůstane jen
- * otisk, takže je nedokáže přečíst ani master.
- */
-export const potvrdTotp = action({
-  args: { sessionToken: v.string(), secret: v.string(), kod: v.string() },
-  returns: v.object({ zalozniKody: v.array(v.string()) }),
-  handler: async (ctx, args): Promise<{ zalozniKody: string[] }> => {
-    const me: Identita = await ctx.runQuery(internal.sessions.whoAmI, {
-      sessionToken: args.sessionToken,
-    })
-    if (!me) throw new ConvexError("Přihlášení vypršelo.")
-    if (!totpSedi(args.secret, args.kod)) {
-      throw new ConvexError(
-        "Kód nesouhlasí. Zkontroluj, že jsi tajemství opsal celé a že má telefon správný čas.",
-      )
-    }
-    const { kody, otisky } = noveZalozniKody()
-    await ctx.runMutation(internal.authInternal.zapniTotp, {
-      coachId: me.id,
-      secret: args.secret,
-      zalozniKody: otisky,
-    })
-    return { zalozniKody: kody }
-  },
-})
-
-/** Vypnutí druhého faktoru. Vyžaduje heslo, ať nestačí odemčený prohlížeč. */
-export const vypniTotp = action({
-  args: { sessionToken: v.string(), heslo: v.string() },
-  returns: v.object({ ok: v.boolean() }),
-  handler: async (ctx, args): Promise<{ ok: boolean }> => {
-    const me: Identita = await ctx.runQuery(internal.sessions.whoAmI, {
-      sessionToken: args.sessionToken,
-    })
-    if (!me) throw new ConvexError("Přihlášení vypršelo.")
-    const coach: CoachZaznam = await ctx.runQuery(internal.authInternal.findByEmail, {
-      email: me.email,
-    })
-    if (!coach) throw new ConvexError("Účet nenalezen.")
-    if (!safeEqual(hashPassword(args.heslo, coach.salt), coach.passwordHash)) {
-      throw new ConvexError("Heslo nesouhlasí.")
-    }
-    await ctx.runMutation(internal.authInternal.vypniTotpInterne, { coachId: coach.id })
-    return { ok: true }
+    return { sessionToken, name: coach.name, role: coach.role }
   },
 })
 
@@ -559,7 +327,7 @@ export const changePassword = action({
 })
 
 /**
- * Nové heslo pro cizí účet. Smí jen master. Vypíná i druhý faktor.
+ * Nové heslo pro cizí účet. Smí jen master.
  *
  * Hesla jsou uložená hashovaná, takže se stávající heslo nedá přečíst ani
  * poslat znovu. Místo toho se vygeneruje nové, jednou se zobrazí masterovi
@@ -595,10 +363,6 @@ export const resetCoachPassword = action({
       passwordHash: hashPassword(heslo, salt),
       salt,
     })
-    // Reset vypne i druhý faktor. Je to jediná záchrana pro kouče, který
-    // ztratil telefon i záložní kódy; master za ni ručí tím, že heslo předává
-    // osobně. Kouč si druhý faktor po přihlášení zapne znovu.
-    await ctx.runMutation(internal.authInternal.vypniTotpInterne, { coachId: args.coachId })
     return { password: heslo, name: coach.name, email: coach.email }
   },
 })

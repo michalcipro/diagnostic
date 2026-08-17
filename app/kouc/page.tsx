@@ -25,9 +25,6 @@ import {
   login as doLogin,
   logout as doLogout,
   logoutAll,
-  zacniNastaveniTotp,
-  potvrdTotp,
-  vypniTotp,
   setCoachActive,
   whoAmI,
   type CoachIdentity,
@@ -82,13 +79,10 @@ export default function CoachPage() {
   const [detailLang, setDetailLang] = useState<Lang>("cs")
 
   const [tab, setTab] = useState<
-    "results" | "invites" | "coaches" | "norms" | "externi" | "pristupy" | "ucet"
+    "results" | "invites" | "coaches" | "norms" | "externi" | "pristupy"
   >("results")
   const [externi, setExterni] = useState<ExternalUsage[] | null>(null)
   const [pristupy, setPristupy] = useState<PristupZaznam[] | null>(null)
-  /** účet má druhý faktor a čeká se na kód */
-  const [potrebaKod, setPotrebaKod] = useState(false)
-  const [kod, setKod] = useState("")
   const [norms, setNorms] = useState<NormStats | null>(null)
   const [exporting, setExporting] = useState(false)
   const [invites, setInvites] = useState<InviteRow[] | null>(null)
@@ -146,20 +140,11 @@ export default function CoachPage() {
     }
     setChecking(true)
     try {
-      const res = await doLogin(email, password, kod || undefined)
-      // Účet s druhým faktorem: doptáme se na kód a zavoláme znovu. Heslo
-      // zůstává ve stavu formuláře, na serveru se žádný mezistav nedrží.
-      if (res.stav === "potreba-kod") {
-        setPotrebaKod(true)
-        setError(null)
-        return
-      }
+      const res = await doLogin(email, password)
       window.localStorage.setItem(SESSION_KEY, res.sessionToken)
       setSession(res.sessionToken)
       setMeInfo({ name: res.name, email, role: res.role as CoachIdentity["role"] })
       setPassword("")
-      setKod("")
-      setPotrebaKod(false)
       await load(res.sessionToken)
     } catch (err) {
       setError(chybaText(err, t.coachWrongPassword))
@@ -347,39 +332,13 @@ export default function CoachPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </label>
-          {potrebaKod && (
-            <label className="mt-4 block">
-              <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">
-                Kód z aplikace
-              </span>
-              <input
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                autoFocus
-                placeholder="123456"
-                className="diag-input tracking-[0.3em]"
-                value={kod}
-                onChange={(e) => setKod(e.target.value)}
-              />
-              <span className="mt-1.5 block text-[12px] leading-relaxed text-[var(--wm-text-3)]">
-                Šestimístný kód z autentizační aplikace. Bez telefonu po ruce
-                zadej místo něj jeden ze záložních kódů.
-              </span>
-            </label>
-          )}
           {error && <p className="mt-3 text-[13px] font-medium text-[var(--wm-invalid-fg)]">{error}</p>}
           <button
             type="submit"
-            disabled={
-              checking ||
-              password.length === 0 ||
-              email.length === 0 ||
-              (potrebaKod && kod.trim().length < 6)
-            }
+            disabled={checking || password.length === 0 || email.length === 0}
             className="diag-press mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-[var(--wm-brand)] text-[15px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-40"
           >
-            {checking ? "…" : potrebaKod ? "Ověřit a přihlásit" : t.coachEnter}
+            {checking ? "…" : t.coachEnter}
           </button>
         </form>
         <p className="mt-6 text-center text-[12px] text-[var(--wm-text-3)]">{t.confidential}</p>
@@ -533,13 +492,6 @@ export default function CoachPage() {
             Externí kouči
           </button>
         )}
-        <button
-          type="button"
-          data-active={tab === "ucet"}
-          onClick={() => setTab("ucet")}
-        >
-          Můj účet
-        </button>
         {meInfo.role === "master" && (
           <button
             type="button"
@@ -557,20 +509,6 @@ export default function CoachPage() {
       {tab === "pristupy" && meInfo.role === "master" && (
         <div className="mb-8">
           <PristupyPanel zaznamy={pristupy} />
-        </div>
-      )}
-
-      {tab === "ucet" && (
-        <div className="mb-8">
-          <DruhyFaktorPanel
-            session={session}
-            aktivni={meInfo.totpAktivni === true}
-            zbyvaKodu={meInfo.zbyvaZalozníchKodu ?? 0}
-            onZmena={async () => {
-              const kdoJsem = await whoAmI(session)
-              if (kdoJsem) setMeInfo(kdoJsem)
-            }}
-          />
         </div>
       )}
 
@@ -1107,254 +1045,6 @@ function PristupyPanel({ zaznamy }: { zaznamy: PristupZaznam[] | null }) {
           ))}
         </div>
       )}
-    </div>
-  )
-}
-
-/**
- * Nastavení druhého faktoru.
- *
- * Zapíná se ve dvou krocích: nejdřív se vydá tajemství k opsání do aplikace,
- * pak se ověří první kód a teprve potom se faktor zapne. Bez toho by stačil
- * překlep k tomu, aby se člověk ke svému účtu už nedostal.
- *
- * Záložní kódy se ukazují jednou; v databázi po nich zůstává jen otisk,
- * takže je nedokáže přečíst ani master.
- */
-function DruhyFaktorPanel({
-  session,
-  aktivni,
-  zbyvaKodu,
-  onZmena,
-}: {
-  session: string
-  aktivni: boolean
-  zbyvaKodu: number
-  onZmena: () => Promise<void>
-}) {
-  const [faze, setFaze] = useState<"prehled" | "nastavuji" | "kody">("prehled")
-  const [secret, setSecret] = useState("")
-  const [uri, setUri] = useState("")
-  const [kod, setKod] = useState("")
-  const [heslo, setHeslo] = useState("")
-  const [zalozni, setZalozni] = useState<string[]>([])
-  const [chyba, setChyba] = useState<string | null>(null)
-  const [pracuje, setPracuje] = useState(false)
-
-  const zacni = async () => {
-    setChyba(null)
-    setPracuje(true)
-    try {
-      const r = await zacniNastaveniTotp(session)
-      setSecret(r.secret)
-      setUri(r.uri)
-      setFaze("nastavuji")
-    } catch (e) {
-      setChyba(chybaText(e, "Nastavení se nepodařilo zahájit."))
-    } finally {
-      setPracuje(false)
-    }
-  }
-
-  const potvrd = async () => {
-    setChyba(null)
-    setPracuje(true)
-    try {
-      setZalozni(await potvrdTotp(session, secret, kod))
-      setKod("")
-      setFaze("kody")
-      await onZmena()
-    } catch (e) {
-      setChyba(chybaText(e, "Kód se nepodařilo ověřit."))
-    } finally {
-      setPracuje(false)
-    }
-  }
-
-  const vypni = async () => {
-    setChyba(null)
-    setPracuje(true)
-    try {
-      await vypniTotp(session, heslo)
-      setHeslo("")
-      await onZmena()
-    } catch (e) {
-      setChyba(chybaText(e, "Druhý faktor se nepodařilo vypnout."))
-    } finally {
-      setPracuje(false)
-    }
-  }
-
-  return (
-    <div className="diag-card p-6">
-      <h2 className="text-[17px] font-bold tracking-tight">Druhý faktor při přihlášení</h2>
-      <p className="mt-1 max-w-[70ch] text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
-        K heslu se přidá šestimístný kód z aplikace v telefonu. Kdo získá heslo,
-        se bez telefonu nepřihlásí. Funguje s Google Authenticatorem, 1Password,
-        Authy i Bitwardenem.
-      </p>
-
-      {chyba && (
-        <p className="mt-4 rounded-xl bg-[var(--wm-red-light)] p-3 text-[13.5px] font-medium text-[var(--wm-invalid-fg)]">
-          {chyba}
-        </p>
-      )}
-
-      {/* ---- hotové záložní kódy ---- */}
-      {faze === "kody" && (
-        <div className="mt-5 rounded-xl border-2 border-[var(--wm-brand)] p-5">
-          <h3 className="text-[15px] font-bold">Ulož si záložní kódy</h3>
-          <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
-            Tohle je jediná chvíle, kdy je vidíš. Každý platí jednou a slouží pro
-            případ, že přijdeš o telefon. Ulož si je někam mimo tento počítač.
-          </p>
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
-            {zalozni.map((k) => (
-              <code
-                key={k}
-                className="rounded-lg bg-[var(--wm-surface-2)] px-2 py-2 text-center text-[13px] tracking-wide"
-              >
-                {k}
-              </code>
-            ))}
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => void navigator.clipboard.writeText(zalozni.join("\n"))}
-              className="diag-press inline-flex h-10 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold"
-            >
-              Zkopírovat
-            </button>
-            <button
-              type="button"
-              onClick={() => setFaze("prehled")}
-              className="diag-press inline-flex h-10 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)]"
-            >
-              Mám je uložené
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ---- probíhající nastavení ---- */}
-      {faze === "nastavuji" && (
-        <div className="mt-5 rounded-xl bg-[var(--wm-surface-2)] p-5">
-          <h3 className="text-[15px] font-bold">1. Přidej účet do aplikace</h3>
-          <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
-            V autentizační aplikaci zvol přidání účtu ručním zadáním klíče
-            a opiš tenhle řetězec. Typ je časový (TOTP), šest číslic, 30 sekund.
-          </p>
-          <code className="mt-3 block break-all rounded-lg bg-[var(--wm-surface)] p-3 text-[14px] tracking-wider">
-            {secret}
-          </code>
-          <button
-            type="button"
-            onClick={() => void navigator.clipboard.writeText(secret)}
-            className="diag-press mt-2 inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold"
-          >
-            Zkopírovat klíč
-          </button>
-          <p className="mt-2 break-all text-[11.5px] leading-relaxed text-[var(--wm-text-3)]">
-            Kdo umí načíst odkaz otpauth, může použít i tenhle: {uri}
-          </p>
-
-          <h3 className="mt-5 text-[15px] font-bold">2. Opiš první kód</h3>
-          <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
-            Tím se ověří, že aplikace i server počítají stejně. Dokud kód
-            nesedí, zůstává přihlašování beze změny.
-          </p>
-          <div className="mt-3 flex flex-wrap items-end gap-3">
-            <label className="block">
-              <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">
-                Kód z aplikace
-              </span>
-              <input
-                className="diag-input tracking-[0.3em]"
-                inputMode="numeric"
-                placeholder="123456"
-                value={kod}
-                onChange={(e) => setKod(e.target.value)}
-              />
-            </label>
-            <button
-              type="button"
-              disabled={pracuje || kod.trim().length < 6}
-              onClick={() => void potvrd()}
-              className="diag-press inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-5 text-[14px] font-semibold text-[var(--wm-brand-fg)] disabled:opacity-40"
-            >
-              Ověřit a zapnout
-            </button>
-            <button
-              type="button"
-              onClick={() => setFaze("prehled")}
-              className="text-[13.5px] font-semibold text-[var(--wm-text-2)] hover:text-[var(--wm-text)]"
-            >
-              Zrušit
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ---- přehled ---- */}
-      {faze === "prehled" &&
-        (aktivni ? (
-          <div className="mt-5">
-            <p className="text-[14px] font-semibold text-[var(--wm-ok-fg)]">
-              Druhý faktor je zapnutý.
-            </p>
-            <p className="mt-1 text-[13.5px] text-[var(--wm-text-2)]">
-              {zbyvaKodu === 1
-                ? "Zbývá jeden nepoužitý záložní kód."
-                : zbyvaKodu >= 2 && zbyvaKodu <= 4
-                  ? `Zbývají ${zbyvaKodu} nepoužité záložní kódy.`
-                  : `Zbývá ${zbyvaKodu} nepoužitých záložních kódů.`}{" "}
-              Když dojdou nebo se ztratí, vypni druhý faktor a zapni ho znovu;
-              dostaneš nové.
-            </p>
-            <div className="mt-4 flex flex-wrap items-end gap-3">
-              <label className="block">
-                <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">
-                  Heslo pro vypnutí
-                </span>
-                <input
-                  type="password"
-                  className="diag-input"
-                  value={heslo}
-                  onChange={(e) => setHeslo(e.target.value)}
-                />
-              </label>
-              <button
-                type="button"
-                disabled={pracuje || heslo.length === 0}
-                onClick={() => void vypni()}
-                className="diag-press inline-flex h-11 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-5 text-[14px] font-semibold text-[var(--wm-text-2)] hover:text-[var(--wm-red)] disabled:opacity-40"
-              >
-                Vypnout druhý faktor
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-5">
-            <p className="text-[14px] text-[var(--wm-text-2)]">
-              Zatím je vypnutý. U účtu, který vidí psychologické profily klientů,
-              stojí za to ho mít.
-            </p>
-            <button
-              type="button"
-              disabled={pracuje}
-              onClick={() => void zacni()}
-              className="diag-press mt-4 inline-flex h-11 items-center rounded-full bg-[var(--wm-brand)] px-5 text-[14px] font-semibold text-[var(--wm-brand-fg)] disabled:opacity-40"
-            >
-              Zapnout druhý faktor
-            </button>
-          </div>
-        ))}
-
-      <p className="mt-5 border-t border-[var(--wm-border-light)] pt-4 text-[12.5px] leading-relaxed text-[var(--wm-text-3)]">
-        Když přijdeš o telefon i o záložní kódy, požádej mastera o nové heslo:
-        reset hesla druhý faktor vypne a můžeš si ho nastavit znovu.
-      </p>
     </div>
   )
 }

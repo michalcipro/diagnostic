@@ -2,11 +2,9 @@
 
 Stav ke dni 16. 8. 2026, revize `5563268`.
 
-**Aktualizace téhož dne:** opravené jsou nálezy K1, V1 až V5, S1 až S5 a N1
-až N4, tedy včetně druhého faktoru. Viz sekci „Co už je hotové" níže. Otevřený
-zůstává jediný technický nález N5, u kterého je v textu vysvětlené, proč se
-nechává tak, jak je. Mimo kód zbývají dokumenty ke GDPR, ke kterým je podklad
-v `docs/gdpr-podklady.md`.
+**Aktualizace téhož dne:** opravené jsou nálezy K1, V1 až V5, S1 až S5 a N1,
+N2, N4. Viz sekci „Co už je hotové" níže. Otevřené zůstávají N3 (druhý faktor),
+N5 a dokumenty ke GDPR, ke kterým je podklad v `docs/gdpr-podklady.md`.
 
 Auditovaná aplikace: Performance Diagnostic ELITE (elitediagnostic.cz), Next.js
 na Vercelu, Convex jako backend a databáze.
@@ -63,31 +61,6 @@ Druhá dávka, tentokrát se změnami, které je vidět v provozu:
 | N2 | Heslo neprojde, když obsahuje běžné slovo ze seznamu nebo část jména či e-mailu účtu. |
 | N4 | Tlačítko „Odhlásit všude" ukončí relace na všech zařízeních. |
 | navíc | Retenční úklid: `convex/uklid.ts` a noční cron mažou data za lhůtou (výsledky 3 roky, pozvánky 90 dní, log rok, pokusy 7 dní). |
-
-Třetí dávka, druhý faktor:
-
-| Nález | Co se změnilo |
-|---|---|
-| N3 | Účet si může zapnout TOTP: šestimístný kód z aplikace v telefonu, krok 30 sekund, tolerance jeden krok na každou stranu. Zapíná se v nové záložce Můj účet, je dobrovolný a nastavuje si ho každý kouč sám. Špatný kód se počítá do stropu pokusů stejně jako špatné heslo, takže se šest číslic nedá zkoušet donekonečna. |
-
-**Jak je ošetřená ztráta telefonu.** U druhého faktoru je největší riziko to, že
-se člověk zamkne sám před sebou. Proto jsou tři pojistky nad sebou. Tajemství se
-uloží až ve chvíli, kdy z aplikace přijde první správný kód, takže nedokončené
-nastavení nemůže zamknout účet. Po zapnutí se jednou jedinkrát ukáže deset
-záložních kódů; v databázi z nich leží jen otisky SHA-256 a každý platí jednou.
-A když dojdou i ty, reset hesla masterem druhý faktor zároveň vypne, takže
-existuje cesta zpátky i po ztrátě všeho.
-
-**Ověření N3.** U kryptografie nestačí, že to vypadá správně. `scripts/test-totp.cjs`
-prochází všech šest testovacích vektorů z přílohy B normy RFC 6238 a k tomu
-chování, na kterém stojí přihlašování: tolerance k rozejitým hodinám, odmítnutí
-kódu o dva kroky vedle, odmítnutí kódu z cizího tajemství a vlastnosti záložních
-kódů. Poslední oddíl navíc hlídá, že se kopie v testu nerozešla s ostrým kódem
-v `convex/auth.ts`. Skript běží jako součást `npm run audit`.
-
-**Co zbývá vyzkoušet ručně:** zapnout druhý faktor u svého účtu se skutečnou
-aplikací v telefonu, opsat si záložní kódy a jedním z nich se pro jistotu jednou
-přihlásit. Odsud to ověřit nejde, protože k tomu je potřeba běžící Convex.
 
 **Pozor při nasazení V2:** `SETUP_TOKEN` musí být nastavený v Convexu dřív, než
 bude potřeba založit master účet. Na existující instalaci se nic nezmění, master
@@ -461,8 +434,10 @@ Zatím stačí vědět, že to tak je, a mít to pokryté smluvně.
 - **N2 – Slabá hesla.** *(Opraveno.)* Podmínkou je 10 znaků. `Heslo12345` projde. Náprava:
   odmítat hesla ze seznamu nejčastějších a hesla obsahující jméno nebo e-mail
   účtu.
-- **N3 – Bez druhého faktoru.** *(Opraveno.)* U master účtu, který zakládá kouče a vidí vše,
-  by TOTP dával smysl.
+- **N3 – Bez druhého faktoru.** U master účtu, který zakládá kouče a vidí vše,
+  by TOTP dával smysl. *(Naprogramováno v `ee6b410` a na tvoje rozhodnutí zase
+  odstraněno; zatím se používat nebude. Kdyby se to mělo vrátit, stačí ten
+  commit vrátit zpátky, kód i test zůstávají v historii.)*
 - **N4 – Bez omezení počtu souběžných relací.** *(Opraveno tlačítkem „Odhlásit všude".)* Kouč nevidí, kde všude je
   přihlášený, a nemůže vzdáleně odhlásit ostatní zařízení.
 - **N5 – Nezvaný přístup ke jménu klienta.** `getInvite` je veřejná a vrací
@@ -516,12 +491,14 @@ posuzuje i to, co je sepsané.
 | 12 | N2 slabá hesla, N4 odhlášení všude | pár hodin | hotovo |
 | 13 | retenční úklid dat | asi 3 hodiny | hotovo |
 | 14 | GDPR dokumenty | mimo vývoj | podklad v `docs/gdpr-podklady.md` |
-| 15 | N3 druhý faktor | asi den | hotovo |
+| 15 | N3 druhý faktor | asi den | odloženo rozhodnutím |
 | 16 | N5 jméno klienta ve veřejné pozvánce | pár minut | ponecháno vědomě |
 
-Z technických nálezů nezbývá žádný. **N3, druhý faktor,** je hotový a popsaný
-níže v sekci „Co už je hotové". Zbývá jediná věc, kterou odsud udělat nejde:
-projít si zapnutí se skutečnou aplikací v telefonu. Postup je v té sekci.
+Z technických nálezů zbývá jediný: **N3, druhý faktor u master účtu.** Nedělal
+jsem ho vědomě. Zásah do přihlašování se nedá ověřit odsud, protože k tomu je
+potřeba běžící Convex a skutečná aplikace v telefonu, a chyba v něm znamená
+ztrátu přístupu k účtu, který jako jediný spravuje ostatní. Stojí za to ho
+udělat, ale s tebou u toho a s vyzkoušenými záložními kódy.
 
 **N5 zůstává vědomě.** `getInvite` vrací jméno klienta, aby se respondentovi
 předvyplnilo. Po opravě K1 je token neuhodnutelný, takže jediný, kdo jméno
