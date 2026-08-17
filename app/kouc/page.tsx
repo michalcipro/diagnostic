@@ -738,6 +738,7 @@ export default function CoachPage() {
                   <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">{t.inviteLang}</span>
                   <select className="diag-input" value={fLang} onChange={(e) => setFLang(e.target.value as Lang)}>
                     <option value="cs">Čeština</option>
+                    <option value="sk">Slovenčina</option>
                     <option value="en">English</option>
                   </select>
                 </label>
