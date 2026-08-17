@@ -328,7 +328,8 @@ function nactiModuly() {
 export { UI, TEST_NAMES } from "../lib/diagnostic/i18n"
 export { TEST_IDS } from "../lib/diagnostic/structure"
 export { JAZYKY } from "../lib/diagnostic/lang"
-export { obsahVzorce } from "../lib/vzorce/content"
+export { obsahVzorce, popisDvojiceProJazyk } from "../lib/vzorce/content"
+export { obsahArchetypu } from "../lib/archetypy/content"
 `,
   )
   try {
@@ -386,20 +387,12 @@ rekni(!bezNazvu.length, `názvy testů: všech ${M.TEST_IDS.length} má slovensk
 // ---------------------------------------------------------------------------
 // 5) angličtina
 //
-// Angličtina se doplňuje po částech, protože jde o desítky tisíc slov. Aby se
-// na zbytek nezapomnělo a aby zároveň nešlo tiše ubrat to, co už hotové je,
-// je stav napsaný tady. Co je v ZBYVA_ANGLICKY, smí padat na češtinu; cokoli
-// jiného padat nesmí.
+// Angličtina je od února hotová u všech devíti testů. Kontrola je tu proto,
+// aby se nedala tiše ztratit: kdyby se některý anglický text vrátil na
+// češtinu, klient by dostal dokument, kterému nerozumí, a build by mlčel.
 // ---------------------------------------------------------------------------
 
 console.log("\n– angličtina –")
-
-/** Části obsahu, které anglicky zatím nejsou. Seznam se má zkracovat. */
-const ZBYVA_ANGLICKY = [
-  "vzorce: výklad sportovních variant (individuální a týmová)",
-  "vzorce: popisy dvojic ve všech třech variantách",
-  "archetypy: výklad byznysové i sportovní varianty",
-]
 
 // Dotazníky anglicky být musí všechny: bez nich se test nedá ani vyplnit.
 for (const [test, csPath] of [
@@ -453,15 +446,82 @@ for (const cast of ["overall", "strengths", "priorities", "caveat", "nextStep"])
   )
 }
 
-// Obsah vzorců: obecná varianta už anglicky je, sportovní zatím ne.
-{
-  const en = M.obsahVzorce("01", "en", "obecna")
-  const cs = M.obsahVzorce("01", "cs", "obecna")
-  rekni(en.nazev !== cs.nazev, `vzorce obecné: výklad je anglicky (${en.nazev})`)
+// Výklad vzorců: všechny tři varianty, všech jedenáct vzorců, všechna pole.
+const POLE_VZORCE = ["nazev", "tema", "motto", "prozitek", "podTlakem", "puvod"]
+for (const varianta of ["obecna", "sport-individual", "sport-tym"]) {
+  const shodne = []
+  const ceske = []
+  for (let i = 1; i <= 11; i++) {
+    const id = String(i).padStart(2, "0")
+    const en = M.obsahVzorce(id, "en", varianta)
+    const cs = M.obsahVzorce(id, "cs", varianta)
+    for (const pole of POLE_VZORCE) {
+      if (en[pole] === cs[pole]) shodne.push(`${id}.${pole}`)
+      if (CESKA_PISMENA.test(en[pole])) ceske.push(`${id}.${pole}`)
+    }
+    for (const pasmo of ["velmi-nizka", "nizka", "stredni", "vysoka", "dominantni"]) {
+      if (en.pasma[pasmo] === cs.pasma[pasmo]) shodne.push(`${id}.pasma.${pasmo}`)
+      if (CESKA_PISMENA.test(en.pasma[pasmo])) ceske.push(`${id}.pasma.${pasmo}`)
+    }
+  }
+  rekni(!shodne.length, `vzorce ${varianta}: výklad je anglicky${shodne.length ? ` (česky zůstalo ${shodne.slice(0, 3).join(", ")})` : ""}`)
+  rekni(!ceske.length, `vzorce ${varianta}: bez ř, ě a ů${ceske.length ? ` (${ceske.slice(0, 3).join(", ")})` : ""}`)
 }
 
-console.log("\nZbývá přeložit do angličtiny:")
-for (const co of ZBYVA_ANGLICKY) console.log(`     · ${co}`)
+// Popisy dvojic: klíče se mezi jazyky nesmí rozejít, jinak zůstane kombinace
+// bez výkladu a spadne na obecný popis přes domény.
+const KLICE_DVOJIC = Object.keys(
+  JSON.parse(
+    JSON.stringify(
+      require("fs")
+        .readFileSync(path.join(KOREN, "lib/vzorce/data/dvojice.ts"), "utf8")
+        .match(/^  "(\d\d-\d\d)":/gm)
+        .reduce((o, r) => ((o[r.match(/\d\d-\d\d/)[0]] = 1), o), {}),
+    ),
+  ),
+)
+for (const varianta of ["obecna", "sport-individual", "sport-tym"]) {
+  const chybi = KLICE_DVOJIC.filter((k) => !M.popisDvojiceProJazyk(k, "en", varianta))
+  const shodne = KLICE_DVOJIC.filter(
+    (k) => M.popisDvojiceProJazyk(k, "en", varianta) === M.popisDvojiceProJazyk(k, "cs", varianta),
+  )
+  rekni(
+    !chybi.length,
+    `dvojice ${varianta}: anglicky má všech ${KLICE_DVOJIC.length} dvojic${chybi.length ? ` (chybí ${chybi.slice(0, 3).join(", ")})` : ""}`,
+  )
+  rekni(!shodne.length, `dvojice ${varianta}: žádná nezůstala česky${shodne.length ? ` (${shodne.slice(0, 3).join(", ")})` : ""}`)
+}
+
+// Archetypy: obě varianty, všech dvanáct, včetně sportovních polí navíc.
+const ARCHETYPY = ["nevinatko", "objevitel", "mudrc", "hrdina", "rebel", "mag",
+  "jeden-z-nas", "milenec", "sprymar", "pecovatel", "tvurce", "vladce"]
+const POLE_ARCH = ["motto", "touha", "strach", "dar", "podstata", "vPodnikani",
+  "stin", "pasti", "priklady", "sekundarniRole"]
+for (const varianta of ["business", "sport"]) {
+  const shodne = []
+  const ceske = []
+  const chybi = []
+  for (const id of ARCHETYPY) {
+    const en = M.obsahArchetypu(id, "en", varianta)
+    const cs = M.obsahArchetypu(id, "cs", varianta)
+    if (!en) { chybi.push(id); continue }
+    for (const pole of POLE_ARCH) {
+      if (en[pole] === cs[pole]) shodne.push(`${id}.${pole}`)
+      // Značky se nepřekládají, takže u příkladů se hlídá jen rodová značka.
+      if (pole !== "priklady" && CESKA_PISMENA.test(en[pole] ?? "")) ceske.push(`${id}.${pole}`)
+    }
+    if (en.navod.length !== cs.navod.length) chybi.push(`${id}.navod (${en.navod.length} vs ${cs.navod.length})`)
+    if (varianta === "sport") {
+      for (const pole of ["prezdivka", "role", "sTrenerem", "znacka"]) {
+        if (!en[pole]) chybi.push(`${id}.${pole}`)
+        else if (en[pole] === cs[pole]) shodne.push(`${id}.${pole}`)
+      }
+    }
+  }
+  rekni(!chybi.length, `archetypy ${varianta}: anglicky mají všechna pole${chybi.length ? ` (chybí ${chybi.slice(0, 3).join(", ")})` : ""}`)
+  rekni(!shodne.length, `archetypy ${varianta}: výklad je anglicky${shodne.length ? ` (česky zůstalo ${shodne.slice(0, 3).join(", ")})` : ""}`)
+  rekni(!ceske.length, `archetypy ${varianta}: bez ř, ě a ů${ceske.length ? ` (${ceske.slice(0, 3).join(", ")})` : ""}`)
+}
 
 console.log(chyb === 0 ? "\njazyky sedí ve všech testech" : `\nNALEZENO CHYB: ${chyb}`)
 process.exit(chyb === 0 ? 0 : 1)

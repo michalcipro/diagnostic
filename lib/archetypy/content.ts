@@ -4,20 +4,25 @@ import { OBSAH_ARCHETYPU } from "./data/obsah"
 import { OBSAH_ARCHETYPU_SK } from "./data/obsah-sk"
 import { OBSAH_ARCHETYPU_SPORT } from "./data/obsah-sport"
 import { OBSAH_ARCHETYPU_SPORT_SK } from "./data/obsah-sport-sk"
+import { OBSAH_ARCHETYPU_EN } from "./data/obsah-en"
+import { OBSAH_ARCHETYPU_SPORT_EN } from "./data/obsah-sport-en"
 
 // Přístup k textům archetypů.
 //
-// Zdroj je česky, slovenština má vlastní soubor se shodnými klíči.
-// Angličtina zatím není a sahá po češtině, stejné pravidlo jako u vzorců:
-// přeložit jen rámování a nechat uvnitř český výklad by bylo horší než
-// poctivá čeština v celém dokumentu.
+// Zdroj je česky, slovenština i angličtina mají vlastní soubory se shodnými
+// klíči. Angličtina tu dřív chyběla a sahala po češtině, takže anglicky
+// pozvaný klient dostal české vyhodnocení.
 //
 // Varianta rozhoduje, jestli se čte byznysový, nebo sportovní výklad.
 // Archetyp je v obou týž, ale hřiště je jiné, takže se nesdílí ani věta.
 
-const TABULKY: Record<Varianta, Record<"cs" | "sk", Record<ArchetypId, ArchetypObsah>>> = {
-  business: { cs: OBSAH_ARCHETYPU, sk: OBSAH_ARCHETYPU_SK },
-  sport: { cs: OBSAH_ARCHETYPU_SPORT, sk: OBSAH_ARCHETYPU_SPORT_SK },
+const TABULKY: Record<Varianta, Record<Lang, Record<ArchetypId, ArchetypObsah>>> = {
+  business: { cs: OBSAH_ARCHETYPU, sk: OBSAH_ARCHETYPU_SK, en: OBSAH_ARCHETYPU_EN },
+  sport: {
+    cs: OBSAH_ARCHETYPU_SPORT,
+    sk: OBSAH_ARCHETYPU_SPORT_SK,
+    en: OBSAH_ARCHETYPU_SPORT_EN,
+  },
 }
 
 export function obsahArchetypu(
@@ -25,7 +30,7 @@ export function obsahArchetypu(
   lang: Lang,
   varianta: Varianta = "business",
 ): ArchetypObsah {
-  return TABULKY[varianta][lang === "sk" ? "sk" : "cs"][id]
+  return TABULKY[varianta][lang][id]
 }
 
 export function nazevArchetypu(
