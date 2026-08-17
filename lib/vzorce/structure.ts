@@ -65,10 +65,18 @@ const PASMA_SK: Record<Pasmo, string> = {
   dominantni: "Dominantná aktivácia",
 }
 
+const PASMA_EN: Record<Pasmo, string> = {
+  "velmi-nizka": "Very low activation",
+  nizka: "Low activation",
+  stredni: "Moderate activation",
+  vysoka: "High activation",
+  dominantni: "Dominant activation",
+}
+
 export const NAZVY_PASEM: Record<Lang, Record<Pasmo, string>> = {
   cs: PASMA_CS,
   sk: PASMA_SK,
-  en: PASMA_CS,
+  en: PASMA_EN,
 }
 
 /**
@@ -91,10 +99,18 @@ const PASMA_KRATCE_SK: Record<Pasmo, string> = {
   dominantni: "dominantná",
 }
 
+const PASMA_KRATCE_EN: Record<Pasmo, string> = {
+  "velmi-nizka": "very low",
+  nizka: "low",
+  stredni: "moderate",
+  vysoka: "high",
+  dominantni: "dominant",
+}
+
 export const NAZVY_PASEM_KRATCE: Record<Lang, Record<Pasmo, string>> = {
   cs: PASMA_KRATCE_CS,
   sk: PASMA_KRATCE_SK,
-  en: PASMA_KRATCE_CS,
+  en: PASMA_KRATCE_EN,
 }
 
 /**
@@ -118,6 +134,14 @@ const DOMENY_KRATCE_SK: Record<Domena, string> = {
   ostrazitost: "Ostražitosť a nároky",
 }
 
+const DOMENY_KRATCE_EN: Record<Domena, string> = {
+  odpojeni: "Disconnection and rejection",
+  autonomie: "Autonomy and performance",
+  hranice: "Impaired limits",
+  zamereni: "Other-directedness",
+  ostrazitost: "Vigilance and demands",
+}
+
 const DOMENY_KRATCE_SPORT_CS: Record<Domena, string> = {
   odpojeni: "Bezpečí a přijetí",
   autonomie: "Samostatnost a důvěra",
@@ -134,14 +158,22 @@ const DOMENY_KRATCE_SPORT_SK: Record<Domena, string> = {
   ostrazitost: "Nároky a kontrola",
 }
 
+const DOMENY_KRATCE_SPORT_EN: Record<Domena, string> = {
+  odpojeni: "Safety and acceptance",
+  autonomie: "Independence and self-trust",
+  hranice: "Boundaries and self-control",
+  zamereni: "Focus on others",
+  ostrazitost: "Demands and control",
+}
+
 const KRATCE_SPORT = {
   cs: DOMENY_KRATCE_SPORT_CS,
   sk: DOMENY_KRATCE_SPORT_SK,
-  en: DOMENY_KRATCE_SPORT_CS,
+  en: DOMENY_KRATCE_SPORT_EN,
 }
 
 export const NAZVY_DOMEN_KRATCE: Record<Varianta, Record<Lang, Record<Domena, string>>> = {
-  obecna: { cs: DOMENY_KRATCE_CS, sk: DOMENY_KRATCE_SK, en: DOMENY_KRATCE_CS },
+  obecna: { cs: DOMENY_KRATCE_CS, sk: DOMENY_KRATCE_SK, en: DOMENY_KRATCE_EN },
   // oblasti jsou pro oba sporty stejné: mluví o potřebách, ne o prostředí
   "sport-individual": KRATCE_SPORT,
   "sport-tym": KRATCE_SPORT,
@@ -168,6 +200,14 @@ const DOMENY_SK: Record<Domena, string> = {
  * Obsahově jde o tytéž skupiny schémat, jen popsané tím, co v nich sportovec
  * skutečně řeší: jistotu místa, samostatnost na hřišti, hranice, nároky.
  */
+const DOMENY_EN: Record<Domena, string> = {
+  odpojeni: "Disconnection and rejection",
+  autonomie: "Impaired autonomy and performance",
+  hranice: "Impaired limits",
+  zamereni: "Other-directedness",
+  ostrazitost: "Overvigilance and inhibition",
+}
+
 const DOMENY_SPORT_CS: Record<Domena, string> = {
   odpojeni: "Bezpečí ve vztazích a přijetí",
   autonomie: "Samostatnost a důvěra ve vlastní síly",
@@ -184,10 +224,18 @@ const DOMENY_SPORT_SK: Record<Domena, string> = {
   ostrazitost: "Nároky a kontrola",
 }
 
-const DOMENY_SPORT = { cs: DOMENY_SPORT_CS, sk: DOMENY_SPORT_SK, en: DOMENY_SPORT_CS }
+const DOMENY_SPORT_EN: Record<Domena, string> = {
+  odpojeni: "Safety in relationships and acceptance",
+  autonomie: "Independence and trust in one's own powers",
+  hranice: "Boundaries and self-control",
+  zamereni: "Focus on others",
+  ostrazitost: "Demands and control",
+}
+
+const DOMENY_SPORT = { cs: DOMENY_SPORT_CS, sk: DOMENY_SPORT_SK, en: DOMENY_SPORT_EN }
 
 export const NAZVY_DOMEN: Record<Varianta, Record<Lang, Record<Domena, string>>> = {
-  obecna: { cs: DOMENY_CS, sk: DOMENY_SK, en: DOMENY_CS },
+  obecna: { cs: DOMENY_CS, sk: DOMENY_SK, en: DOMENY_EN },
   "sport-individual": DOMENY_SPORT,
   "sport-tym": DOMENY_SPORT,
 }
@@ -216,10 +264,18 @@ const POTREBA_SK: Record<Domena, string> = {
   ostrazitost: "prijatie bez podmienok a bez výkonu",
 }
 
+const POTREBA_EN: Record<Domena, string> = {
+  odpojeni: "safe and dependable closeness",
+  autonomie: "support towards independence and trust in one's own powers",
+  hranice: "kind but firm boundaries",
+  zamereni: "the right to have needs of one's own and to say them out loud",
+  ostrazitost: "acceptance without conditions and without performance",
+}
+
 export const POTREBA_DOMENY: Record<Lang, Record<Domena, string>> = {
   cs: POTREBA_CS,
   sk: POTREBA_SK,
-  en: POTREBA_CS,
+  en: POTREBA_EN,
 }
 
 /** Minimální podíl zodpovězených položek, aby se skóre vzorce vykázalo. */

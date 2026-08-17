@@ -86,8 +86,30 @@ const SK: Sablony = {
     `Pracovať sa dá jedine s tým najsilnejším, teda s témou, ktorá sa volá ${nejsilnejsi}. Platí, že iný sa v tejto miere neaktivuje. Postupuj po konkrétnych situáciách, nie po predsavzatiach: vzorec sa nedá prehovoriť, dá sa však opakovane zaskočiť iným správaním, než aké čaká.`,
 }
 
-/** Angličtina obsah vzorců zatím nemá, takže sahá po češtině. */
-const SABLONY: Record<Lang, Sablony> = { cs: CS, sk: SK, en: CS }
+const EN: Sablony = {
+  stejnaDomena: (a, b, potreba) =>
+    `The ${a} and ${b} patterns come from the same area. The same thing is missing in both: ${potreba}. That is why they reinforce each other: whatever sets off one usually wakes the other, and from the inside they are hard to tell apart.`,
+  ruzneDomeny: (a, b, potrebaA, potrebaB) =>
+    `The ${a} and ${b} patterns come from two different areas. The first is missing ${potrebaA}, the second ${potrebaB}. They therefore do not always fire together, but once they meet in a single situation they amplify each other.`,
+  domenyVsechny: (domena, potreba) =>
+    `All three of the most active patterns fall into one area: ${domena}. That is important information in itself: it does not mean three different problems, but one theme in three guises. The missing piece here is ${potreba}.`,
+  domenyDve: (domena, potreba, druha) =>
+    `Two of the three most active patterns fall into the area of ${domena}, that is, the theme of ${potreba}. The third comes from elsewhere, from the area of ${druha}. It is usually that third one that keeps the whole thing running, because it offers an apparent solution to the first two.`,
+  domenyProvazane:
+    "Your three most active patterns come from three different areas of need, but that does not mean three separate problems. Quite the opposite: each of those three pairs forms a known and well-described combination, so they work together as one system. That is why the profile reads easily from the outside, while from the inside it is hard to tell where one pattern ends and the next begins.",
+  domenyPestre:
+    "Your three most active patterns come from three different areas. It means they do not fire together, but each in a different kind of situation. That makes the profile more varied and at the same time harder to read: you behave one way in one situation and differently in another, and from the outside it looks inconsistent, even though every reaction has its own logic on the inside.",
+  souhrnTri: (nejsilnejsi) =>
+    `Together they form a system that sustains itself. The loudest of them is ${nejsilnejsi}, and the other two supply the reasons for exactly that pattern. That is why this way of functioning cannot be interrupted by a decision or a reasonable argument: each of the three explains why the other two belong. This is not weakness of character, but a strategy that once worked and still fires on its own, even where it is no longer needed.`,
+  souhrnJeden: (nejsilnejsi) =>
+    `The loudest of them is ${nejsilnejsi}. The pattern fires by itself and regardless of what you think about it, because it grew as a strategy that once made sense.`,
+  kdeZacitDostupny: (dostupny) =>
+    `It does not pay to start with the strongest pattern, but with the most reachable one, because the strongest is also the best fortified. The most workable place here is ${dostupny}: it shows up in concrete behaviour that can be observed and changed in small steps. When it loosens, the strongest one eases too, because it loses one of its supports.`,
+  kdeZacitJenNejsilnejsi: (nejsilnejsi) =>
+    `The only one worth working with is the strongest, that is, the theme called ${nejsilnejsi}. No other one activates to this degree. Work through concrete situations rather than resolutions: a pattern cannot be talked out of, but it can repeatedly be caught out by behaviour it does not expect.`,
+}
+
+const SABLONY: Record<Lang, Sablony> = { cs: CS, sk: SK, en: EN }
 
 /** Pořadí zásahu podle domén: kde se dá začít s nejmenším odporem. */
 const POradiPACE: Domena[] = ["ostrazitost", "zamereni", "autonomie", "hranice", "odpojeni"]

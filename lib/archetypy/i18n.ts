@@ -10,7 +10,8 @@ import type { Varianta, Vyhraneni } from "./types"
 // Popisky, které mluví o značce nebo o sportu, jsou vedené po variantách.
 // Zbytek je společný, protože stavba vyhodnocení je v obou stejná.
 //
-// Angličtinu obsah zatím nemá, takže na ni ukazuje česká tabulka.
+// Všechny tři jazyky mají vlastní sadu. Dřív tady stálo `en: CS`, takže
+// anglicky vystavená pozvánka končila českým vyhodnocením.
 
 export interface ArchetypyUI {
   podnadpis: Record<Varianta, string>
@@ -341,7 +342,139 @@ const SK: ArchetypyUI = {
   },
 }
 
-export const UI_ARCHETYPY: Record<Lang, ArchetypyUI> = { cs: CS, sk: SK, en: CS }
+const EN: ArchetypyUI = {
+  podnadpis: {
+    business:
+      "An archetypal profile of personality in business, based on The Hero and the Outlaw (Margaret Mark and Carol S. Pearson)",
+    sport:
+      "An archetypal profile of an athlete's competitive identity, based on The Hero and the Outlaw (Margaret Mark and Carol S. Pearson)",
+  },
+  respondent: "Respondent",
+  role: {
+    business: "Company / brand / role",
+    sport: "Sport, discipline and level",
+  },
+  datum: "Date completed",
+
+  neuplnyTitulek: (zodpovezeno, celkem) =>
+    `The questionnaire is incomplete (${zodpovezeno} of ${celkem}).`,
+  neuplnyPopis:
+    "Where answers are missing, the archetype score is estimated from the average of the answers given. Archetypes missing more than a fifth of their answers are left out of the ranking.",
+
+  profilTitulek: "All twelve archetypes",
+  profilPopisWeb: {
+    business:
+      "An archetype score is the sum of eight answers, so 8 to 48 points. There are no good and bad results here: the profile says which voice comes most naturally to the brand. The number in the circle shows how many statements the respondent rated 5 or 6, that is, how many describe them strongly.",
+    sport:
+      "An archetype score is the sum of eight answers, so 8 to 48 points. There are no good and bad results here: the profile says what the athlete naturally draws on when performance is at stake. The number in the circle shows how many statements they rated 5 or 6, that is, how many describe them strongly.",
+  },
+  profilPopisPdf: {
+    business:
+      "An archetype score is the sum of eight answers, so 8 to 48 points. There are no good and bad results here: the profile says which voice comes most naturally to the brand. The number in brackets shows how many statements the respondent rated 5 or 6, that is, how many describe them strongly.",
+    sport:
+      "An archetype score is the sum of eight answers, so 8 to 48 points. There are no good and bad results here: the profile says what the athlete naturally draws on when performance is at stake. The number in brackets shows how many statements they rated 5 or 6, that is, how many describe them strongly.",
+  },
+
+  motivaceTitulek: "Motivation map",
+  motivacePopis:
+    "The book sorts the twelve archetypes into four groups along two axes: stability against risk, and belonging against independence. The map shows which motivation the profile draws on, and it is read before the individual archetypes: two archetypes from the same group are one theme, not two.",
+  motivacePatka:
+    "A group value is the average of its three archetypes as a percentage of the score range. It serves to compare directions, not as a result in its own right.",
+
+  primarniTitulek: "Primary archetype",
+  sekundarniTitulek: "Secondary archetype",
+  potlacenyTitulek: "Suppressed archetype",
+  vyhraneniStitek: {
+    vyhraneny: "sharply defined profile",
+    zretelny: "clearly defined profile",
+    tesny: "close profile",
+  },
+
+  z48: "of 48",
+  bodyZ48: (skore) => `${skore} points of 48`,
+  silneOdpovedi: (pocet, polozky) =>
+    `Rated 5 or 6 on ${pocet} of 8 statements${polozky ? `, namely ${polozky}` : ""}.`,
+  zodpovezenoZ: (zodpovezeno, celkem) => `${zodpovezeno} of ${celkem} items answered`,
+  nezarazuje: "left out of the ranking",
+
+  vKnize: "In the book",
+  touhaStitek: "Desire",
+  strachStitek: "Fear",
+  darStitek: {
+    business: "Gift to the brand",
+    sport: "Gift to the sport",
+  },
+
+  podstataTitulek: "The essence of the archetype",
+  vPodnikaniTitulek: {
+    business: "How it shows up in business",
+    sport: "How it shows up in training and competition",
+  },
+  stinTitulek: "The shadow under pressure",
+  pastiTitulek: {
+    business: "Traps in communication",
+    sport: "How this type gets derailed",
+  },
+  navodTitulek: {
+    business: "How to work with it",
+    sport: "How to work with it, for coach and athlete",
+  },
+  prikladyStitek: {
+    business: "Brands of this archetype",
+    sport: "What it looks like in practice",
+  },
+  sekundarniRoleStitek: "What it adds as the second voice",
+
+  roleTitulek: "Role in the team and in individual preparation",
+  sTreneremTitulek: "Where it grates with the coach",
+  znackaTitulek: "Personal brand and outward communication",
+
+  kombinaceTitulek: "How they play together",
+  kombinacePopis: {
+    business:
+      "The primary archetype decides what the brand is about. The secondary decides how that shows. It is the pair that gives a brand a face the market remembers.",
+    sport:
+      "The primary archetype decides where the athlete draws energy from. The secondary decides what colour it takes. It is the pair that explains behaviour which looks illogical from one archetype alone.",
+  },
+
+  souhrnTitulek: "Summary for the client",
+  souhrnPopis: {
+    business: "The shortest honest answer to the question of what voice the brand should speak in.",
+    sport:
+      "The shortest honest answer to the question of what drives this athlete and how to lead them.",
+  },
+  kdeZacitStitek: "Where to start",
+
+  zaverWeb: {
+    business: [
+      "This profile is not a box and not a horoscope. It is a map: it names the voice the respondent speaks in naturally, so the brand can use it deliberately and consistently. An archetype is not chosen, it is recognised; and a brand that speaks in line with its own does not have to rethink every campaign from scratch.",
+      "This result does not replace a marketing strategy or a psychological examination. It serves as material for the conversation with a coach and for decisions about positioning, tone of voice and visual style.",
+    ],
+    sport: [
+      "This profile is not a box and not a horoscope. It is a map: it names where the athlete draws energy from, which role fits them and what pulls them down under pressure. An archetype is not chosen, it is recognised; and a coach who knows it does not have to guess which approach will land.",
+      "This result does not replace a sport-psychology assessment or a training plan. It serves as material for the coach's conversation with the athlete: about leadership, about the role in the team, and about how to set goals and give feedback.",
+    ],
+  },
+  zaverPdf: {
+    business:
+      "This profile is not a box and not a horoscope. It is a map: it names the voice the respondent speaks in naturally, so the brand can use it deliberately and consistently. An archetype is not chosen, it is recognised; and a brand that speaks in line with its own does not have to rethink every campaign from scratch. This result does not replace a marketing strategy or a psychological examination and serves as material for the conversation with a coach.",
+    sport:
+      "This profile is not a box and not a horoscope. It is a map: it names where the athlete draws energy from, which role fits them and what pulls them down under pressure. An archetype is not chosen, it is recognised; and a coach who knows it does not have to guess which approach will land. This result does not replace a sport-psychology assessment or a training plan and serves as material for the coach's conversation with the athlete.",
+  },
+
+  legendaTop: "primary and secondary archetype",
+  legendaOstatni: "the rest",
+  legendaOdznak: "statements rated 5 or 6",
+  odznakTitulek: (pocet) => `${pocet} statements rated 5 or 6`,
+  prumerSkupiny: (procenta) => `group average ${procenta} %`,
+
+  nazevSouboru: {
+    business: "Brand archetypes",
+    sport: "Athlete archetypes",
+  },
+}
+
+export const UI_ARCHETYPY: Record<Lang, ArchetypyUI> = { cs: CS, sk: SK, en: EN }
 
 // ---------------------------------------------------------------------------
 // Škála a instrukce dotazníku. Vzorce se ptají na míru problému, archetypy na

@@ -40,8 +40,7 @@ export function archetyp(id: ArchetypId): ArchetypDef {
 }
 
 // ---------------------------------------------------------------------------
-// Názvy motivačních skupin. Angličtina zatím sahá po češtině, stejné pravidlo
-// jako u vzorců.
+// Názvy motivačních skupin ve všech třech jazycích.
 // ---------------------------------------------------------------------------
 
 const MOTIVACE_CS: Record<Motivace, string> = {
@@ -58,10 +57,17 @@ const MOTIVACE_SK: Record<Motivace, string> = {
   rad: "Stabilita a kontrola",
 }
 
+const MOTIVACE_EN: Record<Motivace, string> = {
+  nezavislost: "Independence and fulfilment",
+  mistrovstvi: "Risk and mastery",
+  sounalezitost: "Belonging and enjoyment",
+  rad: "Stability and control",
+}
+
 export const NAZVY_MOTIVACI: Record<Lang, Record<Motivace, string>> = {
   cs: MOTIVACE_CS,
   sk: MOTIVACE_SK,
-  en: MOTIVACE_CS,
+  en: MOTIVACE_EN,
 }
 
 /** Čemu skupina odpovídá v praxi; ukazuje se pod grafem motivací. */
@@ -79,6 +85,13 @@ const MOTIVACE_POPIS_SK: Record<Motivace, string> = {
   rad: "postarať sa, vybudovať a udržať veci pod kontrolou",
 }
 
+const MOTIVACE_POPIS_EN: Record<Motivace, string> = {
+  nezavislost: "to be your own person, understand the world and live by your own convictions",
+  mistrovstvi: "to achieve something, change the world and leave a mark",
+  sounalezitost: "to belong with people, care for them and enjoy their company",
+  rad: "to look after things, build them and keep them under control",
+}
+
 /** Táž čtveřice ve sportovním jazyce: motiv se nemění, mění se hřiště. */
 const MOTIVACE_POPIS_SPORT_CS: Record<Motivace, string> = {
   nezavislost: "být sám sebou, rozumět svému sportu a jít vlastní cestou",
@@ -94,15 +107,22 @@ const MOTIVACE_POPIS_SPORT_SK: Record<Motivace, string> = {
   rad: "držať poriadok, starať sa o ostatných a mať prípravu pod kontrolou",
 }
 
+const MOTIVACE_POPIS_SPORT_EN: Record<Motivace, string> = {
+  nezavislost: "to be yourself, understand your sport and go your own way",
+  mistrovstvi: "to show what is in you, push past limits and win",
+  sounalezitost: "to belong to the group, care for the people around you and enjoy the sport",
+  rad: "to hold the order, look after the others and keep preparation under control",
+}
+
 export const POPISY_MOTIVACI: Record<Varianta, Record<Lang, Record<Motivace, string>>> = {
   business: {
     cs: MOTIVACE_POPIS_CS,
     sk: MOTIVACE_POPIS_SK,
-    en: MOTIVACE_POPIS_CS,
+    en: MOTIVACE_POPIS_EN,
   },
   sport: {
     cs: MOTIVACE_POPIS_SPORT_CS,
     sk: MOTIVACE_POPIS_SPORT_SK,
-    en: MOTIVACE_POPIS_SPORT_CS,
+    en: MOTIVACE_POPIS_SPORT_EN,
   },
 }

@@ -7,9 +7,9 @@ import type { Varianta } from "./types"
 // sekcí, vysvětlivky pod grafy, popisky os a věty, které se skládají z čísel.
 // Web i PDF čerpají ze stejné tabulky, aby se obě podoby nerozešly.
 //
-// Angličtinu obsah vzorců zatím nemá, takže na ni ukazuje česká tabulka.
-// Přeložit jen rámování a nechat uvnitř český výklad by bylo horší než
-// poctivá čeština v celém dokumentu.
+// Všechny tři jazyky mají vlastní sadu. Dřív tady stálo `en: CS`, takže
+// anglicky vystavená pozvánka vedla k českému vyhodnocení; klient dostal
+// dokument, kterému nerozuměl.
 
 export interface VzorceUI {
   /** podnadpis pod názvem testu; sportovní verze má vlastní */
@@ -233,4 +233,87 @@ const SK: VzorceUI = {
   },
 }
 
-export const UI_VZORCE: Record<Lang, VzorceUI> = { cs: CS, sk: SK, en: CS }
+const EN: VzorceUI = {
+  podnadpis: {
+    obecna:
+      "A diagnostic profile of automatic emotional reactions, relational strategies and performance blocks",
+    "sport-individual":
+      "A diagnostic profile of automatic emotional reactions, relational strategies and performance blocks in individual sport",
+    "sport-tym":
+      "A diagnostic profile of automatic emotional reactions, relational strategies and performance blocks in team sport",
+  },
+  respondent: "Respondent",
+  role: {
+    obecna: "Role / field",
+    "sport-individual": "Sport and level",
+    "sport-tym": "Sport and level",
+  },
+  datum: "Date completed",
+
+  neuplnyTitulek: (zodpovezeno, celkem) =>
+    `The questionnaire is incomplete (${zodpovezeno} of ${celkem}).`,
+  neuplnyPopis:
+    "Where answers are missing, the pattern score is estimated from the average of the answers given. Patterns missing more than a fifth of their answers are left out of the ranking.",
+
+  profilTitulek: "All patterns",
+  profilPopisWeb:
+    "A pattern score is the sum of ten answers, so 10 to 60 points. Read the band from the position on the axis, not from the colour. The number in the circle shows how many statements the respondent rated 5 or 6; those matter even when the total score is not high.",
+  profilPopisPdf:
+    "A pattern score is the sum of ten answers, so 10 to 60 points. The number in brackets shows how many statements the respondent rated 5 or 6; those matter even when the total score is not high.",
+
+  oblastiTitulek: "Load by area",
+  oblastiPopisWeb:
+    "The same profile grouped by the area each pattern comes from. When a single area is loaded, this is not several problems but one theme in several guises.",
+  oblastiPopisPdf:
+    "The same profile grouped by the area each pattern comes from. When a single area is loaded, this is not several problems but one theme in several guises. The bracket gives the number of patterns the average is drawn from.",
+  oblastiPatka:
+    "The average score of the patterns in that area; the bracket gives how many patterns it is drawn from. Patterns are grouped by which childhood need went unmet, so a loaded area says more than any single score.",
+
+  top3Titulek: "The three most active patterns",
+  top3Popis:
+    "These are the patterns that fire most strongly for this respondent. They are not labels and not a diagnosis. They describe a mechanism that is triggered under pressure.",
+  misto: (poradi) => `no. ${poradi}`,
+  z60: "of 60",
+  bodyZ60: (skore, pasmo) => `${skore} points of 60, ${pasmo}`,
+  silneOdpovedi: (pocet, polozky) =>
+    `Rated 5 or 6 on ${pocet} of 10 statements${polozky ? `, namely ${polozky}` : ""}.`,
+  zodpovezenoZ: (zodpovezeno, celkem) => `${zodpovezeno} of ${celkem} items answered`,
+  nezarazuje: "left out of the ranking",
+
+  jakVypada: "What it feels like from the inside",
+  podTlakem: "What it does under pressure",
+  odkud: "Where it comes from",
+
+  situacniTitulek: "Situationally activated patterns",
+  situacniPopis:
+    "These patterns did not make the top three, yet three or more of their statements are rated at the top of the scale. They are not permanently active, but in specific situations they fire hard. They are worth asking about in the conversation.",
+  situacniRadek: (pocet, polozky) => `${pocet}× rated 5 or 6 · items ${polozky}`,
+
+  spojeniTitulek: "How they work together",
+  spojeniPopis:
+    "Three patterns are not three separate problems. It is the way they combine that explains behaviour a person cannot make sense of on their own.",
+  kdeSeZivi: "Where they feed each other",
+
+  zaverWeb: [
+    "This profile is not a label and not a diagnosis. It is a map. The point is not to fix a person inside a pattern, but to name the mechanism that fires under pressure and to open room for more precise work.",
+    "This result does not replace a psychological or medical examination. It serves as material for the conversation with a coach.",
+  ],
+  zaverPdf:
+    "This profile is not a label and not a diagnosis. It is a map. The point is not to fix a person inside a pattern, but to name the mechanism that fires under pressure and to open room for more precise work. This result does not replace a psychological or medical examination and serves as material for the conversation with a coach.",
+
+  pasmaKlic: "Bands",
+  legendaTop3: "three most active patterns",
+  legendaOstatni: "the rest",
+  legendaOdznak: "statements rated 5 or 6",
+  odznakTitulek: (pocet) => `${pocet} statements rated 5 or 6`,
+  prumerZ: (prumer, vzorcu) => `average ${prumer} points from ${vzorcu}`,
+  pocetVzorcu: (n) => (n === 1 ? "1 pattern" : `${n} patterns`),
+
+  nazevSouboru: {
+    obecna: "Emotionally destructive patterns",
+    "sport-individual": "Emotionally destructive patterns - Individual sport",
+    "sport-tym": "Emotionally destructive patterns - Team sport",
+  },
+}
+
+export const UI_VZORCE: Record<Lang, VzorceUI> = { cs: CS, sk: SK, en: EN }
