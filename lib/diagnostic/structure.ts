@@ -1,6 +1,19 @@
 import type { Varianta as VariantaVzorcu } from "../vzorce/types"
 import type { Varianta as VariantaArchetypu } from "../archetypy/types"
 import type { DimensionDef, FacetDef, StructureDef, TestId, TestModel, Variant } from "./types"
+import {
+  TEST_IDS,
+  jeArchetypy,
+  jeVzorce,
+  parseTestId,
+  variantaArchetypu,
+  variantaVzorcu,
+} from "./test-id"
+
+// Rozpoznání testu podle id sídlí v test-id.ts, aby si ho dotazník mohl vzít
+// bez vyhodnocovacích klíčů, které jsou tady. Znovu se vyváží, ať se kvůli
+// tomu nemusí přepisovat volání ve zbytku aplikace.
+export { TEST_IDS, jeArchetypy, jeVzorce, parseTestId, variantaArchetypu, variantaVzorcu }
 
 // Přepis vyhodnocovacích klíčů ELITE 200™ a ELITE 100™ (Winning Minds).
 // Sport i Business varianta sdílejí identickou strukturu (paralelní formy),
@@ -176,17 +189,6 @@ export const ELITE100: StructureDef = {
 
 // ---------- Registr testů ----------
 
-export const TEST_IDS: TestId[] = [
-  "elite200-sport",
-  "elite200-business",
-  "elite100-sport",
-  "elite100-business",
-  "vzorce",
-  "vzorce-sport-individual",
-  "vzorce-sport-tym",
-  "archetypy",
-  "archetypy-sport",
-]
 
 /**
  * `vzorce-sport` v nabídce není: nahradily ho dvě sportovní verze. Stará
@@ -198,38 +200,19 @@ export const TEST_IDS: TestId[] = [
 export const ELITE_TEST_IDS = TEST_IDS.filter((t) => !jeVzorce(t) && !jeArchetypy(t))
 
 /** Emocionálně-destruktivní vzorce se skórují jinde, v lib/vzorce. */
-export function jeVzorce(testId: string): boolean {
-  return testId.startsWith("vzorce")
-}
 
 /** Archetypy se skórují v lib/archetypy; byznysová i sportovní podoba. */
-export function jeArchetypy(testId: string): boolean {
-  return testId.startsWith("archetypy")
-}
 
 /**
  * Která podoba archetypů to je. Stavba i skórování jsou shodné, liší se
  * dotazník a celý výklad, takže se varianta táhne až do vyhodnocení a do PDF.
  */
-export function variantaArchetypu(testId: string): VariantaArchetypu {
-  return testId === "archetypy-sport" ? "sport" : "business"
-}
 
 /**
  * Která podoba vzorců to je. Stavba i skórování jsou shodné, liší se dotazník
  * a celý výklad, takže se varianta táhne až do vyhodnocení a do PDF.
  */
-export function variantaVzorcu(testId: string): VariantaVzorcu {
-  if (testId === "vzorce-sport-individual") return "sport-individual"
-  if (testId === "vzorce-sport" || testId === "vzorce-sport-tym") return "sport-tym"
-  return "obecna"
-}
 
-export function parseTestId(testId: string): { model: TestModel; variant: Variant } | null {
-  const m = testId.match(/^(elite200|elite100)-(sport|business)$/)
-  if (!m) return null
-  return { model: m[1] as TestModel, variant: m[2] as Variant }
-}
 
 export function getStructure(model: TestModel): StructureDef {
   return model === "elite200" ? ELITE200 : ELITE100

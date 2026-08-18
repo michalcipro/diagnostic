@@ -1,15 +1,15 @@
 import { SCALE_LABELS, SCALE_LABELS_6 } from "./i18n"
-import { getStructure, jeArchetypy, jeVzorce, parseTestId } from "./structure"
-import { POCET_POLOZEK } from "../vzorce/structure"
-import { POCET_POLOZEK as POCET_POLOZEK_ARCHETYPY } from "../archetypy/structure"
+import { POCET_POLOZEK, jeArchetypy, jeVzorce, variantaArchetypu } from "./test-id"
 import { INSTRUKCE_ARCHETYPY, SKALA_ARCHETYPY } from "../archetypy/i18n"
-import { variantaArchetypu } from "./structure"
 import type { Answer, Lang, TestId } from "./types"
 
 // Společné údaje o testu na jednom místě.
 //
 // Aplikace obsluhuje dvě rodiny testů s různým počtem položek i různou škálou.
 // Aby se to nemuselo větvit v každé komponentě, ptají se všechny sem.
+//
+// Čte se odsud i při vyplňování, takže se tu nesmí sáhnout do structure.ts
+// ani do scoring.ts: s nimi by si respondent stáhl i vyhodnocovací klíče.
 
 export interface TestMeta {
   /** kolik má test položek */
@@ -54,7 +54,7 @@ const INSTRUKCE_VZORCE: Record<Lang, string[]> = {
 export function testMeta(testId: TestId): TestMeta {
   if (jeArchetypy(testId)) {
     return {
-      pocetPolozek: POCET_POLOZEK_ARCHETYPY,
+      pocetPolozek: POCET_POLOZEK[testId],
       maxOdpoved: 6,
       popiskySkaly: (lang) => SKALA_ARCHETYPY[lang],
       hodnoty: [1, 2, 3, 4, 5, 6],
@@ -63,16 +63,15 @@ export function testMeta(testId: TestId): TestMeta {
   }
   if (jeVzorce(testId)) {
     return {
-      pocetPolozek: POCET_POLOZEK,
+      pocetPolozek: POCET_POLOZEK[testId],
       maxOdpoved: 6,
       popiskySkaly: (lang) => SCALE_LABELS_6[lang],
       hodnoty: [1, 2, 3, 4, 5, 6],
       instrukceProJazyk: (lang: Lang) => INSTRUKCE_VZORCE[lang],
     }
   }
-  const parsed = parseTestId(testId)!
   return {
-    pocetPolozek: getStructure(parsed.model).itemCount,
+    pocetPolozek: POCET_POLOZEK[testId],
     maxOdpoved: 5,
     popiskySkaly: (lang) => SCALE_LABELS[lang],
     hodnoty: [1, 2, 3, 4, 5],

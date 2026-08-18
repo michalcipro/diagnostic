@@ -4,9 +4,9 @@ import { use, useEffect, useMemo, useRef, useState } from "react"
 import { LangToggle } from "@/components/diagnostic/lang-toggle"
 import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
 import { testMeta } from "@/lib/diagnostic/test-meta"
-import { applyGender } from "@/lib/diagnostic/content"
-import { getItems, itemText } from "@/lib/diagnostic/items"
-import { jeVzorce, parseTestId } from "@/lib/diagnostic/structure"
+import { applyGender } from "@/lib/diagnostic/gender"
+import { getItems, itemText, type Item } from "@/lib/diagnostic/items"
+import { jeVzorce, parseTestId } from "@/lib/diagnostic/test-id"
 import { clearSession, loadSession, newSession, saveSession } from "@/lib/diagnostic/storage"
 import { fetchInvite, isRemoteEnabled, submitWithInvite, type Invite } from "@/lib/diagnostic/remote"
 import type { Answer, Lang, StoredSession, TestId } from "@/lib/diagnostic/types"
@@ -142,7 +142,16 @@ function Questionnaire({
   const parsed = parseTestId(testId)
   const variant = parsed?.variant ?? "business"
   const meta = useMemo(() => testMeta(testId), [testId])
-  const items = useMemo(() => getItems(testId), [testId])
+  // Dotazník se stahuje až podle toho, na který test pozvánka zní: ostatní
+  // testy do prohlížeče respondenta nepatří.
+  const [items, setItems] = useState<Item[] | null>(null)
+  useEffect(() => {
+    let aktivni = true
+    void getItems(testId).then((i) => aktivni && setItems(i))
+    return () => {
+      aktivni = false
+    }
+  }, [testId])
 
   const [session, setSession] = useState<StoredSession | null>(null)
   const [stage, setStage] = useState<"intro" | "items" | "sent" | "sendFailed">("intro")
@@ -168,7 +177,7 @@ function Questionnaire({
     if (session) saveSession(token, session)
   }, [token, session])
 
-  if (!session) return null
+  if (!session || !items) return null
 
   const lang = session.lang
   const t = UI[lang]
