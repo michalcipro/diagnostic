@@ -1,0 +1,1114 @@
+<!doctype html>
+<!--
+  Manuál pro kouče – zdroj sazby pro docs/manual-pro-kouce.pdf.
+
+  Sází se přes headless Chromium, formát A4, okraje 17/16/16/16 mm, patička
+  s číslem strany. Titulní strana se sází zvlášť bez patičky a nasazuje se
+  jako první stránka, aby na obálce nebyla jednička.
+
+  Obsah na titulní straně má čísla stran zapsaná ručně. Když se text změní
+  tak, že se posunou zlomy, je potřeba je přepsat: automaticky se nedopočítají.
+
+  Pravidla textu jsou stejná jako všude v projektu: české uvozovky „takhle“,
+  krátká pomlčka –, žádný znak U+2014. Do manuálu nepatří vyhodnocovací klíče
+  ani nic o validitě; je to popis produktu pro kouče, ne metodika.
+-->
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>Manuál pro kouče</title>
+<style>
+  @page { size: A4; margin: 17mm 16mm 16mm 16mm; }
+
+  :root {
+    --ink:      #1d1d1f;
+    --ink-2:    #55555a;
+    --ink-3:    #8e8e93;
+    --hairline: #e2e2e7;
+    --rule:     #c9c9ce;
+    --tint:     #f4f4f8;
+    --accent:   #007aff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  body {
+    margin: 0;
+    font-family: "Liberation Sans", Helvetica, Arial, sans-serif;
+    font-size: 9.6pt;
+    line-height: 1.55;
+    color: var(--ink);
+    font-kerning: normal;
+  }
+
+  p { margin: 0 0 7pt; }
+  p:last-child { margin-bottom: 0; }
+  strong { font-weight: 700; }
+
+  /* ---------- opakující se prvky ---------- */
+
+  .eyebrow {
+    font-size: 7.3pt;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .accent { color: var(--accent); }
+
+  .page { page-break-before: always; }
+  .page:first-of-type { page-break-before: auto; }
+
+  /* Nic z tohohle se nesmí rozlomit v půlce: půlka tabulky nebo utržený
+     nadpis na patě strany se čte hůř než o kus volnějšího místa výš. */
+  .block, .note, .choose, table.areas, .facts, .section-head,
+  ol.steps > li, ul.plain > li { page-break-inside: avoid; }
+  h2.section, h3 { page-break-after: avoid; }
+  p { orphans: 2; widows: 2; }
+
+  /* ---------- titulní strana ---------- */
+
+  .cover {
+    height: 258mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .cover-top { padding-top: 34mm; }
+  .cover .brand {
+    font-size: 8.5pt;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+  .cover .brand-rule {
+    width: 44mm;
+    height: 2.4pt;
+    background: var(--accent);
+    margin: 7mm 0 9mm;
+  }
+  .cover h1 {
+    font-size: 33pt;
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    line-height: 1.1;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .cover .lede {
+    margin-top: 7mm;
+    max-width: 118mm;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+  .cover-foot {
+    border-top: 0.6pt solid var(--rule);
+    padding-top: 4mm;
+    display: flex;
+    justify-content: space-between;
+    font-size: 8.4pt;
+    color: var(--ink-3);
+  }
+  .cover-index {
+    margin-top: 14mm;
+    border-top: 0.6pt solid var(--hairline);
+  }
+  .cover-index div {
+    display: flex;
+    gap: 6mm;
+    border-bottom: 0.6pt solid var(--hairline);
+    padding: 3.1mm 0;
+    font-size: 9.4pt;
+  }
+  .cover-index span:first-child {
+    width: 8mm;
+    color: var(--accent);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .cover-index span:last-child {
+    margin-left: auto;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- nadpisy sekcí ---------- */
+
+  h2.section {
+    font-size: 21pt;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin: 0 0 1.5mm;
+    text-wrap: balance;
+  }
+  .section-head {
+    border-top: 2.2pt solid var(--ink);
+    padding-top: 3.4mm;
+    margin-bottom: 7mm;
+  }
+  .section-head .kicker {
+    margin-bottom: 2.2mm;
+  }
+  .section-head .standfirst {
+    margin-top: 2.4mm;
+    max-width: 132mm;
+    font-size: 10.4pt;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  h3 {
+    font-size: 12.4pt;
+    font-weight: 700;
+    letter-spacing: -0.012em;
+    margin: 0 0 2.4mm;
+  }
+
+  /* ---------- karta testu ---------- */
+
+  .test {
+    border-top: 0.9pt solid var(--ink);
+    padding-top: 4mm;
+    margin-bottom: 8.5mm;
+    page-break-inside: avoid;
+  }
+  .test-title {
+    display: flex;
+    align-items: baseline;
+    gap: 4.5mm;
+    margin-bottom: 3.5mm;
+  }
+  .test-num {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    min-width: 7mm;
+  }
+  .test-title h3 { margin: 0; }
+  .test-title .sub {
+    font-size: 9.4pt;
+    color: var(--ink-3);
+    margin-top: 0.8mm;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    background: var(--tint);
+    border: 0.6pt solid var(--hairline);
+    border-radius: 2.2mm;
+    margin-bottom: 4mm;
+  }
+  .facts > div {
+    padding: 3mm 4mm;
+    border-right: 0.6pt solid var(--hairline);
+  }
+  .facts > div:last-child { border-right: 0; }
+  .facts dt {
+    font-size: 7.1pt;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 1.2mm;
+  }
+  .facts dd {
+    margin: 0;
+    font-size: 9.3pt;
+    line-height: 1.4;
+  }
+
+  .block { margin-bottom: 4mm; }
+  .block:last-child { margin-bottom: 0; }
+  .block > .eyebrow { display: block; margin-bottom: 1.8mm; }
+
+  /* ---------- seznamy ---------- */
+
+  ul.plain { margin: 0; padding: 0; list-style: none; }
+  ul.plain > li {
+    position: relative;
+    padding-left: 4.6mm;
+    margin-bottom: 1.5mm;
+  }
+  ul.plain > li:last-child { margin-bottom: 0; }
+  ul.plain > li::before {
+    content: "";
+    position: absolute;
+    left: 0.4mm;
+    top: 1.55mm;
+    width: 1.5mm;
+    height: 1.5mm;
+    border-radius: 50%;
+    background: var(--rule);
+  }
+  ul.plain > li .lbl { font-weight: 700; }
+
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  ol.steps > li {
+    counter-increment: s;
+    position: relative;
+    padding-left: 8mm;
+    margin-bottom: 3mm;
+  }
+  ol.steps > li:last-child { margin-bottom: 0; }
+  ol.steps > li::before {
+    content: counter(s);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 8.4pt;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  ol.steps .lbl { font-weight: 700; }
+
+  /* ---------- tabulka oblastí ---------- */
+
+  table.areas {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.2pt;
+  }
+  table.areas th {
+    text-align: left;
+    font-size: 7.1pt;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border-bottom: 0.6pt solid var(--rule);
+    padding: 0 4mm 1.6mm 0;
+    vertical-align: bottom;
+  }
+  table.areas td {
+    border-bottom: 0.6pt solid var(--hairline);
+    padding: 2.1mm 4mm 2.1mm 0;
+    vertical-align: top;
+    line-height: 1.4;
+  }
+  table.areas td:last-child, table.areas th:last-child { padding-right: 0; }
+  table.areas .key {
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  table.areas .nm { font-weight: 700; }
+  table.areas .dsc { color: var(--ink-2); }
+  table.areas tr:last-child td { border-bottom: 0; }
+
+  /* ---------- volba testu ---------- */
+
+  .choose {
+    border: 0.6pt solid var(--hairline);
+    border-radius: 2.2mm;
+    overflow: hidden;
+  }
+  .choose > div {
+    display: grid;
+    grid-template-columns: 74mm 1fr;
+    gap: 6mm;
+    padding: 3.4mm 4mm;
+    border-bottom: 0.6pt solid var(--hairline);
+  }
+  .choose > div:last-child { border-bottom: 0; }
+  .choose > div:nth-child(odd) { background: var(--tint); }
+  .choose .q { font-weight: 700; }
+  .choose .a { color: var(--ink-2); }
+  .choose .a b { color: var(--ink); font-weight: 700; }
+
+  /* ---------- poznámka ---------- */
+
+  .note {
+    border-left: 2.2pt solid var(--accent);
+    padding: 0.4mm 0 0.4mm 4.5mm;
+    margin: 5mm 0;
+    color: var(--ink-2);
+  }
+  .note b { color: var(--ink); }
+
+.eval {
+    border: 1pt solid var(--ink);
+    border-radius: 3mm;
+    padding: 6.5mm 7mm 7mm;
+    margin-top: 8mm;
+    page-break-inside: avoid;
+  }
+  .eval-title {
+    font-size: 15pt;
+    font-weight: 700;
+    letter-spacing: -0.018em;
+    margin: 0 0 1.6mm;
+  }
+  .eval-lede {
+    color: var(--ink-2);
+    font-size: 9.6pt;
+    margin: 0 0 5mm;
+    padding-bottom: 4.5mm;
+    border-bottom: 0.6pt solid var(--hairline);
+    max-width: 138mm;
+  }
+  .eval ul.plain > li { margin-bottom: 3.2mm; }
+  .eval ul.plain > li::before { background: var(--accent); top: 1.7mm; }
+  .eval .sub-head {
+    display: block;
+    margin: 6mm 0 2.6mm;
+    padding-top: 4.5mm;
+    border-top: 0.6pt solid var(--hairline);
+  }
+
+  .footnote {
+    margin-top: 3mm;
+    font-size: 8.3pt;
+    line-height: 1.45;
+    color: var(--ink-3);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================ TITULNÍ STRANA ============================ -->
+<section class="page">
+  <div class="cover">
+    <div class="cover-top">
+      <div class="brand">Winning Minds</div>
+      <div class="brand-rule"></div>
+      <h1>Manuál pro kouče</h1>
+      <p class="lede">
+        Devět diagnostik ve třech rodinách. Ke každé je tady, komu ji zadat,
+        co v člověku sleduje a co najdeš v jejím vyhodnocení.
+      </p>
+
+      <div class="cover-index">
+        <div><span>1</span><span>Jak diagnostika probíhá</span><span>2</span></div>
+        <div><span>2</span><span>Kterou diagnostiku vybrat</span><span>3</span></div>
+        <div><span>3</span><span>Performance Diagnostic ELITE</span><span>4</span></div>
+        <div><span>4</span><span>Emocionálně-destruktivní vzorce</span><span>7</span></div>
+        <div><span>5</span><span>Archetypy</span><span>10</span></div>
+        <div><span>6</span><span>Praktické poznámky</span><span>12</span></div>
+        <div><span></span><span>Přehled všech devíti diagnostik</span><span>13</span></div>
+      </div>
+    </div>
+
+    <div class="cover-foot">
+      <span>Performance Diagnostic ELITE · elitediagnostic.cz</span>
+      <span>Interní materiál pro kouče</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 1. JAK TO PROBÍHÁ ============================ -->
+<section class="page">
+  <div class="section-head">
+    <div class="eyebrow kicker">Kapitola 1</div>
+    <h2 class="section">Jak diagnostika probíhá</h2>
+    <p class="standfirst">
+      Průběh je u všech devíti testů stejný. Liší se jen to, co se klienta ptáme
+      a co z toho vyjde.
+    </p>
+  </div>
+
+  <ol class="steps">
+    <li>
+      <span class="lbl">Vystavíš pozvánku.</span> V přehledu kouče vybereš test,
+      jazyk a oslovení klienta. Aplikace vygeneruje odkaz, který pošleš klientovi.
+      Odkaz vede rovnou do dotazníku, klient si nic nezakládá a nikam se nepřihlašuje.
+    </li>
+    <li>
+      <span class="lbl">Klient vyplní dotazník.</span> Odpovědi se průběžně ukládají
+      v jeho zařízení, takže si může dát pauzu a vrátit se později. Jazyk si může
+      kdykoli během vyplňování přepnout.
+    </li>
+    <li>
+      <span class="lbl">Odkaz se uzavře.</span> Pozvánka je na jedno použití.
+      Po odeslání přestane fungovat, takže tentýž člověk nemůže tentýž test vyplnit
+      dvakrát. Nevyužitá pozvánka platí 30 dní.
+    </li>
+    <li>
+      <span class="lbl">Vyhodnocení se objeví u tebe.</span> Klient po odeslání
+      žádné výsledky nedostává, ani je nevidí. Otevřou se výhradně tobě v přehledu
+      kouče.
+    </li>
+    <li>
+      <span class="lbl">Předáš výklad.</span> Vyhodnocení si můžeš přečíst
+      v aplikaci nebo stáhnout jako PDF. Každé končí shrnutím psaným přímo klientovi,
+      takže máš po ruce text, který se dá poslat nebo přečíst nahlas na sezení.
+    </li>
+  </ol>
+
+  <div class="note">
+    <b>Výsledky vidí jenom kouč.</b> Není to nastavení, které by se dalo přepnout.
+    Celý produkt stojí na tom, že výklad se dostane ke klientovi přes rozhovor
+    s tebou, ne jako soubor, který si otevře sám v autobuse.
+  </div>
+
+  <div class="block" style="margin-top:7mm">
+    <span class="eyebrow">Tři jazyky</span>
+    <p>
+      Každý test i každé vyhodnocení existuje v češtině, slovenštině a angličtině.
+      Nejde o strojový překlad rámování nad českým textem: dotazníky jsou pro každý
+      jazyk psané celé, včetně výkladu. Jazyk vybíráš při vystavení pozvánky
+      a klient si ho může během vyplňování přepnout. Vyhodnocení si pak umíš
+      zobrazit i stáhnout v kterémkoli z těch tří jazyků, nezávisle na tom, v jakém
+      klient odpovídal.
+    </p>
+  </div>
+
+  <div class="block">
+    <span class="eyebrow">Oslovení</span>
+    <p>
+      Při vystavení pozvánky zadáváš, jestli je klient muž, nebo žena. Čeština
+      a slovenština skloňují podle rodu, takže se podle toho napíše celé
+      vyhodnocení. V anglické verzi se nic takového neřeší.
+    </p>
+  </div>
+
+  <div class="block">
+    <span class="eyebrow">Nedokončený dotazník</span>
+    <p>
+      Když klient dotazník neodešle celý, vyhodnocení se přesto sestaví
+      a nahoře je poznámka, kolik tvrzení zůstalo bez odpovědi. Ber ho pak jako
+      podklad k rozhovoru, ne jako hotový obrázek.
+    </p>
+  </div>
+</section>
+
+<!-- ============================ 2. KTEROU VYBRAT ============================ -->
+<section class="page">
+  <div class="section-head">
+    <div class="eyebrow kicker">Kapitola 2</div>
+    <h2 class="section">Kterou diagnostiku vybrat</h2>
+    <p class="standfirst">
+      Tři rodiny odpovídají na tři různé otázky. Nejsou to stupně téhož: nejde
+      o to, která je podrobnější, ale o to, na co se ptáš.
+    </p>
+  </div>
+
+  <table class="areas" style="margin-bottom:7mm">
+    <thead>
+      <tr>
+        <th style="width:46mm">Rodina</th>
+        <th style="width:52mm">Odpovídá na otázku</th>
+        <th>Kdy po ní sáhnout</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="nm">Performance Diagnostic ELITE</span></td>
+        <td class="dsc">Jak dnes funguje jeho hlava ve výkonu?</td>
+        <td class="dsc">Na začátku spolupráce, když potřebuješ širokou mapu
+          a chceš vědět, o co se dá opřít a co brzdí.</td>
+      </tr>
+      <tr>
+        <td><span class="nm">Emocionálně-destruktivní vzorce</span></td>
+        <td class="dsc">Co se v něm zapíná pod tlakem a odkud to je?</td>
+        <td class="dsc">Když klient opakovaně naráží na totéž, i když přesně ví,
+          co by měl dělat. Rozumové řešení tam nezabírá.</td>
+      </tr>
+      <tr>
+        <td><span class="nm">Archetypy</span></td>
+        <td class="dsc">Jaký typ to je a jak působí na ostatní?</td>
+        <td class="dsc">Když řešíš roli v týmu, komunikaci, vedení, osobní značku
+          nebo to, proč si s někým nesedne.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="block">
+    <span class="eyebrow">Rychlé rozhodnutí</span>
+  </div>
+
+  <div class="choose">
+    <div>
+      <div class="q">Klient je sportovec.</div>
+      <div class="a">U všech tří rodin vybírej <b>sportovní variantu</b>. Není to
+        přeformulovaná byznysová verze: ptá se na kabinu, trenéra, sestavu a závod,
+        tedy na situace, které klient skutečně zná.</div>
+    </div>
+    <div>
+      <div class="q">Klient je manažer, podnikatel nebo jde o osobní život.</div>
+      <div class="a">Vybírej <b>Business a Life</b>, u archetypů <b>Archetypy značky</b>
+        a u vzorců <b>obecnou variantu</b>.</div>
+    </div>
+    <div>
+      <div class="q">Sportovec z týmového sportu.</div>
+      <div class="a">U vzorců zvol <b>Týmový sport</b>. Řeší místo v sestavě,
+        šatnu a poměřování se spoluhráči.</div>
+    </div>
+    <div>
+      <div class="q">Sportovec z individuálního sportu.</div>
+      <div class="a">U vzorců zvol <b>Individuální sport</b>. Řeší samotu
+        v přípravě, vztah s trenérem a to, že za výsledek nikdo jiný nestojí.</div>
+    </div>
+    <div>
+      <div class="q">Málo času, nebo chceš měřit opakovaně.</div>
+      <div class="a">Vezmi <b>ELITE 100</b> místo ELITE 200. Pokrývá stejných sedm
+        oblastí, jen bez podrobnějšího členění uvnitř nich.</div>
+    </div>
+    <div>
+      <div class="q">Dlouhodobá spolupráce, chceš to vzít pořádně.</div>
+      <div class="a">Začni <b>ELITE 200</b>. Vzorce nebo archetypy pak přidej podle
+        toho, na co se v profilu narazí.</div>
+    </div>
+  </div>
+
+  <p class="footnote">
+    Rodiny se nevylučují a dají se kombinovat. Obvyklá dvojice je ELITE jako mapa
+    a vzorce jako vysvětlení, proč se něco v té mapě opakovaně nedaří posunout.
+  </p>
+</section>
+
+<!-- ============================ 3. ELITE ============================ -->
+<section class="page">
+  <div class="section-head">
+    <div class="eyebrow kicker">Kapitola 3 · Rodina první</div>
+    <h2 class="section">Performance Diagnostic ELITE</h2>
+    <p class="standfirst">
+      Široká mapa výkonové psychiky. Ukazuje, o co se dá u klienta opřít, co ho
+      brzdí a kudy vede nejbližší krok. Čtyři testy: dvě délky, dvě prostředí.
+    </p>
+  </div>
+
+  <div class="block" style="margin-bottom:6mm">
+    <span class="eyebrow">Sedm oblastí, které ELITE sleduje</span>
+    <table class="areas">
+      <tbody>
+        <tr><td class="key" style="width:8mm">A</td><td class="nm" style="width:62mm">Identita a vnitřní motivace</td><td class="dsc">Ví, kdo je a proč to dělá. Stojí jeho hodnota na výsledku, nebo na něčem pevnějším?</td></tr>
+        <tr><td class="key">B</td><td class="nm">Sebedůvěra a vnitřní dialog</td><td class="dsc">Jak si mluví do hlavy, hlavně poté, co udělá chybu.</td></tr>
+        <tr><td class="key">C</td><td class="nm">Koncentrace a řízení pozornosti</td><td class="dsc">Udrží pozornost tam, kde má být, a vrátí ji, když ji ztratí?</td></tr>
+        <tr><td class="key">D</td><td class="nm">Emoční regulace a výkon pod tlakem</td><td class="dsc">Co s ním dělá tlak a jestli s tím umí zacházet.</td></tr>
+        <tr><td class="key">E</td><td class="nm">Odolnost a růstové nastavení mysli</td><td class="dsc">Jak zpracuje neúspěch a zpětnou vazbu a jak dlouho vydrží.</td></tr>
+        <tr><td class="key">F</td><td class="nm">Disciplína, návyky a regenerace</td><td class="dsc">Spánek, energie, konzistence. Jestli se o sebe stará, nebo to jen vydrží.</td></tr>
+        <tr><td class="key">G</td><td class="nm">Vztahy, komunikace a prostředí</td><td class="dsc">Hranice, opora kolem sebe, bezpečí říct nahlas, co si myslí.</td></tr>
+      </tbody>
+    </table>
+    <p class="footnote">
+      Sport i Business a Life sledují týchž sedm oblastí. Liší se tím, na jaké
+      situace se ptají a jakým jazykem je vykládají.
+    </p>
+  </div>
+
+  <div class="test">
+    <div class="test-title">
+      <span class="test-num">01</span>
+      <div>
+        <h3>Performance Diagnostic ELITE 200™</h3>
+        <div class="sub">Sportovní varianta</div>
+      </div>
+    </div>
+    <dl class="facts">
+      <div><dt>Pro koho</dt><dd>Sportovci, hloubková vstupní diagnostika</dd></div>
+      <div><dt>Rozsah</dt><dd>200 tvrzení · 45–60 minut</dd></div>
+      <div><dt>Jazyky</dt><dd>Čeština, slovenština, angličtina</dd></div>
+    </dl>
+    <div class="block">
+      <span class="eyebrow">K čemu je</span>
+      <p>
+        Nejpodrobnější, co máme. Sáhni po ní, když spolupráce začíná a má trvat
+        měsíce: chceš celý obrázek a jednu solidní výchozí čáru, ke které se pak
+        budeš vracet. Uvnitř každé ze sedmi oblastí rozlišuje ještě tři užší
+        témata, takže neřekne jen „koncentrace vázne“, ale ukáže, jestli je problém
+        v rušení zvenčí, v návratu pozornosti po chybě, nebo v tom, že klient hlavou
+        žije ve výsledku místo v procesu.
+      </p>
+    </div>
+  </div>
+
+  <div class="test">
+    <div class="test-title">
+      <span class="test-num">02</span>
+      <div>
+        <h3>Performance Diagnostic ELITE 200™ · Business a Life</h3>
+        <div class="sub">Byznysová a životní varianta</div>
+      </div>
+    </div>
+    <dl class="facts">
+      <div><dt>Pro koho</dt><dd>Manažeři, podnikatelé, osobní rozvoj</dd></div>
+      <div><dt>Rozsah</dt><dd>200 tvrzení · 45–60 minut</dd></div>
+      <div><dt>Jazyky</dt><dd>Čeština, slovenština, angličtina</dd></div>
+    </dl>
+    <div class="block">
+      <span class="eyebrow">K čemu je</span>
+      <p>
+        Totéž pro člověka, jehož hřištěm je porada, jednání a rodina. Ptá se na
+        rozhodování pod tlakem, na energii napříč týdnem, na hranice v práci
+        a na to, jestli se sebehodnota drží jinde než ve výsledcích čtvrtletí.
+      </p>
+    </div>
+  </div>
+
+
+
+  <div class="test" style="border-top-width:0.9pt">
+    <div class="test-title">
+      <span class="test-num">03</span>
+      <div>
+        <h3>Performance Diagnostic ELITE 100™</h3>
+        <div class="sub">Sportovní varianta</div>
+      </div>
+    </div>
+    <dl class="facts">
+      <div><dt>Pro koho</dt><dd>Sportovci, rychlejší vstup nebo opakované měření</dd></div>
+      <div><dt>Rozsah</dt><dd>100 tvrzení · 20–30 minut</dd></div>
+      <div><dt>Jazyky</dt><dd>Čeština, slovenština, angličtina</dd></div>
+    </dl>
+    <div class="block">
+      <span class="eyebrow">K čemu je</span>
+      <p>
+        Poloviční délka, stejných sedm oblastí. Vhodná, když klient nemá hodinu,
+        když chceš mít profil rychle před prvním sezením, nebo když měříš znovu
+        po nějaké době a zajímá tě posun v celých oblastech. Nerozpadá je na užší
+        témata, takže řekne, kde to vázne, ne už tak přesně proč.
+      </p>
+    </div>
+  </div>
+
+  <div class="test">
+    <div class="test-title">
+      <span class="test-num">04</span>
+      <div>
+        <h3>Performance Diagnostic ELITE 100™ · Business a Life</h3>
+        <div class="sub">Byznysová a životní varianta</div>
+      </div>
+    </div>
+    <dl class="facts">
+      <div><dt>Pro koho</dt><dd>Manažeři, podnikatelé, osobní rozvoj</dd></div>
+      <div><dt>Rozsah</dt><dd>100 tvrzení · 20–30 minut</dd></div>
+      <div><dt>Jazyky</dt><dd>Čeština, slovenština, angličtina</dd></div>
+    </dl>
+    <div class="block">
+      <span class="eyebrow">K čemu je</span>
+      <p>
+        Kratší byznysová verze. Osvědčí se ve firmách, kde se diagnostika zadává
+        více lidem najednou a delší dotazník by část z nich odradil.
+      </p>
+    </div>
+  </div>
+
+  <div class="eval">
+    <div class="eval-title">Co je ve vyhodnocení ELITE</div>
+    <p class="eval-lede">Stejná stavba u všech čtyř testů. ELITE 200 je podrobnější uvnitř jednotlivých oblastí, jinak čteš totéž.</p>
+    <ul class="plain">
+      <li><span class="lbl">Profil v přehledu.</span> Všech sedm oblastí vedle sebe,
+        aby bylo na jeden pohled vidět, kde je člověk doma a kde ne.</li>
+      <li><span class="lbl">Opěrné body profilu.</span> To nejsilnější, co má.
+        Materiál, se kterým se dá pracovat, ne jen pochvala.</li>
+      <li><span class="lbl">Rozvojové priority.</span> Kde je práce nejpotřebnější
+        a co se stane, když se do toho pustíte.</li>
+      <li><span class="lbl">Dimenze profilu.</span> Výklad ke každé ze sedmi oblastí
+        zvlášť: co znamená, jak se u tohohle klienta projevuje a jak s ní zacházet.
+        U ELITE 200 je navíc rozpad na užší témata uvnitř každé oblasti.</li>
+      <li><span class="lbl">Doporučení pro rozvoj na 8 až 12 týdnů.</span> Konkrétní
+        kroky, ne obecné rady. Použitelné jako osnova nejbližších sezení.</li>
+      <li><span class="lbl">Shrnutí pro klienta.</span> Závěr psaný přímo jemu,
+        v jeho rodě. Tohle je text, který mu můžeš předat nebo přečíst.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ 4. VZORCE ============================ -->
+<section class="page">
+  <div class="section-head">
+    <div class="eyebrow kicker">Kapitola 4 · Rodina druhá</div>
+    <h2 class="section">Emocionálně-destruktivní vzorce</h2>
+    <p class="standfirst">
+      Jedenáct vzorců, které se zapínají pod tlakem, obvykle mimo vůli a mimo
+      rozum. Vysvětlují, proč klient dělá znovu to, o čem sám ví, že mu škodí.
+      Tři testy podle prostředí.
+    </p>
+  </div>
+
+  <div class="block" style="margin-bottom:6mm">
+    <span class="eyebrow">Jedenáct vzorců</span>
+    <table class="areas">
+      <tbody>
+        <tr><td class="key" style="width:8mm">01</td><td class="nm" style="width:52mm">Opuštění</td><td class="dsc">Strach ze ztráty a emoční nestability</td></tr>
+        <tr><td class="key">02</td><td class="nm">Nedůvěra</td><td class="dsc">Ostražitost, nedůvěra a očekávání zrady</td></tr>
+        <tr><td class="key">03</td><td class="nm">Citová deprivace</td><td class="dsc">Emoční hlad a nenaplněná potřeba blízkosti</td></tr>
+        <tr><td class="key">04</td><td class="nm">Společenské vyloučení</td><td class="dsc">Pocit odlišnosti a vyloučení ze skupiny</td></tr>
+        <tr><td class="key">05</td><td class="nm">Závislost</td><td class="dsc">Nejistota v samostatnosti a rozhodování</td></tr>
+        <tr><td class="key">06</td><td class="nm">Zranitelnost</td><td class="dsc">Katastrofizace a očekávání ohrožení</td></tr>
+        <tr><td class="key">07</td><td class="nm">Méněcennost</td><td class="dsc">Stud, vnitřní nedostatečnost a strach z odhalení</td></tr>
+        <tr><td class="key">08</td><td class="nm">Selhání</td><td class="dsc">Očekávání neúspěchu a výkonová nedůvěra v sebe</td></tr>
+        <tr><td class="key">09</td><td class="nm">Podmanění</td><td class="dsc">Přizpůsobení, potlačení sebe a ztráta hranic</td></tr>
+        <tr><td class="key">10</td><td class="nm">Perfekcionismus</td><td class="dsc">Neúprosné nároky, tlak a výkonová identita</td></tr>
+        <tr><td class="key">11</td><td class="nm">Výjimečnost a velikášství</td><td class="dsc">Nárokovost, impulz a problém s hranicí</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="block">
+    <span class="eyebrow">Pět oblastí, do kterých se vzorce skládají</span>
+    <p style="margin-bottom:3mm">
+      Vzorce nestojí samostatně. Vyhodnocení je seskupuje podle toho, co v člověku
+      zůstalo nenaplněné, a mluví pak o oblasti místo o třech jednotlivostech.
+    </p>
+    <table class="areas">
+      <tbody>
+        <tr><td class="nm" style="width:70mm">Odpojení a odmítnutí</td><td class="dsc">Chybí bezpečná a spolehlivá blízkost</td></tr>
+        <tr><td class="nm">Narušená autonomie a výkon</td><td class="dsc">Chybí podpora k samostatnosti a důvěra ve vlastní síly</td></tr>
+        <tr><td class="nm">Narušené hranice</td><td class="dsc">Chybí laskavé, ale pevné hranice</td></tr>
+        <tr><td class="nm">Zaměření na druhé</td><td class="dsc">Chybí právo mít vlastní potřeby a říkat je nahlas</td></tr>
+        <tr><td class="nm">Přehnaná ostražitost a nároky</td><td class="dsc">Chybí přijetí bez podmínek a bez výkonu</td></tr>
+      </tbody>
+    </table>
+    <p class="footnote">
+      Ve sportovních variantách se tytéž oblasti jmenují jazykem kabiny: Bezpečí
+      ve vztazích a přijetí, Samostatnost a důvěra ve vlastní síly, Hranice
+      a sebeovládání, Zaměření na druhé, Nároky a kontrola.
+    </p>
+  </div>
+
+
+
+  <div class="test" style="border-top-width:0.9pt">
+    <div class="test-title">
+      <span class="test-num">05</span>
+      <div>
+        <h3>Emocionálně-destruktivní vzorce</h3>
+        <div class="sub">Obecná varianta</div>
+      </div>
+    </div>
+    <dl class="facts">
+      <div><dt>Pro koho</dt><dd>Manažeři, podnikatelé, osobní život</dd></div>
+      <div><dt>Rozsah</dt><dd>110 tvrzení · přibližně 25 minut</dd></div>
+      <div><dt>Jazyky</dt><dd>Čeština, slovenština, angličtina</dd></div>
+    </dl>
+    <div class="block">
+      <span class="eyebrow">K čemu je</span>
+      <p>
+        Ptá se na vztahy, práci a na sebe sama, bez sportovního rámce. Nasaď ji,
+        když klient v koučinku opakovaně narazí na tutéž zeď: ví, co má dělat,
+        umí to popsat, a stejně to neudělá. Vzorce ukážou, co tomu stojí v cestě
+        a proč to není otázka vůle.
+      </p>
+    </div>
+  </div>
+
+  <div class="test">
+    <div class="test-title">
+      <span class="test-num">06</span>
+      <div>
+        <h3>Emocionálně-destruktivní vzorce · Individuální sport</h3>
+        <div class="sub">Sportovní varianta, individuální sporty</div>
+      </div>
+    </div>
+    <dl class="facts">
+      <div><dt>Pro koho</dt><dd>Atleti, tenisté, plavci, jezdci, bojová umění</dd></div>
+      <div><dt>Rozsah</dt><dd>110 tvrzení · přibližně 25 minut</dd></div>
+      <div><dt>Jazyky</dt><dd>Čeština, slovenština, angličtina</dd></div>
+    </dl>
+    <div class="block">
+      <span class="eyebrow">K čemu je</span>
+      <p>
+        Vlastní dotazník, ne přeformulovaná obecná verze. Ptá se na samotu
+        v přípravě, na vztah s trenérem, na to, že za výsledek nikdo jiný nestojí,
+        a na hlavu ve startovním bloku. Vzorec se u individuálního sportovce
+        projeví jinak než v kabině a jinak než v kanceláři, takže i výklad mluví
+        o jeho situacích.
+      </p>
+    </div>
+  </div>
+
+  <div class="test">
+    <div class="test-title">
+      <span class="test-num">07</span>
+      <div>
+        <h3>Emocionálně-destruktivní vzorce · Týmový sport</h3>
+        <div class="sub">Sportovní varianta, týmové sporty</div>
+      </div>
+    </div>
+    <dl class="facts">
+      <div><dt>Pro koho</dt><dd>Fotbal, hokej, basketbal, volejbal a podobné</dd></div>
+      <div><dt>Rozsah</dt><dd>110 tvrzení · přibližně 25 minut</dd></div>
+      <div><dt>Jazyky</dt><dd>Čeština, slovenština, angličtina</dd></div>
+    </dl>
+    <div class="block">
+      <span class="eyebrow">K čemu je</span>
+      <p>
+        Také vlastní dotazník. Točí se kolem místa v sestavě, šatny, poměřování
+        se spoluhráči, změny trenéra a toho, jaké je sedět na lavičce. Pro hráče,
+        u kterého se výkon láme podle toho, jak se cítí ve skupině.
+      </p>
+    </div>
+  </div>
+
+  <div class="eval">
+    <div class="eval-title">Co je ve vyhodnocení vzorců</div>
+    <p class="eval-lede">Stejná stavba u všech tří variant. Liší se jazyk výkladu a situace, o kterých mluví.</p>
+    <ul class="plain">
+      <li><span class="lbl">Profil všech vzorců.</span> Jedenáct vzorců vedle sebe,
+        od nejsilnějšího po nejslabší.</li>
+      <li><span class="lbl">Zatížení oblastí.</span> Kde se to sbíhá. Často je čitelnější
+        než jednotlivé vzorce, protože ukáže jednu potřebu za třemi projevy.</li>
+      <li><span class="lbl">Tři nejsilnější vzorce s výkladem.</span> U každého tři
+        pohledy: jak to vypadá zevnitř, co to dělá pod tlakem a odkud se to vzalo.</li>
+      <li><span class="lbl">Situačně aktivované vzorce.</span> Vzorce, které v součtu
+        nevyčnívají, ale klient u nich označil několik tvrzení hodně silně. Bývají
+        to přesně ty spouštěče, o kterých se pak dobře mluví.</li>
+      <li><span class="lbl">Jak to funguje dohromady.</span> Co spolu dvojice
+        nejsilnějších vzorců dělá. Dva vzorce vedle sebe se často chovají jinak
+        než každý zvlášť.</li>
+      <li><span class="lbl">Shrnutí pro klienta.</span> Závěr psaný přímo jemu,
+        v jeho rodě.</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <b>Výsledek není diagnóza ani nálepka.</b> Tak je to napsané i v instrukcích,
+    které klient vidí před vyplňováním. Vysoký vzorec neříká, že je něco v nepořádku,
+    říká, kde je člověk citlivý a co ho pod tlakem přebírá.
+  </div>
+</section>
+
+<!-- ============================ 5. ARCHETYPY ============================ -->
+<section class="page">
+  <div class="section-head">
+    <div class="eyebrow kicker">Kapitola 5 · Rodina třetí</div>
+    <h2 class="section">Archetypy</h2>
+    <p class="standfirst">
+      Dvanáct typů osobnosti ve čtyřech motivačních skupinách. Neříkají, jak
+      je člověk silný, ale jaký je: co ho táhne, jak působí na ostatní a kde
+      se pod tlakem obrací proti sobě.
+    </p>
+  </div>
+
+  <div class="block" style="margin-bottom:6mm">
+    <span class="eyebrow">Dvanáct archetypů ve čtyřech skupinách</span>
+    <table class="areas">
+      <thead>
+        <tr>
+          <th style="width:56mm">Motivační skupina</th>
+          <th style="width:44mm">Archetypy</th>
+          <th>O co jde</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="nm">Nezávislost a naplnění</td>
+          <td>Neviňátko · Objevitel · Mudrc</td>
+          <td class="dsc">Být svůj, rozumět světu a žít podle vlastního přesvědčení</td>
+        </tr>
+        <tr>
+          <td class="nm">Riziko a mistrovství</td>
+          <td>Hrdina · Rebel · Mág</td>
+          <td class="dsc">Dokázat něco, změnit svět a nechat po sobě stopu</td>
+        </tr>
+        <tr>
+          <td class="nm">Sounáležitost a potěšení</td>
+          <td>Jeden z nás · Milenec · Šprýmař</td>
+          <td class="dsc">Patřit k lidem, mít je rád a užívat si s nimi</td>
+        </tr>
+        <tr>
+          <td class="nm">Stabilita a kontrola</td>
+          <td>Pečovatel · Tvůrce · Vládce</td>
+          <td class="dsc">Postarat se, vybudovat a udržet věci pod kontrolou</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="footnote">
+      Ve sportovní variantě nesou archetypy navíc přezdívku z prostředí sportu:
+      Radost ze hry, Hledač, Stratég, Závodník, Provokatér, Vizionář, Dříč bez ega,
+      Estét pohybu, Bavič šatny, Opora týmu, Technik, Kapitán.
+    </p>
+  </div>
+
+  <div class="test">
+    <div class="test-title">
+      <span class="test-num">08</span>
+      <div>
+        <h3>Archetypy značky</h3>
+        <div class="sub">Byznysová varianta</div>
+      </div>
+    </div>
+    <dl class="facts">
+      <div><dt>Pro koho</dt><dd>Podnikatelé, manažeři, lidé budující značku</dd></div>
+      <div><dt>Rozsah</dt><dd>96 tvrzení · přibližně 20 minut</dd></div>
+      <div><dt>Jazyky</dt><dd>Čeština, slovenština, angličtina</dd></div>
+    </dl>
+    <div class="block">
+      <span class="eyebrow">K čemu je</span>
+      <p>
+        Pro práci s rolí, vedením, komunikací a osobní značkou. Odpovídá na to,
+        proč někdo za člověkem jde a jiný ne, jaký typ vedení mu sedí a čím
+        odpuzuje, aniž by to tušil. Dobře se hodí i tam, kde se řeší nástupnictví
+        nebo skladba vedení: dva Vládci vedle sebe fungují jinak než Vládce
+        s Pečovatelem.
+      </p>
+    </div>
+  </div>
+
+  <div class="test">
+    <div class="test-title">
+      <span class="test-num">09</span>
+      <div>
+        <h3>Archetypy sportovce</h3>
+        <div class="sub">Sportovní varianta</div>
+      </div>
+    </div>
+    <dl class="facts">
+      <div><dt>Pro koho</dt><dd>Sportovci, individuální i týmoví</dd></div>
+      <div><dt>Rozsah</dt><dd>96 tvrzení · přibližně 20 minut</dd></div>
+      <div><dt>Jazyky</dt><dd>Čeština, slovenština, angličtina</dd></div>
+    </dl>
+    <div class="block">
+      <span class="eyebrow">K čemu je</span>
+      <p>
+        Vlastní dotazník, ne přeložený byznysový. Archetyp je týž, ale ptát se
+        majitele firmy a sportovce stejnými slovy nejde. Sáhni po něm, když řešíš
+        roli v týmu, vztah s trenérem, vystupování navenek nebo to, proč hráč
+        nesedí do role, do které ho někdo posadil.
+      </p>
+    </div>
+  </div>
+
+
+
+  <div class="eval">
+    <div class="eval-title">Co je ve vyhodnocení archetypů</div>
+    <p class="eval-lede">Stejná stavba u obou variant. Sportovní má navíc tři části o týmu, trenérovi a vystupování navenek.</p>
+    <ul class="plain">
+      <li><span class="lbl">Profil všech dvanácti archetypů.</span> Celé pole vedle
+        sebe, aby bylo vidět, jak vyhraněný ten člověk je.</li>
+      <li><span class="lbl">Motivační mapa.</span> Čtyři skupiny a to, kam se váha
+        sype. Často řekne víc než jediný nejsilnější typ.</li>
+      <li><span class="lbl">Primární archetyp.</span> Kdo to hlavně je. Podrobný
+        výklad: podstata, jak se to projeví v podnikání nebo ve sportu, stín pod
+        tlakem, typické pasti a návod, co s tím dělat.</li>
+      <li><span class="lbl">Sekundární archetyp.</span> Druhá barva, která primární
+        typ mění. Tentýž Hrdina vypadá jinak s Mudrcem za zády než se Šprýmařem.</li>
+      <li><span class="lbl">Potlačený archetyp.</span> To, co v sobě člověk nemá
+        rád nebo si to nedovolí. Bývá to nejcennější místo celého vyhodnocení.</li>
+      <li><span class="lbl">Jak spolu hrají.</span> Souhra primárního, sekundárního
+        a potlačeného. Ne tři popisy vedle sebe, ale jeden výklad té konkrétní
+        kombinace.</li>
+      <li><span class="lbl">Shrnutí pro klienta.</span> Závěr psaný přímo jemu,
+        v jeho rodě.</li>
+    </ul>
+  </div>
+
+  <span class="eyebrow sub-head">Co má navíc sportovní varianta</span>
+    <ul class="plain">
+      <li><span class="lbl">Role v týmu a v individuální přípravě.</span> Kde tenhle
+        typ v sestavě sedí a kde ho to bude dřít.</li>
+      <li><span class="lbl">Kde to skřípe s trenérem.</span> Předvídatelná místa
+        střetu a čím se dají obejít.</li>
+      <li><span class="lbl">Osobní značka a komunikace navenek.</span> Jak vystupovat
+        na veřejnosti, aby to sedělo tomu, kým člověk je.</li>
+    </ul>
+
+  <div class="note">
+    <b>Archetyp není hodnocení.</b> Žádný z dvanácti není lepší. Vyhodnocení
+    proto neříká, který mít, ale co s tím, který klient má, a co ho stojí ten,
+    který mu chybí.
+  </div>
+</section>
+
+<!-- ============================ 6. PRAKTICKÉ POZNÁMKY ============================ -->
+<section class="page">
+  <div class="section-head">
+    <div class="eyebrow kicker">Kapitola 6</div>
+    <h2 class="section">Praktické poznámky</h2>
+    <p class="standfirst">
+      Drobnosti, které se vyplatí vědět dřív, než na ně narazíš u klienta.
+    </p>
+  </div>
+
+  <div class="block">
+    <span class="eyebrow">Než pozvánku pošleš</span>
+    <ul class="plain">
+      <li><span class="lbl">Zkontroluj variantu.</span> Sport nebo byznys,
+        u vzorců navíc individuální nebo týmový. Špatná varianta se pozná až
+        z odpovědí a odkaz už podruhé nepoužiješ.</li>
+      <li><span class="lbl">Zkontroluj jazyk a oslovení.</span> Jazyk si klient
+        přepnout umí, oslovení ne. To zadáváš ty.</li>
+      <li><span class="lbl">Řekni klientovi, kolik to zabere.</span> ELITE 200
+        je skoro hodina. Kdo si na to nesedne pořádně, vyplní ho zbrkle.</li>
+    </ul>
+  </div>
+
+  <div class="block">
+    <span class="eyebrow">Co říct klientovi předem</span>
+    <ul class="plain">
+      <li>Ať odpovídá rychle a podle toho, co se v něm skutečně děje, ne podle
+        toho, jaký by chtěl být.</li>
+      <li>Ať to nevyplňuje po hádce ani hodinu po zápase. Zajímá nás, jak to
+        má obvykle, ne jak se cítí právě teď.</li>
+      <li>Že výsledky uvidíš ty a projdete je spolu. Klient je po odeslání
+        nedostane a je lepší, když to ví předem, než aby na ně čekal.</li>
+    </ul>
+  </div>
+
+  <div class="block">
+    <span class="eyebrow">Když se něco pokazí</span>
+    <ul class="plain">
+      <li><span class="lbl">Odkaz nefunguje.</span> Buď byl už použitý, nebo mu
+        vypršela platnost, nebo jsi ho zrušil. Klient uvidí hlášku ve svém jazyce.
+        Vystav novou pozvánku.</li>
+      <li><span class="lbl">Klient si dotazník rozdělal a nedokončil.</span>
+        Rozepsané odpovědi má uložené ve svém zařízení, takže může pokračovat
+        na témže odkazu ve stejném prohlížeči. Na jiném zařízení začíná znovu.</li>
+      <li><span class="lbl">Poslal jsi špatný test.</span> Pozvánku zruš, dokud
+        ji klient neotevřel, a vystav novou.</li>
+    </ul>
+  </div>
+
+  <div class="block">
+    <span class="eyebrow">Jak s vyhodnocením zacházet</span>
+    <p>
+      Vyhodnocení je podklad k rozhovoru, ne verdikt. Nejsilnější část bývá ta,
+      kterou klient nečeká: potlačený archetyp, oblast, kam se sbíhají tři vzorce,
+      nebo rozvojová priorita v oblasti, o které si myslel, že ji má vyřešenou.
+      Shrnutí na konci je psané tak, aby se dalo předat beze změny.
+    </p>
+    <p>
+      Diagnostika neurčuje, co s člověkem je. Ukazuje, kde se dá zabrat, aby se
+      hnul dál.
+    </p>
+  </div>
+
+  <div class="eval" style="margin-top:10mm">
+    <div class="eval-title">Přehled všech devíti diagnostik</div>
+    <p class="eval-lede">Rejstřík k celému manuálu. Číslo u testu odpovídá pořadí,
+      v jakém je popsaný na předchozích stranách.</p>
+    <table class="areas">
+      <thead>
+        <tr>
+          <th style="width:8mm"></th>
+          <th style="width:76mm">Test</th>
+          <th style="width:26mm">Rozsah</th>
+          <th>Prostředí</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="key">01</td><td class="nm">Performance Diagnostic ELITE 200™</td><td class="dsc">200 tvrzení</td><td class="dsc">Sport</td></tr>
+        <tr><td class="key">02</td><td class="nm">ELITE 200™ · Business a Life</td><td class="dsc">200 tvrzení</td><td class="dsc">Byznys a život</td></tr>
+        <tr><td class="key">03</td><td class="nm">Performance Diagnostic ELITE 100™</td><td class="dsc">100 tvrzení</td><td class="dsc">Sport</td></tr>
+        <tr><td class="key">04</td><td class="nm">ELITE 100™ · Business a Life</td><td class="dsc">100 tvrzení</td><td class="dsc">Byznys a život</td></tr>
+        <tr><td class="key">05</td><td class="nm">Emocionálně-destruktivní vzorce</td><td class="dsc">110 tvrzení</td><td class="dsc">Byznys a život</td></tr>
+        <tr><td class="key">06</td><td class="nm">Vzorce · Individuální sport</td><td class="dsc">110 tvrzení</td><td class="dsc">Sport</td></tr>
+        <tr><td class="key">07</td><td class="nm">Vzorce · Týmový sport</td><td class="dsc">110 tvrzení</td><td class="dsc">Sport</td></tr>
+        <tr><td class="key">08</td><td class="nm">Archetypy značky</td><td class="dsc">96 tvrzení</td><td class="dsc">Byznys a život</td></tr>
+        <tr><td class="key">09</td><td class="nm">Archetypy sportovce</td><td class="dsc">96 tvrzení</td><td class="dsc">Sport</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:auto; padding-top:14mm">
+    <div style="border-top:0.6pt solid var(--rule); padding-top:4mm; display:flex; justify-content:space-between; font-size:8.4pt; color:var(--ink-3)">
+      <span>Winning Minds · Performance Diagnostic ELITE</span>
+      <span>elitediagnostic.cz</span>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
