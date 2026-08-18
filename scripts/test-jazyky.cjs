@@ -330,6 +330,7 @@ export { TEST_IDS } from "../lib/diagnostic/structure"
 export { JAZYKY } from "../lib/diagnostic/lang"
 export { obsahVzorce, popisDvojiceProJazyk } from "../lib/vzorce/content"
 export { obsahArchetypu } from "../lib/archetypy/content"
+export { MANUAL } from "../lib/diagnostic/manual"
 `,
   )
   try {
@@ -387,7 +388,7 @@ const SHODNE_UI_SK = new Set([
   "brand", "chooseTitle", "language", "validityAttention", "validityStatusInvalid",
   "prioritiesTitle", "facetProfile", "band", "newTest", "personLabel",
   "coachPassword", "colTest", "colValidity", "invitesTitle", "newInvite",
-  "inviteTest", "tabInvites", "genderFemale", "genderMale", "tabNorms",
+  "inviteTest", "tabInvites", "genderFemale", "genderMale", "tabNorms", "tabManual",
 ])
 const shodneUiSk = klice.filter(
   (k) => !SHODNE_UI_SK.has(k) && typeof M.UI.sk[k] === "string" && M.UI.sk[k] === M.UI.cs[k],
@@ -561,6 +562,76 @@ for (const varianta of ["business", "sport"]) {
   rekni(!chybi.length, `archetypy ${varianta}: anglicky mají všechna pole${chybi.length ? ` (chybí ${chybi.slice(0, 3).join(", ")})` : ""}`)
   rekni(!shodne.length, `archetypy ${varianta}: výklad je anglicky${shodne.length ? ` (česky zůstalo ${shodne.slice(0, 3).join(", ")})` : ""}`)
   rekni(!ceske.length, `archetypy ${varianta}: bez ř, ě a ů${ceske.length ? ` (${ceske.slice(0, 3).join(", ")})` : ""}`)
+}
+
+// ---------------------------------------------------------------------------
+// 5) manuál pro kouče
+// ---------------------------------------------------------------------------
+//
+// Manuál je nejmladší text v aplikaci a nejsnáz se zapomene. Prochází se celý
+// strom textů, ne vyjmenovaná pole, takže nově přidaná věta spadne do kontroly
+// sama a nedá se propašovat bez překladu.
+
+console.log("\n– manuál pro kouče –")
+
+/** Všechny řetězce ve stromu i s cestou, ať je v hlášce vidět, kde chybí. */
+function retezce(uzel, cesta = "") {
+  if (typeof uzel === "string") return [[cesta, uzel]]
+  if (Array.isArray(uzel)) return uzel.flatMap((v, i) => retezce(v, `${cesta}[${i}]`))
+  if (uzel && typeof uzel === "object") {
+    return Object.entries(uzel).flatMap(([k, v]) => retezce(v, cesta ? `${cesta}.${k}` : k))
+  }
+  return []
+}
+
+// Shody, které jsou v pořádku: názvy produktu a slova, která se ve dvou
+// jazycích píšou stejně. Cokoli mimo tenhle seznam znamená zapomenutý překlad.
+const MANUAL_SHODNE = new Set([
+  // název produktu
+  "kapitoly[2].title", "rodiny[0].nazev",
+  // slova, která čeština a slovenština píšou stejně
+  "obsah", "popiskyKaret.rozsah", "popiskyKaret.jazyky",
+  "kapitoly[0].kicker", "kapitoly[1].kicker", "kapitoly[3].kicker",
+  "kapitoly[4].title", "kapitoly[5].kicker", "kapitoly[5].title",
+  "postup[0].lbl", "postup[1].lbl", "ch1Bloky[2].lbl",
+  "rodinyHlavicka[0]", "rodiny[2].nazev", "eliteEval[2].lbl",
+  "archetypyHlavicka[1]", "archEval[4].lbl", "praktickeBloky[0].title",
+  "praktickeBloky[2].polozky[0].lbl", "prehledHlavicka[0]", "prehledHlavicka[1]",
+  // stejná i v angličtině
+  "prostredi.sport",
+])
+const manualCs = retezce(M.MANUAL.cs)
+for (const jazyk of ["sk", "en"]) {
+  const jine = Object.fromEntries(retezce(M.MANUAL[jazyk]))
+  const shodne = []
+  const chybejici = []
+  const ceske = []
+  const znacky = []
+  for (const [cesta, cs] of manualCs) {
+    const text = jine[cesta]
+    if (text === undefined) { chybejici.push(cesta); continue }
+    if (text === cs && cs.trim() !== "" && !MANUAL_SHODNE.has(cesta)) shodne.push(cesta)
+    if (CESKA_PISMENA.test(text)) ceske.push(cesta)
+    if (jazyk === "en" && pocetZnacek(text)) znacky.push(cesta)
+  }
+  rekni(!chybejici.length, `manuál ${jazyk}: má všechny texty${chybejici.length ? ` (chybí ${chybejici.slice(0, 3).join(", ")})` : ""}`)
+  rekni(!shodne.length, `manuál ${jazyk}: nezůstal česky${shodne.length ? ` (${shodne.slice(0, 4).join(", ")})` : ""}`)
+  rekni(!ceske.length, `manuál ${jazyk}: bez ř, ě a ů${ceske.length ? ` (${ceske.slice(0, 3).join(", ")})` : ""}`)
+  if (jazyk === "en") {
+    rekni(!znacky.length, `manuál en: bez rodových značek${znacky.length ? ` (${znacky.slice(0, 3).join(", ")})` : ""}`)
+  }
+}
+
+// Manuál oslovuje kouče, jehož rod aplikace nezná: rod se zadává u klienta.
+// Minulý čas ve druhé osobě („poslal jsi") by kouče otypoval, takže tam nesmí
+// být. Kontroluje se čeština, kde je „jsi" jednoznačné; slovenské „si" je
+// zároveň zvratné zájmeno a od zájmena se auxiliár nerozezná. Oba jazyky se
+// píšou společně, takže česká kontrola podchytí obojí.
+{
+  const rodove = retezce(M.MANUAL.cs)
+    .filter(([, v]) => /\bjsi\s+\p{Ll}+l[aiy]?\b/u.test(v) || /\b\p{Ll}+l[aiy]?\s+jsi\b/u.test(v))
+    .map(([c]) => c)
+  rekni(!rodove.length, `manuál cs: neoslovuje kouče v rodě${rodove.length ? ` (${rodove.slice(0, 3).join(", ")})` : ""}`)
 }
 
 console.log(chyb === 0 ? "\njazyky sedí ve všech testech" : `\nNALEZENO CHYB: ${chyb}`)

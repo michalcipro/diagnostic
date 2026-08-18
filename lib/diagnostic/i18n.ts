@@ -311,6 +311,7 @@ export interface UIStrings {
   genderHint: string
   // anonymní normativní vzorek
   tabNorms: string
+  tabManual: string
   loading: string
   normsTitle: string
   normsIntro: string
@@ -471,6 +472,7 @@ export const UI: Record<Lang, UIStrings> = {
     genderMale: "Muž",
     genderHint: "Podle toho se vyhodnocení napíše ve správném rodě.",
     tabNorms: "Normy",
+    tabManual: "Manuál",
     loading: "Načítám…",
     normsTitle: "Anonymní vzorek pro normy",
     normsIntro:
@@ -632,6 +634,7 @@ export const UI: Record<Lang, UIStrings> = {
     genderHint:
       "Czech and Slovak inflect for gender, so this decides how the evaluation addresses you.",
     tabNorms: "Norms",
+    tabManual: "Handbook",
     loading: "Loading…",
     normsTitle: "Anonymous sample for norms",
     normsIntro:
@@ -792,6 +795,7 @@ export const UI: Record<Lang, UIStrings> = {
     genderMale: "Muž",
     genderHint: "Podľa toho sa vyhodnotenie napíše v správnom rode.",
     tabNorms: "Normy",
+    tabManual: "Manuál",
     loading: "Načítavam…",
     normsTitle: "Anonymná vzorka pre normy",
     normsIntro:

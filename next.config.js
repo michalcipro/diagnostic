@@ -2,6 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // `next dev` jinak dopisuje do CLAUDE.md vlastní blok s dlouhou pomlčkou,
+  // kterou v textech projektu nepoužíváme, a dělá to při každém spuštění
+  // znovu. CLAUDE.md si píšeme sami.
+  agentRules: false,
   async headers() {
     // Bezpečnostní hlavičky, které nezávisí na požadavku. Content-Security-Policy
     // mezi ně nepatří: potřebuje nonce pro každý požadavek zvlášť a nastavuje

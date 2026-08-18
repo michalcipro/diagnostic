@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { LangToggle } from "@/components/diagnostic/lang-toggle"
+import { ManualView } from "@/components/diagnostic/manual-view"
 import { CoachCard } from "@/components/diagnostic/coach-card"
 import { ExternalPanel } from "@/components/diagnostic/external-panel"
 import { ReportView } from "@/components/diagnostic/report-view"
@@ -79,7 +80,7 @@ export default function CoachPage() {
   const [detailLang, setDetailLang] = useState<Lang>("cs")
 
   const [tab, setTab] = useState<
-    "results" | "invites" | "coaches" | "norms" | "externi" | "pristupy"
+    "results" | "invites" | "manual" | "coaches" | "norms" | "externi" | "pristupy"
   >("results")
   const [externi, setExterni] = useState<ExternalUsage[] | null>(null)
   const [pristupy, setPristupy] = useState<PristupZaznam[] | null>(null)
@@ -456,6 +457,9 @@ export default function CoachPage() {
         <button type="button" data-active={tab === "invites"} onClick={() => setTab("invites")}>
           {t.tabInvites}
         </button>
+        <button type="button" data-active={tab === "manual"} onClick={() => setTab("manual")}>
+          {t.tabManual}
+        </button>
         {meInfo.role !== "external" && (
           <button
             type="button"
@@ -505,6 +509,12 @@ export default function CoachPage() {
           </button>
         )}
       </div>
+
+      {tab === "manual" && (
+        <div className="mb-8">
+          <ManualView lang={lang} onPdf={() => void exportManualPdf(lang)} />
+        </div>
+      )}
 
       {tab === "pristupy" && meInfo.role === "master" && (
         <div className="mb-8">
@@ -935,6 +945,37 @@ function NormsPanel({
  *
  * Knihovna se načítá až při kliknutí, aby nezdržovala první zobrazení stránky.
  */
+/** Předá hotové PDF uživateli: na iOS přes systémové sdílení, jinde stažením. */
+async function stahni(blob: Blob, nazev: string): Promise<void> {
+  const soubor = new File([blob], nazev, { type: "application/pdf" })
+
+  // iPhone i iPad: systémové sdílení se souborem.
+  if (typeof navigator.canShare === "function" && navigator.canShare({ files: [soubor] })) {
+    try {
+      await navigator.share({ files: [soubor], title: nazev })
+      return
+    } catch (e) {
+      // Uživatel sdílení zavřel – pak už nic dalšího nedělej.
+      if (e instanceof DOMException && e.name === "AbortError") return
+    }
+  }
+
+  // Ostatní prohlížeče: stažení souboru.
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = nazev
+  a.click()
+  // Odvolání až po chvíli, jinak stahování v Safari nestihne začít.
+  window.setTimeout(() => URL.revokeObjectURL(url), 10_000)
+}
+
+/** Manuál pro kouče jako PDF, ve stejném jazyce, jaký má zapnuté rozhraní. */
+async function exportManualPdf(lang: Lang): Promise<void> {
+  const { buildManualPdf, manualPdfFileName } = await import("@/lib/diagnostic/manual-pdf")
+  await stahni(buildManualPdf(lang), manualPdfFileName(lang))
+}
+
 async function exportPdf(detail: ResultDetail, lang: Lang): Promise<void> {
   // Kazda rodina testu ma vlastni generator, ale stejnou sazbu.
   let blob: Blob
@@ -977,27 +1018,7 @@ async function exportPdf(detail: ResultDetail, lang: Lang): Promise<void> {
     blob = buildReportPdf(vstup)
     nazev = pdfFileName(vstup)
   }
-  const soubor = new File([blob], nazev, { type: "application/pdf" })
-
-  // iPhone i iPad: systémové sdílení se souborem.
-  if (typeof navigator.canShare === "function" && navigator.canShare({ files: [soubor] })) {
-    try {
-      await navigator.share({ files: [soubor], title: nazev })
-      return
-    } catch (e) {
-      // Uživatel sdílení zavřel – pak už nic dalšího nedělej.
-      if (e instanceof DOMException && e.name === "AbortError") return
-    }
-  }
-
-  // Ostatní prohlížeče: stažení souboru.
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement("a")
-  a.href = url
-  a.download = nazev
-  a.click()
-  // Odvolání až po chvíli, jinak stahování v Safari nestihne začít.
-  window.setTimeout(() => URL.revokeObjectURL(url), 10_000)
+  await stahni(blob, nazev)
 }
 
 /**
