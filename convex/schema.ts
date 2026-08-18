@@ -16,8 +16,11 @@ export default defineSchema({
     passwordHash: v.string(),
     salt: v.string(),
     /**
-     * master  – zakládá kouče, vidí vše kromě větví externích koučů
-     * coach   – náš kouč, sdílí přehled klientů s masterem
+     * master  – zakládá kouče a vidí celou naši větev, tedy klienty všech
+     *   našich koučů. Do větví externích koučů nevidí ani on.
+     * coach   – náš kouč. Vidí výhradně klienty, které si sám pozval. Přístup
+     *   k cizímu klientovi nemá být vedlejším účinkem toho, že člověk pracuje
+     *   ve stejné firmě; u údajů o duševním zdraví to platí dvojnásob.
      * external – externí kouč: samostatná větev klientů. Vidí výhradně to, co
      *   sám založil, a nikdo z našich na jeho klienty nevidí. Master o jeho
      *   větvi zná jen počty, typy testů a data, aby mohl vystavit fakturu.

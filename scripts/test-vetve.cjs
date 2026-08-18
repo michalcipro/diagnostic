@@ -11,6 +11,7 @@
 const KOUCI = {
   M: { id: "M", role: "master" },
   K: { id: "K", role: "coach" },
+  K2: { id: "K2", role: "coach" },
   E1: { id: "E1", role: "external" },
   E2: { id: "E2", role: "external" },
 }
@@ -20,13 +21,17 @@ const VYPLNENI = [
   { id: "v-stare", coachId: undefined },
   { id: "v-master", coachId: "M" },
   { id: "v-kouc", coachId: "K" },
+  { id: "v-kouc2", coachId: "K2" },
   { id: "v-e1", coachId: "E1" },
   { id: "v-e2", coachId: "E2" },
 ]
 
 /** convex/sessions.ts: filtrViditelnosti */
 function filtrViditelnosti(me) {
-  if (me.role === "external") return (vlastnik) => vlastnik === me.id
+  // Kouč vidí jen to, co sám založil. Externí i náš, pravidlo je stejné.
+  if (me.role !== "master") return (vlastnik) => vlastnik === me.id
+  // Master vidí celou naši větev včetně starých vyplnění bez vlastníka,
+  // do větví externích koučů ale nevidí.
   const externi = new Set(
     Object.values(KOUCI).filter((c) => c.role === "external").map((c) => c.id),
   )
@@ -35,9 +40,6 @@ function filtrViditelnosti(me) {
 
 const vyzadujMastera = (me) => {
   if (me.role !== "master") throw new Error("jen master")
-}
-const odmitniExterniho = (me) => {
-  if (me.role === "external") throw new Error("externí sem nesmí")
 }
 
 // ---- koncové body ----
@@ -54,7 +56,7 @@ const removeForCoach = (me, id) => {
   return "ok"
 }
 const normStats = (me) => {
-  odmitniExterniho(me)
+  vyzadujMastera(me)
   return "data norem"
 }
 const externalUsage = (me) => {
@@ -78,13 +80,11 @@ const hodi = (fn) => {
 
 console.log("– seznam vyplnění –")
 rekni(
-  JSON.stringify(listForCoach(KOUCI.M)) === JSON.stringify(["v-stare", "v-master", "v-kouc"]),
-  "master vidí naše a stará, ne externí",
+  JSON.stringify(listForCoach(KOUCI.M)) === JSON.stringify(["v-stare", "v-master", "v-kouc", "v-kouc2"]),
+  "master vidí celou naši větev včetně starých, ne externí",
 )
-rekni(
-  JSON.stringify(listForCoach(KOUCI.K)) === JSON.stringify(["v-stare", "v-master", "v-kouc"]),
-  "náš kouč vidí naše a stará, ne externí",
-)
+rekni(JSON.stringify(listForCoach(KOUCI.K)) === JSON.stringify(["v-kouc"]), "náš kouč vidí jen své klienty")
+rekni(JSON.stringify(listForCoach(KOUCI.K2)) === JSON.stringify(["v-kouc2"]), "druhý náš kouč vidí jen své klienty")
 rekni(JSON.stringify(listForCoach(KOUCI.E1)) === JSON.stringify(["v-e1"]), "externí 1 vidí jen své")
 rekni(JSON.stringify(listForCoach(KOUCI.E2)) === JSON.stringify(["v-e2"]), "externí 2 vidí jen své")
 
@@ -95,15 +95,24 @@ rekni(getForCoach(KOUCI.E1, "v-e2") === null, "externí nedostane vyplnění dru
 rekni(getForCoach(KOUCI.E1, "v-e1") === "v-e1", "externí dostane své vlastní")
 rekni(getForCoach(KOUCI.M, "v-e1") === null, "master nedostane vyplnění externího")
 rekni(getForCoach(KOUCI.K, "v-e1") === null, "náš kouč nedostane vyplnění externího")
+rekni(getForCoach(KOUCI.K, "v-kouc2") === null, "náš kouč nedostane klienta jiného našeho kouče")
+rekni(getForCoach(KOUCI.K, "v-master") === null, "náš kouč nedostane klienta mastera")
+rekni(getForCoach(KOUCI.K, "v-stare") === null, "náš kouč nedostane staré vyplnění bez vlastníka")
+rekni(getForCoach(KOUCI.K, "v-kouc") === "v-kouc", "náš kouč dostane svého klienta")
+rekni(getForCoach(KOUCI.M, "v-kouc2") === "v-kouc2", "master dostane klienta kteréhokoli našeho kouče")
 
 console.log("\n– mazání –")
 rekni(hodi(() => removeForCoach(KOUCI.E1, "v-master")), "externí nesmaže naše vyplnění")
 rekni(hodi(() => removeForCoach(KOUCI.M, "v-e1")), "master nesmaže vyplnění externího")
 rekni(removeForCoach(KOUCI.E1, "v-e1") === "ok", "externí smaže své vlastní")
+rekni(hodi(() => removeForCoach(KOUCI.K, "v-kouc2")), "náš kouč nesmaže klienta jiného kouče")
+rekni(removeForCoach(KOUCI.K, "v-kouc") === "ok", "náš kouč smaže svého klienta")
+rekni(removeForCoach(KOUCI.M, "v-kouc2") === "ok", "master smaže klienta kteréhokoli našeho kouče")
 
 console.log("\n– normy a přehled větví –")
-rekni(hodi(() => normStats(KOUCI.E1)), "externí nevidí na naše normy")
-rekni(normStats(KOUCI.K) === "data norem", "náš kouč na normy vidí")
+rekni(hodi(() => normStats(KOUCI.E1)), "externí nevidí na normy")
+rekni(hodi(() => normStats(KOUCI.K)), "náš kouč nevidí na normy")
+rekni(normStats(KOUCI.M) === "data norem", "master na normy vidí")
 rekni(hodi(() => externalUsage(KOUCI.K)), "náš kouč nevidí přehled větví")
 rekni(hodi(() => externalUsage(KOUCI.E1)), "externí nevidí přehled větví")
 rekni(externalUsage(KOUCI.M) === "přehled větví", "master přehled větví vidí")
@@ -131,7 +140,10 @@ for (const [kdo, popis] of [
   rekni(!filtrViditelnosti(KOUCI.E1)(vyplneni.coachId), `externí na ně nevidí (${popis})`)
   rekni(!filtrViditelnosti(KOUCI.E2)(vyplneni.coachId), `druhý externí na ně nevidí (${popis})`)
   rekni(filtrViditelnosti(KOUCI.M)(vyplneni.coachId), `master na ně vidí (${popis})`)
-  rekni(filtrViditelnosti(KOUCI.K)(vyplneni.coachId), `náš kouč na ně vidí (${popis})`)
+  rekni(
+    filtrViditelnosti(KOUCI.K)(vyplneni.coachId) === (kdo === "K"),
+    `náš kouč na ně vidí jen když jsou jeho (${popis})`,
+  )
 }
 
 const odExterniho = submitWithInvite(createInvite(KOUCI.E1))
@@ -146,6 +158,7 @@ const zeStarePozvanky = submitWithInvite({ coachId: undefined })
 rekni(zeStarePozvanky.coachId === undefined, "vyplnění ze staré pozvánky nemá vlastníka")
 rekni(filtrViditelnosti(KOUCI.M)(zeStarePozvanky.coachId), "master na ně vidí")
 rekni(!filtrViditelnosti(KOUCI.E1)(zeStarePozvanky.coachId), "externí na ně nevidí")
+rekni(!filtrViditelnosti(KOUCI.K)(zeStarePozvanky.coachId), "náš kouč na ně nevidí, vlastníka nemají")
 
 console.log(chyb === 0 ? "\nizolace větví sedí" : `\nNALEZENO CHYB: ${chyb}`)
 process.exit(chyb === 0 ? 0 : 1)

@@ -22,13 +22,23 @@ export async function filtrViditelnosti(
   ctx: QueryCtx,
   me: Coach,
 ): Promise<(vlastnik: Id<"coaches"> | undefined) => boolean> {
-  if (me.role === "external") {
+  // Kouč vidí výhradně klienty, které si sám pozval. Platí to pro externího
+  // i pro našeho: u údajů o duševním zdraví nemá být přístup k cizímu klientovi
+  // vedlejším účinkem toho, že člověk pracuje ve stejné firmě.
+  if (me.role !== "master") {
     const mujId = me._id
     return (vlastnik) => vlastnik === mujId
   }
+
+  // Master vidí celou naši větev, tedy i klienty ostatních našich koučů
+  // a stará vyplnění bez vlastníka, která vznikla dřív, než se vlastnictví
+  // začalo evidovat.
+  //
+  // Do větví externích koučů nevidí ani on. Na tom stojí jejich spolupráce
+  // s námi: mají vlastní klienty, my jim do nich nevidíme a oni k nám taky ne.
+  // Z jejich větve známe jen počty testů, aby šlo vystavit fakturu.
   const vsichni = await ctx.db.query("coaches").collect()
   const externi = new Set(vsichni.filter((c) => c.role === "external").map((c) => String(c._id)))
-  // Vyplnění bez vlastníka vzniklo dřív, než externí kouči existovali; je naše.
   return (vlastnik) => vlastnik === undefined || !externi.has(String(vlastnik))
 }
 

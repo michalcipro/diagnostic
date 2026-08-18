@@ -505,6 +505,32 @@ předvyplnilo. Po opravě K1 je token neuhodnutelný, takže jediný, kdo jméno
 uvidí, je ten, komu odkaz patří. Zrušit předvyplnění by zhoršilo použití
 a bezpečnosti by to prakticky nepřidalo.
 
+## Doplněk: srpen 2026
+
+Kontrola oprávnění a toho, co si respondent stáhne spolu s dotazníkem.
+
+**Klíče v prohlížeči respondenta.** Stránka s dotazníkem si kvůli importu
+jediné funkce tahala `structure.ts`, tedy čísla kontrolních položek pozornosti,
+neobvyklé položky, dvojice na konzistenci s prahy, obrácené položky a hranice
+pásem. Stačilo otevřít zdroj stránky. Kdo tyhle údaje zná, projde kontrolami
+platnosti podle libosti, takže mechanismus na odhalení nepoctivého vyplnění byl
+čitelný právě pro toho, koho má odhalit. Stejnou cestou se vezl celý výklad
+ELITE a všech devět dotazníků najednou. Opraveno rozdělením souborů podle toho,
+co která strana potřebuje; hlídá to `scripts/audit-balicku.cjs`.
+
+**Normativní vzorek.** `normStats` a `normExport` odmítaly jen externího kouče,
+takže náš vlastní kouč viděl velikost vzorku a mohl si ho celý stáhnout. Nově
+vyžadují mastera.
+
+**Viditelnost klientů.** Náš kouč dřív viděl klienty všech ostatních našich
+koučů. Nově vidí výhradně ty, které si sám pozval; celou naši větev vidí jen
+master. Do větví externích koučů nevidí nikdo od nás, to zůstává.
+
+**Ověřeno bez nálezu:** cizí záznam přes uhodnuté ID (všechny koncové body si
+dotáhnou dokument a teprve pak ověří větev), vlastník pozvánky se bere z relace
+a nedá se podvrhnout, výmaz vyplnění bere s sebou i anonymní kopii ve vzorku,
+zakládat kouče smí pouze master a druhý master tudy vzniknout nemůže.
+
 ## Závěr
 
 Aplikace je na svoji velikost postavená nadprůměrně obezřetně: autorizace je

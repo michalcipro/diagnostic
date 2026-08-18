@@ -551,10 +551,11 @@ export default function CoachPage() {
             <form onSubmit={submitCoach} className="diag-card p-6">
               <h2 className="text-[16px] font-semibold">Přidat kouče</h2>
               <p className="mt-1 max-w-[74ch] text-[13px] leading-relaxed text-[var(--wm-text-2)]">
-                Náš kouč sdílí přehled klientů s tebou. Externí kouč dostane vlastní větev: uvidí
-                jen to, co sám založí, a do našich klientů nevidí. Ty na jeho klienty také ne,
-                v záložce Externí kouči uvidíš jen počty testů, jejich typ a data. Spravovat účty
-                může dál pouze master.
+                Každý kouč vidí výhradně klienty, které si sám pozval. Ty jako master vidíš
+                celou naši větev, tedy klienty všech našich koučů. Externí kouč má navíc větev
+                oddělenou úplně: do našich klientů nevidí a ty na jeho také ne, v záložce
+                Vytížení uvidíš jen počty testů, jejich typ a data. Spravovat účty může dál
+                pouze master.
               </p>
 
               <div className="mt-4">
