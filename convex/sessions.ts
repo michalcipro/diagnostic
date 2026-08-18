@@ -37,11 +37,6 @@ export function vyzadujMastera(me: Coach): void {
   if (me.role !== "master") throw new ConvexError("Přístup má pouze master účet.")
 }
 
-/** Vyhodí chybu, pokud je přihlášený externí kouč. Chrání naše společná data. */
-export function odmitniExterniho(me: Coach): void {
-  if (me.role === "external") throw new ConvexError("Externí účet sem přístup nemá.")
-}
-
 /**
  * Vrátí přihlášeného kouče, nebo vyhodí chybu. Používá se všude, kde se
  * pracuje s výsledky a pozvánkami.

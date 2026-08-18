@@ -460,7 +460,7 @@ export default function CoachPage() {
         <button type="button" data-active={tab === "manual"} onClick={() => setTab("manual")}>
           {t.tabManual}
         </button>
-        {meInfo.role !== "external" && (
+        {meInfo.role === "master" && (
           <button
             type="button"
             data-active={tab === "norms"}
@@ -493,7 +493,7 @@ export default function CoachPage() {
               if (externi === null) void loadExterni()
             }}
           >
-            Externí kouči
+            Vytížení
           </button>
         )}
         {meInfo.role === "master" && (
@@ -528,7 +528,7 @@ export default function CoachPage() {
         </div>
       )}
 
-      {tab === "norms" && meInfo.role !== "external" && (
+      {tab === "norms" && meInfo.role === "master" && (
         <NormsPanel
           stats={norms}
           lang={lang}

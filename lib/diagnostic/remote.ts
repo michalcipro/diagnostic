@@ -395,6 +395,7 @@ export interface ExternalUsage {
   coachId: string
   name: string
   email: string
+  role: "coach" | "external"
   note?: string
   active: boolean
   createdAt: number
@@ -410,7 +411,7 @@ export interface ExternalUsage {
   }[]
 }
 
-/** Přehled větví externích koučů. Vidí ho pouze master. */
+/** Vytížení koučů, podklad pro fakturaci. Vidí ho pouze master. */
 export async function externalUsage(sessionToken: string): Promise<ExternalUsage[]> {
   const c = client()
   if (!c) throw new Error("not-configured")

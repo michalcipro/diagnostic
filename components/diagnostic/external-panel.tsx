@@ -5,12 +5,12 @@ import { TEST_NAMES } from "@/lib/diagnostic/i18n"
 import type { ExternalUsage, PocetTestu } from "@/lib/diagnostic/remote"
 import type { Lang, TestId } from "@/lib/diagnostic/types"
 
-// Přehled větví externích koučů. Vidí ho pouze master.
+// Vytížení koučů. Vidí ho pouze master.
 //
-// Externí kouč má vlastní větev klientů a my do ní nevidíme. Tenhle panel
-// proto NEZOBRAZUJE žádný osobní údaj: jen typ testu, datum a úplnost. Slouží
-// k jedinému účelu, a to k podkladu pro měsíční fakturu za použití našich
-// testů a vyhodnocení.
+// Jsou tu všichni kouči kromě mastera, externí i naši. Panel NEZOBRAZUJE
+// žádný osobní údaj: jen typ testu, datum a úplnost. U externího kouče je to
+// nutnost, protože do jeho větve klientů nevidíme; u našeho proto, že na
+// podklad k fakturaci nic víc není potřeba a klienty má master jinde.
 
 const MESICE_CS = [
   "leden",
@@ -40,6 +40,13 @@ function datumCasem(ms: number, lang: Lang): string {
   const den = `${d.getDate()}. ${d.getMonth() + 1}. ${d.getFullYear()}`
   const cas = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
   return lang === "en" ? d.toISOString().slice(0, 16).replace("T", " ") : `${den} ${cas}`
+}
+
+/** Český tvar podle počtu: 1 test, 2 až 4 testy, 5 a víc testů. */
+function pocetTestu(n: number): string {
+  if (n === 1) return "test"
+  if (n >= 2 && n <= 4) return "testy"
+  return "testů"
 }
 
 function nazevTestu(testId: string, lang: Lang): string {
@@ -73,7 +80,7 @@ function Vetev({ u, lang }: { u: ExternalUsage; lang: Lang }) {
           <h3 className="flex flex-wrap items-center gap-2 text-[17px] font-bold tracking-tight">
             {u.name}
             <span className="rounded-full bg-[var(--wm-track)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--wm-text-2)]">
-              externí
+              {u.role === "external" ? "externí" : "náš kouč"}
             </span>
             {!u.active && (
               <span className="rounded-full bg-[var(--wm-red-light)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--wm-invalid-fg)]">
@@ -86,7 +93,7 @@ function Vetev({ u, lang }: { u: ExternalUsage; lang: Lang }) {
         <div className="text-right">
           <div className="text-[28px] font-bold leading-none tabular-nums">{u.celkem}</div>
           <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--wm-text-3)]">
-            {u.celkem === 1 ? "test celkem" : "testů celkem"}
+            {pocetTestu(u.celkem)} celkem
           </div>
         </div>
       </header>
@@ -167,11 +174,12 @@ export function ExternalPanel({ data, lang }: { data: ExternalUsage[] | null; la
   if (!data.length) {
     return (
       <div className="diag-card p-6">
-        <h2 className="text-[16px] font-bold tracking-tight">Zatím žádný externí kouč</h2>
+        <h2 className="text-[16px] font-bold tracking-tight">Zatím žádný další kouč</h2>
         <p className="mt-2 max-w-[68ch] text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
-          Externího kouče přidáš v záložce Kouči. Dostane vlastní větev klientů: uvidí jen to, co
-          sám založí, a do našich klientů nevidí. My na jeho klienty nevidíme také ne, tady se
-          objeví jen počty testů, jejich typ a data, aby šlo vystavit fakturu.
+          Kouče přidáš v záložce Kouči. Jakmile začnou vystavovat pozvánky, objeví se tady počty
+          testů, jejich typ a data, aby šlo vystavit fakturu. Osobní údaje jejich klientů tudy
+          neprocházejí. Externí kouč navíc dostane vlastní větev klientů: uvidí jen to, co sám
+          založí, a do našich klientů nevidí, stejně jako my do jeho.
         </p>
       </div>
     )
@@ -184,7 +192,7 @@ export function ExternalPanel({ data, lang }: { data: ExternalUsage[] | null; la
       <p className="max-w-[74ch] text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
         Podklad pro fakturaci. Osobní údaje klientů externích koučů se sem záměrně nepřenášejí,
         vidíš jen typ testu, datum a úplnost. Všechna tahle vyplnění přitom stavějí naše normy.
-        Celkem {celkem === 1 ? "je to 1 test" : `je to ${celkem} testů`}.
+        Celkem je to {celkem} {pocetTestu(celkem)}.
       </p>
       {data.map((u) => (
         <Vetev key={u.coachId} u={u} lang={lang} />

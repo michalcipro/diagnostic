@@ -2,7 +2,6 @@ import { ConvexError, v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import {
   filtrViditelnosti,
-  odmitniExterniho,
   requireCoach,
   requireCoachProZapis,
   vyzadujMastera,
@@ -559,6 +558,11 @@ export const getForCoach = mutation({
 /**
  * Kolik anonymních záznamů se zatím nasbíralo, po testech.
  *
+ * Vidí to výhradně master. Že se z vyplnění staví normativní vzorek a na čem
+ * se počítají percentily a reliabilita, je naše know-how; kouč, který ví, že
+ * vzorek je zatím malý, snadno usoudí, že testy nestojí za nic, a řekne to
+ * dál. Proto sem nemá přístup ani náš vlastní kouč, nejen externí.
+ *
  * Orientační milníky: od ~100 záznamů na variantu dávají smysl percentily
  * a reliabilita (α/ω), od ~250 konfirmační faktorová analýza.
  */
@@ -570,7 +574,7 @@ export const normStats = query({
     months: v.array(v.string()),
   }),
   handler: async (ctx, args) => {
-    odmitniExterniho(await requireCoach(ctx, args.sessionToken))
+    vyzadujMastera(await requireCoach(ctx, args.sessionToken))
     const vsechny = await ctx.db.query("normSamples").collect()
     const mapa = new Map<string, { count: number; complete: number }>()
     for (const id of TEST_IDS) mapa.set(id, { count: 0, complete: 0 })
@@ -619,7 +623,7 @@ export const normExport = mutation({
   ),
   handler: async (ctx, args) => {
     const me = await requireCoachProZapis(ctx, args.sessionToken)
-    odmitniExterniho(me)
+    vyzadujMastera(me)
     const vsechny = await ctx.db.query("normSamples").take(5000)
     await zaznamenejPristup(ctx, me._id, "export-vzorku")
     return vsechny.map((z) => ({
@@ -678,16 +682,20 @@ export const removeForCoach = mutation({
 })
 
 // ---------------------------------------------------------------------------
-// Přehled větví externích koučů (pouze master)
+// Vytížení koučů (pouze master)
 // ---------------------------------------------------------------------------
 
 /**
- * Podklad pro fakturaci externímu kouči.
+ * Kolik testů který kouč vypustil. Podklad pro fakturaci.
+ *
+ * Uvádí se všichni kouči kromě mastera, tedy i naši vlastní: master má vidět
+ * vytížení celé sítě na jednom místě, ne jen u těch, komu vystavuje fakturu.
  *
  * Záměrně BEZ jakéhokoli osobního údaje: vrací se jen typ testu, datum
- * a úplnost. Jméno, datum narození ani odpovědi tudy neprojdou, protože
- * externí kouč má vlastní větev klientů a my do ní nevidíme. Na účtování
- * stačí vědět, kolik testů kterého typu a kdy proběhlo.
+ * a úplnost. Jméno klienta, datum narození ani odpovědi tudy neprojdou.
+ * U externího kouče je to nutnost, protože do jeho větve klientů nevidíme;
+ * u našeho je to tím, že na účtování nic víc není potřeba a přehled klientů
+ * je stejně jinde.
  */
 export const externalUsage = query({
   args: { sessionToken: v.string() },
@@ -696,6 +704,12 @@ export const externalUsage = query({
       coachId: v.id("coaches"),
       name: v.string(),
       email: v.string(),
+      /**
+       * Master se v přehledu neuvádí: sám sobě fakturu nevystavuje, proto tu
+       * "master" schválně chybí.
+       * audit-role-neuplny
+       */
+      role: v.union(v.literal("coach"), v.literal("external")),
       note: v.optional(v.string()),
       active: v.boolean(),
       createdAt: v.number(),
@@ -723,10 +737,14 @@ export const externalUsage = query({
     vyzadujMastera(await requireCoach(ctx, args.sessionToken))
 
     const vsichni = await ctx.db.query("coaches").collect()
-    const externi = vsichni.filter((c) => c.role === "external")
+    // Master sám sebe nefakturuje, ostatní role ano. Externí první, protože
+    // právě jim se faktura vystavuje.
+    const kouci = vsichni
+      .filter((c) => c.role !== "master")
+      .sort((a, b) => (a.role === b.role ? 0 : a.role === "external" ? -1 : 1))
 
     const out = []
-    for (const c of externi) {
+    for (const c of kouci) {
       const vyplneni = await ctx.db
         .query("eliteDiagnosticResults")
         .withIndex("by_coach", (q) => q.eq("coachId", c._id))
@@ -746,6 +764,7 @@ export const externalUsage = query({
         coachId: c._id,
         name: c.name,
         email: c.email,
+        role: c.role as "coach" | "external",
         note: c.note,
         active: c.active,
         createdAt: c.createdAt,

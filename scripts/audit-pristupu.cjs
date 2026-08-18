@@ -32,7 +32,32 @@ const ZAMERNE_VEREJNE = {
 }
 
 /** Výrazy, které se považují za stráž. */
-const STRAZE = ["requireCoach", "vyzadujMastera", "odmitniExterniho", "filtrViditelnosti", "whoAmI"]
+const STRAZE = ["requireCoach", "vyzadujMastera", "filtrViditelnosti", "whoAmI"]
+
+/**
+ * Funkce, do kterých smí výhradně master.
+ *
+ * Kontrola „má nějakou stráž" tuhle skupinu nepodchytí: normStats dřív
+ * odmítalo jen externího kouče, takže náš vlastní kouč viděl, jak velký je
+ * normativní vzorek, a mohl si ho celý stáhnout. Stráž tam byla, jen slabší,
+ * než se čekalo. Proto se u téhle skupiny ověřuje jmenovitě `vyzadujMastera`.
+ *
+ * Co sem patří: správa účtů, přístupový log, podklady k fakturaci a všechno
+ * kolem normativního vzorku. To poslední je know-how; kdo ví, jak je vzorek
+ * zatím malý, snadno usoudí, že testy nestojí za nic.
+ */
+const POUZE_MASTER = [
+  "sessions.listCoaches",
+  "sessions.setCoachActive",
+  "sessions.pristupovyLog",
+  "auth.addCoach",
+  "eliteDiagnostic.normStats",
+  "eliteDiagnostic.normExport",
+  "eliteDiagnostic.externalUsage",
+]
+
+/** Funkce, u kterých se během průchodu potvrdilo, že mastera vyžadují. */
+const nalezenoMaster = new Set()
 
 const ROLE = ["master", "coach", "external"]
 
@@ -59,6 +84,11 @@ for (const soubor of fs.readdirSync(KOREN).filter((f) => f.endsWith(".ts"))) {
     const telo = zdroj.slice(m.index, dalsi === -1 ? zdroj.length : dalsi)
 
     const maStraz = STRAZE.some((s) => telo.includes(s))
+    if (POUZE_MASTER.includes(klic)) {
+      const jenMaster = telo.includes("vyzadujMastera") || telo.includes('role !== "master"')
+      rekni(jenMaster, `${klic} pouští dovnitř jen mastera`)
+      if (jenMaster) nalezenoMaster.add(klic)
+    }
     if (ZAMERNE_VEREJNE[klic]) {
       rekni(!maStraz || klic === "auth.login", `${klic} je veřejná záměrně (${ZAMERNE_VEREJNE[klic]})`)
     } else {
@@ -91,6 +121,44 @@ for (const soubor of fs.readdirSync(KOREN).filter((f) => f.endsWith(".ts"))) {
 function chibiText(chybi) {
   return chybi.length ? ` (chybí: ${chybi.join(", ")})` : ""
 }
+
+// ---------------------------------------------------------------------------
+// Druhý master nesmí vzniknout přes addCoach
+// ---------------------------------------------------------------------------
+//
+// Kdo zakládá kouče, mohl by si založit i druhého mastera a tím obejít
+// všechno ostatní. Validátor argumentu proto "master" neobsahuje a tahle
+// kontrola hlídá, že to tak zůstane.
+{
+  const auth = fs.readFileSync(path.join(KOREN, "auth.ts"), "utf8")
+  const zac = auth.indexOf("export const addCoach")
+  const telo = auth.slice(zac, auth.indexOf("\nexport const ", zac + 10))
+  const roleArg = /role:\s*v\.optional\(\s*v\.union\(([^)]*(?:\)[^)]*)*?)\)\s*\)/.exec(telo)
+  rekni(!!roleArg, "auth.addCoach má validátor role")
+  rekni(!!roleArg && !roleArg[1].includes('v.literal("master")'), "auth.addCoach neumí založit dalšího mastera")
+}
+
+// ---------------------------------------------------------------------------
+// Do normativního vzorku padá každé odeslané vyplnění
+// ---------------------------------------------------------------------------
+//
+// Kdyby se zápis dostal do podmínky, přestala by část vyplnění do vzorku
+// chodit a nikdo by si toho nevšiml: normy by se počítaly z toho, co zbylo.
+// Kontroluje se, že zápis stojí přímo v těle funkce, ne uvnitř bloku.
+{
+  const elite = fs.readFileSync(path.join(KOREN, "eliteDiagnostic.ts"), "utf8")
+  const zac = elite.indexOf("export const submitWithInvite")
+  const telo = elite.slice(zac, elite.indexOf("\nexport const ", zac + 10))
+  const zapis = /^(\s*)await ctx\.db\.insert\("normSamples"/m.exec(telo)
+  rekni(!!zapis, "submitWithInvite ukládá anonymní kopii do normSamples")
+  rekni(!!zapis && zapis[1].length === 4, "zápis do normSamples není schovaný v podmínce")
+}
+
+const neprosle = POUZE_MASTER.filter((k) => !nalezenoMaster.has(k))
+rekni(
+  !neprosle.length,
+  `seznam funkcí jen pro mastera je aktuální${chibiText(neprosle)}`,
+)
 
 console.log(chyb === 0 ? "\nvše v pořádku" : `\nNALEZENO CHYB: ${chyb}`)
 process.exit(chyb === 0 ? 0 : 1)
