@@ -61,23 +61,14 @@ export function ForcePassword(props: ForcePasswordProps) {
   }
 
   return (
-    <div className="pl-root">
-      <div
-        className="pl-wrap"
-        style={{ maxWidth: 400, paddingTop: 90, display: "flex", flexDirection: "column" }}
-      >
-        <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.18em", margin: 0 }}>
-          WINNING MINDS
-        </p>
-        <h1 style={{ fontSize: 26, fontWeight: 700, margin: "10px 0 6px" }}>
-          {t.zmenHesloNadpis}
-        </h1>
-        <p className="pl-note" style={{ marginTop: 0 }}>
-          {applyGender(t.zmenHesloPopis, gender)}
-        </p>
+    <div className="pl-root pl-prihlaseni">
+      <div className="pl-prihlaseni-obal pl-anim">
+        <div className="pl-znacka">WINNING MINDS</div>
+        <h1 className="pl-prihlaseni-titul">{t.zmenHesloNadpis}</h1>
+        <p className="pl-prihlaseni-pod">{applyGender(t.zmenHesloPopis, gender)}</p>
 
         {hotovo ? (
-          <div className="pl-card" style={{ marginTop: 18 }}>
+          <div className="pl-card pl-prihlaseni-karta">
             <p style={{ margin: 0, fontSize: 15, lineHeight: 1.55 }}>{t.zmenHesloHotovo}</p>
             <button
               type="button"
@@ -89,7 +80,7 @@ export function ForcePassword(props: ForcePasswordProps) {
             </button>
           </div>
         ) : (
-          <div className="pl-card" style={{ marginTop: 18 }}>
+          <div className="pl-card pl-prihlaseni-karta">
             <label className="pl-label" htmlFor="zh-stav">
               {t.stavajiciHeslo}
             </label>
@@ -141,8 +132,8 @@ export function ForcePassword(props: ForcePasswordProps) {
 
             <button
               type="button"
-              className="pl-btn pl-btn-primary"
-              style={{ marginTop: 16 }}
+              className="pl-btn pl-btn-akcent"
+              style={{ width: "100%", marginTop: 16, minHeight: 46 }}
               disabled={pracuji || !stavajici || !nove || !znovu}
               onClick={() => void zmen()}
             >

@@ -1,26 +1,127 @@
-/* Weekly Planner – vizuální okruh plánovače.
+/* Weekly Planner, vizuální okruh klientské aplikace.
  *
- * Navazuje na diagnostiku: tytéž tokeny --wm-*, tytéž karty, tytéž poloměry
- * a stejná typografie. Plánovač a vyhodnocení se otevírají ze stejné domény
- * a mají vypadat jako jeden produkt, ne jako dva programy vedle sebe.
+ * Klientský deník je vždycky tmavý, bez ohledu na nastavení systému. Je to
+ * rozhodnutí, ne opomenutí: aplikace stojí na velkých číslech, prstencích
+ * a grafech, a ty na tmavém podkladu nesou informaci barvou a světlem,
+ * kdežto na bílé se z nich stane tabulka. Stejně to dělají Whoop i Oura,
+ * a stejně jako u nich je tma součást značky.
+ *
+ * TOKENY: uvnitř .pl-root se přebíjí celá paleta --wm-* z globals.css.
+ * Komponenty deníku tak dál mluví jmény --wm-*, ale uvnitř klientské
+ * aplikace dostanou tmavé hodnoty. Koučovská sekce (/kouc) obal .pl-root
+ * nemá, takže tam tytéž komponenty zůstávají ve světlém stylu diagnostiky
+ * a nic se nerozbije.
  *
  * Papírová podoba předlohy zůstává tam, kde na ni dojde: v tisku a v PDF.
- * Na obrazovce by imitace papíru s mřížkou a černými pruhy jen ubírala
- * čitelnost, kterou na papíře nahradí tisk a formát.
  */
+
+/* ── paleta ───────────────────────────────────────────────────────────────── */
+
+/* Akcentové tokeny i pro koučovskou sekci, kde .pl-root není: grafy deníku
+   se kreslí i v detailu klienta u kouče a bez těchto hodnot by tam přišly
+   o barvy. Světlé odstíny jsou tmavší než ty z tmavého tématu, protože na
+   bílém podkladu by zářivá zelená nedržela kontrast. */
+:root {
+  --el-akcent: #0f9d6d;
+  --el-akcent-tmavy: #0b7f57;
+  --el-akcent-mekky: rgba(15, 157, 109, 0.12);
+  --el-modra: #007aff;
+  --el-modra-mekka: rgba(0, 122, 255, 0.1);
+  --el-jantar: #c96b00;
+  --el-jantar-mekky: rgba(201, 107, 0, 0.1);
+  --el-rubin: #d70015;
+  --el-rubin-mekky: rgba(215, 0, 21, 0.08);
+  --el-mlha: #e9e9ef;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --el-akcent: #2fe6a6;
+    --el-akcent-tmavy: #14c98a;
+    --el-akcent-mekky: rgba(47, 230, 166, 0.13);
+    --el-modra: #5b9bff;
+    --el-modra-mekka: rgba(91, 155, 255, 0.13);
+    --el-jantar: #ffb340;
+    --el-jantar-mekky: rgba(255, 179, 64, 0.13);
+    --el-rubin: #ff6b6b;
+    --el-rubin-mekky: rgba(255, 107, 107, 0.13);
+    --el-mlha: #232733;
+  }
+}
+:root[data-theme="dark"] {
+  --el-akcent: #2fe6a6;
+  --el-akcent-tmavy: #14c98a;
+  --el-akcent-mekky: rgba(47, 230, 166, 0.13);
+  --el-modra: #5b9bff;
+  --el-modra-mekka: rgba(91, 155, 255, 0.13);
+  --el-jantar: #ffb340;
+  --el-jantar-mekky: rgba(255, 179, 64, 0.13);
+  --el-rubin: #ff6b6b;
+  --el-rubin-mekky: rgba(255, 107, 107, 0.13);
+  --el-mlha: #232733;
+}
+
+.pl-root {
+  /* přebití diagnostické palety: vždy tma */
+  --wm-bg: #07080b;
+  --wm-surface: #101218;
+  --wm-surface-2: #181b23;
+  --wm-text: #f2f4f8;
+  --wm-text-2: #9aa1ae;
+  --wm-text-3: #7f8696;
+  --wm-border: #3a4050;
+  --wm-border-light: #20242e;
+  --wm-brand: #f2f4f8;
+  --wm-brand-fg: #0b0d12;
+  --wm-glass: rgba(9, 10, 14, 0.88);
+  --wm-blue: #5b9bff;
+  --wm-blue-light: #131f36;
+  --wm-blue-dark: #86b6ff;
+  --wm-green: #2fe6a6;
+  --wm-green-light: #0c2a20;
+  --wm-red: #ff6b6b;
+  --wm-red-light: #301518;
+  --wm-orange: #ffb340;
+  --wm-orange-light: #2f2310;
+  --wm-gray: #8e93a0;
+  --wm-fill-4: rgba(148, 158, 178, 0.1);
+  --wm-tint-blue: rgba(91, 155, 255, 0.11);
+  --wm-ok-fg: #35e0a1;
+  --wm-caution-fg: #ffb340;
+  --wm-invalid-fg: #ff6b6b;
+  --wm-track: #20242e;
+  --wm-bar-muted: #4a5060;
+
+  /* akcenty deníku: zelená výkonu, modrá spánku, jantar výstrahy */
+  --el-akcent: #2fe6a6;
+  --el-akcent-tmavy: #14c98a;
+  --el-akcent-mekky: rgba(47, 230, 166, 0.13);
+  --el-modra: #5b9bff;
+  --el-modra-mekka: rgba(91, 155, 255, 0.13);
+  --el-jantar: #ffb340;
+  --el-jantar-mekky: rgba(255, 179, 64, 0.13);
+  --el-rubin: #ff6b6b;
+  --el-rubin-mekky: rgba(255, 107, 107, 0.13);
+  --el-mlha: #232733;
+}
 
 /* ── kostra ───────────────────────────────────────────────────────────────── */
 
 .pl-root {
-  min-height: 100vh;
-  background: var(--wm-bg);
+  min-height: 100dvh;
   color: var(--wm-text);
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "ss01" on;
+  /* Tichá záře nahoře. Jemná natolik, že si jí nikdo nevšimne, ale bez ní
+     je černá plocha mrtvá jako vypnutý monitor. */
+  background:
+    radial-gradient(1100px 520px at 50% -180px, rgba(47, 230, 166, 0.06), transparent 60%),
+    radial-gradient(900px 480px at 88% 4%, rgba(91, 155, 255, 0.05), transparent 55%),
+    var(--wm-bg);
+  background-attachment: fixed;
 }
 
 .pl-wrap {
-  max-width: 1240px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 0 20px 96px;
 }
@@ -29,43 +130,47 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  background: var(--wm-glass);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 1px solid var(--wm-border-light);
+  background: rgba(10, 11, 15, 0.97);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+@supports (backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px)) {
+  .pl-topbar {
+    background: var(--wm-glass);
+    backdrop-filter: saturate(160%) blur(20px);
+    -webkit-backdrop-filter: saturate(160%) blur(20px);
+  }
 }
 .pl-topbar-inner {
-  max-width: 1240px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 11px 20px;
+  padding: 10px 20px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 14px;
 }
 
 .pl-brand {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   white-space: nowrap;
+  color: var(--wm-text);
 }
 .pl-top-mezera { flex: 1; }
 
 /* ── ovládací prvky ───────────────────────────────────────────────────────── */
 
-/* Všechno, co stojí v jedné řadě, má stejnou výšku. Bez toho se tlačítko,
-   přepínač a rozbalovací nabídka liší o pár pixelů, což při pohledu na řádek
-   ovládání vypadá jako nedodělek, i když si toho nikdo vědomě nevšimne. */
+/* Všechno, co stojí v jedné řadě, má stejnou výšku. */
 :root {
-  --pl-ovladani: 36px;
+  --pl-ovladani: 38px;
 }
 
 .pl-tabs {
   display: inline-flex;
   align-items: center;
-  background: var(--wm-fill-4);
-  border-radius: 10px;
+  background: rgba(148, 158, 178, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 11px;
   padding: 2px;
   gap: 2px;
 }
@@ -73,10 +178,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(var(--pl-ovladani) - 4px);
+  min-height: calc(var(--pl-ovladani) - 8px);
   padding: 0 14px;
   border: none;
-  border-radius: 8px;
+  border-radius: 9px;
   background: transparent;
   color: var(--wm-text-2);
   font: inherit;
@@ -84,24 +189,25 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.18s ease, color 0.18s ease;
 }
 .pl-tabs button[data-active="true"] {
-  background: var(--wm-surface);
+  background: var(--wm-surface-2);
   color: var(--wm-text);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .pl-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 7px;
   min-height: var(--pl-ovladani);
   border: 1px solid var(--wm-border-light);
   background: var(--wm-surface);
   color: var(--wm-text);
-  border-radius: 10px;
-  padding: 0 14px;
+  border-radius: 11px;
+  padding: 0 15px;
   font: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -110,15 +216,27 @@
   transition:
     transform 0.14s cubic-bezier(0.34, 1.4, 0.64, 1),
     border-color 0.15s ease,
-    background 0.15s ease;
+    background 0.15s ease,
+    color 0.15s ease;
 }
-.pl-btn:hover:not(:disabled) { border-color: var(--wm-border); }
-.pl-btn:active:not(:disabled) { transform: scale(0.97); }
-.pl-btn:disabled { opacity: 0.42; cursor: default; }
+.pl-btn:hover:not(:disabled) { border-color: var(--wm-border); background: var(--wm-surface-2); }
+.pl-btn:active:not(:disabled) { transform: scale(0.96); }
+.pl-btn:disabled { opacity: 0.38; cursor: default; }
 .pl-btn-primary {
   background: var(--wm-brand);
   border-color: var(--wm-brand);
   color: var(--wm-brand-fg);
+}
+.pl-root .pl-btn-primary:hover:not(:disabled) { background: #ffffff; border-color: #ffffff; }
+.pl-btn-akcent {
+  background: linear-gradient(180deg, var(--el-akcent) 0%, var(--el-akcent-tmavy) 100%);
+  border-color: transparent;
+  color: #05130d;
+  box-shadow: 0 6px 22px rgba(47, 230, 166, 0.22);
+}
+.pl-btn-akcent:hover:not(:disabled) {
+  background: linear-gradient(180deg, #43ecb3 0%, var(--el-akcent) 100%);
+  border-color: transparent;
 }
 .pl-btn-quiet {
   border-color: transparent;
@@ -128,30 +246,60 @@
 .pl-btn-quiet:hover:not(:disabled) { background: var(--wm-fill-4); border-color: transparent; }
 .pl-btn-danger { color: var(--wm-red); }
 
+/* Kulaté tlačítko pro krok vzad a vpřed a pro drobné akce s jedním znakem. */
+.pl-krok {
+  width: var(--pl-ovladani);
+  height: var(--pl-ovladani);
+  padding: 0;
+  border-radius: 9999px;
+  font-size: 17px;
+  line-height: 1;
+  flex: none;
+}
+
+/* Čip: malá pilulka se stavem nebo rychlou akcí. */
+.pl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: var(--wm-fill-4);
+  color: var(--wm-text-2);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: default;
+}
+button.pl-chip { cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
+button.pl-chip:hover { background: rgba(148, 158, 178, 0.18); color: var(--wm-text); }
+.pl-chip-akcent {
+  background: var(--el-akcent-mekky);
+  color: var(--el-akcent);
+}
+
 .pl-input {
   width: 100%;
   min-height: var(--pl-ovladani);
   border: 1px solid var(--wm-border-light);
-  background: var(--wm-surface);
+  background: rgba(148, 158, 178, 0.07);
   color: var(--wm-text);
-  border-radius: 10px;
+  border-radius: 11px;
   padding: 8px 13px;
   font: inherit;
   font-size: 15px;
   outline: none;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
-select.pl-input {
-  padding-right: 34px;
-  cursor: pointer;
-}
-textarea.pl-input {
-  padding: 10px 13px;
-  line-height: 1.5;
-}
+select.pl-input { padding-right: 34px; cursor: pointer; }
+textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
+.pl-input::placeholder { color: var(--wm-text-3); }
 .pl-input:focus {
-  border-color: var(--wm-blue);
-  box-shadow: 0 0 0 3px var(--wm-tint-blue);
+  border-color: var(--el-akcent);
+  background: rgba(148, 158, 178, 0.05);
+  box-shadow: 0 0 0 3px var(--el-akcent-mekky);
 }
 .pl-label {
   display: block;
@@ -161,41 +309,42 @@ textarea.pl-input {
   margin-bottom: 6px;
 }
 
-/* Viditelné zaostření pro klávesnici. Bez něj se plánovač nedá projít
-   tabulátorem, což je u mřížky sedmi sloupců hlavní způsob, jak se v ní
-   pohybovat. */
+/* Viditelné zaostření pro klávesnici. */
 .pl-btn:focus-visible,
 .pl-tabs button:focus-visible,
+.pl-chip:focus-visible,
 .pl-dot:focus-visible,
 .pl-cell:focus-visible,
+.pl-skala button:focus-visible,
+.pl-navyk-radek:focus-visible,
+.pl-dolninav button:focus-visible,
 .pl-score:focus-visible {
-  outline: 2px solid var(--wm-blue);
+  outline: 2px solid var(--el-akcent);
   outline-offset: 2px;
 }
 
 /* ── karty ────────────────────────────────────────────────────────────────── */
 
-/* Odstupy drží čtyřpixelovou mřížku: 8, 12, 16, 20, 24. Karta má stejné
-   odsazení ze všech stran, takže se obsah dá zarovnat na jednu svislici. */
 .pl-card {
-  background: var(--wm-surface);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0) 40%),
+    var(--wm-surface);
   border: 1px solid var(--wm-border-light);
   border-radius: 20px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   padding: 20px;
 }
 .pl-card-label {
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--wm-text-3);
 }
 .pl-card-value {
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.02em;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
   margin-top: 7px;
   font-variant-numeric: tabular-nums;
 }
@@ -207,8 +356,8 @@ textarea.pl-input {
 .pl-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(186px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
+  gap: 14px;
+  margin-top: 14px;
 }
 
 /* ── list plánovače ───────────────────────────────────────────────────────── */
@@ -216,14 +365,12 @@ textarea.pl-input {
 .pl-sheet {
   background: var(--wm-surface);
   border: 1px solid var(--wm-border-light);
-  border-radius: 20px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  border-radius: 22px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   padding: 24px;
   margin-top: 16px;
 }
 
-/* Hlavička listu: název sekce drobně, období velké. Na papíře tuhle roli
-   plní černé pruhy; na obrazovce stačí hierarchie písma a je to čistší. */
 .pl-sheet-head {
   display: flex;
   align-items: flex-end;
@@ -241,7 +388,7 @@ textarea.pl-input {
   color: var(--wm-text-3);
 }
 .pl-sheet-title {
-  font-size: 21px;
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 4px 0 0;
@@ -256,15 +403,12 @@ textarea.pl-input {
 .pl-section-title {
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--wm-text-3);
   margin: 24px 0 8px;
 }
-/* První nadpis ve sloupci nemá odsazovat od hlavičky víc než ostatní. */
-.pl-spread > div > .pl-section-title:first-child {
-  margin-top: 20px;
-}
+.pl-spread > div > .pl-section-title:first-child { margin-top: 20px; }
 .pl-section-hint {
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -274,22 +418,228 @@ textarea.pl-input {
 
 .pl-box {
   border: 1px solid var(--wm-border-light);
-  border-radius: 14px;
-  background: var(--wm-surface);
+  border-radius: 15px;
+  background: rgba(148, 158, 178, 0.04);
   overflow: hidden;
 }
 .pl-scroll { overflow-x: auto; }
 
-/* ── mřížky ───────────────────────────────────────────────────────────────── */
+/* ── hero dne: datum a prstence ───────────────────────────────────────────── */
 
-/* Mřížka se nesmršťuje pod čitelnou míru. Když se na obrazovku nevejde,
-   posune se vodorovně a první sloupec zůstane přilepený, takže je pořád
-   vidět, o který den nebo návyk jde. Dřív se místo toho sloupce zužovaly,
-   až se text ořízl, a na užší obrazovce se list rozpadl.
+.pl-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 22px 24px;
+  border: 1px solid var(--wm-border-light);
+  border-radius: 22px;
+  margin-top: 16px;
+  background:
+    radial-gradient(560px 260px at 12% -40%, rgba(47, 230, 166, 0.09), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0) 45%),
+    var(--wm-surface);
+}
+.pl-hero-datum { min-width: 180px; }
+.pl-hero-datum h2 {
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 4px 0 0;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+.pl-hero-datum .pl-chip { margin-top: 10px; }
 
-   border-collapse je proto separate: přilepený sloupec s collapse ztrácí
-   linky, protože ty patří tabulce, ne buňce. Tady si je kreslí každá buňka
-   sama a při border-spacing: 0 se nikde nezdvojí. */
+.pl-prstence {
+  display: flex;
+  gap: 26px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.pl-prstenec {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 0;
+  min-width: 84px;
+}
+.pl-prstenec svg { display: block; }
+.pl-prstenec-drah { stroke: var(--el-mlha); }
+.pl-prstenec-oblouk {
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.4s ease;
+}
+.pl-prstenec-stred {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  fill: var(--wm-text);
+}
+.pl-prstenec-jednotka {
+  font-weight: 600;
+  letter-spacing: 0;
+  fill: var(--wm-text-3);
+}
+.pl-prstenec-popisek {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wm-text-3);
+  text-align: center;
+}
+
+/* Prstence ve statistikách stojí na kartách vedle sebe. */
+.pl-prstence-stat {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+.pl-prstence-stat .pl-karta-prstence {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 16px 16px;
+}
+
+/* ── škála hodnocení 1 až 10 ──────────────────────────────────────────────── */
+
+.pl-skala {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 6px;
+}
+.pl-skala button {
+  min-height: 40px;
+  border: 1px solid var(--wm-border-light);
+  border-radius: 10px;
+  background: rgba(148, 158, 178, 0.06);
+  color: var(--wm-text-2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.16s cubic-bezier(0.34, 1.4, 0.64, 1),
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.2s ease;
+}
+.pl-skala button:hover { border-color: var(--wm-border); color: var(--wm-text); }
+.pl-skala button:active { transform: scale(0.92); transition-duration: 0.06s; }
+/* Vybraná hodnota nese barvu svého pásma: nízko rubín, střed jantar, vysoko
+   akcent. Barva tak říká totéž co číslo a průběh týdne se dá číst letmo. */
+.pl-skala button[data-pasmo="nizko"][aria-pressed="true"] {
+  background: var(--el-rubin);
+  border-color: var(--el-rubin);
+  color: #2a0b0b;
+  box-shadow: 0 4px 16px var(--el-rubin-mekky);
+}
+.pl-skala button[data-pasmo="stred"][aria-pressed="true"] {
+  background: var(--el-jantar);
+  border-color: var(--el-jantar);
+  color: #2a1c04;
+  box-shadow: 0 4px 16px var(--el-jantar-mekky);
+}
+.pl-skala button[data-pasmo="vysoko"][aria-pressed="true"] {
+  background: var(--el-akcent);
+  border-color: var(--el-akcent);
+  color: #05130d;
+  box-shadow: 0 4px 16px rgba(47, 230, 166, 0.28);
+}
+
+.pl-metrika { padding: 14px 0; border-bottom: 1px solid var(--wm-border-light); }
+.pl-metrika:first-child { padding-top: 2px; }
+.pl-metrika:last-child { border-bottom: none; padding-bottom: 2px; }
+.pl-metrika-hlava {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 9px;
+}
+.pl-metrika-nazev { font-size: 13.5px; font-weight: 600; }
+.pl-metrika-hodnota {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--wm-text-2);
+}
+
+/* Spánek: číslo s jednotkou vpravo uvnitř pole. */
+.pl-spanek { position: relative; max-width: 150px; }
+.pl-spanek .pl-input { padding-right: 34px; text-align: center; font-weight: 600; }
+.pl-spanek-jednotka {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: var(--wm-text-3);
+  pointer-events: none;
+}
+
+/* ── návyky v denním pohledu ──────────────────────────────────────────────── */
+
+.pl-navyk-radek {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-bottom: 1px solid var(--wm-border-light);
+  background: transparent;
+  color: var(--wm-text);
+  font: inherit;
+  font-size: 14.5px;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
+}
+.pl-navyk-radek:last-child { border-bottom: none; }
+.pl-navyk-radek:hover:not(:disabled) { background: rgba(148, 158, 178, 0.06); }
+.pl-navyk-radek:disabled { opacity: 0.4; cursor: default; }
+.pl-navyk-radek .pl-dot { margin: 0; flex: none; }
+.pl-navyk-nazev { flex: 1; min-width: 0; transition: color 0.2s ease; }
+.pl-navyk-radek[aria-pressed="true"] .pl-navyk-nazev { color: var(--wm-text-2); }
+.pl-navyk-cil { font-size: 12px; color: var(--wm-text-3); white-space: nowrap; }
+
+/* ── časová osa rozvrhu dne ───────────────────────────────────────────────── */
+
+.pl-cas-radek {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--wm-border-light);
+  transition: background 0.15s ease;
+}
+.pl-cas-radek:last-child { border-bottom: none; }
+.pl-cas-radek[data-ted="true"] {
+  background: var(--el-akcent-mekky);
+  box-shadow: inset 3px 0 0 var(--el-akcent);
+}
+.pl-cas-hodina {
+  width: 58px;
+  flex: none;
+  padding: 0 10px;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--wm-text-3);
+}
+.pl-cas-radek .pl-cell { text-align: left; font-size: 14px; padding: 11px 8px; }
+
+/* ── mřížky týdenního listu ───────────────────────────────────────────────── */
+
 .pl-grid {
   width: 100%;
   border-collapse: separate;
@@ -308,10 +658,6 @@ textarea.pl-input {
 .pl-grid td:last-child { border-right: none; }
 .pl-grid tbody tr:last-child td { border-bottom: none; }
 
-/* Nejmenší šířky, pod které se mřížka nesmí stlačit.
-   Nemusí být velkorysé: text v buňce se zalomí, takže užší sloupec znamená
-   jen víc řádků, ne oříznutý zápis. Hlídají hlavně to, aby se sedm sloupců
-   nesmrsklo na proužky, ve kterých je každé slovo na vlastním řádku. */
 .pl-grid-rozvrh { min-width: 620px; }
 .pl-grid-tracker { min-width: 400px; }
 .pl-grid-reflexe { min-width: 780px; }
@@ -334,35 +680,18 @@ textarea.pl-input {
   margin-top: 1px;
 }
 
-/* Dnešek dostane modrý nádech, ať je v mřížce sedmi sloupců hned vidět,
-   kde člověk je. */
+/* Dnešek dostane nádech akcentu, ať je v sedmi sloupcích hned vidět. */
 .pl-grid th[data-today="true"],
-.pl-grid td[data-today="true"] { background: var(--wm-tint-blue); }
-.pl-grid thead th[data-today="true"] { color: var(--wm-blue); }
+.pl-grid td[data-today="true"] { background: var(--el-akcent-mekky); }
+.pl-grid thead th[data-today="true"] { color: var(--el-akcent); }
 
-/* Popisek řádku. Na střed a tučně, stejně jako popisky dnů nad mřížkou:
-   celá mřížka je pak souměrná a čte se jako jeden celek, ne jako sloupec
-   textu s přilepenou tabulkou. Přilepený vlevo zůstává proto, aby při posunu
-   bylo pořád vidět, o který den nebo návyk jde. */
 .pl-rowhead,
 .pl-hour {
   position: sticky;
   left: 0;
   z-index: 1;
   background: var(--wm-surface-2);
-  /* Stín napravo od přilepeného sloupce. Je to jediné, co při posunu mřížky
-     napoví, že vlevo něco drží a vpravo něco pokračuje. */
-  box-shadow: 5px 0 6px -5px rgba(0, 0, 0, 0.16);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .pl-rowhead,
-  :root:not([data-theme="light"]) .pl-hour {
-    box-shadow: 5px 0 6px -5px rgba(0, 0, 0, 0.5);
-  }
-}
-:root[data-theme="dark"] .pl-rowhead,
-:root[data-theme="dark"] .pl-hour {
-  box-shadow: 5px 0 6px -5px rgba(0, 0, 0, 0.5);
+  box-shadow: 5px 0 6px -5px rgba(0, 0, 0, 0.55);
 }
 .pl-grid thead .pl-rowhead,
 .pl-grid thead .pl-hour { z-index: 2; }
@@ -388,12 +717,6 @@ textarea.pl-input {
   padding: 0 8px;
 }
 
-/* Buňka mřížky.
-   Text je na střed vodorovně i svisle, stejně jako popisky dnů nad ním, takže
-   mřížka čte jako mřížka a ne jako slepenec zarovnaných okrajů.
-   Na střed se dá jít jen proto, že se zápis zalomí místo oříznutí: kdyby se
-   ořezával, zmizel by u vystředěného textu začátek i konec a nezbylo by nic,
-   podle čeho by se dal záznam poznat. */
 .pl-cell {
   width: 100%;
   border: none;
@@ -409,8 +732,8 @@ textarea.pl-input {
 }
 .pl-cell::placeholder { color: var(--wm-text-3); }
 .pl-cell:focus {
-  background: var(--wm-tint-blue);
-  box-shadow: inset 0 0 0 1.5px var(--wm-blue);
+  background: var(--el-akcent-mekky);
+  box-shadow: inset 0 0 0 1.5px var(--el-akcent);
   border-radius: 6px;
 }
 textarea.pl-cell {
@@ -418,17 +741,15 @@ textarea.pl-cell {
   line-height: 1.45;
   padding: 8px;
 }
-/* Poznámky k týdnu jsou souvislý odstavec, ne položka mřížky; ty patří
-   zleva, jinak by se z nich stal rozsypaný sloupec. */
 .pl-poznamky { text-align: left; }
 
 /* ── kolečka trackeru ─────────────────────────────────────────────────────── */
 
 .pl-dot {
-  width: 24px;
-  height: 24px;
+  width: 25px;
+  height: 25px;
   border-radius: 9999px;
-  border: 1.6px solid var(--wm-border);
+  border: 1.7px solid var(--wm-border);
   background: transparent;
   display: block;
   margin: 5px auto;
@@ -438,40 +759,42 @@ textarea.pl-cell {
   transition:
     transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1),
     background 0.15s ease,
-    border-color 0.15s ease;
+    border-color 0.15s ease,
+    box-shadow 0.25s ease;
 }
 .pl-dot:hover:not(:disabled) {
-  border-color: var(--wm-brand);
+  border-color: var(--el-akcent);
   transform: scale(1.1);
 }
 .pl-dot:active:not(:disabled) {
-  transform: scale(0.9);
+  transform: scale(0.88);
   transition-duration: 0.06s;
 }
 .pl-dot[data-done="true"] {
-  background: var(--wm-brand);
-  border-color: var(--wm-brand);
-  animation: pl-pop 0.3s cubic-bezier(0.34, 1.5, 0.64, 1);
+  background: var(--el-akcent);
+  border-color: var(--el-akcent);
+  box-shadow: 0 0 14px rgba(47, 230, 166, 0.35);
+  animation: pl-pop 0.32s cubic-bezier(0.34, 1.5, 0.64, 1);
 }
 .pl-dot[data-done="true"]::after {
   content: "";
   position: absolute;
-  left: 7px;
-  top: 3.5px;
+  left: 7.5px;
+  top: 4px;
   width: 5px;
   height: 10px;
-  border: solid var(--wm-brand-fg);
-  border-width: 0 1.9px 1.9px 0;
+  border: solid #05130d;
+  border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 .pl-dot:disabled { opacity: 0.3; cursor: default; }
 @keyframes pl-pop {
-  0% { transform: scale(0.82); }
-  60% { transform: scale(1.16); }
+  0% { transform: scale(0.78); }
+  60% { transform: scale(1.18); }
   100% { transform: scale(1); }
 }
 
-/* ── hodnocení ────────────────────────────────────────────────────────────── */
+/* ── hodnocení v mřížce ───────────────────────────────────────────────────── */
 
 .pl-score {
   width: 100%;
@@ -487,29 +810,26 @@ textarea.pl-cell {
   outline: none;
   min-height: 34px;
   cursor: pointer;
-  /* Šipky číselníku by v úzkém sloupci zabraly půlku místa. */
   -moz-appearance: textfield;
   appearance: textfield;
 }
 .pl-score::-webkit-outer-spin-button,
 .pl-score::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .pl-score:focus {
-  background: var(--wm-tint-blue);
-  box-shadow: inset 0 0 0 1.5px var(--wm-blue);
+  background: var(--el-akcent-mekky);
+  box-shadow: inset 0 0 0 1.5px var(--el-akcent);
   border-radius: 6px;
 }
 
-/* Podklad buňky roste s hodnotou, takže je průběh týdne vidět bez čtení
-   čísel. Jedna barva pro všechny ukazatele: čtyři barevné škály vedle sebe
-   by nesly míň informace, ne víc. */
+/* Podklad buňky roste s hodnotou: průběh týdne je vidět bez čtení čísel. */
 .pl-heat { position: relative; }
 .pl-heat::before {
   content: "";
   position: absolute;
   inset: 2px;
   border-radius: 6px;
-  background: var(--wm-blue);
-  opacity: calc(var(--pl-v, 0) * 0.1);
+  background: var(--el-akcent);
+  opacity: calc(var(--pl-v, 0) * 0.16);
   pointer-events: none;
 }
 
@@ -536,15 +856,13 @@ textarea.pl-cell {
   border-bottom: 1px solid var(--wm-border-light);
   vertical-align: middle;
 }
-/* Krajní sloupce lícují s okrajem karty. Bez toho začíná text tabulky
-   o dvanáct pixelů jinde než popisek nad ní a celá karta vypadá křivě. */
 .pl-table th:first-child,
 .pl-table td:first-child { padding-left: 0; }
 .pl-table th:last-child,
 .pl-table td:last-child { padding-right: 0; }
 .pl-table tbody tr:last-child td { border-bottom: none; }
 .pl-table tbody tr { transition: background 0.15s ease; }
-.pl-table tbody tr:hover { background: var(--wm-fill-4); }
+.pl-table tbody tr:hover { background: rgba(148, 158, 178, 0.05); }
 .pl-num {
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -563,14 +881,10 @@ textarea.pl-cell {
   height: 100%;
   min-width: 8px;
   border-radius: 9999px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 58%),
-    var(--wm-blue);
-  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  background: linear-gradient(90deg, var(--el-akcent-tmavy) 0%, var(--el-akcent) 100%);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Změna proti minulému období. Znaménko a slovo nesou význam samy, barva je
-   jen zesílení: červená a zelená jsou pro část lidí prakticky totožné. */
 .pl-delta {
   display: inline-flex;
   align-items: center;
@@ -582,8 +896,8 @@ textarea.pl-cell {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.pl-delta[data-dir="up"] { color: var(--wm-ok-fg); background: var(--wm-green-light); }
-.pl-delta[data-dir="down"] { color: var(--wm-caution-fg); background: var(--wm-orange-light); }
+.pl-delta[data-dir="up"] { color: var(--el-akcent); background: var(--el-akcent-mekky); }
+.pl-delta[data-dir="down"] { color: var(--el-jantar); background: var(--el-jantar-mekky); }
 .pl-delta[data-dir="flat"] { color: var(--wm-text-3); background: var(--wm-fill-4); }
 
 .pl-note {
@@ -596,6 +910,7 @@ textarea.pl-cell {
   color: var(--wm-text-3);
   min-width: 74px;
   text-align: right;
+  transition: color 0.2s ease;
 }
 .pl-status[data-state="error"] { color: var(--wm-red); }
 
@@ -608,7 +923,7 @@ textarea.pl-cell {
   padding: 22px 0 2px;
 }
 
-/* ── rozvržení ────────────────────────────────────────────────────────────── */
+/* ── rozvržení listu ──────────────────────────────────────────────────────── */
 
 .pl-spread {
   display: grid;
@@ -618,10 +933,9 @@ textarea.pl-cell {
 @media (max-width: 1080px) {
   .pl-spread { grid-template-columns: minmax(0, 1fr); }
 }
-/* Nápověda k tažení. Na širokých obrazovkách nemá co dělat, tam se nic
-   neposouvá. Stojí schválně nad dotazem na šířku: kdyby byla pod ním,
-   přebilo by pozdější `display: none` zapnutí v dotazu a nápověda by se
-   neukázala nikdy. */
+
+/* Nápověda k tažení. Stojí schválně nad dotazem na šířku: kdyby byla pod
+   ním, přebilo by pozdější `display: none` zapnutí v dotazu. */
 .pl-tahni {
   display: none;
   font-size: 11.5px;
@@ -632,9 +946,80 @@ textarea.pl-cell {
   margin-left: 8px;
 }
 
-/* ── sdílení deníku s koučem ──────────────────────────────────────────────
-   Volba úrovně a sdělení o tom, co je zamčené. Obojí musí být čitelné na
-   první pohled: klient i kouč tady čtou tutéž věc, jen z jiné strany. */
+/* ── lišta období ─────────────────────────────────────────────────────────── */
+
+.pl-perioda {
+  display: flex;
+  gap: 10px 14px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding-top: 16px;
+}
+.pl-perioda-nav {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+.pl-perioda-akce {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+.pl-perioda-nazev {
+  font-size: 14.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  min-width: 0;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── přihlášení a celoobrazovkové stavy ───────────────────────────────────── */
+
+.pl-prihlaseni {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+.pl-prihlaseni-obal {
+  width: 100%;
+  max-width: 396px;
+  margin: 0 auto;
+  padding: 0 22px 40px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+}
+.pl-znacka {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--wm-text-2);
+}
+.pl-prihlaseni-titul {
+  font-size: 31px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  margin: 12px 0 8px;
+  text-wrap: balance;
+}
+.pl-prihlaseni-pod {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--wm-text-2);
+  margin: 0;
+}
+.pl-prihlaseni-karta { margin-top: 22px; }
+
+/* ── sdílení deníku s koučem ──────────────────────────────────────────────── */
 
 .pl-volby {
   display: grid;
@@ -652,6 +1037,7 @@ textarea.pl-cell {
   border: 1px solid var(--wm-border-light);
   background: var(--wm-surface);
   cursor: pointer;
+  font: inherit;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 .pl-volba:hover { border-color: var(--wm-border); }
@@ -662,8 +1048,6 @@ textarea.pl-cell {
 .pl-volba-n { font-size: 14px; font-weight: 620; color: var(--wm-text); }
 .pl-volba-p { font-size: 12px; line-height: 1.4; color: var(--wm-text-2); }
 
-/* Co kouč nevidí, případně co klientovi zůstává. Přerušovaný rámeček proto,
-   že tady nic nechybí omylem: je to prázdné místo se sjednaným důvodem. */
 .pl-zamek {
   margin-top: 14px;
   padding: 13px 15px;
@@ -675,8 +1059,6 @@ textarea.pl-cell {
   line-height: 1.55;
 }
 
-/* Vygenerované heslo. Musí jít přečíst z obrazovky a nadiktovat do telefonu,
-   proto jednotná šířka znaku a velikost, která se nemusí luštit. */
 .pl-heslo { border-color: var(--wm-blue); }
 .pl-udaje {
   display: grid;
@@ -701,47 +1083,115 @@ textarea.pl-cell {
   letter-spacing: 0.02em;
 }
 
-/* ── telefon ──────────────────────────────────────────────────────────────
-   Sedm sloupců textu se na tři sta padesát pixelů nevejde a smrsknout je
-   znamená je zahodit. Rozdělí se to proto podle toho, co se vejít může:
+/* ── spodní navigace na telefonu ──────────────────────────────────────────── */
 
-   Tracker a denní postup ano. Kolečko i jednociferné číslo zaberou málo, tak
-   se zúží popisek řádku a mřížka se vejde celá, bez posouvání.
+.pl-dolninav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: none;
+  grid-template-columns: repeat(5, 1fr);
+  background: rgba(10, 11, 15, 0.97);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+}
+@supports (backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px)) {
+  .pl-dolninav {
+    background: var(--wm-glass);
+    backdrop-filter: saturate(160%) blur(22px);
+    -webkit-backdrop-filter: saturate(160%) blur(22px);
+  }
+}
+.pl-dolninav button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 2px 5px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--wm-text-3);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.18s ease, transform 0.14s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.pl-dolninav button:active { transform: scale(0.94); }
+.pl-dolninav button svg {
+  width: 23px;
+  height: 23px;
+  stroke-width: 1.8;
+  transition: transform 0.2s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.pl-dolninav button[data-active="true"] {
+  color: var(--el-akcent);
+}
+.pl-dolninav button[data-active="true"] svg { transform: translateY(-1px); }
 
-   Rozvrh a reflexe ne. Ty se posouvají do strany, ale pořádně: sloupec je
-   dost široký na to, aby se v něm dalo psát, první sloupec zůstává přilepený
-   se stínem a pod nadpisem je vidět, že se má táhnout. Useknutá tabulka bez
-   vysvětlení vypadá jako chyba, tohle jako ovládání. */
+/* ── animace ──────────────────────────────────────────────────────────────── */
+
+/* Obsah záložky nastupuje zespodu s prolnutím. Krátké a jednou: opakovaný
+   pohyb by zdržoval, jeden nástup dává přepnutí váhu. */
+.pl-anim {
+  animation: pl-nastup 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes pl-nastup {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pl-graf-nastup { animation: pl-prolnuti 0.5s ease both; }
+@keyframes pl-prolnuti {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Koncový bod grafu tiše dýchá, ať je poslední hodnota k nalezení. */
+.pl-puls { animation: pl-puls 2.6s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes pl-puls {
+  0%, 100% { opacity: 0.28; transform: scale(1); }
+  50% { opacity: 0.1; transform: scale(1.45); }
+}
+
+/* ── telefon ──────────────────────────────────────────────────────────────── */
+
 @media (max-width: 720px) {
-  /* Horní lišta na dva řádky: značka, stav a jazyk nahoře, záložky pod tím
-     přes celou šířku. Na jeden řádek se to nevejde a zalomené to zabíralo
-     třetinu obrazovky. */
-  .pl-topbar-inner {
-    padding: 8px 16px;
-    gap: 8px 10px;
-    row-gap: 8px;
-  }
-  .pl-top-brand { font-size: 10.5px; letter-spacing: 0.16em; order: 1; }
-  .pl-top-mezera { display: none; }
-  .pl-top-status { order: 2; margin-left: auto; min-width: 0; }
-  .pl-top-lang { order: 3; }
-  .pl-top-tabs {
-    order: 4;
-    flex-basis: 100%;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .pl-top-tabs::-webkit-scrollbar { display: none; }
+  /* Horní pruh se zúží na značku, stav a jazyk. Záložky přebírá spodní
+     navigace, která je palcem na dosah; nahoře by byly mrtvé místo. */
+  .pl-topbar-inner { padding: 9px 16px; gap: 10px; }
+  .pl-top-brand { font-size: 10.5px; letter-spacing: 0.18em; }
+  .pl-top-tabs { display: none; }
+  .pl-top-status { margin-left: auto; min-width: 0; }
+  .pl-top-lang button { padding: 0 10px; font-size: 12px; }
 
-  .pl-wrap { padding: 0 16px 72px; }
-  .pl-sheet { padding: 18px 16px 14px; border-radius: 18px; }
+  .pl-dolninav { display: grid; }
+  .pl-wrap { padding: 0 14px calc(96px + env(safe-area-inset-bottom)); }
+
+  .pl-sheet { padding: 18px 14px 14px; border-radius: 20px; }
   .pl-card { padding: 16px; border-radius: 18px; }
+  .pl-hero { padding: 20px 16px; border-radius: 20px; }
+  .pl-hero-datum { min-width: 0; width: 100%; }
+  .pl-hero-datum h2 { font-size: 22px; }
+  .pl-prstence { width: 100%; justify-content: space-between; gap: 8px; }
   .pl-section-title { margin-top: 22px; }
+  .pl-perioda { padding-top: 12px; row-gap: 8px; }
+  .pl-perioda-nav { flex: 0 0 100%; justify-content: center; }
+  .pl-perioda-nav .pl-perioda-nazev { flex: 1; font-size: 13.5px; }
+  .pl-perioda-akce { margin-left: 0; flex: 1; justify-content: flex-end; }
+
+  .pl-skala { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .pl-prstence-stat { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .pl-prstence-stat .pl-karta-prstence { padding: 14px 8px 12px; }
+  .pl-skala button { min-height: 42px; }
 
   /* Tracker a postup se vejdou celé. */
   .pl-grid-tracker { min-width: 0; }
-  /* Popisek se na telefonu zalomí, ne ořízne: „Za co jsem vděčný" se do sta
-     pixelů na jeden řádek nevejde a tři tečky z něj udělají hádanku. */
   .pl-grid .pl-rowhead {
     font-size: 12px;
     padding: 6px 8px;
@@ -749,13 +1199,13 @@ textarea.pl-cell {
     line-height: 1.25;
   }
   .pl-grid-tracker .pl-rowhead { width: 104px; }
-  .pl-grid-tracker .pl-dot { width: 20px; height: 20px; margin: 4px auto; }
+  .pl-grid-tracker .pl-dot { width: 21px; height: 21px; margin: 4px auto; }
   .pl-grid-tracker .pl-dot[data-done="true"]::after {
-    left: 5.5px;
-    top: 2.5px;
+    left: 5.6px;
+    top: 2.6px;
     width: 4px;
     height: 8.5px;
-    border-width: 0 1.7px 1.7px 0;
+    border-width: 0 1.8px 1.8px 0;
   }
   .pl-grid-tracker .pl-score { font-size: 13px; padding: 6px 0; }
   .pl-grid-tracker thead th { font-size: 10px; padding: 7px 2px; }
@@ -769,28 +1219,53 @@ textarea.pl-cell {
   .pl-tahni { display: inline; }
 }
 
-
-
 @media (prefers-reduced-motion: reduce) {
+  .pl-anim,
+  .pl-graf-nastup { animation: none; }
+  .pl-puls { animation: none; opacity: 0.2; }
   .pl-dot,
   .pl-dot:hover:not(:disabled),
+  .pl-skala button:active,
+  .pl-dolninav button:active,
   .pl-btn:active:not(:disabled) { transform: none; }
   .pl-dot[data-done="true"] { animation: none; }
   .pl-bar-fill { transition: none; }
+  .pl-prstenec-oblouk { transition: none; }
 }
 
 /* ── tisk ─────────────────────────────────────────────────────────────────── */
 
 /* Tady se plánovač vrací k papírové předloze: A4 na šířku, jeden týden na
-   stránku, mřížka a černé pruhy jako v tisku. Karty a stíny z obrazovky by
-   na papíře jen ubíraly místo. */
+   stránku, světlý podklad a mřížka jako v tisku. Tmavé téma obrazovky by na
+   papíře vypilo toner a nepřineslo nic. */
 @media print {
   @page {
     size: A4 landscape;
     margin: 8mm;
   }
-  .pl-root { background: #ffffff; }
+  .pl-root {
+    background: #ffffff;
+    --wm-bg: #ffffff;
+    --wm-surface: #ffffff;
+    --wm-surface-2: #f4f4f6;
+    --wm-text: #1d1d1f;
+    --wm-text-2: #5f5f66;
+    --wm-text-3: #8a8a90;
+    --wm-border: #c2c2c6;
+    --wm-border-light: #e2e2e6;
+    --el-akcent: #111111;
+    --el-akcent-tmavy: #111111;
+    --el-akcent-mekky: #ffffff;
+    --el-modra: #2456a8;
+    --el-modra-mekka: #ffffff;
+    --el-jantar: #8a5c00;
+    --el-jantar-mekky: #ffffff;
+    --el-rubin: #b00013;
+    --el-rubin-mekky: #ffffff;
+    --el-mlha: #e8e8ec;
+  }
   .pl-topbar,
+  .pl-dolninav,
   .pl-noprint { display: none !important; }
   .pl-wrap { max-width: none; padding: 0; }
 
@@ -800,6 +1275,7 @@ textarea.pl-cell {
     box-shadow: none;
     padding: 0;
     margin: 0;
+    background: #ffffff;
   }
   .pl-sheet-head { padding-bottom: 6px; border-color: #999999; }
   .pl-sheet-title { font-size: 13px; }
@@ -807,17 +1283,15 @@ textarea.pl-cell {
   .pl-sheet-who { font-size: 8px; }
 
   .pl-spread { grid-template-columns: minmax(0, 1.42fr) minmax(0, 1fr); gap: 8px; }
-  /* Na papíře se nikam neposouvá, takže nejmenší šířky mřížek nesmí platit
-     a přilepený sloupec nemá co držet. */
   .pl-scroll { overflow: visible; }
   .pl-grid-rozvrh,
   .pl-grid-tracker,
   .pl-grid-reflexe { min-width: 0; }
   .pl-rowhead,
-  .pl-hour { position: static; }
+  .pl-hour { position: static; box-shadow: none; }
 
   .pl-section-title { font-size: 7.5px; margin: 8px 0 3px; color: #000000; }
-  .pl-box { border-color: #999999; border-radius: 3px; }
+  .pl-box { border-color: #999999; border-radius: 3px; background: #ffffff; }
   .pl-grid { font-size: 8.5px; }
   .pl-grid th,
   .pl-grid td { border-color: #cccccc; }
@@ -844,6 +1318,7 @@ textarea.pl-cell {
     height: 13px;
     margin: 1px auto;
     border-color: #666666;
+    box-shadow: none;
   }
   .pl-dot[data-done="true"] {
     background: #000000;
@@ -866,6 +1341,7 @@ textarea.pl-cell {
     border-radius: 8px;
     box-shadow: none;
     break-inside: avoid;
+    background: #ffffff;
   }
   .pl-footer-motto { color: #333333; padding: 8px 0 0; }
 }

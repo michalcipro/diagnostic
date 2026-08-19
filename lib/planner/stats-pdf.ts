@@ -144,7 +144,7 @@ export function sestavStatistikyPdf(v: StatsPdfVstup): Blob {
       casti.push(`${t.statDenniSkore} ${zmenaText(stat.skoreZmena, lang)}`)
     }
     if (stat.navykyCelkem.zmena !== undefined) {
-      casti.push(`${t.statNavyky} ${zmenaText(stat.navykyCelkem.zmena, lang, 0)} b.`)
+      casti.push(`${t.statNavyky} ${zmenaText(stat.navykyCelkem.zmena, lang, 0)} ${t.bodu}`)
     }
     s.text(`${t.statProtiMinulemu}: ${casti.join(" · ")}`, {
       velikost: 9,

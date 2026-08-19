@@ -23,6 +23,7 @@ import { shrnuti, type Obdobi } from "@/lib/planner/shrnuti"
 import { chybaText, getRange } from "@/lib/planner/remote"
 import { nazevStatistikPdf, sestavStatistikyPdf } from "@/lib/planner/stats-pdf"
 import { CaraGraf, MapaRoku, Pruh, SloupceGraf, type Bod, type PoleDne } from "./charts"
+import { Prstenec, barvaPasma, pasmoSkore } from "./score-ring"
 
 // Statistiky deníku: týden, měsíc, rok.
 //
@@ -316,6 +317,7 @@ export function StatsPanel({ sessionToken, lang, gender, jmeno, dnesniDatum }: S
               key={o}
               type="button"
               data-active={obdobi === o}
+              aria-pressed={obdobi === o}
               onClick={() => prepniObdobi(o)}
             >
               {o === "tyden" ? t.statTyden : o === "mesic" ? t.statMesic : t.statRok}
@@ -368,51 +370,65 @@ export function StatsPanel({ sessionToken, lang, gender, jmeno, dnesniDatum }: S
 
       {stat && !prazdno && (
         <>
-          {/* ── přehledové karty ──────────────────────────────────────────── */}
-          <div className="pl-cards">
-            <div className="pl-card">
-              <div className="pl-card-label">{t.statDenniSkore}</div>
-              <div className="pl-card-value">
-                {stat.skore !== undefined ? cislo(stat.skore, lang, 1) : "–"}
-                <span style={{ fontSize: 15, color: "var(--wm-text-3)", fontWeight: 600 }}> / 10</span>
-              </div>
-              <div className="pl-card-note">
-                <Zmena hodnota={stat.skoreZmena} lang={lang} /> {stat.skoreZmena !== undefined ? t.statProtiMinulemu : ""}
-              </div>
+          {/* ── přehled: prstence a dlaždice ─────────────────────────────── */}
+          <div className="pl-prstence-stat">
+            <div className="pl-card pl-karta-prstence">
+              <Prstenec
+                podil={stat.skore !== undefined ? stat.skore / 10 : 0}
+                barva={barvaPasma(pasmoSkore(stat.skore))}
+                stred={stat.skore !== undefined ? cislo(stat.skore, lang, 1) : "–"}
+                popisek={t.statDenniSkore}
+                velikost={118}
+              />
+              <Zmena hodnota={stat.skoreZmena} lang={lang} />
             </div>
 
+            <div className="pl-card pl-karta-prstence">
+              <Prstenec
+                podil={stat.navykyCelkem.uspesnost ?? 0}
+                barva={
+                  stat.navykyCelkem.uspesnost !== undefined
+                    ? "var(--el-akcent)"
+                    : "var(--el-mlha)"
+                }
+                stred={
+                  stat.navykyCelkem.uspesnost !== undefined
+                    ? String(Math.round(stat.navykyCelkem.uspesnost * 100))
+                    : "–"
+                }
+                jednotka={stat.navykyCelkem.uspesnost !== undefined ? " %" : undefined}
+                popisek={t.statNavyky}
+                velikost={118}
+              />
+              <Zmena hodnota={stat.navykyCelkem.zmena} lang={lang} jednotka={t.bodu} />
+            </div>
+
+            <div className="pl-card pl-karta-prstence">
+              <Prstenec
+                podil={stat.dnuCelkem ? stat.vyplnenychDnu / stat.dnuCelkem : 0}
+                barva="var(--el-modra)"
+                stred={`${stat.vyplnenychDnu}/${stat.dnuCelkem}`}
+                popisek={t.statVyplnenychDnu}
+                velikost={118}
+              />
+              <span className="pl-chip">
+                {t.statReflexe}: {Math.round((stat.reflexe.podil ?? 0) * 100)} %
+              </span>
+            </div>
+          </div>
+
+          <div className="pl-cards">
             <div className="pl-card">
-              <div className="pl-card-label">{t.statVyplnenychDnu}</div>
+              <div className="pl-card-label">{t.statSerie}</div>
               <div className="pl-card-value">
-                {stat.vyplnenychDnu}
+                {stat.serieVedeni}
                 <span style={{ fontSize: 15, color: "var(--wm-text-3)", fontWeight: 600 }}>
                   {" "}
-                  / {stat.dnuCelkem}
+                  {t.dnu}
                 </span>
               </div>
               <div className="pl-card-note">
-                {t.statReflexe}: {Math.round((stat.reflexe.podil ?? 0) * 100)} %
-              </div>
-            </div>
-
-            <div className="pl-card">
-              <div className="pl-card-label">{t.statSerie}</div>
-              <div className="pl-card-value">{stat.serieVedeni}</div>
-              <div className="pl-card-note">
                 {t.statNejdelsiSerie}: {stat.nejdelsiSerieVedeni} {t.dnu}
-              </div>
-            </div>
-
-            <div className="pl-card">
-              <div className="pl-card-label">{t.statNavyky}</div>
-              <div className="pl-card-value">
-                {stat.navykyCelkem.uspesnost !== undefined
-                  ? `${Math.round(stat.navykyCelkem.uspesnost * 100)} %`
-                  : "–"}
-              </div>
-              <div className="pl-card-note">
-                {stat.navykyCelkem.splneno} / {stat.navykyCelkem.moznych}{" "}
-                <Zmena hodnota={stat.navykyCelkem.zmena} lang={lang} jednotka="b." />
               </div>
             </div>
 
@@ -458,6 +474,8 @@ export function StatsPanel({ sessionToken, lang, gender, jmeno, dnesniDatum }: S
                 min={grafRozsah.min}
                 max={grafRozsah.max}
                 popisHodnoty={(v) => cislo(v, lang, 1)}
+                barva={grafMetrika === "sleep" ? "var(--el-modra)" : "var(--el-akcent)"}
+                popis={`${t.statVyvoj}: ${grafMetrika === "skore" ? t.statDenniSkore : NAZVY_METRIK[lang][grafMetrika]}`}
               />
             </div>
           </div>
@@ -511,7 +529,7 @@ export function StatsPanel({ sessionToken, lang, gender, jmeno, dnesniDatum }: S
                           <span style={{ color: "var(--wm-text-3)" }}> / {n.nejdelsiSerie}</span>
                         </td>
                         <td className="pl-num">
-                          <Zmena hodnota={n.zmena} lang={lang} jednotka="b." />
+                          <Zmena hodnota={n.zmena} lang={lang} jednotka={t.bodu} />
                         </td>
                       </tr>
                     ))}
@@ -573,6 +591,7 @@ export function StatsPanel({ sessionToken, lang, gender, jmeno, dnesniDatum }: S
                   }))}
                   max={10}
                   popisHodnoty={(v) => cislo(v, lang, 1)}
+                  popis={t.statPodleDnu}
                 />
               </div>
               <p className="pl-note" style={{ marginTop: 8 }}>
@@ -588,7 +607,11 @@ export function StatsPanel({ sessionToken, lang, gender, jmeno, dnesniDatum }: S
                 {t.statDenniSkore} · {rozsah.popis}
               </div>
               <div style={{ marginTop: 10 }}>
-                <MapaRoku dny={mapaRoku} zkratkyDnu={ZKRATKY_DNU[lang]} />
+                <MapaRoku
+                  dny={mapaRoku}
+                  zkratkyDnu={ZKRATKY_DNU[lang]}
+                  popis={`${t.statDenniSkore} · ${rozsah.popis}`}
+                />
               </div>
             </div>
           )}

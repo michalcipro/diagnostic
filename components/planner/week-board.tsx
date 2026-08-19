@@ -89,7 +89,7 @@ export function WeekBoard(props: WeekBoardProps) {
         </div>
         <div className="pl-sheet-who">
           <div>
-            {lang === "en" ? "For" : "Pro"} <strong>{jmeno}</strong>
+            {lang === "en" ? "For" : lang === "sk" ? "Pre" : "Pro"} <strong>{jmeno}</strong>
           </div>
           <div style={{ fontSize: 11.5, color: "var(--wm-text-3)" }}>
             {t.weekOf} {popisTydne(monday)}

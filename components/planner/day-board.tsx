@@ -1,10 +1,13 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { applyGender } from "@/lib/diagnostic/gender"
 import type { Gender, Lang } from "@/lib/diagnostic/types"
 import { NAZVY_METRIK, NAZVY_REFLEXE, UI, cislo } from "@/lib/planner/i18n"
+import { denniSkore } from "@/lib/planner/stats"
 import { RatingInput } from "./rating-input"
 import { AutoTextarea } from "./auto-textarea"
+import { Prstenec, barvaPasma, pasmoSkore, usePocitadlo } from "./score-ring"
 import {
   HODINY,
   METRIKY,
@@ -17,11 +20,12 @@ import {
 } from "@/lib/planner/types"
 import { NAZVY_DNU, dlouheDatum, indexDne } from "@/lib/planner/datum"
 
-// Denní pohled.
+// Denní pohled, hlavní obrazovka deníku.
 //
-// Týdenní mřížka je věrná papíru, ale na telefonu se do sedmi sloupců
-// textových polí psát nedá. Tohle je tentýž obsah pro jeden den pod sebou:
-// stejná políčka, stejná data, jen jinak poskládaná. Nic tu nepřibývá ani
+// Nahoře prstence: skóre dne, návyky a spánek na jeden pohled, stejná
+// hierarchie, jakou mají Whoop a Oura. Pod nimi vstupy v pořadí, v jakém se
+// den vyplňuje: hodnocení, návyky, reflexe a nakonec rozvrh. Jsou to tatáž
+// políčka jako v týdenním listu, jen jinak poskládaná; nic tu nepřibývá ani
 // nechybí, takže se list a den nemůžou rozejít.
 
 export interface DayBoardProps {
@@ -42,7 +46,10 @@ function popisHodiny(h: number): string {
   return `${String(h).padStart(2, "0")}:00`
 }
 
-/** Řada tlačítek 1 až 10. Na dotykovém displeji se trefí líp než číselník. */
+/**
+ * Škála 1 až 10 jako řada čipů. Vybraný čip nese barvu svého pásma, takže
+ * hodnocení je čitelné z dálky: rubín dole, jantar uprostřed, akcent nahoře.
+ */
 function Skala({
   hodnota,
   onZmena,
@@ -53,26 +60,17 @@ function Skala({
   popis: string
 }) {
   return (
-    <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+    <div className="pl-skala" role="group" aria-label={popis}>
       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
         const vybrano = hodnota === n
         return (
           <button
             key={n}
             type="button"
-            className="pl-btn"
             aria-label={`${popis} ${n}`}
             aria-pressed={vybrano}
+            data-pasmo={pasmoSkore(n)}
             onClick={() => onZmena(vybrano ? null : n)}
-            style={{
-              minWidth: 34,
-              padding: "6px 0",
-              textAlign: "center",
-              fontVariantNumeric: "tabular-nums",
-              background: vybrano ? "var(--wm-brand)" : "var(--wm-surface)",
-              color: vybrano ? "var(--wm-brand-fg)" : "var(--wm-text-2)",
-              borderColor: vybrano ? "var(--wm-brand)" : "var(--wm-border-light)",
-            }}
           >
             {n}
           </button>
@@ -82,33 +80,144 @@ function Skala({
   )
 }
 
+/** Prstenec skóre s dopočítávaným číslem. */
+function PrstenecSkore({
+  skore,
+  popisek,
+  lang,
+}: {
+  skore: number | undefined
+  popisek: string
+  lang: Lang
+}) {
+  const bezi = usePocitadlo(skore ?? 0)
+  return (
+    <Prstenec
+      podil={typeof skore === "number" ? skore / 10 : 0}
+      barva={barvaPasma(pasmoSkore(skore))}
+      stred={typeof skore === "number" ? cislo(bezi, lang, 1) : "–"}
+      popisek={popisek}
+    />
+  )
+}
+
 export function DayBoard(props: DayBoardProps) {
   const { lang, gender, datum, dnesniDatum, den, navyky } = props
   const t = UI[lang]
   const budoucnost = datum > dnesniDatum
+  const dnesek = datum === dnesniDatum
+
   const viditelneNavyky = navyky.filter(
     (h) => !h.archivedAt || (den?.habits.includes(h.id) ?? false),
   )
+  const hotovo = viditelneNavyky.filter((h) => den?.habits.includes(h.id)).length
+
+  const skore = den ? denniSkore(den) : undefined
+  const spanek = den?.ratings.sleep
+
+  // Zvýraznění řádku s právě běžící hodinou. Počítá se až po připojení,
+  // protože server aktuální hodinu prohlížeče nezná a nesouhlasil by otisk.
+  const [hodinaTed, setHodinaTed] = useState<number | null>(null)
+  useEffect(() => {
+    if (!dnesek) {
+      setHodinaTed(null)
+      return
+    }
+    const obnov = () => setHodinaTed(new Date().getHours())
+    obnov()
+    const id = window.setInterval(obnov, 60_000)
+    return () => window.clearInterval(id)
+  }, [dnesek])
+
+  // Spánkové pásmo se hodnotí proti osmi hodinám, ne na desetibodové škále.
+  const spanekPasmo =
+    typeof spanek !== "number" ? "zadne" : spanek >= 7 ? "vysoko" : spanek >= 6 ? "stred" : "nizko"
 
   return (
-    <div className="pl-sheet">
-      <div className="pl-sheet-head">
-        <div>
+    <div>
+      {/* ── hero: datum a prstence ─────────────────────────────────────── */}
+      <section className="pl-hero">
+        <div className="pl-hero-datum">
           <div className="pl-sheet-eyebrow">{NAZVY_DNU[lang][indexDne(datum)]}</div>
-          <h2 className="pl-sheet-title">{dlouheDatum(datum, lang)}</h2>
+          <h2>{dlouheDatum(datum, lang)}</h2>
+          {dnesek && <span className="pl-chip pl-chip-akcent">{t.dnes}</span>}
         </div>
-        {datum === dnesniDatum && (
-          <div className="pl-delta" data-dir="flat" style={{ color: "var(--wm-blue)" }}>
-            {t.dnes}
+        <div className="pl-prstence">
+          <PrstenecSkore skore={skore} popisek={t.statDenniSkore} lang={lang} />
+          <Prstenec
+            podil={viditelneNavyky.length ? hotovo / viditelneNavyky.length : 0}
+            barva={viditelneNavyky.length ? "var(--el-akcent)" : "var(--el-mlha)"}
+            stred={viditelneNavyky.length ? `${hotovo}/${viditelneNavyky.length}` : "–"}
+            popisek={t.statNavyky}
+          />
+          <Prstenec
+            podil={typeof spanek === "number" ? Math.min(1, spanek / 8) : 0}
+            barva={spanekPasmo === "zadne" ? "var(--el-mlha)" : "var(--el-modra)"}
+            stred={typeof spanek === "number" ? cislo(spanek, lang, 1) : "–"}
+            jednotka={typeof spanek === "number" ? " h" : undefined}
+            popisek={NAZVY_METRIK[lang].sleep}
+          />
+        </div>
+      </section>
+
+      {/* ── hodnocení ──────────────────────────────────────────────────── */}
+      <div className="pl-section-title">
+        {t.dailyProgress}
+        <span className="pl-section-hint">{t.dailyProgressHint}</span>
+      </div>
+      <div className="pl-card" style={{ paddingTop: 8, paddingBottom: 8 }}>
+        <div className="pl-metrika">
+          <div className="pl-metrika-hlava">
+            <span className="pl-metrika-nazev">{NAZVY_METRIK[lang].sleep}</span>
+            <span className="pl-metrika-hodnota">
+              {typeof spanek === "number" ? `${cislo(spanek, lang, 1)} h` : "–"}
+            </span>
           </div>
-        )}
+          <div className="pl-spanek">
+            <RatingInput
+              hodnota={spanek}
+              rozsah={ROZSAH.sleep}
+              lang={lang}
+              popis={NAZVY_METRIK[lang].sleep}
+              trida="pl-input"
+              placeholder={`${ROZSAH.sleep.min} – ${ROZSAH.sleep.max}`}
+              onZmena={(x) => props.onHodnoceni(datum, "sleep", x)}
+              onFlush={props.onFlush}
+            />
+            <span className="pl-spanek-jednotka">h</span>
+          </div>
+        </div>
+
+        {METRIKY.filter((m) => m !== "sleep").map((m) => {
+          const v = den?.ratings[m]
+          return (
+            <div key={m} className="pl-metrika">
+              <div className="pl-metrika-hlava">
+                <span className="pl-metrika-nazev">{NAZVY_METRIK[lang][m]}</span>
+                <span
+                  className="pl-metrika-hodnota"
+                  style={
+                    typeof v === "number" ? { color: barvaPasma(pasmoSkore(v)) } : undefined
+                  }
+                >
+                  {typeof v === "number" ? cislo(v, lang, 0) : "–"}
+                </span>
+              </div>
+              <Skala
+                hodnota={v}
+                popis={NAZVY_METRIK[lang][m]}
+                onZmena={(x) => props.onHodnoceni(datum, m, x)}
+              />
+            </div>
+          )
+        })}
       </div>
 
-      {/* Návyky */}
+      {/* ── návyky ─────────────────────────────────────────────────────── */}
       <div className="pl-section-title">{t.habitTracker}</div>
-      <div className="pl-box" style={{ padding: "4px 0" }}>
+      <div className="pl-box">
         {viditelneNavyky.length === 0 && (
-          <p className="pl-note" style={{ padding: "10px 12px", margin: 0 }}>
+          <p className="pl-note" style={{ padding: "12px 14px", margin: 0 }}>
             {t.zadneNavyky}
           </p>
         )}
@@ -118,94 +227,29 @@ export function DayBoard(props: DayBoardProps) {
             <button
               key={h.id}
               type="button"
+              className="pl-navyk-radek"
               disabled={budoucnost}
               onClick={() => props.onNavyk(datum, h.id, !splneno)}
               aria-pressed={splneno}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                width: "100%",
-                padding: "10px 12px",
-                border: "none",
-                borderBottom: "1px solid var(--wm-border-light)",
-                background: "transparent",
-                color: "var(--wm-text)",
-                font: "inherit",
-                fontSize: 14,
-                textAlign: "left",
-                cursor: budoucnost ? "default" : "pointer",
-                opacity: budoucnost ? 0.45 : 1,
-              }}
             >
-              <span className="pl-dot" data-done={splneno} style={{ margin: 0, flex: "none" }} />
-              <span style={{ flex: 1 }}>{h.name}</span>
+              <span className="pl-dot" data-done={splneno} aria-hidden />
+              <span className="pl-navyk-nazev">{h.name}</span>
               {h.target ? (
-                <span style={{ fontSize: 12, color: "var(--wm-text-3)" }}>{h.target}× / {lang === "en" ? "week" : "týden"}</span>
+                <span className="pl-navyk-cil">
+                  {h.target}×{" "}
+                  {lang === "en" ? "/ week" : lang === "sk" ? "/ týždeň" : "/ týden"}
+                </span>
               ) : null}
             </button>
           )
         })}
       </div>
 
-      {/* Denní postup */}
-      <div className="pl-section-title">
-        {t.dailyProgress}
-        <span className="pl-section-hint">{t.dailyProgressHint}</span>
-      </div>
-      <div className="pl-box" style={{ padding: "10px 12px" }}>
-        {METRIKY.map((m) => {
-          const r = ROZSAH[m]
-          const v = den?.ratings[m]
-          return (
-            <div key={m} style={{ marginBottom: 14 }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "baseline",
-                  marginBottom: 6,
-                }}
-              >
-                <span style={{ fontSize: 13, fontWeight: 600 }}>{NAZVY_METRIK[lang][m]}</span>
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontVariantNumeric: "tabular-nums",
-                    color: "var(--wm-text-3)",
-                  }}
-                >
-                  {typeof v === "number" ? cislo(v, lang, r.hodiny ? 1 : 0) : "–"}
-                </span>
-              </div>
-              {r.hodiny ? (
-                <RatingInput
-                  hodnota={v}
-                  rozsah={r}
-                  lang={lang}
-                  popis={NAZVY_METRIK[lang][m]}
-                  trida="pl-input"
-                  placeholder={`${r.min} \u2013 ${r.max}`}
-                  onZmena={(x) => props.onHodnoceni(datum, m, x)}
-                  onFlush={props.onFlush}
-                />
-              ) : (
-                <Skala
-                  hodnota={v}
-                  popis={NAZVY_METRIK[lang][m]}
-                  onZmena={(x) => props.onHodnoceni(datum, m, x)}
-                />
-              )}
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Reflexe */}
+      {/* ── reflexe ────────────────────────────────────────────────────── */}
       <div className="pl-section-title">{t.dailyReflection}</div>
-      <div className="pl-box" style={{ padding: "10px 12px" }}>
+      <div className="pl-card" style={{ display: "grid", gap: 14 }}>
         {REFLEXE.map((klic) => (
-          <div key={klic} style={{ marginBottom: 12 }}>
+          <div key={klic}>
             <span className="pl-label">{applyGender(NAZVY_REFLEXE[lang][klic], gender)}</span>
             <AutoTextarea
               className="pl-input"
@@ -219,34 +263,14 @@ export function DayBoard(props: DayBoardProps) {
         ))}
       </div>
 
-      {/* Rozvrh */}
+      {/* ── rozvrh ─────────────────────────────────────────────────────── */}
       <div className="pl-section-title">{t.weeklySchedule}</div>
       <div className="pl-box">
         {HODINY.map((h) => (
-          <div
-            key={h}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              borderBottom: "1px solid var(--wm-border-light)",
-            }}
-          >
-            <span
-              style={{
-                width: 56,
-                flex: "none",
-                padding: "0 8px",
-                fontSize: 11.5,
-                fontVariantNumeric: "tabular-nums",
-                color: "var(--wm-text-3)",
-              }}
-            >
-              {popisHodiny(h)}
-            </span>
+          <div key={h} className="pl-cas-radek" data-ted={hodinaTed === h}>
+            <span className="pl-cas-hodina">{popisHodiny(h)}</span>
             <input
               className="pl-cell"
-              style={{ fontSize: 14, padding: "10px 6px" }}
               value={den?.schedule.find((s) => s.hour === h)?.text ?? ""}
               onChange={(e) => props.onRozvrh(datum, h, e.target.value)}
               onBlur={props.onFlush}

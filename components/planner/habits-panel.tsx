@@ -107,7 +107,7 @@ export function HabitsPanel(props: HabitsPanelProps) {
           <VyberCile hodnota={novyCil} onZmena={setNovyCil} lang={lang} />
           <button
             type="button"
-            className="pl-btn pl-btn-primary"
+            className="pl-btn pl-btn-akcent"
             disabled={!novyNazev.trim() || zaneprazdneno || aktivni.length >= 20}
             onClick={pridat}
           >
@@ -172,14 +172,14 @@ export function HabitsPanel(props: HabitsPanelProps) {
                   <div style={{ flex: "1 1 160px", minWidth: 0 }}>
                     <div style={{ fontSize: 15, fontWeight: 600 }}>{h.name}</div>
                     {h.target ? (
-                      <div style={{ fontSize: 12, color: "var(--wm-text-3)" }}>
-                        {t.cilTydne}: {h.target}×
+                      <div style={{ marginTop: 3 }}>
+                        <span className="pl-chip">{t.cilTydne}: {h.target}×</span>
                       </div>
                     ) : null}
                   </div>
                   <button
                     type="button"
-                    className="pl-btn pl-btn-quiet"
+                    className="pl-btn pl-btn-quiet pl-krok"
                     aria-label={t.posunoutNahoru}
                     title={t.posunoutNahoru}
                     disabled={i === 0 || zaneprazdneno}
@@ -189,7 +189,7 @@ export function HabitsPanel(props: HabitsPanelProps) {
                   </button>
                   <button
                     type="button"
-                    className="pl-btn pl-btn-quiet"
+                    className="pl-btn pl-btn-quiet pl-krok"
                     aria-label={t.posunoutDolu}
                     title={t.posunoutDolu}
                     disabled={i === aktivni.length - 1 || zaneprazdneno}
@@ -197,12 +197,16 @@ export function HabitsPanel(props: HabitsPanelProps) {
                   >
                     ↓
                   </button>
-                  <button type="button" className="pl-btn" onClick={() => zacniUpravu(h)}>
+                  <button
+                    type="button"
+                    className="pl-btn pl-btn-quiet"
+                    onClick={() => zacniUpravu(h)}
+                  >
                     {t.prejmenovat}
                   </button>
                   <button
                     type="button"
-                    className="pl-btn"
+                    className="pl-btn pl-btn-quiet"
                     disabled={zaneprazdneno}
                     onClick={() => props.onArchivovat(h.id, true)}
                   >
@@ -210,7 +214,7 @@ export function HabitsPanel(props: HabitsPanelProps) {
                   </button>
                   <button
                     type="button"
-                    className="pl-btn pl-btn-danger"
+                    className="pl-btn pl-btn-quiet pl-btn-danger"
                     onClick={() => setMazany(maze ? null : h.id)}
                   >
                     {t.smazat}

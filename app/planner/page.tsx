@@ -38,6 +38,61 @@ import { nazevSouboru, sestavTydenniPdf } from "@/lib/planner/pdf"
 type Zalozka = "tyden" | "den" | "statistiky" | "navyky" | "ucet"
 type StavUlozeni = "klid" | "uklada" | "ulozeno" | "chyba"
 
+const ZALOZKY: Zalozka[] = ["tyden", "den", "statistiky", "navyky", "ucet"]
+
+/**
+ * Ikony spodní navigace. Ručně kreslené SVG na mřížce 24 bodů, tah 1.8:
+ * ikonová sada by přinesla stovky tvarů kvůli pěti a vlastní paletu k tomu.
+ */
+function IkonaZalozky({ z }: { z: Zalozka }) {
+  const spolecne = {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  }
+  if (z === "tyden") {
+    return (
+      <svg {...spolecne}>
+        <rect x="3" y="5" width="18" height="16" rx="3" />
+        <path d="M3 10h18M8 3v4M16 3v4" />
+      </svg>
+    )
+  }
+  if (z === "den") {
+    return (
+      <svg {...spolecne}>
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8" />
+      </svg>
+    )
+  }
+  if (z === "statistiky") {
+    return (
+      <svg {...spolecne}>
+        <path d="M4 20.5h16" />
+        <path d="M6.5 16.5v-5M12 16.5V7M17.5 16.5v-8" />
+      </svg>
+    )
+  }
+  if (z === "navyky") {
+    return (
+      <svg {...spolecne}>
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M8.4 12.3l2.4 2.4 4.8-5" />
+      </svg>
+    )
+  }
+  return (
+    <svg {...spolecne}>
+      <circle cx="12" cy="8.2" r="3.7" />
+      <path d="M4.8 20.5c1.1-3.4 3.9-5.2 7.2-5.2s6.1 1.8 7.2 5.2" />
+    </svg>
+  )
+}
+
 /** Jak dlouho se čeká po dopsání, než se text odešle. */
 const PRODLEVA_MS = 900
 
@@ -106,6 +161,13 @@ export default function PlannerPage() {
     const ceka = cekaRef.current
     if (!ceka.rozvrh.size && !ceka.reflexe.size && !ceka.poznamky) return
     cekaRef.current = { rozvrh: new Set(), reflexe: new Set(), poznamky: false }
+    /** Vrátí neodeslané položky do fronty, aby je zopakoval další pokus. */
+    const vratDoFronty = () => {
+      const f = cekaRef.current
+      for (const d of ceka.rozvrh) f.rozvrh.add(d)
+      for (const d of ceka.reflexe) f.reflexe.add(d)
+      f.poznamky = f.poznamky || ceka.poznamky
+    }
 
     const { dny: aktualni, poznamky: pozn, monday: pondeliDatum, session: token } = stavRef.current
     if (!token) return
@@ -133,6 +195,10 @@ export default function PlannerPage() {
       setStav("ulozeno")
       setChyba(null)
     } catch (e) {
+      // Neodeslané se vrací do fronty: další uložení čehokoli je vezme
+      // s sebou. Bez toho by jediný výpadek sítě text tiše ztratil, a stav
+      // „Uloženo" po příštím úspěchu by tvrdil, že je všechno na serveru.
+      vratDoFronty()
       setStav("chyba")
       setChyba(api.chybaText(e, t.chybaUlozeni))
     }
@@ -160,6 +226,9 @@ export default function PlannerPage() {
   useEffect(() => {
     const ulozenyJazyk = nactiJazyk()
     if (ulozenyJazyk) setLang(ulozenyJazyk)
+    // Telefon otevírá dnešek: týdenní dvoustrana je pracovna velké obrazovky,
+    // na výšku drženém displeji se den vyplňuje rovnou, bez posouvání mřížky.
+    if (window.innerWidth < 721) setZalozka("den")
     const ulozena = nactiRelaci()
     if (!ulozena || !api.isRemoteEnabled()) {
       setBooting(false)
@@ -297,7 +366,7 @@ export default function PlannerPage() {
    */
   const onHodnoceni = useCallback(
     (datumDne: string, metrika: MetricKey, hodnota: number | null) => {
-      const puvodni = stavRef.current.dny.get(datumDne)
+      const puvodniHodnota = stavRef.current.dny.get(datumDne)?.ratings[metrika]
       upravDen(datumDne, (d) => ({
         ...d,
         ratings: { ...d.ratings, [metrika]: hodnota ?? undefined },
@@ -314,14 +383,13 @@ export default function PlannerPage() {
           if (po && jeDenPrazdny(po)) await api.uklidPrazdnyDen(token, datumDne)
         })
         .catch((e) => {
-          // Neuložená změna se vrátí zpět, ať na obrazovce nezůstane číslo,
-          // které v databázi není.
-          setDny((stare) => {
-            const nove = new Map(stare)
-            if (puvodni) nove.set(datumDne, puvodni)
-            else nove.delete(datumDne)
-            return nove
-          })
+          // Vrací se jen tohle jedno číslo, ne snímek celého dne: během letu
+          // požadavku mohl klient stihnout napsat text nebo uložit jinou
+          // hodnotu a snímek by mu je z obrazovky smazal.
+          upravDen(datumDne, (d) => ({
+            ...d,
+            ratings: { ...d.ratings, [metrika]: puvodniHodnota },
+          }))
           setStav("chyba")
           setChyba(api.chybaText(e, t.chybaUlozeni))
         })
@@ -331,7 +399,6 @@ export default function PlannerPage() {
 
   const onNavyk = useCallback(
     (datumDne: string, habitId: string, splneno: boolean) => {
-      const puvodni = stavRef.current.dny.get(datumDne)
       upravDen(datumDne, (d) => ({
         ...d,
         habits: splneno ? [...d.habits, habitId] : d.habits.filter((h) => h !== habitId),
@@ -348,12 +415,12 @@ export default function PlannerPage() {
           if (po && jeDenPrazdny(po)) await api.uklidPrazdnyDen(token, datumDne)
         })
         .catch((e) => {
-          setDny((stare) => {
-            const nove = new Map(stare)
-            if (puvodni) nove.set(datumDne, puvodni)
-            else nove.delete(datumDne)
-            return nove
-          })
+          // Vrací se jen tohle jedno kolečko, ne snímek celého dne, ze
+          // stejného důvodu jako u hodnocení.
+          upravDen(datumDne, (d) => ({
+            ...d,
+            habits: splneno ? d.habits.filter((h) => h !== habitId) : [...d.habits, habitId],
+          }))
           setStav("chyba")
           setChyba(api.chybaText(e, t.chybaUlozeni))
         })
@@ -414,8 +481,8 @@ export default function PlannerPage() {
 
   if (booting) {
     return (
-      <div className="pl-root">
-        <div className="pl-wrap" style={{ paddingTop: 80 }}>
+      <div className="pl-root pl-prihlaseni">
+        <div className="pl-prihlaseni-obal">
           <p className="pl-note">{t.nacitam}</p>
         </div>
       </div>
@@ -424,8 +491,8 @@ export default function PlannerPage() {
 
   if (!api.isRemoteEnabled()) {
     return (
-      <div className="pl-root">
-        <div className="pl-wrap" style={{ paddingTop: 80, maxWidth: 480 }}>
+      <div className="pl-root pl-prihlaseni">
+        <div className="pl-prihlaseni-obal">
           <p className="pl-note">{t.bezPripojeni}</p>
         </div>
       </div>
@@ -464,20 +531,13 @@ export default function PlannerPage() {
 
   if (!session || !ja) {
     return (
-      <div className="pl-root">
-        <div
-          className="pl-wrap"
-          style={{ maxWidth: 400, paddingTop: 90, display: "flex", flexDirection: "column" }}
-        >
-          <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.18em", margin: 0 }}>
-            WINNING MINDS
-          </p>
-          <h1 style={{ fontSize: 26, fontWeight: 700, margin: "10px 0 6px" }}>{t.appName}</h1>
-          <p className="pl-note" style={{ marginTop: 0 }}>
-            {t.uvodniText}
-          </p>
+      <div className="pl-root pl-prihlaseni">
+        <div className="pl-prihlaseni-obal pl-anim">
+          <div className="pl-znacka">WINNING MINDS</div>
+          <h1 className="pl-prihlaseni-titul">{t.appName}</h1>
+          <p className="pl-prihlaseni-pod">{t.uvodniText}</p>
 
-          <div className="pl-card" style={{ marginTop: 18 }}>
+          <div className="pl-card pl-prihlaseni-karta">
             <label className="pl-label" htmlFor="pl-email">
               {t.email}
             </label>
@@ -507,8 +567,8 @@ export default function PlannerPage() {
             </div>
             <button
               type="button"
-              className="pl-btn pl-btn-primary"
-              style={{ width: "100%", marginTop: 16, padding: "10px 14px" }}
+              className="pl-btn pl-btn-akcent"
+              style={{ width: "100%", marginTop: 16, minHeight: 46 }}
               disabled={prihlasuji || !email || !heslo}
               onClick={() => void prihlas()}
             >
@@ -521,33 +581,37 @@ export default function PlannerPage() {
             )}
           </div>
 
-          <div className="pl-tabs" style={{ marginTop: 18, alignSelf: "flex-start" }}>
-            {JAZYKY.map((j) => (
-              <button
-                key={j}
-                type="button"
-                data-active={lang === j}
-                onClick={() => {
-                  setLang(j)
-                  ulozJazyk(j)
-                }}
-              >
-                {KOD_JAZYKA[j]}
-              </button>
-            ))}
-          </div>
-
-          <Link
-            href="/"
+          <div
             style={{
-              marginTop: 26,
-              fontSize: 13,
-              color: "var(--wm-text-3)",
-              textDecoration: "none",
+              marginTop: 20,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
             }}
           >
-            Winning Minds
-          </Link>
+            <div className="pl-tabs">
+              {JAZYKY.map((j) => (
+                <button
+                  key={j}
+                  type="button"
+                  data-active={lang === j}
+                  onClick={() => {
+                    setLang(j)
+                    ulozJazyk(j)
+                  }}
+                >
+                  {KOD_JAZYKA[j]}
+                </button>
+              ))}
+            </div>
+            <Link
+              href="/"
+              style={{ fontSize: 13, color: "var(--wm-text-3)", textDecoration: "none" }}
+            >
+              Winning Minds
+            </Link>
+          </div>
         </div>
       </div>
     )
@@ -562,31 +626,39 @@ export default function PlannerPage() {
           ? t.chybaUlozeni
           : ""
 
+  const nazevZalozky = (z: Zalozka) =>
+    z === "tyden"
+      ? t.tabTyden
+      : z === "den"
+        ? t.tabDen
+        : z === "statistiky"
+          ? t.tabStatistiky
+          : z === "navyky"
+            ? t.tabNavyky
+            : t.tabUcet
+
+  const prepni = (z: Zalozka) => {
+    void odesli()
+    setZalozka(z)
+  }
+
+  const naDnesku = zalozka === "tyden" ? monday === pondeli(dnesniDatum) : datum === dnesniDatum
+
   return (
     <div className="pl-root">
       <header className="pl-topbar pl-noprint">
         <div className="pl-topbar-inner">
           <span className="pl-brand pl-top-brand">WINNING MINDS</span>
           <div className="pl-tabs pl-top-tabs">
-            {(["tyden", "den", "statistiky", "navyky", "ucet"] as Zalozka[]).map((z) => (
+            {ZALOZKY.map((z) => (
               <button
                 key={z}
                 type="button"
                 data-active={zalozka === z}
-                onClick={() => {
-                  void odesli()
-                  setZalozka(z)
-                }}
+                aria-pressed={zalozka === z}
+                onClick={() => prepni(z)}
               >
-                {z === "tyden"
-                  ? t.tabTyden
-                  : z === "den"
-                    ? t.tabDen
-                    : z === "statistiky"
-                      ? t.tabStatistiky
-                      : z === "navyky"
-                        ? t.tabNavyky
-                        : t.tabUcet}
+                {nazevZalozky(z)}
               </button>
             ))}
           </div>
@@ -603,6 +675,7 @@ export default function PlannerPage() {
                 key={j}
                 type="button"
                 data-active={lang === j}
+                aria-pressed={lang === j}
                 onClick={() => {
                   setLang(j)
                   ulozJazyk(j)
@@ -617,46 +690,44 @@ export default function PlannerPage() {
 
       <div className="pl-wrap">
         {(zalozka === "tyden" || zalozka === "den") && (
-          <div
-            className="pl-noprint"
-            style={{
-              display: "flex",
-              gap: 8,
-              alignItems: "center",
-              flexWrap: "wrap",
-              paddingTop: 14,
-            }}
-          >
-            <button
-              type="button"
-              className="pl-btn"
-              onClick={() => void jdiNa(posun(datum, zalozka === "tyden" ? -7 : -1))}
-            >
-              ‹ {t.predchozi}
-            </button>
-            <span style={{ fontSize: 14, fontWeight: 600, minWidth: 200, textAlign: "center" }}>
-              {zalozka === "tyden"
-                ? popisRozsahuTydne(monday, lang)
-                : `${NAZVY_DNU[lang][indexDne(datum)]} · ${dlouheDatum(datum, lang)}`}
-            </span>
-            <button
-              type="button"
-              className="pl-btn"
-              onClick={() => void jdiNa(posun(datum, zalozka === "tyden" ? 7 : 1))}
-            >
-              {t.dalsi} ›
-            </button>
-            <button type="button" className="pl-btn" onClick={() => void jdiNa(dnesniDatum)}>
-              {t.dnes}
-            </button>
-            <div style={{ flex: 1 }} />
-            <button type="button" className="pl-btn" onClick={() => window.print()}>
-              {t.tisk}
-            </button>
-            <button type="button" className="pl-btn" onClick={() => void exportPdf()}>
-              {t.pdf}
-            </button>
-            {nacitam && <span className="pl-status">{t.nacitam}</span>}
+          <div className="pl-perioda pl-noprint">
+            <div className="pl-perioda-nav">
+              <button
+                type="button"
+                className="pl-btn pl-krok"
+                aria-label={t.predchozi}
+                onClick={() => void jdiNa(posun(datum, zalozka === "tyden" ? -7 : -1))}
+              >
+                ‹
+              </button>
+              <span className="pl-perioda-nazev">
+                {zalozka === "tyden"
+                  ? popisRozsahuTydne(monday, lang)
+                  : `${NAZVY_DNU[lang][indexDne(datum)]} · ${dlouheDatum(datum, lang)}`}
+              </span>
+              <button
+                type="button"
+                className="pl-btn pl-krok"
+                aria-label={t.dalsi}
+                onClick={() => void jdiNa(posun(datum, zalozka === "tyden" ? 7 : 1))}
+              >
+                ›
+              </button>
+              {!naDnesku && (
+                <button type="button" className="pl-chip" onClick={() => void jdiNa(dnesniDatum)}>
+                  {t.dnes}
+                </button>
+              )}
+            </div>
+            <div className="pl-perioda-akce">
+              <button type="button" className="pl-btn pl-btn-quiet" onClick={() => window.print()}>
+                {t.tisk}
+              </button>
+              <button type="button" className="pl-btn" onClick={() => void exportPdf()}>
+                {t.pdf}
+              </button>
+              {nacitam && <span className="pl-status">{t.nacitam}</span>}
+            </div>
           </div>
         )}
 
@@ -666,6 +737,9 @@ export default function PlannerPage() {
           </p>
         )}
 
+        {/* Klíč podle záložky: obsah při přepnutí nastoupí zespodu. Při psaní
+            uvnitř záložky se klíč nemění, takže se nic neopakuje. */}
+        <div key={zalozka} className="pl-anim">
         {zalozka === "tyden" && (
           <WeekBoard
             lang={lang}
@@ -786,7 +860,25 @@ export default function PlannerPage() {
             onOdhlasit={() => void odhlas()}
           />
         )}
+        </div>
       </div>
+
+      {/* Spodní navigace telefonu. Na širokých obrazovkách ji CSS skryje,
+          tam záložky sedí nahoře; palec na telefonu ale dosáhne dolů. */}
+      <nav className="pl-dolninav pl-noprint" aria-label={t.appName}>
+        {ZALOZKY.map((z) => (
+          <button
+            key={z}
+            type="button"
+            data-active={zalozka === z}
+            aria-pressed={zalozka === z}
+            onClick={() => prepni(z)}
+          >
+            <IkonaZalozky z={z} />
+            <span>{nazevZalozky(z)}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   )
 }
