@@ -1,59 +1,28 @@
-/* Weekly Planner – elektronická podoba papírové předlohy Winning Minds.
+/* Weekly Planner – vizuální okruh plánovače.
  *
- * Vizuál vychází z tištěného plánovače: papírový podklad, tenká mřížka,
- * černé pruhy nadpisů, prázdná kolečka trackeru. Barvy jsou vlastní tokeny,
- * ne natvrdo psané hodnoty, protože se všechny musí převrátit v tmavém
- * režimu; papír, který v noci svítí do očí, je k ničemu.
+ * Navazuje na diagnostiku: tytéž tokeny --wm-*, tytéž karty, tytéž poloměry
+ * a stejná typografie. Plánovač a vyhodnocení se otevírají ze stejné domény
+ * a mají vypadat jako jeden produkt, ne jako dva programy vedle sebe.
+ *
+ * Papírová podoba předlohy zůstává tam, kde na ni dojde: v tisku a v PDF.
+ * Na obrazovce by imitace papíru s mřížkou a černými pruhy jen ubírala
+ * čitelnost, kterou na papíře nahradí tisk a formát.
  */
-
-:root {
-  --pl-paper: #f9f7f2;
-  --pl-paper-2: #ffffff;
-  --pl-ink: #1f1f1f;
-  --pl-ink-2: #5c5850;
-  --pl-ink-3: #8b877e;
-  --pl-rule: #e2ded4;
-  --pl-rule-2: #ece8df;
-  --pl-frame: #b8b4aa;
-  --pl-band: #141414;
-  --pl-band-fg: #ffffff;
-  --pl-mark: #1f1f1f;
-  --pl-accent: #007aff;
-  --pl-good: #248a3d;
-  --pl-warn: #c93400;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --pl-paper: #17171a;
-    --pl-paper-2: #1f1f23;
-    --pl-ink: #f0efec;
-    --pl-ink-2: #a9a69f;
-    --pl-ink-3: #7d7a74;
-    --pl-rule: #34343a;
-    --pl-rule-2: #2a2a2f;
-    --pl-frame: #4a4a52;
-    --pl-band: #e9e7e2;
-    --pl-band-fg: #17171a;
-    --pl-mark: #f0efec;
-    --pl-accent: #0a84ff;
-    --pl-good: #30d158;
-    --pl-warn: #ff9f0a;
-  }
-}
 
 /* ── kostra ───────────────────────────────────────────────────────────────── */
 
 .pl-root {
   min-height: 100vh;
   background: var(--wm-bg);
-  color: var(--pl-ink);
+  color: var(--wm-text);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01" on;
 }
 
 .pl-wrap {
-  max-width: 1280px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 0 16px 80px;
+  padding: 0 20px 96px;
 }
 
 .pl-topbar {
@@ -66,9 +35,9 @@
   border-bottom: 1px solid var(--wm-border-light);
 }
 .pl-topbar-inner {
-  max-width: 1280px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 10px 16px;
+  padding: 11px 20px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -79,9 +48,10 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
-  color: var(--pl-ink);
   white-space: nowrap;
 }
+
+/* ── ovládací prvky ───────────────────────────────────────────────────────── */
 
 .pl-tabs {
   display: inline-flex;
@@ -92,19 +62,21 @@
 }
 .pl-tabs button {
   padding: 6px 14px;
-  border-radius: 8px;
   border: none;
+  border-radius: 8px;
   background: transparent;
   color: var(--wm-text-2);
+  font: inherit;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 .pl-tabs button[data-active="true"] {
   background: var(--wm-surface);
   color: var(--wm-text);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .pl-btn {
@@ -113,18 +85,19 @@
   color: var(--wm-text);
   border-radius: 10px;
   padding: 7px 14px;
+  font: inherit;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  white-space: nowrap;
+  transition:
+    transform 0.14s cubic-bezier(0.34, 1.4, 0.64, 1),
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
-.pl-btn:hover:not(:disabled) {
-  border-color: var(--wm-border);
-}
-.pl-btn:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
+.pl-btn:hover:not(:disabled) { border-color: var(--wm-border); }
+.pl-btn:active:not(:disabled) { transform: scale(0.97); }
+.pl-btn:disabled { opacity: 0.42; cursor: default; }
 .pl-btn-primary {
   background: var(--wm-brand);
   border-color: var(--wm-brand);
@@ -135,351 +108,20 @@
   background: transparent;
   color: var(--wm-text-2);
 }
-.pl-btn-danger {
-  color: var(--wm-red);
-  border-color: var(--wm-border-light);
-}
-
-/* ── list plánovače ───────────────────────────────────────────────────────── */
-
-.pl-sheet {
-  background: var(--pl-paper);
-  border: 1px solid var(--pl-frame);
-  border-radius: 14px;
-  padding: 14px;
-  margin-top: 16px;
-  /* Papír má mřížku, po které se píše. Je to jemné, ale drží to celou
-     dvoustranu pohromadě stejně jako v tisku. */
-  background-image:
-    linear-gradient(var(--pl-rule-2) 1px, transparent 1px),
-    linear-gradient(90deg, var(--pl-rule-2) 1px, transparent 1px);
-  background-size: 12px 12px;
-}
-
-.pl-band {
-  background: var(--pl-band);
-  color: var(--pl-band-fg);
-  text-align: center;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  padding: 7px 10px;
-  border-radius: 4px;
-}
-
-.pl-section-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--pl-ink);
-  margin: 14px 0 6px;
-}
-.pl-section-hint {
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  color: var(--pl-ink-3);
-  margin-left: 8px;
-}
-
-.pl-box {
-  border: 1px solid var(--pl-frame);
-  background: var(--pl-paper-2);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-/* ── mřížky ───────────────────────────────────────────────────────────────── */
-
-.pl-grid {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  font-size: 12px;
-}
-.pl-grid th,
-.pl-grid td {
-  border: 1px solid var(--pl-rule);
-  padding: 0;
-  vertical-align: middle;
-}
-.pl-grid thead th {
-  background: var(--pl-paper);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--pl-ink);
-  padding: 6px 2px;
-  text-align: center;
-  border-bottom: 1.5px solid var(--pl-frame);
-}
-.pl-grid thead th[data-today="true"],
-.pl-grid td[data-today="true"] {
-  background: var(--wm-tint-blue);
-}
-.pl-grid .pl-rowhead {
-  width: 116px;
-  background: var(--pl-paper);
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--pl-ink-2);
-  padding: 0 8px;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.pl-grid .pl-hour {
-  width: 54px;
-  background: var(--pl-paper);
-  font-size: 10px;
-  font-variant-numeric: tabular-nums;
-  color: var(--pl-ink-3);
-  text-align: right;
-  padding: 0 6px;
-}
-
-/* Buňka je celá klikatelná a vstup v ní nemá vlastní rámeček: mřížku kreslí
-   tabulka, takže dvojitá linka by list zaplevelila. */
-.pl-cell {
-  width: 100%;
-  border: none;
-  background: transparent;
-  color: var(--pl-ink);
-  font: inherit;
-  font-size: 11.5px;
-  padding: 4px 6px;
-  outline: none;
-  min-height: 26px;
-}
-.pl-cell:focus {
-  background: var(--wm-tint-blue);
-}
-.pl-cell::placeholder {
-  color: transparent;
-}
-
-textarea.pl-cell {
-  resize: none;
-  line-height: 1.35;
-  display: block;
-}
-
-/* ── kolečka trackeru ─────────────────────────────────────────────────────── */
-
-.pl-dot {
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  border: 1.6px solid var(--pl-frame);
-  background: transparent;
-  display: block;
-  margin: 3px auto;
-  cursor: pointer;
-  position: relative;
-  -webkit-tap-highlight-color: transparent;
-  transition:
-    transform 0.2s cubic-bezier(0.34, 1.4, 0.64, 1),
-    background 0.14s ease,
-    border-color 0.14s ease;
-}
-.pl-dot:hover:not(:disabled) {
-  border-color: var(--pl-mark);
-  transform: scale(1.08);
-}
-.pl-dot:active:not(:disabled) {
-  transform: scale(0.9);
-  transition-duration: 0.06s;
-}
-.pl-dot[data-done="true"] {
-  background: var(--pl-mark);
-  border-color: var(--pl-mark);
-  animation: pl-pop 0.28s cubic-bezier(0.34, 1.5, 0.64, 1);
-}
-.pl-dot[data-done="true"]::after {
-  content: "";
-  position: absolute;
-  left: 6px;
-  top: 2.5px;
-  width: 5px;
-  height: 10px;
-  border: solid var(--pl-paper-2);
-  border-width: 0 1.8px 1.8px 0;
-  transform: rotate(45deg);
-}
-.pl-dot:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-@keyframes pl-pop {
-  0% { transform: scale(0.8); }
-  60% { transform: scale(1.14); }
-  100% { transform: scale(1); }
-}
-
-/* ── hodnocení 1 až 10 ────────────────────────────────────────────────────── */
-
-.pl-score {
-  width: 100%;
-  border: none;
-  background: transparent;
-  color: var(--pl-ink);
-  font: inherit;
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  text-align: center;
-  padding: 5px 2px;
-  outline: none;
-  cursor: pointer;
-  min-height: 28px;
-  /* Šipky číselníku by v úzkém sloupci zabraly polovinu místa. */
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-.pl-score::-webkit-outer-spin-button,
-.pl-score::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.pl-score:focus {
-  background: var(--wm-tint-blue);
-}
-
-/* Sloupec s hodnotou dostane jemný podklad podle výše hodnocení, ať je na
-   list vidět, kde týden šel nahoru a kde dolů, bez čtení čísel. */
-.pl-heat {
-  position: relative;
-}
-.pl-heat::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--pl-mark);
-  opacity: calc(var(--pl-v, 0) * 0.13);
-  pointer-events: none;
-}
-
-/* ── statistiky ───────────────────────────────────────────────────────────── */
-
-.pl-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
-  gap: 12px;
-  margin-top: 14px;
-}
-.pl-card {
-  background: var(--wm-surface);
-  border: 1px solid var(--wm-border-light);
-  border-radius: 14px;
-  padding: 14px 16px;
-}
-.pl-card-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--wm-text-3);
-}
-.pl-card-value {
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.1;
-  margin-top: 6px;
-  font-variant-numeric: tabular-nums;
-  color: var(--wm-text);
-}
-.pl-card-note {
-  font-size: 12px;
-  color: var(--wm-text-2);
-  margin-top: 4px;
-}
-
-.pl-delta {
-  font-size: 12px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.pl-delta[data-dir="up"] { color: var(--pl-good); }
-.pl-delta[data-dir="down"] { color: var(--pl-warn); }
-.pl-delta[data-dir="flat"] { color: var(--wm-text-3); }
-
-.pl-bar-track {
-  height: 8px;
-  border-radius: 999px;
-  background: var(--wm-track);
-  overflow: hidden;
-}
-.pl-bar-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: var(--wm-brand);
-  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.pl-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-.pl-table th {
-  text-align: left;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--wm-text-3);
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--wm-border-light);
-}
-.pl-table td {
-  padding: 9px 10px;
-  border-bottom: 1px solid var(--wm-border-light);
-  vertical-align: middle;
-}
-.pl-table tbody tr:last-child td {
-  border-bottom: none;
-}
-.pl-num {
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  white-space: nowrap;
-}
-
-/* ── drobnosti ────────────────────────────────────────────────────────────── */
-
-.pl-note {
-  font-size: 12.5px;
-  line-height: 1.55;
-  color: var(--wm-text-2);
-}
-.pl-status {
-  font-size: 12px;
-  color: var(--wm-text-3);
-  min-width: 74px;
-  text-align: right;
-}
-.pl-status[data-state="error"] {
-  color: var(--wm-red);
-}
-.pl-footer-motto {
-  text-align: center;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  color: var(--pl-ink-2);
-  padding: 14px 0 4px;
-}
+.pl-btn-quiet:hover:not(:disabled) { background: var(--wm-fill-4); border-color: transparent; }
+.pl-btn-danger { color: var(--wm-red); }
 
 .pl-input {
   width: 100%;
   border: 1px solid var(--wm-border-light);
   background: var(--wm-surface);
   color: var(--wm-text);
-  border-radius: 10px;
-  padding: 9px 12px;
-  font-size: 14px;
+  border-radius: 12px;
+  padding: 10px 13px;
+  font: inherit;
+  font-size: 15px;
   outline: none;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .pl-input:focus {
   border-color: var(--wm-blue);
@@ -490,121 +132,485 @@ textarea.pl-cell {
   font-size: 12px;
   font-weight: 600;
   color: var(--wm-text-2);
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
-/* ── responzivita ─────────────────────────────────────────────────────────── */
+/* Viditelné zaostření pro klávesnici. Bez něj se plánovač nedá projít
+   tabulátorem, což je u mřížky sedmi sloupců hlavní způsob, jak se v ní
+   pohybovat. */
+.pl-btn:focus-visible,
+.pl-tabs button:focus-visible,
+.pl-dot:focus-visible,
+.pl-cell:focus-visible,
+.pl-score:focus-visible {
+  outline: 2px solid var(--wm-blue);
+  outline-offset: 2px;
+}
 
-/* Dvoustrana se skládá vedle sebe jen tam, kde je na ni místo. Pod tím se
-   sloupce poskládají pod sebe a mřížka rozvrhu se schová úplně: sedm sloupců
-   textových polí na telefonu se nedá vyplnit, od toho je denní pohled. */
+/* ── karty ────────────────────────────────────────────────────────────────── */
+
+.pl-card {
+  background: var(--wm-surface);
+  border: 1px solid var(--wm-border-light);
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  padding: 20px 22px;
+}
+.pl-card-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wm-text-3);
+}
+.pl-card-value {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-top: 7px;
+  font-variant-numeric: tabular-nums;
+}
+.pl-card-note {
+  font-size: 12.5px;
+  color: var(--wm-text-2);
+  margin-top: 5px;
+}
+.pl-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(186px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+/* ── list plánovače ───────────────────────────────────────────────────────── */
+
+.pl-sheet {
+  background: var(--wm-surface);
+  border: 1px solid var(--wm-border-light);
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  padding: 22px 24px 18px;
+  margin-top: 16px;
+}
+
+/* Hlavička listu: název sekce drobně, období velké. Na papíře tuhle roli
+   plní černé pruhy; na obrazovce stačí hierarchie písma a je to čistší. */
+.pl-sheet-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--wm-border-light);
+}
+.pl-sheet-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--wm-text-3);
+}
+.pl-sheet-title {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 4px 0 0;
+  line-height: 1.15;
+}
+.pl-sheet-who {
+  font-size: 13px;
+  color: var(--wm-text-2);
+  text-align: right;
+}
+
+.pl-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wm-text-3);
+  margin: 22px 0 8px;
+}
+.pl-section-hint {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  margin-left: 8px;
+}
+
+.pl-box {
+  border: 1px solid var(--wm-border-light);
+  border-radius: 14px;
+  background: var(--wm-surface);
+  overflow: hidden;
+}
+.pl-scroll { overflow-x: auto; }
+
+/* ── mřížky ───────────────────────────────────────────────────────────────── */
+
+/* Svislé linky jen tam, kde oddělují dny; vodorovné vlasové. Plná mřížka
+   z papíru by na obrazovce dělala šum, protože tady sloupce drží samy. */
+.pl-grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+}
+.pl-grid th,
+.pl-grid td {
+  padding: 0;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--wm-border-light);
+  border-right: 1px solid var(--wm-border-light);
+}
+.pl-grid th:last-child,
+.pl-grid td:last-child { border-right: none; }
+.pl-grid tbody tr:last-child td { border-bottom: none; }
+
+.pl-grid thead th {
+  background: var(--wm-surface-2);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--wm-text-2);
+  padding: 8px 4px;
+  text-align: center;
+  border-bottom: 1px solid var(--wm-border-light);
+}
+.pl-grid thead th small {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--wm-text-3);
+  letter-spacing: 0;
+  margin-top: 1px;
+}
+
+/* Dnešek dostane modrý nádech, ať je v mřížce sedmi sloupců hned vidět,
+   kde člověk je. */
+.pl-grid th[data-today="true"],
+.pl-grid td[data-today="true"] { background: var(--wm-tint-blue); }
+.pl-grid thead th[data-today="true"] { color: var(--wm-blue); }
+
+.pl-rowhead {
+  width: 148px;
+  background: var(--wm-surface-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--wm-text-2);
+  padding: 0 12px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pl-hour {
+  width: 62px;
+  background: var(--wm-surface-2);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--wm-text-3);
+  text-align: right;
+  padding: 0 10px;
+}
+
+.pl-cell {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--wm-text);
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 9px;
+  outline: none;
+  min-height: 32px;
+  display: block;
+}
+.pl-cell::placeholder { color: var(--wm-text-3); }
+.pl-cell:focus {
+  background: var(--wm-tint-blue);
+  box-shadow: inset 0 0 0 1.5px var(--wm-blue);
+  border-radius: 6px;
+}
+textarea.pl-cell { resize: none; line-height: 1.4; }
+
+/* ── kolečka trackeru ─────────────────────────────────────────────────────── */
+
+.pl-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  border: 1.6px solid var(--wm-border);
+  background: transparent;
+  display: block;
+  margin: 5px auto;
+  cursor: pointer;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1),
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+.pl-dot:hover:not(:disabled) {
+  border-color: var(--wm-brand);
+  transform: scale(1.1);
+}
+.pl-dot:active:not(:disabled) {
+  transform: scale(0.9);
+  transition-duration: 0.06s;
+}
+.pl-dot[data-done="true"] {
+  background: var(--wm-brand);
+  border-color: var(--wm-brand);
+  animation: pl-pop 0.3s cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+.pl-dot[data-done="true"]::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 3.5px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--wm-brand-fg);
+  border-width: 0 1.9px 1.9px 0;
+  transform: rotate(45deg);
+}
+.pl-dot:disabled { opacity: 0.3; cursor: default; }
+@keyframes pl-pop {
+  0% { transform: scale(0.82); }
+  60% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+/* ── hodnocení ────────────────────────────────────────────────────────────── */
+
+.pl-score {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--wm-text);
+  font: inherit;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: center;
+  padding: 7px 2px;
+  outline: none;
+  min-height: 34px;
+  cursor: pointer;
+  /* Šipky číselníku by v úzkém sloupci zabraly půlku místa. */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.pl-score::-webkit-outer-spin-button,
+.pl-score::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.pl-score:focus {
+  background: var(--wm-tint-blue);
+  box-shadow: inset 0 0 0 1.5px var(--wm-blue);
+  border-radius: 6px;
+}
+
+/* Podklad buňky roste s hodnotou, takže je průběh týdne vidět bez čtení
+   čísel. Jedna barva pro všechny ukazatele: čtyři barevné škály vedle sebe
+   by nesly míň informace, ne víc. */
+.pl-heat { position: relative; }
+.pl-heat::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 6px;
+  background: var(--wm-blue);
+  opacity: calc(var(--pl-v, 0) * 0.16);
+  pointer-events: none;
+}
+
+/* ── tabulky ──────────────────────────────────────────────────────────────── */
+
+.pl-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.pl-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wm-text-3);
+  padding: 0 12px 9px;
+  border-bottom: 1px solid var(--wm-border-light);
+  white-space: nowrap;
+}
+.pl-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--wm-border-light);
+  vertical-align: middle;
+}
+.pl-table tbody tr:last-child td { border-bottom: none; }
+.pl-table tbody tr { transition: background 0.15s ease; }
+.pl-table tbody tr:hover { background: var(--wm-fill-4); }
+.pl-num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ── drobné prvky ─────────────────────────────────────────────────────────── */
+
+.pl-bar-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--wm-track);
+  overflow: hidden;
+}
+.pl-bar-fill {
+  height: 100%;
+  min-width: 8px;
+  border-radius: 9999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 58%),
+    var(--wm-blue);
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Změna proti minulému období. Znaménko a slovo nesou význam samy, barva je
+   jen zesílení: červená a zelená jsou pro část lidí prakticky totožné. */
+.pl-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.pl-delta[data-dir="up"] { color: var(--wm-ok-fg); background: var(--wm-green-light); }
+.pl-delta[data-dir="down"] { color: var(--wm-caution-fg); background: var(--wm-orange-light); }
+.pl-delta[data-dir="flat"] { color: var(--wm-text-3); background: var(--wm-fill-4); }
+
+.pl-note {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--wm-text-2);
+}
+.pl-status {
+  font-size: 12px;
+  color: var(--wm-text-3);
+  min-width: 74px;
+  text-align: right;
+}
+.pl-status[data-state="error"] { color: var(--wm-red); }
+
+.pl-footer-motto {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--wm-text-3);
+  padding: 22px 0 2px;
+}
+
+/* ── rozvržení ────────────────────────────────────────────────────────────── */
+
 .pl-spread {
   display: grid;
   grid-template-columns: minmax(0, 1.28fr) minmax(0, 1fr);
-  gap: 16px;
+  gap: 20px;
 }
 @media (max-width: 1080px) {
-  .pl-spread {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  .pl-spread { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 720px) {
-  .pl-only-wide {
-    display: none;
-  }
-  .pl-wrap {
-    padding: 0 10px 72px;
-  }
-  .pl-sheet {
-    padding: 10px;
-  }
+  .pl-only-wide { display: none; }
+  .pl-wrap { padding: 0 12px 72px; }
+  .pl-sheet { padding: 16px 14px 12px; border-radius: 16px; }
+  .pl-card { padding: 16px 16px; border-radius: 16px; }
 }
-.pl-hint-narrow {
-  display: none;
-}
+.pl-hint-narrow { display: none; }
 @media (max-width: 720px) {
-  .pl-hint-narrow {
-    display: block;
-  }
+  .pl-hint-narrow { display: block; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-dot,
+  .pl-dot:hover:not(:disabled),
+  .pl-btn:active:not(:disabled) { transform: none; }
+  .pl-dot[data-done="true"] { animation: none; }
+  .pl-bar-fill { transition: none; }
 }
 
 /* ── tisk ─────────────────────────────────────────────────────────────────── */
 
-/* Tištěný list má vyjít jako papírová předloha: A4 na šířku, jeden týden na
-   stránku, bez ovládacích prvků. Vstupní pole se tisknou jako obyčejný text,
-   jinak by prohlížeč kreslil rámečky formuláře. */
+/* Tady se plánovač vrací k papírové předloze: A4 na šířku, jeden týden na
+   stránku, mřížka a černé pruhy jako v tisku. Karty a stíny z obrazovky by
+   na papíře jen ubíraly místo. */
 @media print {
   @page {
     size: A4 landscape;
     margin: 8mm;
   }
-  :root {
-    --pl-paper: #ffffff;
-    --pl-paper-2: #ffffff;
-    --pl-ink: #000000;
-    --pl-ink-2: #333333;
-    --pl-ink-3: #666666;
-    --pl-rule: #cccccc;
-    --pl-rule-2: #e6e6e6;
-    --pl-frame: #999999;
-    --pl-band: #141414;
-    --pl-band-fg: #ffffff;
-    --pl-mark: #000000;
-  }
-  body {
-    background: #ffffff;
-  }
+  .pl-root { background: #ffffff; }
   .pl-topbar,
-  .pl-noprint {
-    display: none !important;
-  }
-  .pl-wrap {
-    max-width: none;
-    padding: 0;
-  }
+  .pl-noprint { display: none !important; }
+  .pl-wrap { max-width: none; padding: 0; }
+
   .pl-sheet {
     border: none;
     border-radius: 0;
+    box-shadow: none;
     padding: 0;
     margin: 0;
-    background-image: none;
   }
-  .pl-spread {
-    grid-template-columns: minmax(0, 1.28fr) minmax(0, 1fr);
-    gap: 8px;
-  }
-  .pl-only-wide {
-    display: revert;
-  }
-  .pl-band {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .pl-dot[data-done="true"] {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .pl-cell,
-  .pl-score {
-    color: #000000;
-  }
-  .pl-grid {
-    font-size: 8.5px;
-  }
+  .pl-sheet-head { padding-bottom: 6px; border-color: #999999; }
+  .pl-sheet-title { font-size: 13px; }
+  .pl-sheet-eyebrow,
+  .pl-sheet-who { font-size: 8px; }
+
+  .pl-spread { grid-template-columns: minmax(0, 1.28fr) minmax(0, 1fr); gap: 8px; }
+  .pl-only-wide { display: revert; }
+  .pl-hint-narrow { display: none; }
+
+  .pl-section-title { font-size: 7.5px; margin: 8px 0 3px; color: #000000; }
+  .pl-box { border-color: #999999; border-radius: 3px; }
+  .pl-grid { font-size: 8.5px; }
+  .pl-grid th,
+  .pl-grid td { border-color: #cccccc; }
+  .pl-grid thead th { background: #ffffff; color: #000000; font-size: 7.5px; padding: 2px; }
+  .pl-grid thead th small { font-size: 6.5px; }
+  .pl-rowhead,
+  .pl-hour { background: #ffffff; font-size: 7.5px; }
+  .pl-rowhead { width: 96px; }
+  .pl-hour { width: 40px; }
+
   .pl-cell {
     font-size: 8px;
     min-height: 0;
     padding: 2px 3px;
+    color: #000000;
   }
-  .pl-grid thead th,
-  .pl-grid .pl-rowhead,
-  .pl-grid .pl-hour {
-    font-size: 7.5px;
-  }
+  .pl-score { font-size: 9px; min-height: 0; padding: 2px; color: #000000; }
+  .pl-heat::before { display: none; }
+  .pl-grid th[data-today="true"],
+  .pl-grid td[data-today="true"] { background: #ffffff; }
+
   .pl-dot {
     width: 13px;
     height: 13px;
     margin: 1px auto;
+    border-color: #666666;
+  }
+  .pl-dot[data-done="true"] {
+    background: #000000;
+    border-color: #000000;
+    animation: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   .pl-dot[data-done="true"]::after {
     left: 3.4px;
@@ -612,8 +618,14 @@ textarea.pl-cell {
     width: 3px;
     height: 6px;
     border-width: 0 1.4px 1.4px 0;
+    border-color: #ffffff;
   }
-  .pl-heat::before {
-    display: none;
+
+  .pl-card {
+    border: 1px solid #e5e5ea;
+    border-radius: 8px;
+    box-shadow: none;
+    break-inside: avoid;
   }
+  .pl-footer-motto { color: #333333; padding: 8px 0 0; }
 }

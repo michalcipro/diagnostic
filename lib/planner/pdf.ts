@@ -70,11 +70,35 @@ const PODPOROVANE =
   // chyba, i když je tu jen jako povolený vstup z klientova textu.
   /[ -~\u00A3\u00A7\u00A9\u00AB\u00AE\u00B0\u00B1\u00B7\u00BB\u00C0-\u00C2\u00C4\u00C7-\u00CB\u00CD\u00D3\u00D4\u00D6-\u00D8\u00DA\u00DC\u00DD\u00DF-\u00E2\u00E4\u00E7-\u00EB\u00ED\u00F3\u00F4\u00F6\u00FA\u00FC\u00FD\u010C-\u010F\u011A\u011B\u0139\u013A\u013D\u013E\u0147\u0148\u0154\u0155\u0158\u0159\u0160\u0161\u0164\u0165\u016E\u016F\u017D\u017E\u2013\u2014\u2018-\u201A\u201C-\u201E\u2022\u2026\u20AC\u2122\u2190-\u2193\u2264\u2265]/
 
+/**
+ * Znaky, které písmo nemá, ale mají zřejmou náhradu.
+ *
+ * Matematické minus je tu ten důležitý. Píše se jím záporná změna a v písmu
+ * chybí, takže se beze stopy ztratilo a z „−1,5" se v PDF stalo „1,5".
+ * Číslo přitom zůstalo červené, takže dokument tvrdil pravý opak toho, co
+ * se stalo. Odstranění neznámého znaku je u textu klienta správná odpověď,
+ * u znaménka je to chyba, kterou nikdo nepozná.
+ */
+const NAHRADY: Record<string, string> = {
+  "\u2212": "-", // matematické minus
+  "\u2010": "-", // spojovník
+  "\u2011": "-", // nezlomitelný spojovník
+  "\u00A0": " ", // nezlomitelná mezera
+  "\u202F": " ", // úzká nezlomitelná mezera
+  "\u2009": " ", // úzká mezera
+  "\u200B": "", // nulová mezera
+}
+
 export function ocisti(text: string): string {
   let out = ""
   for (const znak of text) {
     if (PODPOROVANE.test(znak)) {
       out += znak
+      continue
+    }
+    const nahrada = NAHRADY[znak]
+    if (nahrada !== undefined) {
+      out += nahrada
       continue
     }
     // Druhý pokus bez diakritiky: „ñ" projde jako „n", což je pořád čitelné.

@@ -14,6 +14,21 @@ export function cislo(hodnota: number, lang: Lang, desetin = 1): string {
   return lang === "en" ? s : s.replace(".", ",")
 }
 
+/**
+ * Přečte číslo, které člověk napsal.
+ *
+ * Přijímá desetinnou čárku i tečku: Čech píše „7,5", česká klávesnice na
+ * numerickém bloku dává čárku a prohlížeč by u pole typu number čárku zahodil.
+ * Vrací null pro prázdný i nesmyslný vstup, aby volající rozlišil „smazáno"
+ * od „napsal jsem něco divného".
+ */
+export function parsujCislo(raw: string): number | null {
+  const t = raw.trim().replace(",", ".")
+  if (!t) return null
+  const n = Number(t)
+  return Number.isFinite(n) ? n : null
+}
+
 /** Číslo se znaménkem, pro změny proti minulému období. */
 export function zmenaText(hodnota: number, lang: Lang, desetin = 1): string {
   const s = cislo(Math.abs(hodnota), lang, desetin)
@@ -149,6 +164,11 @@ export interface PlannerUI {
   statUspesnost: string
   statSplneno: string
   statUkazatele: string
+  statUkazatel: string
+  statSerieKratce: string
+  statSNavykem: string
+  statBezNavyku: string
+  statDnuSBez: string
   statPrumer: string
   statRozsah: string
   statZmena: string
@@ -166,6 +186,7 @@ export interface PlannerUI {
   statNejlepsiDen: string
   statNejhorsiDen: string
   statShrnuti: string
+  statShrnutiUvod: string
   dnu: string
   bodu: string
   hodin: string
@@ -287,6 +308,11 @@ export const UI: Record<Lang, PlannerUI> = {
     statUspesnost: "Úspěšnost",
     statSplneno: "Splněno",
     statUkazatele: "Denní ukazatele",
+    statUkazatel: "Ukazatel",
+    statSerieKratce: "Série",
+    statSNavykem: "S návykem",
+    statBezNavyku: "Bez návyku",
+    statDnuSBez: "Dnů s / bez",
     statPrumer: "Průměr",
     statRozsah: "Rozsah",
     statZmena: "Změna",
@@ -306,6 +332,8 @@ export const UI: Record<Lang, PlannerUI> = {
     statNejlepsiDen: "Nejsilnější den",
     statNejhorsiDen: "Nejslabší den",
     statShrnuti: "Co z toho plyne",
+    statShrnutiUvod:
+      "Několik vět k tomu, co za čísly výš stojí, na čem stavět a co řešit jako první.",
     dnu: "dnů",
     bodu: "bodů",
     hodin: "hodin",
@@ -424,6 +452,11 @@ export const UI: Record<Lang, PlannerUI> = {
     statUspesnost: "Completion",
     statSplneno: "Done",
     statUkazatele: "Daily ratings",
+    statUkazatel: "Rating",
+    statSerieKratce: "Streak",
+    statSNavykem: "With habit",
+    statBezNavyku: "Without",
+    statDnuSBez: "Days with / without",
     statPrumer: "Average",
     statRozsah: "Range",
     statZmena: "Change",
@@ -443,6 +476,8 @@ export const UI: Record<Lang, PlannerUI> = {
     statNejlepsiDen: "Strongest day",
     statNejhorsiDen: "Weakest day",
     statShrnuti: "What this means",
+    statShrnutiUvod:
+      "A few sentences on what stands behind the numbers above, what to build on and what to tackle first.",
     dnu: "days",
     bodu: "points",
     hodin: "hours",
@@ -561,6 +596,11 @@ export const UI: Record<Lang, PlannerUI> = {
     statUspesnost: "Úspešnosť",
     statSplneno: "Splnené",
     statUkazatele: "Denné ukazovatele",
+    statUkazatel: "Ukazovateľ",
+    statSerieKratce: "Séria",
+    statSNavykem: "S návykom",
+    statBezNavyku: "Bez návyku",
+    statDnuSBez: "Dní s / bez",
     statPrumer: "Priemer",
     statRozsah: "Rozsah",
     statZmena: "Zmena",
@@ -580,6 +620,8 @@ export const UI: Record<Lang, PlannerUI> = {
     statNejlepsiDen: "Najsilnejší deň",
     statNejhorsiDen: "Najslabší deň",
     statShrnuti: "Čo z toho plynie",
+    statShrnutiUvod:
+      "Niekoľko viet k tomu, čo za číslami vyššie stojí, na čom stavať a čo riešiť ako prvé.",
     dnu: "dní",
     bodu: "bodov",
     hodin: "hodín",

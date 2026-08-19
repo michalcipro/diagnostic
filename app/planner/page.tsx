@@ -672,6 +672,7 @@ export default function PlannerPage() {
             sessionToken={session}
             lang={lang}
             gender={gender}
+            jmeno={ja.name}
             dnesniDatum={dnesniDatum}
           />
         )}

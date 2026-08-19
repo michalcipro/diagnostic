@@ -113,23 +113,62 @@ oběma směry: v dobrý den se návyk plní snáz.
 
 ## Tisk a PDF
 
-Týdenní list jde vytisknout i uložit jako PDF, vždy a v obou případech na A4 na
-šířku, ve stejném rozvržení jako papírová předloha.
+Dva různé dokumenty pro dvě různé věci:
 
-- **Tisk** otevře tiskový dialog prohlížeče; sazbu řídí `@media print`
-  v `app/planner.css`.
-- **Uložit PDF** vyrobí skutečný soubor přímo v prohlížeči
-  (`lib/planner/pdf.ts`). Je to samostatná cesta proto, že na iPhonu z
-  tiskového dialogu soubor uložit ani odeslat nejde. Text zůstává textem,
-  takže se v PDF dá vyhledávat.
+| Dokument | Formát | Odkud |
+| --- | --- | --- |
+| **Týdenní list** | A4 na šířku, věrná kopie papírové předlohy | tlačítko na týdenním i denním pohledu |
+| **Přehled deníku** | A4 na výšku, čtený report za týden, měsíc nebo rok | tlačítko ve statistikách |
 
-Do PDF se vkládá tentýž osekaný řez Liberation Sans jako u vyhodnocení
-diagnostiky. Umí češtinu, slovenštinu i angličtinu; znak, který v něm není, se
-před sazbou zbaví diakritiky, a když ani to nepomůže, vypustí se. Nečitelný
-čtvereček v tisku vypadá jako chyba programu, chybějící emotikon ne.
+Obojí vzniká jako **skutečný soubor** přímo v prohlížeči, ne přes tiskový
+dialog. Je to samostatná cesta proto, že na iPhonu z tiskového dialogu soubor
+uložit ani odeslat nejde. Text zůstává textem, takže se v PDF dá vyhledávat.
+Tisk přes dialog prohlížeče funguje taky, sazbu řídí `@media print`
+v `app/planner.css`.
+
+**Týdenní list** (`lib/planner/pdf.ts`) se drží tištěné předlohy doslova:
+konstanty v kódu jsou původní souřadnice z papírového plánovače v bodech, jen
+se převádějí na milimetry. Kód se tak dá porovnat s předlohou řádek po řádku.
+
+**Přehled deníku** (`lib/planner/stats-pdf.ts`) sází tentýž sazeč, jakým se
+skládá vyhodnocení diagnostiky (`lib/diagnostic/pdf/sazba.ts`), takže oba
+dokumenty vypadají jako jedna řada. Obsahuje klíčová čísla, tabulku návyků
+s pruhy úspěšnosti, tabulku ukazatelů, grafy vývoje a rozdílů podle dnů,
+souvislosti a na vlastní stránce shrnutí běžnou řečí zakončené jedním
+konkrétním krokem. Vlastní stránka pro shrnutí je záměr, stejně jako
+u diagnostiky: je to pro klienta to nejdůležitější a nemá se lámat přes dvě
+strany.
+
+Do obou se vkládá tentýž osekaný řez Liberation Sans jako u vyhodnocení
+diagnostiky. Umí češtinu, slovenštinu i angličtinu; znak, který v něm není,
+se nahradí zřejmým protějškem, jinak se zbaví diakritiky, a když ani to
+nepomůže, vypustí se. Nečitelný čtvereček v tisku vypadá jako chyba programu,
+chybějící emotikon ne.
+
+**Pozor na znaménka.** Matematické minus (U+2212) ve vloženém písmu není.
+Dokud se nenahrazovalo, mizelo beze stopy a ze záporné změny „−1,5" se v PDF
+stalo „1,5" v červené barvě, tedy pravý opak toho, co se stalo. Proto se
+všechny buňky tabulek čistí na jednom místě a náhradní tabulka v
+`lib/planner/pdf.ts` tenhle znak převádí na obyčejný spojovník.
 
 Klient si navíc může celý deník stáhnout jako JSON (Účet → Stáhnout deník).
 Osobní zápisky mají jít vzít s sebou; bez exportu by byl deník past.
+
+## Vzhled
+
+Plánovač používá tytéž tokeny `--wm-*`, tytéž karty a tutéž typografii jako
+vyhodnocení diagnostiky. Otevírají se ze stejné domény a mají vypadat jako
+jeden produkt, ne jako dva programy vedle sebe. Papírová podoba předlohy se
+drží tam, kde na ni dojde: v tisku a v PDF.
+
+Grafy jsou ruční SVG bez knihovny a kreslí se **v pixelech podle změřené
+šířky karty**. Obě obvyklé zkratky totiž selhaly a stojí za zapamatování:
+
+- `preserveAspectRatio="none"` s úzkým plátnem roztáhne osu X, takže se z bodů
+  stanou elipsy a z popisků rozvleklé písmo;
+- pevné plátno se škálováním se sice nedeformuje, ale mění se šířkou karty
+  velikost písma, takže popisky grafu byly na širokém monitoru větší než
+  nadpisy kolem nich.
 
 ## Jazyky a rod
 

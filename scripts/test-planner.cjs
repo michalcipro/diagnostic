@@ -344,6 +344,7 @@ const STEJNE_V_OBOU = new Set([
   "jazyk",
   "koucKlienti",
   "koucPozvanky",
+  "statBezNavyku",
 ])
 const shodneSCestinou = klice.filter(
   (k) => I.UI.sk[k] === I.UI.cs[k] && I.UI.cs[k] !== I.UI.en[k] && !STEJNE_V_OBOU.has(k),

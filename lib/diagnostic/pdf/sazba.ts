@@ -51,6 +51,32 @@ export const STITEK_NEUTRALNI: BarvyStitku = {
   podklad: BARVA.podklad,
 }
 
+/** Sloupec tabulky. Podíly všech sloupců mají dohromady dát jedničku. */
+export interface SloupecTabulky {
+  popis: string
+  podil: number
+  /** čísla patří doprava, text doleva */
+  vpravo?: boolean
+}
+
+/**
+ * Buňka tabulky.
+ *
+ * Krátký zápis je samotný řetězec. Delší tvar umí ztučnit, obarvit a hlavně
+ * vykreslit pruh: úspěšnost se v tabulce čte líp jako délka než jako procento,
+ * a když je pruh přímo v buňce, nemusí se kvůli němu stavět druhá tabulka.
+ */
+export type BunkaTabulky =
+  | string
+  | {
+      text?: string
+      tucne?: boolean
+      barva?: RGB
+      /** 0 až 100; vykreslí pruh přes šířku sloupce */
+      pruh?: number
+      barvaPruhu?: RGB
+    }
+
 const MESICE_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 /**
@@ -320,6 +346,148 @@ export class Sazba {
       this.y += radek
     }
     this.y += 3
+  }
+
+  /**
+   * Tabulka s hlavičkou a vlasovými linkami mezi řádky.
+   *
+   * Svislé linky tu nejsou schválně: sloupce drží zarovnání samo a mřížka
+   * navíc jen přidá šum. Čísla jdou doprava, text doleva, protože při čtení
+   * sloupce číslic se oko chytá jednotek, ne první číslice.
+   *
+   * Hlavička se po zalomení stránky zopakuje. Bez toho by druhá strana delší
+   * tabulky byla jen hromada čísel bez popisků.
+   */
+  tabulka(
+    sloupce: SloupecTabulky[],
+    radky: BunkaTabulky[][],
+    opts: { velikost?: number; x?: number; sirka?: number } = {},
+  ) {
+    if (!radky.length) return
+    const velikost = opts.velikost ?? 9.2
+    const x0 = opts.x ?? OKRAJ.levy
+    const sirka = opts.sirka ?? SIRKA
+    const vyskaRadku = velikost * 0.62 + 4.4
+    const odsazeniBunky = 2
+
+    const hranice = (i: number) => {
+      let podil = 0
+      for (let k = 0; k < i; k++) podil += sloupce[k].podil
+      return x0 + sirka * podil
+    }
+
+    const hlavicka = () => {
+      this.misto(vyskaRadku + 4)
+      const zaklad = this.y + 3.4
+      this.pismo(6.8, true, BARVA.slaba)
+      sloupce.forEach((sl, i) => {
+        if (!sl.popis) return
+        const levy = hranice(i)
+        const pravy = hranice(i) + sirka * sl.podil
+        if (sl.vpravo) {
+          this.doc.text(sl.popis.toUpperCase(), pravy - odsazeniBunky, zaklad, {
+            align: "right",
+            charSpace: 0.35,
+          })
+        } else {
+          this.doc.text(sl.popis.toUpperCase(), levy + odsazeniBunky, zaklad, { charSpace: 0.35 })
+        }
+      })
+      this.y = zaklad + 2.2
+      this.doc.setDrawColor(BARVA.linka[0], BARVA.linka[1], BARVA.linka[2])
+      this.doc.setLineWidth(0.3)
+      this.doc.line(x0, this.y, x0 + sirka, this.y)
+      this.y += 1.2
+    }
+
+    hlavicka()
+
+    radky.forEach((radek, r) => {
+      if (this.y + vyskaRadku > A4.vyska - OKRAJ.dolni) {
+        this.zalom()
+        hlavicka()
+      }
+      const zaklad = this.y + vyskaRadku * 0.66
+      radek.forEach((bunka, i) => {
+        const sl = sloupce[i]
+        if (!sl) return
+        const levy = hranice(i)
+        const sirkaSloupce = sirka * sl.podil
+        const pravy = levy + sirkaSloupce
+        const b = typeof bunka === "string" ? { text: bunka } : bunka
+
+        if (typeof b.pruh === "number") {
+          this.pruh(zaklad - 1.6, b.pruh, {
+            x: levy + odsazeniBunky,
+            sirka: sirkaSloupce - odsazeniBunky * 2,
+            vyska: 2.2,
+            barva: b.barvaPruhu,
+          })
+          return
+        }
+        if (!b.text) return
+
+        this.pismo(velikost, b.tucne, b.barva ?? (b.tucne ? BARVA.text : BARVA.text2))
+        if (sl.vpravo) {
+          this.doc.text(b.text, pravy - odsazeniBunky, zaklad, { align: "right" })
+        } else {
+          const [prvni] = this.doc.splitTextToSize(
+            b.text,
+            Math.max(8, sirkaSloupce - odsazeniBunky * 2),
+          ) as string[]
+          this.doc.text(prvni ?? b.text, levy + odsazeniBunky, zaklad)
+        }
+      })
+      this.y += vyskaRadku
+      if (r < radky.length - 1) {
+        this.doc.setDrawColor(BARVA.linka[0], BARVA.linka[1], BARVA.linka[2])
+        this.doc.setLineWidth(0.15)
+        this.doc.line(x0, this.y, x0 + sirka, this.y)
+      }
+    })
+    this.y += 2
+  }
+
+  /**
+   * Sloupcový graf. Používá se pro vývoj v čase a rozdíly mezi dny v týdnu.
+   *
+   * Chybějící hodnota se kreslí jen jako prázdná dráha, ne jako nula: měsíc
+   * bez zápisu není měsíc s nulovým skóre.
+   */
+  graf(
+    body: { popisek: string; hodnota?: number }[],
+    max: number,
+    opts: { vyska?: number; barva?: RGB; popisHodnoty?: (v: number) => string } = {},
+  ) {
+    if (!body.length) return
+    const vyska = opts.vyska ?? 24
+    // Nad sloupcem je řádek na hodnotu, pod ním na popisek.
+    this.misto(vyska + 12)
+    const zaklad = this.y + 4
+    const rozestup = SIRKA / body.length
+    const sirkaSloupce = Math.min(rozestup * 0.42, 7)
+
+    body.forEach((b, i) => {
+      const stred = OKRAJ.levy + rozestup * (i + 0.5)
+      const x = stred - sirkaSloupce / 2
+      this.doc.setFillColor(BARVA.drazka[0], BARVA.drazka[1], BARVA.drazka[2])
+      this.doc.roundedRect(x, zaklad, sirkaSloupce, vyska, 1, 1, "F")
+      if (typeof b.hodnota === "number") {
+        const h = Math.max(1, vyska * Math.min(1, Math.max(0, b.hodnota / max)))
+        const barva = opts.barva ?? BARVA.znacka
+        this.doc.setFillColor(barva[0], barva[1], barva[2])
+        this.doc.roundedRect(x, zaklad + vyska - h, sirkaSloupce, h, 1, 1, "F")
+        // Hodnota nad sloupcem. Bez ní se dva sloupce lišící se o desetinu
+        // nedají od sebe rozeznat a graf tvrdí, že se nic nezměnilo.
+        if (opts.popisHodnoty) {
+          this.pismo(6.4, true, BARVA.text2)
+          this.doc.text(opts.popisHodnoty(b.hodnota), stred, zaklad - 1.4, { align: "center" })
+        }
+      }
+      this.pismo(6.4, false, BARVA.slaba)
+      this.doc.text(b.popisek, stred, zaklad + vyska + 4, { align: "center" })
+    })
+    this.y = zaklad + vyska + 8
   }
 
   /** Patička na každé straně: linka, text vlevo, číslo strany vpravo. */

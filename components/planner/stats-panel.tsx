@@ -21,6 +21,7 @@ import {
 import { bodVyvoje, denniSkore, dnyRozsahu, mapaDnu, spocitejStatistiku, type Statistika } from "@/lib/planner/stats"
 import { shrnuti, type Obdobi } from "@/lib/planner/shrnuti"
 import { chybaText, getRange } from "@/lib/planner/remote"
+import { nazevStatistikPdf, sestavStatistikyPdf } from "@/lib/planner/stats-pdf"
 import { CaraGraf, MapaRoku, Pruh, SloupceGraf, type Bod, type PoleDne } from "./charts"
 
 // Statistiky deníku: týden, měsíc, rok.
@@ -37,6 +38,8 @@ export interface StatsPanelProps {
   sessionToken: string
   lang: Lang
   gender: Gender
+  /** jméno do hlavičky vytištěného přehledu */
+  jmeno: string
   dnesniDatum: string
 }
 
@@ -128,7 +131,7 @@ function Zmena({ hodnota, lang, jednotka }: { hodnota?: number; lang: Lang; jedn
   )
 }
 
-export function StatsPanel({ sessionToken, lang, gender, dnesniDatum }: StatsPanelProps) {
+export function StatsPanel({ sessionToken, lang, gender, jmeno, dnesniDatum }: StatsPanelProps) {
   const t = UI[lang]
   const [obdobi, setObdobi] = useState<Obdobi>("tyden")
   const [kotva, setKotva] = useState<string>(() => pondeli(dnesniDatum))
@@ -186,41 +189,53 @@ export function StatsPanel({ sessionToken, lang, gender, dnesniDatum }: StatsPan
   }, [dny, navyky, rozsah, dnesniDatum])
 
   // ── body grafu vývoje ─────────────────────────────────────────────────────
-  const vyvoj: Bod[] = useMemo(() => {
-    if (!dny) return []
-    const hodnota = (b: ReturnType<typeof bodVyvoje>) =>
-      grafMetrika === "skore" ? b.skore : b.metriky[grafMetrika]
+  //
+  // Počítá se pro libovolný ukazatel, protože graf na obrazovce se přepíná,
+  // ale do PDF jde vždycky denní skóre. Bez parametru by se to muselo počítat
+  // dvakrát a jednou z toho jinak.
+  const spoctiVyvoj = useCallback(
+    (co: "skore" | MetricKey): Bod[] => {
+      if (!dny) return []
+      const hodnota = (b: ReturnType<typeof bodVyvoje>) =>
+        co === "skore" ? b.skore : b.metriky[co]
 
-    if (obdobi === "tyden") {
-      const mapa = mapaDnu(dny)
-      return dnyTydne(rozsah.od).map((d, i) => {
-        const den = mapa.get(d)
-        const v =
-          grafMetrika === "skore" ? (den ? denniSkore(den) : undefined) : den?.ratings[grafMetrika]
-        return { klic: d, hodnota: d <= dnesniDatum ? v : undefined, popisek: ZKRATKY_DNU[lang][i] }
-      })
-    }
-    if (obdobi === "mesic") {
-      // Body měsíce jsou týdny, ořezané na hranice měsíce, ať se první a
-      // poslední týden nepočítají z dnů, které do měsíce nepatří.
-      const tydny: Bod[] = []
-      let m = pondeli(rozsah.od)
-      while (m <= rozsah.do) {
-        const od = m < rozsah.od ? rozsah.od : m
-        const konec = posun(m, 6)
-        const do_ = konec > rozsah.do ? rozsah.do : konec
-        const b = bodVyvoje(m, dny, navyky, od, do_, dnesniDatum)
-        tydny.push({ klic: m, hodnota: hodnota(b), popisek: kratkeDatum(od, lang) })
-        m = posun(m, 7)
+      if (obdobi === "tyden") {
+        const mapa = mapaDnu(dny)
+        return dnyTydne(rozsah.od).map((d, i) => {
+          const den = mapa.get(d)
+          const v = co === "skore" ? (den ? denniSkore(den) : undefined) : den?.ratings[co]
+          return {
+            klic: d,
+            hodnota: d <= dnesniDatum ? v : undefined,
+            popisek: ZKRATKY_DNU[lang][i],
+          }
+        })
       }
-      return tydny
-    }
-    return mesiceRoku(rozsah.od.slice(0, 4)).map((mes) => {
-      const { od, do: do_ } = rozsahMesice(mes)
-      const b = bodVyvoje(mes, dny, navyky, od, do_, dnesniDatum)
-      return { klic: mes, hodnota: hodnota(b), popisek: String(Number(mes.slice(5, 7))) }
-    })
-  }, [dny, navyky, obdobi, rozsah, grafMetrika, lang, dnesniDatum])
+      if (obdobi === "mesic") {
+        // Body měsíce jsou týdny, ořezané na hranice měsíce, ať se první a
+        // poslední týden nepočítají z dnů, které do měsíce nepatří.
+        const tydny: Bod[] = []
+        let m = pondeli(rozsah.od)
+        while (m <= rozsah.do) {
+          const od = m < rozsah.od ? rozsah.od : m
+          const konec = posun(m, 6)
+          const do_ = konec > rozsah.do ? rozsah.do : konec
+          const b = bodVyvoje(m, dny, navyky, od, do_, dnesniDatum)
+          tydny.push({ klic: m, hodnota: hodnota(b), popisek: kratkeDatum(od, lang) })
+          m = posun(m, 7)
+        }
+        return tydny
+      }
+      return mesiceRoku(rozsah.od.slice(0, 4)).map((mes) => {
+        const { od, do: do_ } = rozsahMesice(mes)
+        const b = bodVyvoje(mes, dny, navyky, od, do_, dnesniDatum)
+        return { klic: mes, hodnota: hodnota(b), popisek: String(Number(mes.slice(5, 7))) }
+      })
+    },
+    [dny, navyky, obdobi, rozsah, lang, dnesniDatum],
+  )
+
+  const vyvoj: Bod[] = useMemo(() => spoctiVyvoj(grafMetrika), [spoctiVyvoj, grafMetrika])
 
   const grafRozsah = useMemo(() => {
     if (grafMetrika === "skore") return { min: 1, max: 10 }
@@ -247,6 +262,44 @@ export function StatsPanel({ sessionToken, lang, gender, dnesniDatum }: StatsPan
     () => (stat ? shrnuti(stat, obdobi, lang, gender) : []),
     [stat, obdobi, lang, gender],
   )
+
+  /**
+   * Uložení přehledu jako PDF.
+   *
+   * Vlastní soubor, ne tiskový dialog: na iPhonu z něj nejde nic uložit ani
+   * odeslat. Sází se stejným sazečem jako vyhodnocení diagnostiky, takže oba
+   * dokumenty vypadají jako jedna řada.
+   */
+  const exportPdf = useCallback(() => {
+    if (!stat) return
+    const blob = sestavStatistikyPdf({
+      stat,
+      obdobi,
+      popisObdobi: rozsah.popis,
+      jmeno,
+      lang,
+      gender,
+      vyvoj: spoctiVyvoj("skore").map((b) => ({ popisek: b.popisek ?? b.klic, hodnota: b.hodnota })),
+      dnesniDatum,
+    })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = nazevStatistikPdf({
+      stat,
+      obdobi,
+      popisObdobi: rozsah.popis,
+      jmeno,
+      lang,
+      gender,
+      vyvoj: [],
+      dnesniDatum,
+    })
+    a.click()
+    // Uvolnění až po kliknutí: Safari si adresu přečte asynchronně a při
+    // okamžitém uvolnění by stáhlo prázdný soubor.
+    window.setTimeout(() => URL.revokeObjectURL(url), 4000)
+  }, [stat, obdobi, rozsah.popis, jmeno, lang, gender, spoctiVyvoj, dnesniDatum])
 
   const prazdno = stat !== null && stat.vyplnenychDnu === 0
 
@@ -290,6 +343,13 @@ export function StatsPanel({ sessionToken, lang, gender, dnesniDatum }: StatsPan
           }
         >
           {t.dnes}
+        </button>
+        <div style={{ flex: 1 }} />
+        <button type="button" className="pl-btn" onClick={() => window.print()}>
+          {t.tisk}
+        </button>
+        <button type="button" className="pl-btn" disabled={!stat || prazdno} onClick={exportPdf}>
+          {t.pdf}
         </button>
         {nacitam && <span className="pl-status">{t.nacitam}</span>}
       </div>

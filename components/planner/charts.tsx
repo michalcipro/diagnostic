@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
+
 // Grafy statistik.
 //
 // Všechno je ruční SVG, žádná grafová knihovna. Důvod je střízlivý: potřebné
@@ -7,8 +9,43 @@
 // paletu, kterou by bylo stejně nutné celou přebít, aby seděla se světlým
 // i tmavým režimem.
 //
-// Barvy se berou z proměnných tématu přes `currentColor` a `var(--...)`, takže
-// se převracejí spolu se zbytkem aplikace a nikde není natvrdo psaný odstín.
+// SOUŘADNICE: kreslí se rovnou v pixelech podle skutečné šířky karty, ne do
+// pružného plátna. Obě obvyklé zkratky totiž selhaly: `preserveAspectRatio`
+// s hodnotou `none` roztáhl osu X a udělal z bodů elipsy a z popisků
+// rozvleklé písmo, a pevné plátno se škálováním sice nedeformuje, ale mění
+// s šířkou karty velikost písma, takže popisky grafu byly na širokém monitoru
+// větší než nadpisy kolem. Změřená šířka obojí řeší a stojí jeden
+// ResizeObserver.
+//
+// Barvy se berou z proměnných tématu, takže se převracejí spolu se zbytkem
+// aplikace a nikde není natvrdo psaný odstín.
+
+/**
+ * Šířka prvku, do kterého se graf kreslí.
+ *
+ * Vrací nulu, dokud se prvek nezměří; graf se do té doby nevykresluje, aby
+ * se na okamžik neobjevil v nesmyslné velikosti.
+ */
+function useSirka<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null)
+  const [sirka, setSirka] = useState(0)
+  useEffect(() => {
+    const prvek = ref.current
+    if (!prvek) return
+    setSirka(prvek.clientWidth)
+    if (typeof ResizeObserver === "undefined") return
+    const pozorovatel = new ResizeObserver((zaznamy) => {
+      const s = zaznamy[0]?.contentRect.width
+      if (typeof s === "number") setSirka(s)
+    })
+    pozorovatel.observe(prvek)
+    return () => pozorovatel.disconnect()
+  }, [])
+  return [ref, sirka] as const
+}
+
+/** Velikost popisků. Nezávisí na šířce, protože graf se kreslí v pixelech. */
+const PISMO = { hodnota: 11.5, osa: 11 }
 
 export interface Bod {
   klic: string
@@ -28,25 +65,27 @@ export function CaraGraf({
   body,
   min,
   max,
-  vyska = 132,
   popisHodnoty,
 }: {
   body: Bod[]
   min: number
   max: number
-  vyska?: number
   popisHodnoty?: (v: number) => string
 }) {
-  const sirka = 100
-  const okraj = { top: 6, right: 2, bottom: 16, left: 2 }
-  const plochaV = vyska - okraj.top - okraj.bottom
+  const [ref, sirkaPrvku] = useSirka<HTMLDivElement>()
+  const vyska = 190
+  const okraj = { top: 22, right: 14, bottom: 22, left: 14 }
+  const plocha = vyska - okraj.top - okraj.bottom
   const rozsah = max - min || 1
-  const krok = body.length > 1 ? (sirka - okraj.left - okraj.right) / (body.length - 1) : 0
+  const sirkaPlochy = Math.max(0, sirkaPrvku - okraj.left - okraj.right)
+  const krok = body.length > 1 ? sirkaPlochy / (body.length - 1) : 0
 
-  const x = (i: number) => okraj.left + i * krok
-  const y = (v: number) => okraj.top + plochaV * (1 - (v - min) / rozsah)
+  const x = (i: number) => okraj.left + (body.length > 1 ? i * krok : sirkaPlochy / 2)
+  const y = (v: number) => okraj.top + plocha * (1 - (v - min) / rozsah)
+  const popis = (v: number) => (popisHodnoty ? popisHodnoty(v) : v.toFixed(1))
 
-  // Čára se skládá po souvislých úsecích, mezera zůstane mezerou.
+  // Čára se skládá po souvislých úsecích, mezera zůstane mezerou. Spojit je
+  // přímkou přes prázdno by tvrdilo něco, co v datech není.
   const useky: string[] = []
   let ted: string[] = []
   body.forEach((b, i) => {
@@ -55,95 +94,100 @@ export function CaraGraf({
       ted = []
       return
     }
-    ted.push(`${ted.length ? "L" : "M"}${x(i).toFixed(2)},${y(b.hodnota).toFixed(2)}`)
+    ted.push(`${ted.length ? "L" : "M"}${x(i).toFixed(1)},${y(b.hodnota).toFixed(1)}`)
   })
   if (ted.length > 1) useky.push(ted.join(" "))
 
   const jsouData = body.some((b) => typeof b.hodnota === "number")
+  // Kolik popisků osy se vejde vedle sebe, aby se nepřekrývaly.
+  const hustota = Math.max(1, Math.ceil(body.length / Math.max(2, Math.floor(sirkaPrvku / 54))))
 
   return (
-    <svg
-      viewBox={`0 0 ${sirka} ${vyska}`}
-      preserveAspectRatio="none"
-      style={{ width: "100%", height: vyska, display: "block", overflow: "visible" }}
-      role="img"
-    >
-      {/* vodicí linky po třetinách rozsahu */}
-      {[0, 0.5, 1].map((p) => (
-        <line
-          key={p}
-          x1={okraj.left}
-          x2={sirka - okraj.right}
-          y1={okraj.top + plochaV * p}
-          y2={okraj.top + plochaV * p}
-          stroke="var(--wm-border-light)"
-          strokeWidth={0.4}
-          vectorEffect="non-scaling-stroke"
-        />
-      ))}
-
-      {useky.map((d, i) => (
-        <path
-          key={i}
-          d={d}
-          fill="none"
-          stroke="var(--wm-brand)"
-          strokeWidth={1.8}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
-        />
-      ))}
-
-      {body.map((b, i) =>
-        typeof b.hodnota === "number" ? (
-          <g key={b.klic}>
-            <circle
-              cx={x(i)}
-              cy={y(b.hodnota)}
-              r={2.2}
-              fill="var(--wm-surface)"
-              stroke="var(--wm-brand)"
-              strokeWidth={1.4}
-              vectorEffect="non-scaling-stroke"
+    <div ref={ref} style={{ width: "100%", minHeight: vyska }}>
+      {sirkaPrvku > 0 && (
+        <svg width={sirkaPrvku} height={vyska} role="img" style={{ display: "block" }}>
+          {[0, 0.5, 1].map((p) => (
+            <line
+              key={p}
+              x1={okraj.left}
+              x2={sirkaPrvku - okraj.right}
+              y1={okraj.top + plocha * p}
+              y2={okraj.top + plocha * p}
+              stroke="var(--wm-border-light)"
+              strokeWidth={1}
             />
-            <title>
-              {b.popisek ?? b.klic}: {popisHodnoty ? popisHodnoty(b.hodnota) : b.hodnota.toFixed(1)}
-            </title>
-          </g>
-        ) : null,
-      )}
+          ))}
 
-      {/* popisky osy: jen krajní a prostřední, aby se nepřekrývaly */}
-      {body.map((b, i) => {
-        const ukaz = body.length <= 12 || i === 0 || i === body.length - 1 || i % Math.ceil(body.length / 6) === 0
-        if (!ukaz) return null
-        return (
-          <text
-            key={`p-${b.klic}`}
-            x={x(i)}
-            y={vyska - 4}
-            textAnchor={i === 0 ? "start" : i === body.length - 1 ? "end" : "middle"}
-            fill="var(--wm-text-3)"
-            style={{ fontSize: 6 }}
-          >
-            {b.popisek ?? b.klic}
-          </text>
-        )
-      })}
+          {useky.map((d, i) => (
+            <path
+              key={i}
+              d={d}
+              fill="none"
+              stroke="var(--wm-brand)"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ))}
 
-      {!jsouData && (
-        <text
-          x={sirka / 2}
-          y={okraj.top + plochaV / 2}
-          textAnchor="middle"
-          fill="var(--wm-text-3)"
-          style={{ fontSize: 7 }}
-        >
-          –
-        </text>
+          {body.map((b, i) =>
+            typeof b.hodnota === "number" ? (
+              <g key={b.klic}>
+                <circle
+                  cx={x(i)}
+                  cy={y(b.hodnota)}
+                  r={3.4}
+                  fill="var(--wm-surface)"
+                  stroke="var(--wm-brand)"
+                  strokeWidth={2}
+                />
+                <text
+                  x={x(i)}
+                  y={y(b.hodnota) - 9}
+                  textAnchor="middle"
+                  fill="var(--wm-text-2)"
+                  style={{ fontSize: PISMO.hodnota, fontWeight: 600 }}
+                >
+                  {popis(b.hodnota)}
+                </text>
+                <title>
+                  {b.popisek ?? b.klic}: {popis(b.hodnota)}
+                </title>
+              </g>
+            ) : null,
+          )}
+
+          {body.map((b, i) => {
+            const ukaz = i === 0 || i === body.length - 1 || i % hustota === 0
+            if (!ukaz) return null
+            return (
+              <text
+                key={`p-${b.klic}`}
+                x={x(i)}
+                y={vyska - 6}
+                textAnchor={i === 0 ? "start" : i === body.length - 1 ? "end" : "middle"}
+                fill="var(--wm-text-3)"
+                style={{ fontSize: PISMO.osa }}
+              >
+                {b.popisek ?? b.klic}
+              </text>
+            )
+          })}
+
+          {!jsouData && (
+            <text
+              x={sirkaPrvku / 2}
+              y={okraj.top + plocha / 2}
+              textAnchor="middle"
+              fill="var(--wm-text-3)"
+              style={{ fontSize: 13 }}
+            >
+              –
+            </text>
+          )}
+        </svg>
       )}
-    </svg>
+    </div>
   )
 }
 
@@ -151,72 +195,78 @@ export function CaraGraf({
 export function SloupceGraf({
   body,
   max,
-  vyska = 116,
   popisHodnoty,
 }: {
   body: Bod[]
   max: number
-  vyska?: number
   popisHodnoty?: (v: number) => string
 }) {
-  const sirka = 100
-  const okraj = { top: 4, bottom: 14 }
-  const plochaV = vyska - okraj.top - okraj.bottom
-  const sirkaSloupce = (sirka / body.length) * 0.6
-  const rozestup = sirka / body.length
+  const [ref, sirkaPrvku] = useSirka<HTMLDivElement>()
+  const vyska = 170
+  const okraj = { top: 20, bottom: 22 }
+  const plocha = vyska - okraj.top - okraj.bottom
+  const rozestup = body.length ? sirkaPrvku / body.length : 0
+  const sirkaSloupce = Math.min(rozestup * 0.5, 42)
+  const popis = (v: number) => (popisHodnoty ? popisHodnoty(v) : v.toFixed(1))
 
   return (
-    <svg
-      viewBox={`0 0 ${sirka} ${vyska}`}
-      preserveAspectRatio="none"
-      style={{ width: "100%", height: vyska, display: "block", overflow: "visible" }}
-      role="img"
-    >
-      {body.map((b, i) => {
-        const stred = rozestup * (i + 0.5)
-        const v = typeof b.hodnota === "number" ? Math.max(0, Math.min(1, b.hodnota / max)) : 0
-        const h = plochaV * v
-        return (
-          <g key={b.klic}>
-            <rect
-              x={stred - sirkaSloupce / 2}
-              y={okraj.top}
-              width={sirkaSloupce}
-              height={plochaV}
-              rx={1}
-              fill="var(--wm-track)"
-            />
-            {typeof b.hodnota === "number" && (
-              <rect
-                x={stred - sirkaSloupce / 2}
-                y={okraj.top + plochaV - h}
-                width={sirkaSloupce}
-                height={h}
-                rx={1}
-                fill="var(--wm-brand)"
-              />
-            )}
-            <text
-              x={stred}
-              y={vyska - 3}
-              textAnchor="middle"
-              fill="var(--wm-text-3)"
-              style={{ fontSize: 6 }}
-            >
-              {b.popisek ?? b.klic}
-            </text>
-            <title>
-              {b.popisek ?? b.klic}:{" "}
-              {typeof b.hodnota === "number"
-                ? popisHodnoty
-                  ? popisHodnoty(b.hodnota)
-                  : b.hodnota.toFixed(1)
-                : "–"}
-            </title>
-          </g>
-        )
-      })}
-    </svg>
+    <div ref={ref} style={{ width: "100%", minHeight: vyska }}>
+      {sirkaPrvku > 0 && (
+        <svg width={sirkaPrvku} height={vyska} role="img" style={{ display: "block" }}>
+          {body.map((b, i) => {
+            const stred = rozestup * (i + 0.5)
+            const podil =
+              typeof b.hodnota === "number" ? Math.max(0, Math.min(1, b.hodnota / max)) : 0
+            const h = plocha * podil
+            return (
+              <g key={b.klic}>
+                <rect
+                  x={stred - sirkaSloupce / 2}
+                  y={okraj.top}
+                  width={sirkaSloupce}
+                  height={plocha}
+                  rx={4}
+                  fill="var(--wm-track)"
+                />
+                {typeof b.hodnota === "number" && (
+                  <>
+                    <rect
+                      x={stred - sirkaSloupce / 2}
+                      y={okraj.top + plocha - h}
+                      width={sirkaSloupce}
+                      height={Math.max(3, h)}
+                      rx={4}
+                      fill="var(--wm-brand)"
+                    />
+                    <text
+                      x={stred}
+                      y={okraj.top - 6}
+                      textAnchor="middle"
+                      fill="var(--wm-text-2)"
+                      style={{ fontSize: PISMO.hodnota, fontWeight: 600 }}
+                    >
+                      {popis(b.hodnota)}
+                    </text>
+                  </>
+                )}
+                <text
+                  x={stred}
+                  y={vyska - 6}
+                  textAnchor="middle"
+                  fill="var(--wm-text-3)"
+                  style={{ fontSize: PISMO.osa }}
+                >
+                  {b.popisek ?? b.klic}
+                </text>
+                <title>
+                  {b.popisek ?? b.klic}: {typeof b.hodnota === "number" ? popis(b.hodnota) : "–"}
+                </title>
+              </g>
+            )
+          })}
+        </svg>
+      )}
+    </div>
   )
 }
 
@@ -236,9 +286,9 @@ export interface PoleDne {
  */
 export function MapaRoku({ dny, zkratkyDnu }: { dny: PoleDne[]; zkratkyDnu: string[] }) {
   if (!dny.length) return null
-  const bunka = 11
-  const mezera = 2
-  const levyOkraj = 20
+  const bunka = 12
+  const mezera = 3
+  const levyOkraj = 26
   const horniOkraj = 4
 
   // Sloupec = týden. První sloupec začíná pondělkem prvního týdne, takže se
@@ -260,7 +310,7 @@ export function MapaRoku({ dny, zkratkyDnu }: { dny: PoleDne[]; zkratkyDnu: stri
               x={0}
               y={horniOkraj + i * (bunka + mezera) + bunka - 2}
               fill="var(--wm-text-3)"
-              style={{ fontSize: 7 }}
+              style={{ fontSize: 8 }}
             >
               {z}
             </text>
@@ -277,9 +327,9 @@ export function MapaRoku({ dny, zkratkyDnu }: { dny: PoleDne[]; zkratkyDnu: stri
               y={horniOkraj + radek * (bunka + mezera)}
               width={bunka}
               height={bunka}
-              rx={2}
+              rx={3}
               fill={d.uroven === undefined ? "var(--wm-track)" : "var(--wm-brand)"}
-              fillOpacity={d.uroven === undefined ? 1 : 0.25 + d.uroven * 0.75}
+              fillOpacity={d.uroven === undefined ? 1 : 0.22 + d.uroven * 0.78}
             >
               <title>{d.popisek}</title>
             </rect>
@@ -294,7 +344,10 @@ export function MapaRoku({ dny, zkratkyDnu }: { dny: PoleDne[]; zkratkyDnu: stri
 export function Pruh({ podil }: { podil: number }) {
   return (
     <div className="pl-bar-track">
-      <div className="pl-bar-fill" style={{ width: `${Math.round(Math.max(0, Math.min(1, podil)) * 100)}%` }} />
+      <div
+        className="pl-bar-fill"
+        style={{ width: `${Math.round(Math.max(0, Math.min(1, podil)) * 100)}%` }}
+      />
     </div>
   )
 }

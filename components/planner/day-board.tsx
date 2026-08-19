@@ -3,6 +3,7 @@
 import { applyGender } from "@/lib/diagnostic/gender"
 import type { Gender, Lang } from "@/lib/diagnostic/types"
 import { NAZVY_METRIK, NAZVY_REFLEXE, UI, cislo } from "@/lib/planner/i18n"
+import { RatingInput } from "./rating-input"
 import {
   HODINY,
   METRIKY,
@@ -90,8 +91,16 @@ export function DayBoard(props: DayBoardProps) {
 
   return (
     <div className="pl-sheet">
-      <div className="pl-band">
-        {NAZVY_DNU[lang][indexDne(datum)].toUpperCase()} · {dlouheDatum(datum, lang)}
+      <div className="pl-sheet-head">
+        <div>
+          <div className="pl-sheet-eyebrow">{NAZVY_DNU[lang][indexDne(datum)]}</div>
+          <h2 className="pl-sheet-title">{dlouheDatum(datum, lang)}</h2>
+        </div>
+        {datum === dnesniDatum && (
+          <div className="pl-delta" data-dir="flat" style={{ color: "var(--wm-blue)" }}>
+            {t.dnes}
+          </div>
+        )}
       </div>
 
       {/* Návyky */}
@@ -118,9 +127,9 @@ export function DayBoard(props: DayBoardProps) {
                 width: "100%",
                 padding: "10px 12px",
                 border: "none",
-                borderBottom: "1px solid var(--pl-rule-2)",
+                borderBottom: "1px solid var(--wm-border-light)",
                 background: "transparent",
-                color: "var(--pl-ink)",
+                color: "var(--wm-text)",
                 font: "inherit",
                 fontSize: 14,
                 textAlign: "left",
@@ -131,7 +140,7 @@ export function DayBoard(props: DayBoardProps) {
               <span className="pl-dot" data-done={splneno} style={{ margin: 0, flex: "none" }} />
               <span style={{ flex: 1 }}>{h.name}</span>
               {h.target ? (
-                <span style={{ fontSize: 12, color: "var(--pl-ink-3)" }}>{h.target}× / {lang === "en" ? "week" : "týden"}</span>
+                <span style={{ fontSize: 12, color: "var(--wm-text-3)" }}>{h.target}× / {lang === "en" ? "week" : "týden"}</span>
               ) : null}
             </button>
           )
@@ -162,33 +171,22 @@ export function DayBoard(props: DayBoardProps) {
                   style={{
                     fontSize: 13,
                     fontVariantNumeric: "tabular-nums",
-                    color: "var(--pl-ink-3)",
+                    color: "var(--wm-text-3)",
                   }}
                 >
                   {typeof v === "number" ? cislo(v, lang, r.hodiny ? 1 : 0) : "–"}
                 </span>
               </div>
               {r.hodiny ? (
-                <input
-                  className="pl-input"
-                  type="number"
-                  inputMode="decimal"
-                  min={r.min}
-                  max={r.max}
-                  step={r.krok}
-                  value={typeof v === "number" ? String(v) : ""}
-                  onChange={(e) => {
-                    const raw = e.target.value
-                    if (raw === "") {
-                      props.onHodnoceni(datum, m, null)
-                      return
-                    }
-                    const n = Number(raw)
-                    if (!Number.isFinite(n) || n < r.min || n > r.max) return
-                    props.onHodnoceni(datum, m, n)
-                  }}
-                  onBlur={props.onFlush}
-                  aria-label={NAZVY_METRIK[lang][m]}
+                <RatingInput
+                  hodnota={v}
+                  rozsah={r}
+                  lang={lang}
+                  popis={NAZVY_METRIK[lang][m]}
+                  trida="pl-input"
+                  placeholder={`${r.min} \u2013 ${r.max}`}
+                  onZmena={(x) => props.onHodnoceni(datum, m, x)}
+                  onFlush={props.onFlush}
                 />
               ) : (
                 <Skala
@@ -233,7 +231,7 @@ export function DayBoard(props: DayBoardProps) {
               display: "flex",
               alignItems: "center",
               gap: 8,
-              borderBottom: "1px solid var(--pl-rule-2)",
+              borderBottom: "1px solid var(--wm-border-light)",
             }}
           >
             <span
@@ -243,7 +241,7 @@ export function DayBoard(props: DayBoardProps) {
                 padding: "0 8px",
                 fontSize: 11.5,
                 fontVariantNumeric: "tabular-nums",
-                color: "var(--pl-ink-3)",
+                color: "var(--wm-text-3)",
               }}
             >
               {popisHodiny(h)}

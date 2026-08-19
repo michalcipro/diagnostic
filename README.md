@@ -20,6 +20,11 @@ plánovače Winning Minds. Klient si pod vlastním přihlášením vede deník, 
 z něj počítá týdenní, měsíční a roční statistiky. Do obsahu deníku nevidí nikdo
 kromě klienta, ani master.
 
+Ven jdou dva dokumenty: **týdenní list** jako věrná kopie papírové předlohy (A4 na
+šířku) a **přehled deníku** za týden, měsíc nebo rok (A4 na výšku), sázený stejným
+sazečem jako vyhodnocení diagnostiky. Obojí vzniká jako skutečný soubor, ne přes
+tiskový dialog.
+
 **Zatím je v pilotním provozu a pracovat s ním smí výhradně master účet.** Ostatní
 kouči záložku „Deníky" nevidí a server je odmítne. Podrobnosti, včetně toho, jak
 pilot vypnout, jsou v [docs/weekly-planner.md](docs/weekly-planner.md).
