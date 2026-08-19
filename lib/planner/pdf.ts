@@ -227,10 +227,10 @@ export function sestavTydenniPdf(v: PdfVstupTydne): Blob {
   const podilDne = (1 - podilHodin) / 7
   s.tabulka(
     [
-      { popis: "", podil: podilHodin, vpravo: true },
-      // Popisek dne je na střed, zápis pod ním zleva: delší záznam se ořízne
-      // zprava a zůstane z něj to, podle čeho se pozná, o co šlo.
-      ...zkratky.map((z) => ({ popis: z, podil: podilDne, popisNaStred: true })),
+      { popis: "", podil: podilHodin, stred: true },
+      // Na střed jako popisky dnů nad tím. Ořezává se zprava a s třemi
+      // tečkami, takže i u vystředěného textu zůstane začátek.
+      ...zkratky.map((z) => ({ popis: z, podil: podilDne, stred: true })),
     ],
     HODINY.map((h) => [
       { text: popisHodiny(h), barva: BARVA.slaba },

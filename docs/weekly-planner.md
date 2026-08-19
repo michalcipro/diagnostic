@@ -172,10 +172,19 @@ Ovládací prvky mají jednotnou výšku (`--pl-ovladani`), odstupy drží
 čtyřpixelovou mřížku a krajní sloupce tabulek lícují s okrajem karty. Bez toho
 začínal text tabulky o dvanáct pixelů jinde než popisek nad ní.
 
-Zápisy v rozvrhu jsou zarovnané vlevo, ne na střed. Vypadalo by to úhledněji,
-jenže do sloupce širokého sto pixelů se delší zápis nevejde a vystředěný text
-se pak ořízne z obou stran: zmizí začátek i konec a nezbyde nic, podle čeho by
-se dal záznam poznat.
+Obsah mřížky je na střed, vodorovně i svisle, stejně jako popisky dnů nad ním.
+Jde to jen díky tomu, že se **text v buňce zalomí místo oříznutí**: kdyby se
+ořezával, zmizel by u vystředěného textu začátek i konec a nezbylo by nic,
+podle čeho by se dal záznam poznat. Políčka rozvrhu i reflexe proto rostou
+podle obsahu (`components/planner/auto-textarea.tsx`) a řádek mřížky se srovná
+podle nejvyšší buňky, takže všechny dny zůstanou zarovnané.
+
+Mřížka se nesmršťuje pod čitelnou míru. Když se na obrazovku nevejde, posune se
+vodorovně a **první sloupec zůstane přilepený**, takže je pořád vidět, o který
+den nebo návyk jde. Dřív se místo toho sloupce zužovaly, až se text ořízl, a na
+užší obrazovce se list rozpadl. Kvůli přilepenému sloupci má tabulka
+`border-collapse: separate`: s `collapse` patří linky tabulce, ne buňce, a
+přilepenému sloupci by zmizely.
 
 Grafy jsou ruční SVG bez knihovny a kreslí se **v pixelech podle změřené
 šířky karty**. Obě obvyklé zkratky totiž selhaly a stojí za zapamatování:

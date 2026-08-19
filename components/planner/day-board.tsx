@@ -4,6 +4,7 @@ import { applyGender } from "@/lib/diagnostic/gender"
 import type { Gender, Lang } from "@/lib/diagnostic/types"
 import { NAZVY_METRIK, NAZVY_REFLEXE, UI, cislo } from "@/lib/planner/i18n"
 import { RatingInput } from "./rating-input"
+import { AutoTextarea } from "./auto-textarea"
 import {
   HODINY,
   METRIKY,
@@ -205,17 +206,14 @@ export function DayBoard(props: DayBoardProps) {
       <div className="pl-box" style={{ padding: "10px 12px" }}>
         {REFLEXE.map((klic) => (
           <div key={klic} style={{ marginBottom: 12 }}>
-            <label className="pl-label" htmlFor={`refl-${klic}`}>
-              {applyGender(NAZVY_REFLEXE[lang][klic], gender)}
-            </label>
-            <textarea
-              id={`refl-${klic}`}
+            <span className="pl-label">{applyGender(NAZVY_REFLEXE[lang][klic], gender)}</span>
+            <AutoTextarea
               className="pl-input"
-              rows={2}
+              minRows={2}
               value={den?.reflection[klic] ?? ""}
-              onChange={(e) => props.onReflexe(datum, klic, e.target.value)}
+              onChange={(text) => props.onReflexe(datum, klic, text)}
               onBlur={props.onFlush}
-              style={{ resize: "vertical" }}
+              ariaLabel={applyGender(NAZVY_REFLEXE[lang][klic], gender)}
             />
           </div>
         ))}

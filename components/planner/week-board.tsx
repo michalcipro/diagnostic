@@ -4,6 +4,7 @@ import { applyGender } from "@/lib/diagnostic/gender"
 import type { Gender, Lang } from "@/lib/diagnostic/types"
 import { NAZVY_METRIK, NAZVY_REFLEXE, UI } from "@/lib/planner/i18n"
 import { RatingInput } from "./rating-input"
+import { AutoTextarea } from "./auto-textarea"
 import {
   HODINY,
   METRIKY,
@@ -99,17 +100,12 @@ export function WeekBoard(props: WeekBoardProps) {
       <div className="pl-spread" style={{ marginTop: 4 }}>
         {/* ── levý sloupec ─────────────────────────────────────────────── */}
         <div>
-          <div className="pl-section-title pl-only-wide">{t.weeklySchedule}</div>
-          <p className="pl-hint-narrow pl-note" style={{ margin: "12px 0" }}>
-            {lang === "en"
-              ? "The weekly grid needs a wider screen. Use the Day tab on a phone."
-              : lang === "sk"
-                ? "Týždenná mriežka potrebuje širšiu obrazovku. Na telefóne použi záložku Deň."
-                : "Týdenní mřížka potřebuje širší obrazovku. Na telefonu použij záložku Den."}
-          </p>
+          <div className="pl-section-title">{t.weeklySchedule}</div>
+          {/* Mřížka se na úzké obrazovce posouvá vodorovně a první
+              sloupec zůstává přilepený, takže se nic neschovává. */}
 
-          <div className="pl-box pl-only-wide">
-            <table className="pl-grid">
+          <div className="pl-box pl-scroll">
+            <table className="pl-grid pl-grid-rozvrh">
               <thead>
                 <tr>
                   <th className="pl-hour" />
@@ -129,15 +125,16 @@ export function WeekBoard(props: WeekBoardProps) {
                     <td className="pl-hour">{popisHodiny(h)}</td>
                     {data.map((d) => (
                       <td key={d} data-today={d === dnesniDatum}>
-                        <input
+                        {/* Pole, které se zalomí, ne jednořádkový vstup:
+                            delší zápis se tak nikde neořízne a řádek mřížky
+                            povyroste podle nejdelší buňky. */}
+                        <AutoTextarea
                           className="pl-cell"
+                          minRows={1}
                           value={blok(dny.get(d), h)}
-                          onChange={(e) => props.onRozvrh(d, h, e.target.value)}
+                          onChange={(text) => props.onRozvrh(d, h, text)}
                           onBlur={props.onFlush}
-                          aria-label={`${popisHodiny(h)} ${d}`}
-                          // Do úzkého sloupce se dlouhý zápis nevejde celý.
-                          // V titulku zůstane, takže se dá přečíst bez kliknutí.
-                          title={blok(dny.get(d), h)}
+                          ariaLabel={`${popisHodiny(h)} ${d}`}
                         />
                       </td>
                     ))}
@@ -153,7 +150,7 @@ export function WeekBoard(props: WeekBoardProps) {
         <div>
           <div className="pl-section-title">{t.habitTracker}</div>
           <div className="pl-box">
-            <table className="pl-grid">
+            <table className="pl-grid pl-grid-tracker">
               <thead>
                 <tr>
                   <th className="pl-rowhead" />
@@ -212,7 +209,7 @@ export function WeekBoard(props: WeekBoardProps) {
             <span className="pl-section-hint">{t.dailyProgressHint}</span>
           </div>
           <div className="pl-box">
-            <table className="pl-grid">
+            <table className="pl-grid pl-grid-tracker">
               <thead>
                 <tr>
                   <th className="pl-rowhead" />
@@ -271,14 +268,14 @@ export function WeekBoard(props: WeekBoardProps) {
               Stejně je poskládaný i list v PDF. */}
           <div className="pl-section-title">{t.notesIdeas}</div>
           <div className="pl-box">
-            <textarea
-              className="pl-cell"
-              rows={6}
+            <AutoTextarea
+              className="pl-cell pl-poznamky"
+              minRows={6}
               value={poznamky}
-              onChange={(e) => props.onPoznamky(e.target.value)}
+              onChange={props.onPoznamky}
               onBlur={props.onFlush}
-              aria-label={t.notesIdeas}
-              style={{ fontSize: 13.5, padding: "12px 14px" }}
+              ariaLabel={t.notesIdeas}
+              style={{ fontSize: 13.5, padding: "12px 14px", lineHeight: 1.55 }}
             />
           </div>
         </div>
@@ -287,7 +284,7 @@ export function WeekBoard(props: WeekBoardProps) {
       {/* ── denní reflexe přes celou šířku ───────────────────────────────── */}
       <div className="pl-section-title">{t.dailyReflection}</div>
       <div className="pl-box">
-        <table className="pl-grid">
+        <table className="pl-grid pl-grid-reflexe">
           <thead>
             <tr>
               <th className="pl-rowhead" />
@@ -306,13 +303,13 @@ export function WeekBoard(props: WeekBoardProps) {
                 </td>
                 {data.map((d) => (
                   <td key={d} data-today={d === dnesniDatum}>
-                    <textarea
+                    <AutoTextarea
                       className="pl-cell"
-                      rows={2}
+                      minRows={2}
                       value={dny.get(d)?.reflection[klic] ?? ""}
-                      onChange={(e) => props.onReflexe(d, klic, e.target.value)}
+                      onChange={(text) => props.onReflexe(d, klic, text)}
                       onBlur={props.onFlush}
-                      aria-label={`${applyGender(NAZVY_REFLEXE[lang][klic], gender)} ${d}`}
+                      ariaLabel={`${applyGender(NAZVY_REFLEXE[lang][klic], gender)} ${d}`}
                     />
                   </td>
                 ))}

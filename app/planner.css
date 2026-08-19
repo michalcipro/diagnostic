@@ -281,11 +281,18 @@ textarea.pl-input {
 
 /* ── mřížky ───────────────────────────────────────────────────────────────── */
 
-/* Svislé linky jen tam, kde oddělují dny; vodorovné vlasové. Plná mřížka
-   z papíru by na obrazovce dělala šum, protože tady sloupce drží samy. */
+/* Mřížka se nesmršťuje pod čitelnou míru. Když se na obrazovku nevejde,
+   posune se vodorovně a první sloupec zůstane přilepený, takže je pořád
+   vidět, o který den nebo návyk jde. Dřív se místo toho sloupce zužovaly,
+   až se text ořízl, a na užší obrazovce se list rozpadl.
+
+   border-collapse je proto separate: přilepený sloupec s collapse ztrácí
+   linky, protože ty patří tabulce, ne buňce. Tady si je kreslí každá buňka
+   sama a při border-spacing: 0 se nikde nezdvojí. */
 .pl-grid {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   table-layout: fixed;
   font-size: 13px;
 }
@@ -293,12 +300,20 @@ textarea.pl-input {
 .pl-grid td {
   padding: 0;
   vertical-align: middle;
-  border-bottom: 1px solid var(--wm-border-light);
   border-right: 1px solid var(--wm-border-light);
+  border-bottom: 1px solid var(--wm-border-light);
 }
 .pl-grid th:last-child,
 .pl-grid td:last-child { border-right: none; }
 .pl-grid tbody tr:last-child td { border-bottom: none; }
+
+/* Nejmenší šířky, pod které se mřížka nesmí stlačit.
+   Nemusí být velkorysé: text v buňce se zalomí, takže užší sloupec znamená
+   jen víc řádků, ne oříznutý zápis. Hlídají hlavně to, aby se sedm sloupců
+   nesmrsklo na proužky, ve kterých je každé slovo na vlastním řádku. */
+.pl-grid-rozvrh { min-width: 620px; }
+.pl-grid-tracker { min-width: 400px; }
+.pl-grid-reflexe { min-width: 780px; }
 
 .pl-grid thead th {
   background: var(--wm-surface-2);
@@ -308,7 +323,6 @@ textarea.pl-input {
   color: var(--wm-text-2);
   padding: 8px 4px;
   text-align: center;
-  border-bottom: 1px solid var(--wm-border-light);
 }
 .pl-grid thead th small {
   display: block;
@@ -325,45 +339,57 @@ textarea.pl-input {
 .pl-grid td[data-today="true"] { background: var(--wm-tint-blue); }
 .pl-grid thead th[data-today="true"] { color: var(--wm-blue); }
 
-.pl-rowhead {
-  width: 148px;
+/* Popisek řádku. Přilepený vlevo a bez tučného řezu: je to orientační
+   sloupec, ne nadpis, a tučné písmo v něm přebíjí vlastní obsah mřížky. */
+.pl-rowhead,
+.pl-hour {
+  position: sticky;
+  left: 0;
+  z-index: 1;
   background: var(--wm-surface-2);
+}
+.pl-grid thead .pl-rowhead,
+.pl-grid thead .pl-hour { z-index: 2; }
+
+.pl-rowhead {
+  width: 140px;
   font-size: 12.5px;
-  font-weight: 600;
-  color: var(--wm-text-2);
+  font-weight: 500;
+  color: var(--wm-text);
   padding: 0 12px;
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.pl-rowhead span { color: var(--wm-text-3); }
 .pl-hour {
   width: 62px;
-  background: var(--wm-surface-2);
   font-size: 11.5px;
   font-variant-numeric: tabular-nums;
   color: var(--wm-text-3);
-  text-align: right;
-  padding: 0 10px;
+  text-align: center;
+  padding: 0 8px;
 }
 
 /* Buňka mřížky.
-   Zarovnání vlevo, ne na střed. Vypadalo by to sice úhledněji, jenže do
-   sloupce širokého sto pixelů se delší zápis nevejde a vystředěný text se pak
-   ořízne z obou stran: zmizí začátek i konec a nezbyde nic, podle čeho by se
-   dal záznam poznat. */
+   Text je na střed vodorovně i svisle, stejně jako popisky dnů nad ním, takže
+   mřížka čte jako mřížka a ne jako slepenec zarovnaných okrajů.
+   Na střed se dá jít jen proto, že se zápis zalomí místo oříznutí: kdyby se
+   ořezával, zmizel by u vystředěného textu začátek i konec a nezbylo by nic,
+   podle čeho by se dal záznam poznat. */
 .pl-cell {
   width: 100%;
   border: none;
   background: transparent;
   color: var(--wm-text);
   font: inherit;
-  font-size: 12px;
-  padding: 7px 5px;
+  font-size: 12.5px;
+  padding: 7px 8px;
   outline: none;
-  min-height: 32px;
+  min-height: 34px;
   display: block;
-  text-align: left;
+  text-align: center;
 }
 .pl-cell::placeholder { color: var(--wm-text-3); }
 .pl-cell:focus {
@@ -371,7 +397,14 @@ textarea.pl-input {
   box-shadow: inset 0 0 0 1.5px var(--wm-blue);
   border-radius: 6px;
 }
-textarea.pl-cell { resize: none; line-height: 1.4; padding: 7px 9px; }
+textarea.pl-cell {
+  resize: none;
+  line-height: 1.45;
+  padding: 8px;
+}
+/* Poznámky k týdnu jsou souvislý odstavec, ne položka mřížky; ty patří
+   zleva, jinak by se z nich stal rozsypaný sloupec. */
+.pl-poznamky { text-align: left; }
 
 /* ── kolečka trackeru ─────────────────────────────────────────────────────── */
 
@@ -570,14 +603,10 @@ textarea.pl-cell { resize: none; line-height: 1.4; padding: 7px 9px; }
   .pl-spread { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 720px) {
-  .pl-only-wide { display: none; }
   .pl-wrap { padding: 0 12px 72px; }
   .pl-sheet { padding: 16px 14px 12px; border-radius: 16px; }
-  .pl-card { padding: 16px 16px; border-radius: 16px; }
-}
-.pl-hint-narrow { display: none; }
-@media (max-width: 720px) {
-  .pl-hint-narrow { display: block; }
+  .pl-card { padding: 16px; border-radius: 16px; }
+  .pl-section-title { margin-top: 20px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -616,8 +645,14 @@ textarea.pl-cell { resize: none; line-height: 1.4; padding: 7px 9px; }
   .pl-sheet-who { font-size: 8px; }
 
   .pl-spread { grid-template-columns: minmax(0, 1.42fr) minmax(0, 1fr); gap: 8px; }
-  .pl-only-wide { display: revert; }
-  .pl-hint-narrow { display: none; }
+  /* Na papíře se nikam neposouvá, takže nejmenší šířky mřížek nesmí platit
+     a přilepený sloupec nemá co držet. */
+  .pl-scroll { overflow: visible; }
+  .pl-grid-rozvrh,
+  .pl-grid-tracker,
+  .pl-grid-reflexe { min-width: 0; }
+  .pl-rowhead,
+  .pl-hour { position: static; }
 
   .pl-section-title { font-size: 7.5px; margin: 8px 0 3px; color: #000000; }
   .pl-box { border-color: #999999; border-radius: 3px; }
