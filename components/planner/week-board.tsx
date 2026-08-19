@@ -135,6 +135,9 @@ export function WeekBoard(props: WeekBoardProps) {
                           onChange={(e) => props.onRozvrh(d, h, e.target.value)}
                           onBlur={props.onFlush}
                           aria-label={`${popisHodiny(h)} ${d}`}
+                          // Do úzkého sloupce se dlouhý zápis nevejde celý.
+                          // V titulku zůstane, takže se dá přečíst bez kliknutí.
+                          title={blok(dny.get(d), h)}
                         />
                       </td>
                     ))}
@@ -144,18 +147,6 @@ export function WeekBoard(props: WeekBoardProps) {
             </table>
           </div>
 
-          <div className="pl-section-title">{t.notesIdeas}</div>
-          <div className="pl-box">
-            <textarea
-              className="pl-cell"
-              rows={5}
-              value={poznamky}
-              onChange={(e) => props.onPoznamky(e.target.value)}
-              onBlur={props.onFlush}
-              aria-label={t.notesIdeas}
-              style={{ fontSize: 13.5, padding: "12px 14px" }}
-            />
-          </div>
         </div>
 
         {/* ── pravý sloupec ────────────────────────────────────────────── */}
@@ -273,6 +264,22 @@ export function WeekBoard(props: WeekBoardProps) {
                 })}
               </tbody>
             </table>
+          </div>
+
+          {/* Poznámky patří do pravého sloupce, ne pod rozvrh: rozvrh je
+              vysoký a pravý sloupec by pod trackerem zůstal poloprázdný.
+              Stejně je poskládaný i list v PDF. */}
+          <div className="pl-section-title">{t.notesIdeas}</div>
+          <div className="pl-box">
+            <textarea
+              className="pl-cell"
+              rows={6}
+              value={poznamky}
+              onChange={(e) => props.onPoznamky(e.target.value)}
+              onBlur={props.onFlush}
+              aria-label={t.notesIdeas}
+              style={{ fontSize: 13.5, padding: "12px 14px" }}
+            />
           </div>
         </div>
       </div>

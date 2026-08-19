@@ -1,5 +1,11 @@
-import { jsPDF } from "jspdf"
-import { FONT_BOLD, FONT_REGULAR } from "@/lib/diagnostic/pdf/font"
+import {
+  BARVA,
+  NA_SIRKU,
+  Sazba,
+  novyDokument,
+  type BunkaTabulky,
+  type SloupecTabulky,
+} from "@/lib/diagnostic/pdf/sazba"
 import { applyGender } from "@/lib/diagnostic/gender"
 import type { Gender, Lang } from "@/lib/diagnostic/types"
 import { NAZVY_METRIK, NAZVY_REFLEXE, UI, cislo } from "./i18n"
@@ -13,45 +19,23 @@ import {
   type PlannerDay,
   type PlannerHabit,
 } from "./types"
-import { ZKRATKY_DNU, dnyTydne, popisRozsahuTydne } from "./datum"
+import { ZKRATKY_DNU, dnyTydne, popisRozsahuTydne, popisTydne } from "./datum"
 
 // Export týdenního listu do PDF.
 //
 // Proč se PDF skládá tady a nenechává se na tiskovém dialogu prohlížeče: na
 // iPhonu z tiskového dialogu nejde soubor uložit ani odeslat. Takhle vznikne
 // skutečný soubor, který jde přes systémové sdílení poslat dál nebo uložit
-// do Souborů. Je to stejný důvod jako u vyhodnocení diagnostiky, jen pro
-// jiný obsah, takže se sdílí i vložené písmo.
+// do Souborů.
 //
-// SOUŘADNICE: rozvržení se drží tištěné předlohy, a to doslova. Konstanty
-// níž jsou původní hodnoty z papírového plánovače v bodech, se souřadnicí
-// zdola nahoru, jak je má PDF. Funkce X() a Y() je převedou na milimetry a
-// na počátek vlevo nahoře, se kterým počítá jsPDF. Díky tomu se dá kód
-// porovnat s předlohou řádek po řádku a nikdo nemusí přepočítávat v hlavě.
-
-const BOD = 2.834646 // bodů na milimetr
-const STRANA = { sirka: 297, vyska: 210 }
-
-/** Vodorovná souřadnice z bodů předlohy na milimetry. */
-const X = (pt: number) => pt / BOD
-/** Svislá souřadnice z bodů předlohy (zdola) na milimetry (shora). */
-const Y = (pt: number) => STRANA.vyska - pt / BOD
-/** Rozměr z bodů na milimetry. */
-const D = (pt: number) => pt / BOD
-
-type RGB = [number, number, number]
-
-const BARVA = {
-  papir: [249, 247, 242] as RGB,
-  ram: [184, 180, 170] as RGB,
-  linka: [226, 222, 212] as RGB,
-  linkaSlaba: [236, 232, 223] as RGB,
-  pruh: [20, 20, 20] as RGB,
-  pruhText: [255, 255, 255] as RGB,
-  text: [31, 31, 31] as RGB,
-  text2: [92, 88, 80] as RGB,
-  text3: [139, 135, 126] as RGB,
-}
+// SAZBA: stejná jako u přehledu deníku i u vyhodnocení diagnostiky, jen na
+// šířku, protože sedm dnů vedle sebe se na výšku nevejde. Dřív to byla věrná
+// kopie papírové předlohy i s černými pruhy a plnou mřížkou; vedle ostatních
+// dokumentů to působilo jako výstup jiného programu. Zůstala z ní stavba,
+// tedy co je kde, ne její grafika.
+//
+// Všechny míry se počítají ze šířky sazby, nikde není natvrdo psaná
+// souřadnice. Dvoustrana tak drží zarovnání i kdyby se změnily okraje.
 
 /**
  * Znaky, které vložené písmo umí.
@@ -108,57 +92,6 @@ export function ocisti(text: string): string {
   return out
 }
 
-interface Sazec {
-  doc: jsPDF
-  text: (t: string, x: number, y: number, velikost: number, tucne?: boolean, barva?: RGB) => void
-  textNaStred: (t: string, x: number, y: number, velikost: number, tucne?: boolean, barva?: RGB) => void
-  textVpravo: (t: string, x: number, y: number, velikost: number, tucne?: boolean, barva?: RGB) => void
-  linka: (x1: number, y1: number, x2: number, y2: number, barva: RGB, tloustka: number) => void
-  ramecek: (x: number, y: number, w: number, h: number, barva: RGB, tloustka: number) => void
-}
-
-function sazec(doc: jsPDF): Sazec {
-  const nastav = (velikost: number, tucne: boolean, barva: RGB) => {
-    doc.setFont("Liberation", tucne ? "bold" : "normal")
-    doc.setFontSize(velikost)
-    doc.setTextColor(barva[0], barva[1], barva[2])
-  }
-  return {
-    doc,
-    text: (t, x, y, velikost, tucne = false, barva = BARVA.text) => {
-      nastav(velikost, tucne, barva)
-      doc.text(ocisti(t), x, y)
-    },
-    textNaStred: (t, x, y, velikost, tucne = false, barva = BARVA.text) => {
-      nastav(velikost, tucne, barva)
-      doc.text(ocisti(t), x, y, { align: "center" })
-    },
-    textVpravo: (t, x, y, velikost, tucne = false, barva = BARVA.text) => {
-      nastav(velikost, tucne, barva)
-      doc.text(ocisti(t), x, y, { align: "right" })
-    },
-    linka: (x1, y1, x2, y2, barva, tloustka) => {
-      doc.setDrawColor(barva[0], barva[1], barva[2])
-      doc.setLineWidth(tloustka)
-      doc.line(x1, y1, x2, y2)
-    },
-    ramecek: (x, y, w, h, barva, tloustka) => {
-      doc.setDrawColor(barva[0], barva[1], barva[2])
-      doc.setLineWidth(tloustka)
-      doc.rect(x, y, w, h)
-    },
-  }
-}
-
-/** Text zkrácený tak, aby se vešel do dané šířky. */
-function vejdiSe(doc: jsPDF, text: string, sirka: number, velikost: number): string {
-  const cisty = ocisti(text)
-  doc.setFontSize(velikost)
-  if (doc.getTextWidth(cisty) <= sirka) return cisty
-  let s = cisty
-  while (s.length > 1 && doc.getTextWidth(`${s}…`) > sirka) s = s.slice(0, -1)
-  return `${s}…`
-}
 
 export interface PdfVstupTydne {
   monday: string
@@ -172,12 +105,44 @@ export interface PdfVstupTydne {
 
 /** Název souboru: týden a jméno. */
 export function nazevSouboru(v: PdfVstupTydne): string {
-  return `weekly-planner-${v.monday}-${v.jmeno}`
+  return `tydenni-plan-${v.monday}-${v.jmeno}`
     .replace(/[/\\?%*:|"<>]/g, "-")
     .replace(/\s+/g, "-")
+    .toLowerCase()
     .slice(0, 120)
     .concat(".pdf")
 }
+
+/** Popisek hodiny, „05:00". */
+function popisHodiny(h: number): string {
+  return `${String(h).padStart(2, "0")}:00`
+}
+
+/**
+ * Rozvržení dvoustrany.
+ *
+ * Levý sloupec je širší, protože nese rozvrh se sedmi dny a hodinami; pravý
+ * stačí užší, tam jsou jen kolečka a jednociferná čísla.
+ *
+ * Všechny výšky se počítají dopředu z místa, které na stránce zbývá, a teprve
+ * pak se kreslí. Díky tomu list vždycky vyjde na jednu stranu, oba sloupce
+ * končí ve stejné výšce a denní reflexe začíná pokaždé na stejném místě, ať
+ * má klient návyky tři nebo dvacet. Kdyby se sázelo shora dolů a doufalo se,
+ * že to vyjde, přetekla by při plném trackeru reflexe na druhou stranu.
+ */
+const POMER_LEVEHO = 0.587
+const MEZERA_SLOUPCU = 7
+const MEZERA_BLOKU = 4.5
+
+/** Výška nadpisu oddílu i s linkou pod ním. */
+const VYSKA_NADPISU = 8.4
+/** Výška řádku s popisky sloupců v tabulce. */
+const VYSKA_HLAVICKY = 5.6
+/** Co si tabulka přidá pod poslední řádek. */
+const DOBEH_TABULKY = 2
+
+/** Meze výšky řádku, aby zůstal čitelný a zároveň se vešel. */
+const mez = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v))
 
 export function sestavTydenniPdf(v: PdfVstupTydne): Blob {
   const { monday, dny, poznamky, navyky, jmeno, lang, gender } = v
@@ -185,217 +150,208 @@ export function sestavTydenniPdf(v: PdfVstupTydne): Blob {
   const data = dnyTydne(monday)
   const zkratky = ZKRATKY_DNU[lang]
 
-  const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape", compress: true })
-  doc.addFileToVFS("Liberation-Regular.ttf", FONT_REGULAR)
-  doc.addFont("Liberation-Regular.ttf", "Liberation", "normal")
-  doc.addFileToVFS("Liberation-Bold.ttf", FONT_BOLD)
-  doc.addFont("Liberation-Bold.ttf", "Liberation", "bold")
-  const s = sazec(doc)
+  const doc = novyDokument("landscape")
+  const s = new Sazba(doc, NA_SIRKU)
 
-  // ── podklad a vnější rámeček ────────────────────────────────────────────
-  doc.setFillColor(BARVA.papir[0], BARVA.papir[1], BARVA.papir[2])
-  doc.rect(0, 0, STRANA.sirka, STRANA.vyska, "F")
-  doc.setDrawColor(BARVA.ram[0], BARVA.ram[1], BARVA.ram[2])
-  doc.setLineWidth(0.35)
-  doc.roundedRect(X(28), Y(567.28), D(785.89), D(539.28), 3.5, 3.5)
+  const sirkaLeva = (s.sirka - MEZERA_SLOUPCU) * POMER_LEVEHO
+  const sirkaPrava = s.sirka - MEZERA_SLOUPCU - sirkaLeva
+  const xLevy = s.levyKraj
+  const xPravy = s.levyKraj + sirkaLeva + MEZERA_SLOUPCU
+  const dno = s.g.vyskaStrany - s.g.okraj.dolni
 
-  // ── černé pruhy v hlavičce ──────────────────────────────────────────────
-  doc.setFillColor(BARVA.pruh[0], BARVA.pruh[1], BARVA.pruh[2])
-  doc.rect(X(34), Y(561.28), D(426), D(26), "F")
-  doc.rect(X(476), Y(561.28), D(331.89), D(26), "F")
-  s.textNaStred(t.weeklyPlan, X(34 + 426 / 2), Y(544.5), 9, true, BARVA.pruhText)
-  s.textNaStred(t.habitsProgress, X(476 + 331.89 / 2), Y(544.5), 9, true, BARVA.pruhText)
+  // ── hlavička ────────────────────────────────────────────────────────────
+  //
+  // Stejná stavba jako u přehledu deníku: značka drobně, název velký, pod ním
+  // linka. Jen sevřenější, protože list pod ní potřebuje každý milimetr.
+  const zaklad = s.y
+  s.pismo(7.4, true, BARVA.slaba)
+  doc.text("WINNING MINDS", xLevy, zaklad + 2.6, { charSpace: 1.1 })
+  doc.text(ocisti(jmeno.toUpperCase()), s.pravyKraj, zaklad + 2.6, {
+    align: "right",
+    charSpace: 0.6,
+  })
 
-  // ── řádek s obdobím a jménem ────────────────────────────────────────────
-  s.text(`${t.weekOf.toUpperCase()}:  ${popisRozsahuTydne(monday, lang)}`, X(34), Y(521.28), 7.5, false)
-  s.textVpravo(
-    `${lang === "en" ? "FOR" : "PRO"}:  ${jmeno.toUpperCase()}`,
-    X(460),
-    Y(521.28),
-    7.5,
-    true,
+  s.pismo(15.5, true, BARVA.text)
+  doc.text(ocisti(`${t.appName} · ${t.tabTyden}`), xLevy, zaklad + 11)
+  s.pismo(10, false, BARVA.text2)
+  doc.text(
+    `${popisRozsahuTydne(monday, lang)}  ·  ${t.weekOf} ${popisTydne(monday)}`,
+    s.pravyKraj,
+    zaklad + 11,
+    { align: "right" },
   )
+  s.y = zaklad + 13.6
+  s.linka()
+  s.mezera(5)
 
-  // ── týdenní rozvrh ──────────────────────────────────────────────────────
-  s.text(t.weeklySchedule, X(34), Y(503.28), 8, true)
-  s.ramecek(X(34), Y(495.28), D(426), D(243.28), BARVA.ram, 0.32)
-  s.linka(X(34), Y(480.28), X(460), Y(480.28), BARVA.ram, 0.32)
-  s.linka(X(68), Y(495.28), X(68), Y(252), BARVA.ram, 0.32)
+  const zacatekSloupcu = s.y
 
-  const sirkaDne = 56 // bodů, sedm sloupců od x = 68
-  data.forEach((_, i) => {
-    s.textNaStred(zkratky[i], X(68 + sirkaDne * (i + 0.5)), Y(484.4), 6.4, true)
-    if (i > 0) s.linka(X(68 + sirkaDne * i), Y(480.28), X(68 + sirkaDne * i), Y(252), BARVA.linkaSlaba, 0.18)
-  })
-
-  const vyskaRadku = (480.28 - 252) / HODINY.length
-  HODINY.forEach((h, i) => {
-    const horni = 480.28 - vyskaRadku * i
-    const dolni = horni - vyskaRadku
-    s.linka(X(34), Y(dolni), X(460), Y(dolni), BARVA.linkaSlaba, 0.16)
-    s.textVpravo(`${String(h).padStart(2, "0")}:00`, X(66), Y(dolni + 3.4), 6, false, BARVA.text3)
-    data.forEach((datum, j) => {
-      const text = dny.get(datum)?.schedule.find((b) => b.hour === h)?.text
-      if (!text) return
-      s.text(
-        vejdiSe(doc, text, D(sirkaDne - 4), 5.6),
-        X(68 + sirkaDne * j + 2),
-        Y(dolni + 3.2),
-        5.6,
-        false,
-        BARVA.text,
-      )
-    })
-  })
-
-  // ── poznámky a nápady ───────────────────────────────────────────────────
-  s.text(t.notesIdeas, X(34), Y(240), 8, true)
-  s.ramecek(X(34), Y(234), D(426), D(60), BARVA.ram, 0.32)
-  for (const y of [218, 202, 186]) s.linka(X(40), Y(y), X(454), Y(y), BARVA.linkaSlaba, 0.16)
-  if (poznamky.trim()) {
-    doc.setFont("Liberation", "normal")
-    doc.setFontSize(6.6)
-    const radky = doc.splitTextToSize(ocisti(poznamky), D(414)) as string[]
-    radky.slice(0, 4).forEach((r, i) => {
-      s.text(r, X(40), Y(221 - i * 16), 6.6, false, BARVA.text)
-    })
-  }
-
-  // ── tracker návyků ──────────────────────────────────────────────────────
-  s.text(t.habitTracker, X(476), Y(521.28), 8, true)
-
-  // Sloupce trackeru i denního postupu sedí na sobě, proto stejná rozteč.
-  const prvniSloupec = 629.7
-  const roztec = 27.41
-  data.forEach((_, i) => {
-    s.textNaStred(zkratky[i].slice(0, 2), X(prvniSloupec + roztec * i), Y(521.28), 6.4, true)
-  })
-
+  // ── rozpočet výšek ──────────────────────────────────────────────────────
   const viditelne = navyky.filter(
     (h) => !h.archivedAt || data.some((d) => dny.get(d)?.habits.includes(h.id)),
   )
-  const prostor = 495.28 - 345 // bodů mezi hlavičkou trackeru a denním postupem
-  // Rozteč se přizpůsobí počtu návyků. Dolní mez drží kolečka od sebe i při
-  // plném trackeru; strop nechá pěti návykům stejnou sazbu jako na papíře.
-  const roztecRadku = Math.max(
-    7.6,
-    Math.min(28.93, viditelne.length ? prostor / viditelne.length : 28.93),
+  const RADKU_POZNAMEK = 3
+  const vyskaRadkuReflexe = 6.6
+  const vyskaReflexe =
+    VYSKA_NADPISU + VYSKA_HLAVICKY + REFLEXE.length * vyskaRadkuReflexe + DOBEH_TABULKY
+  const vyskaSloupcu = dno - zacatekSloupcu - vyskaReflexe - MEZERA_BLOKU
+
+  // Levý sloupec nese jen rozvrh, takže mu zbyde na osmnáct hodin nejvíc
+  // místa a záznamy se nemusí ořezávat hned u druhého slova.
+  const mistoNaRozvrh = vyskaSloupcu - VYSKA_NADPISU - VYSKA_HLAVICKY - DOBEH_TABULKY
+  const vyskaRadkuRozvrhu = mez(mistoNaRozvrh / HODINY.length, 3.4, 6.4)
+
+  // Pravý sloupec: tracker, denní postup a pod nimi poznámky. Poznámky mají
+  // pevnou výšku řádku, ať se na ně dá psát rukou; tracker a postup si dělí
+  // zbytek podle počtu řádků, takže sloupec vždycky přesně dojde tam, kam
+  // levý, a nezůstane v něm díra.
+  const vyskaRadkuPoznamek = 5.8
+  const vyskaPoznamek = VYSKA_NADPISU + RADKU_POZNAMEK * vyskaRadkuPoznamek + DOBEH_TABULKY
+  const radkuVpravo = viditelne.length + METRIKY.length
+  const mistoNaRadkyVpravo =
+    vyskaSloupcu -
+    2 * MEZERA_BLOKU -
+    vyskaPoznamek -
+    2 * (VYSKA_NADPISU + VYSKA_HLAVICKY + DOBEH_TABULKY)
+  const vyskaRadkuVpravo = mez(radkuVpravo ? mistoNaRadkyVpravo / radkuVpravo : 6.4, 3.4, 9)
+
+  const podilNazvu = 0.34
+  const podilDnePrava = (1 - podilNazvu) / 7
+  const sloupceDnu = zkratky.map((z) => ({ popis: z, podil: podilDnePrava, stred: true }))
+
+  // ── levý sloupec ────────────────────────────────────────────────────────
+  s.nadpis(t.weeklySchedule, 9.5, { x: xLevy, sirka: sirkaLeva, mezeraPo: 2 })
+
+  const sirkaHodin = 12
+  const podilHodin = sirkaHodin / sirkaLeva
+  const podilDne = (1 - podilHodin) / 7
+  s.tabulka(
+    [
+      { popis: "", podil: podilHodin, vpravo: true },
+      // Popisek dne je na střed, zápis pod ním zleva: delší záznam se ořízne
+      // zprava a zůstane z něj to, podle čeho se pozná, o co šlo.
+      ...zkratky.map((z) => ({ popis: z, podil: podilDne, popisNaStred: true })),
+    ],
+    HODINY.map((h) => [
+      { text: popisHodiny(h), barva: BARVA.slaba },
+      ...data.map((datum) => ({
+        text: dny.get(datum)?.schedule.find((b) => b.hour === h)?.text ?? "",
+      })),
+    ]),
+    {
+      x: xLevy,
+      sirka: sirkaLeva,
+      velikost: 6.2,
+      vyskaRadku: vyskaRadkuRozvrhu,
+      svisleLinky: true,
+    },
   )
-  const polomer = Math.min(1.55, D(roztecRadku) * 0.28)
-  const velikostNazvu = roztecRadku >= 20 ? 7 : roztecRadku >= 12 ? 6 : 5
 
-  viditelne.forEach((h, i) => {
-    const y = 492.41 - roztecRadku * i
-    const nazev = h.target ? `${h.name} (${h.target}x)` : h.name
-    s.text(vejdiSe(doc, nazev, D(prvniSloupec - 480 - 8), velikostNazvu), X(480), Y(y), velikostNazvu)
-    data.forEach((datum, j) => {
-      const stred = { x: X(prvniSloupec + roztec * j), y: Y(y + 2.4) }
-      const splneno = dny.get(datum)?.habits.includes(h.id) ?? false
-      doc.setDrawColor(BARVA.text[0], BARVA.text[1], BARVA.text[2])
-      doc.setLineWidth(0.32)
-      if (splneno) {
-        doc.setFillColor(BARVA.text[0], BARVA.text[1], BARVA.text[2])
-        doc.circle(stred.x, stred.y, polomer, "FD")
-      } else {
-        doc.circle(stred.x, stred.y, polomer, "S")
-      }
-    })
-  })
-
-  // ── denní postup ────────────────────────────────────────────────────────
-  s.text(t.dailyProgress, X(476), Y(340.64), 8, true)
-  s.text(t.dailyProgressHint, X(476 + 96), Y(340.64), 6, false, BARVA.text3)
-  s.ramecek(X(476), Y(332.64), D(331.89), D(158.64), BARVA.ram, 0.32)
-  s.linka(X(476), Y(318.64), X(807.89), Y(318.64), BARVA.ram, 0.32)
-  s.linka(X(616), Y(332.64), X(616), Y(174), BARVA.ram, 0.32)
-  data.forEach((_, i) => {
-    s.textNaStred(zkratky[i].slice(0, 2), X(prvniSloupec + roztec * i), Y(322.2), 6.2, true)
-    if (i > 0)
-      s.linka(
-        X(616 + roztec * i),
-        Y(318.64),
-        X(616 + roztec * i),
-        Y(174),
-        BARVA.linkaSlaba,
-        0.18,
-      )
-  })
-
-  const vyskaUkazatele = (318.64 - 174) / METRIKY.length
-  METRIKY.forEach((m, i) => {
-    const horni = 318.64 - vyskaUkazatele * i
-    const dolni = horni - vyskaUkazatele
-    if (i > 0) s.linka(X(476), Y(horni), X(807.89), Y(horni), BARVA.linkaSlaba, 0.16)
-    s.text(
-      vejdiSe(doc, NAZVY_METRIK[lang][m].toUpperCase(), D(132), 6.2),
-      X(482),
-      Y(dolni + vyskaUkazatele / 2 - 2),
-      6.2,
-      false,
-      BARVA.text2,
+  // ── pravý sloupec ───────────────────────────────────────────────────────
+  s.y = zacatekSloupcu
+  s.nadpis(t.habitTracker, 9.5, { x: xPravy, sirka: sirkaPrava, mezeraPo: 2 })
+  if (viditelne.length) {
+    s.tabulka(
+      [{ popis: "", podil: podilNazvu }, ...sloupceDnu],
+      viditelne.map((h) => [
+        { text: ocisti(h.target ? `${h.name}  ${h.target}\u00D7` : h.name) },
+        ...data.map((datum) => ({
+          kolecko: (dny.get(datum)?.habits.includes(h.id) ? "plne" : "prazdne") as
+            | "plne"
+            | "prazdne",
+        })),
+      ]),
+      {
+        x: xPravy,
+        sirka: sirkaPrava,
+        velikost: vyskaRadkuVpravo >= 5.6 ? 7.4 : 6.6,
+        vyskaRadku: vyskaRadkuVpravo,
+      },
     )
-    data.forEach((datum, j) => {
-      const v = dny.get(datum)?.ratings[m]
-      if (typeof v !== "number") return
-      s.textNaStred(
-        cislo(v, lang, ROZSAH[m].hodiny ? 1 : 0),
-        X(prvniSloupec + roztec * j),
-        Y(dolni + vyskaUkazatele / 2 - 2),
-        7,
-        true,
-      )
-    })
-  })
+  } else {
+    s.text(t.zadneNavyky, { x: xPravy, sirka: sirkaPrava, velikost: 7.2, barva: BARVA.slaba })
+  }
 
-  // ── denní reflexe ───────────────────────────────────────────────────────
-  s.text(t.dailyReflection, X(34), Y(164), 7.5, true)
-  s.ramecek(X(34), Y(158), D(773.89), D(86), BARVA.ram, 0.32)
-  s.linka(X(34), Y(143), X(807.89), Y(143), BARVA.ram, 0.32)
-  s.linka(X(118), Y(158), X(118), Y(72), BARVA.ram, 0.32)
-
-  const sirkaReflexe = (807.89 - 118) / 7
-  data.forEach((_, i) => {
-    s.textNaStred(zkratky[i], X(118 + sirkaReflexe * (i + 0.5)), Y(147.4), 6.4, true)
-    if (i > 0)
-      s.linka(
-        X(118 + sirkaReflexe * i),
-        Y(143),
-        X(118 + sirkaReflexe * i),
-        Y(72),
-        BARVA.linkaSlaba,
-        0.18,
-      )
+  s.mezera(MEZERA_BLOKU)
+  s.nadpis(t.dailyProgress, 9.5, {
+    x: xPravy,
+    sirka: sirkaPrava,
+    mezeraPo: 2,
+    vpravo: t.dailyProgressHint,
   })
+  s.tabulka(
+    [{ popis: "", podil: podilNazvu }, ...sloupceDnu],
+    METRIKY.map((m) => [
+      { text: NAZVY_METRIK[lang][m] },
+      ...data.map((datum) => {
+        const hodnota = dny.get(datum)?.ratings[m]
+        return {
+          text: typeof hodnota === "number" ? cislo(hodnota, lang, ROZSAH[m].hodiny ? 1 : 0) : "",
+          tucne: true,
+          stred: true,
+        }
+      }),
+    ]),
+    {
+      x: xPravy,
+      sirka: sirkaPrava,
+      velikost: vyskaRadkuVpravo >= 5.6 ? 7.4 : 6.6,
+      vyskaRadku: vyskaRadkuVpravo,
+    },
+  )
 
-  const vyskaReflexe = (143 - 72) / REFLEXE.length
-  REFLEXE.forEach((klic, i) => {
-    const horni = 143 - vyskaReflexe * i
-    const dolni = horni - vyskaReflexe
-    if (i > 0) s.linka(X(34), Y(horni), X(807.89), Y(horni), BARVA.linkaSlaba, 0.16)
-    s.text(
-      vejdiSe(doc, applyGender(NAZVY_REFLEXE[lang][klic], gender).toUpperCase(), D(78), 6.2),
-      X(40),
-      Y(dolni + vyskaReflexe / 2 - 1.5),
-      6.2,
-      false,
-      BARVA.text2,
-    )
-    data.forEach((datum, j) => {
-      const text = dny.get(datum)?.reflection[klic]
-      if (!text) return
-      doc.setFont("Liberation", "normal")
-      doc.setFontSize(5.6)
-      const radky = doc.splitTextToSize(ocisti(text), D(sirkaReflexe - 6)) as string[]
-      radky.slice(0, 3).forEach((r, k) => {
-        s.text(r, X(118 + sirkaReflexe * j + 3), Y(horni - 6 - k * 6.4), 5.6, false, BARVA.text)
-      })
-    })
-  })
+  s.mezera(MEZERA_BLOKU)
+  s.nadpis(t.notesIdeas, 9.5, { x: xPravy, sirka: sirkaPrava, mezeraPo: 2 })
+  const radkyPoznamek = poznamky.trim()
+    ? (doc.splitTextToSize(ocisti(poznamky), sirkaPrava - 4) as string[]).slice(0, RADKU_POZNAMEK)
+    : []
+  while (radkyPoznamek.length < RADKU_POZNAMEK) radkyPoznamek.push("")
+  s.tabulka(
+    [{ popis: "", podil: 1 }],
+    radkyPoznamek.map((r) => [{ text: r }]),
+    {
+      x: xPravy,
+      sirka: sirkaPrava,
+      velikost: 7.2,
+      vyskaRadku: vyskaRadkuPoznamek,
+      bezHlavicky: true,
+    },
+  )
+
+  // ── denní reflexe přes celou šířku ──────────────────────────────────────
+  //
+  // Začíná na pevné výšce, ne za delším ze sloupců: pak vypadá list pokaždé
+  // stejně, ať má klient návyků kolik chce.
+  s.y = zacatekSloupcu + vyskaSloupcu + MEZERA_BLOKU
+  s.nadpis(t.dailyReflection, 9.5, { mezeraPo: 2 })
+
+  const podilPopisku = 0.13
+  const podilDneDole = (1 - podilPopisku) / 7
+  s.tabulka(
+    [
+      { popis: "", podil: podilPopisku },
+      ...zkratky.map((z) => ({ popis: z, podil: podilDneDole, stred: true })),
+    ],
+    REFLEXE.map((klic) => [
+      { text: ocisti(applyGender(NAZVY_REFLEXE[lang][klic], gender)), barva: BARVA.slaba },
+      ...data.map((datum) => ({ text: ocisti(dny.get(datum)?.reflection[klic] ?? "") })),
+    ]),
+    // Menší řez než jinde schválně: do sloupce se tak vejde celá věta,
+    // a právě u reflexe je věta to jediné, co má cenu číst.
+    { velikost: 5.9, vyskaRadku: vyskaRadkuReflexe, svisleLinky: true },
+  )
 
   // ── patička ─────────────────────────────────────────────────────────────
-  s.textNaStred(t.motto, X(841.89 / 2), Y(45), 7.5, false, BARVA.text2)
-  s.text("Winning Minds", X(34), Y(45), 7, true, BARVA.text3)
-
+  //
+  // Tři části na jednom účaří: vlevo komu list patří, uprostřed motto, vpravo
+  // číslo strany. Motto pod tabulkou vypadalo jako utržený řádek, tady je
+  // součástí paty a drží ji vyváženou.
+  s.paticka(`Winning Minds  ·  ${ocisti(jmeno)}  ·  ${popisRozsahuTydne(monday, lang)}`)
+  s.pismo(7.2, true, BARVA.slaba)
+  doc.text(ocisti(t.motto), s.g.sirkaStrany / 2, s.g.vyskaStrany - 9.5, {
+    align: "center",
+    charSpace: 0.9,
+  })
   return doc.output("blob")
 }
 

@@ -79,6 +79,9 @@ export const NAZVY_REFLEXE: Record<Lang, Record<ReflectionKey, string>> = {
 }
 
 export interface PlannerUI {
+  // Názvy sekcí se drží v přirozeném tvaru, ne verzálkami. Na obrazovce
+  // je zvětší CSS, v PDF se sázejí tak, jak jsou, a sedí pak s nadpisy
+  // přehledu i vyhodnocení diagnostiky.
   // hlavička
   appName: string
   weeklyPlan: string
@@ -227,17 +230,17 @@ export interface PlannerUI {
 export const UI: Record<Lang, PlannerUI> = {
   cs: {
     appName: "Weekly Planner",
-    weeklyPlan: "TÝDENNÍ PLÁN",
-    habitsProgress: "NÁVYKY A POSTUP",
+    weeklyPlan: "Týdenní plán",
+    habitsProgress: "Návyky a postup",
     weekOf: "Týden",
     motto: "DISCIPLÍNA DNES, SVOBODA ZÍTRA.",
 
-    weeklySchedule: "TÝDENNÍ ROZVRH",
-    notesIdeas: "POZNÁMKY A NÁPADY",
-    habitTracker: "TRACKER NÁVYKŮ",
-    dailyProgress: "DENNÍ POSTUP",
+    weeklySchedule: "Týdenní rozvrh",
+    notesIdeas: "Poznámky a nápady",
+    habitTracker: "Tracker návyků",
+    dailyProgress: "Denní postup",
     dailyProgressHint: "(hodnocení 1 až 10)",
-    dailyReflection: "DENNÍ REFLEXE",
+    dailyReflection: "Denní reflexe",
 
     tabTyden: "Týden",
     tabDen: "Den",
@@ -371,17 +374,17 @@ export const UI: Record<Lang, PlannerUI> = {
 
   en: {
     appName: "Weekly Planner",
-    weeklyPlan: "WEEKLY PLAN",
-    habitsProgress: "HABITS & PROGRESS",
+    weeklyPlan: "Weekly plan",
+    habitsProgress: "Habits and progress",
     weekOf: "Week of",
     motto: "DISCIPLINE TODAY, FREEDOM TOMORROW.",
 
-    weeklySchedule: "WEEKLY SCHEDULE",
-    notesIdeas: "NOTES / IDEAS",
-    habitTracker: "HABIT TRACKER",
-    dailyProgress: "DAILY PROGRESS",
+    weeklySchedule: "Weekly schedule",
+    notesIdeas: "Notes and ideas",
+    habitTracker: "Habit tracker",
+    dailyProgress: "Daily progress",
     dailyProgressHint: "(ratings 1 to 10)",
-    dailyReflection: "DAILY REFLECTION",
+    dailyReflection: "Daily reflection",
 
     tabTyden: "Week",
     tabDen: "Day",
@@ -515,17 +518,17 @@ export const UI: Record<Lang, PlannerUI> = {
 
   sk: {
     appName: "Weekly Planner",
-    weeklyPlan: "TÝŽDENNÝ PLÁN",
-    habitsProgress: "NÁVYKY A POSTUP",
+    weeklyPlan: "Týždenný plán",
+    habitsProgress: "Návyky a postup",
     weekOf: "Týždeň",
     motto: "DISCIPLÍNA DNES, SLOBODA ZAJTRA.",
 
-    weeklySchedule: "TÝŽDENNÝ ROZVRH",
-    notesIdeas: "POZNÁMKY A NÁPADY",
-    habitTracker: "TRACKER NÁVYKOV",
-    dailyProgress: "DENNÝ POSTUP",
+    weeklySchedule: "Týždenný rozvrh",
+    notesIdeas: "Poznámky a nápady",
+    habitTracker: "Tracker návykov",
+    dailyProgress: "Denný postup",
     dailyProgressHint: "(hodnotenie 1 až 10)",
-    dailyReflection: "DENNÁ REFLEXIA",
+    dailyReflection: "Denná reflexia",
 
     tabTyden: "Týždeň",
     tabDen: "Deň",

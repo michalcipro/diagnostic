@@ -126,9 +126,16 @@ uložit ani odeslat nejde. Text zůstává textem, takže se v PDF dá vyhledáv
 Tisk přes dialog prohlížeče funguje taky, sazbu řídí `@media print`
 v `app/planner.css`.
 
-**Týdenní list** (`lib/planner/pdf.ts`) se drží tištěné předlohy doslova:
-konstanty v kódu jsou původní souřadnice z papírového plánovače v bodech, jen
-se převádějí na milimetry. Kód se tak dá porovnat s předlohou řádek po řádku.
+**Týdenní list** (`lib/planner/pdf.ts`) drží stavbu papírové předlohy, tedy co
+je kde, ale ne její grafiku: sází se stejným sazečem a stejnou typografií jako
+přehled i vyhodnocení. Původně to byla věrná kopie i s černými pruhy a plnou
+mřížkou a vedle ostatních dokumentů to působilo jako výstup jiného programu.
+
+Všechny výšky se počítají dopředu z místa, které na stránce zbývá, a teprve
+pak se kreslí. Díky tomu list vždycky vyjde na jednu stranu, oba sloupce končí
+ve stejné výšce a denní reflexe začíná pokaždé na stejném místě, ať má klient
+návyky tři nebo dvacet. Kdyby se sázelo shora dolů a doufalo se, že to vyjde,
+přetekla by při plném trackeru reflexe na druhou stranu.
 
 **Přehled deníku** (`lib/planner/stats-pdf.ts`) sází tentýž sazeč, jakým se
 skládá vyhodnocení diagnostiky (`lib/diagnostic/pdf/sazba.ts`), takže oba
@@ -160,6 +167,15 @@ Plánovač používá tytéž tokeny `--wm-*`, tytéž karty a tutéž typografi
 vyhodnocení diagnostiky. Otevírají se ze stejné domény a mají vypadat jako
 jeden produkt, ne jako dva programy vedle sebe. Papírová podoba předlohy se
 drží tam, kde na ni dojde: v tisku a v PDF.
+
+Ovládací prvky mají jednotnou výšku (`--pl-ovladani`), odstupy drží
+čtyřpixelovou mřížku a krajní sloupce tabulek lícují s okrajem karty. Bez toho
+začínal text tabulky o dvanáct pixelů jinde než popisek nad ní.
+
+Zápisy v rozvrhu jsou zarovnané vlevo, ne na střed. Vypadalo by to úhledněji,
+jenže do sloupce širokého sto pixelů se delší zápis nevejde a vystředěný text
+se pak ořízne z obou stran: zmizí začátek i konec a nezbyde nic, podle čeho by
+se dal záznam poznat.
 
 Grafy jsou ruční SVG bez knihovny a kreslí se **v pixelech podle změřené
 šířky karty**. Obě obvyklé zkratky totiž selhaly a stojí za zapamatování:

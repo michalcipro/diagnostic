@@ -57,6 +57,15 @@ export interface SloupecTabulky {
   podil: number
   /** čísla patří doprava, text doleva */
   vpravo?: boolean
+  /** na střed patří to, co tvoří mřížku: dny, kolečka, jednotlivé hodnoty */
+  stred?: boolean
+  /**
+   * Popisek sloupce na střed i tam, kde je obsah zarovnaný jinak.
+   *
+   * Mřížka rozvrhu to potřebuje: názvy dnů patří nad sloupec doprostřed, ale
+   * zápis pod nimi zleva, aby se delší text ořízl jen zprava.
+   */
+  popisNaStred?: boolean
 }
 
 /**
@@ -75,6 +84,11 @@ export type BunkaTabulky =
       /** 0 až 100; vykreslí pruh přes šířku sloupce */
       pruh?: number
       barvaPruhu?: RGB
+      /**
+       * Kolečko trackeru návyků: plné znamená splněno, prázdné nesplněno.
+       * Kreslí se doprostřed buňky, takže se s textem nekombinuje.
+       */
+      kolecko?: "plne" | "prazdne"
     }
 
 const MESICE_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -92,8 +106,8 @@ export function datumLokalne(iso: string | undefined, lang: Lang): string {
 }
 
 /** Nový dokument s nahranými řezy písma. */
-export function novyDokument(): jsPDF {
-  const doc = new jsPDF({ unit: "mm", format: "a4", compress: true })
+export function novyDokument(orientace: "portrait" | "landscape" = "portrait"): jsPDF {
+  const doc = new jsPDF({ unit: "mm", format: "a4", orientation: orientace, compress: true })
   doc.addFileToVFS("Liberation-Regular.ttf", FONT_REGULAR)
   doc.addFont("Liberation-Regular.ttf", "Liberation", "normal")
   doc.addFileToVFS("Liberation-Bold.ttf", FONT_BOLD)
@@ -101,18 +115,64 @@ export function novyDokument(): jsPDF {
   return doc
 }
 
+/**
+ * Rozměry stránky, na kterou se sází.
+ *
+ * Výchozí je A4 na výšku, na které stojí vyhodnocení diagnostiky. Týdenní list
+ * plánovače potřebuje šířku, jinak se sedm dnů vedle sebe nevejde, a jinak je
+ * to tentýž dokument se stejnou sazbou. Proto geometrie, ne druhý sazeč:
+ * kdyby si každý formát psal vlastní kód, rozejdou se dřív nebo později
+ * i velikosti písma a odsazení.
+ */
+export interface Geometrie {
+  sirkaStrany: number
+  vyskaStrany: number
+  okraj: { levy: number; pravy: number; horni: number; dolni: number }
+  /** předává se do addPage, aby další strana měla stejnou orientaci */
+  naSirku: boolean
+}
+
+export const NA_VYSKU: Geometrie = {
+  sirkaStrany: A4.sirka,
+  vyskaStrany: A4.vyska,
+  okraj: OKRAJ,
+  naSirku: false,
+}
+
+/** A4 na šířku s vyváženými okraji. */
+export const NA_SIRKU: Geometrie = {
+  sirkaStrany: A4.vyska,
+  vyskaStrany: A4.sirka,
+  okraj: { levy: 14, pravy: 14, horni: 13, dolni: 18 },
+  naSirku: true,
+}
+
 /** Sazeč, který si hlídá pozici na stránce a sám zalamuje. */
 export class Sazba {
   doc: jsPDF
-  y = OKRAJ.horni
+  g: Geometrie
+  y: number
+  /** šířka sazby, tedy strana bez okrajů */
+  sirka: number
+  /** pravý kraj sazby v souřadnicích stránky */
+  pravyKraj: number
 
-  constructor(doc: jsPDF) {
+  constructor(doc: jsPDF, geometrie: Geometrie = NA_VYSKU) {
     this.doc = doc
+    this.g = geometrie
+    this.y = geometrie.okraj.horni
+    this.sirka = geometrie.sirkaStrany - geometrie.okraj.levy - geometrie.okraj.pravy
+    this.pravyKraj = geometrie.sirkaStrany - geometrie.okraj.pravy
+  }
+
+  /** Levý kraj sazby. Zkratka, protože se používá skoro v každé metodě. */
+  get levyKraj(): number {
+    return this.g.okraj.levy
   }
 
   /** Zalomí stránku, pokud se výška nevejde. */
   misto(vyska: number) {
-    if (this.y + vyska <= A4.vyska - OKRAJ.dolni) return
+    if (this.y + vyska <= this.g.vyskaStrany - this.g.okraj.dolni) return
     this.zalom()
   }
 
@@ -122,19 +182,39 @@ export class Sazba {
 
   /** Vynucené zalomení na novou stránku. */
   zalom() {
-    this.doc.addPage()
-    this.y = OKRAJ.horni
+    this.doc.addPage("a4", this.g.naSirku ? "landscape" : "portrait")
+    this.y = this.g.okraj.horni
   }
 
   /** Kolik místa na stránce ještě zbývá. */
   zbyva(): number {
-    return A4.vyska - OKRAJ.dolni - this.y
+    return this.g.vyskaStrany - this.g.okraj.dolni - this.y
   }
 
   pismo(velikost: number, tucne = false, barva: RGB = BARVA.text) {
     this.doc.setFont("Liberation", tucne ? "bold" : "normal")
     this.doc.setFontSize(velikost)
     this.doc.setTextColor(barva[0], barva[1], barva[2])
+  }
+
+  /**
+   * Zkrátí text tak, aby se do dané šířky vešel doopravdy.
+   *
+   * Zalomení na slova samo nestačí: jediné dlouhé slovo se do úzkého sloupce
+   * nevejde ani na vlastním řádku a přeteče do sousedního. V tabulce, kde je
+   * sloupec široký dvacet milimetrů, je to skoro jistota. Předpokládá, že je
+   * písmo nastavené.
+   */
+  orizni(text: string, sirka: number): string {
+    if (!text) return ""
+    if (this.doc.getTextWidth(text) <= sirka) return text
+    const [prvni] = this.doc.splitTextToSize(text, sirka) as string[]
+    let s = prvni ?? text
+    if (this.doc.getTextWidth(s) <= sirka && s === text) return s
+    // Tři tečky se vejdou vždy: kdyby ne, je sloupec tak úzký, že v něm text
+    // stejně nemá co dělat.
+    while (s.length > 1 && this.doc.getTextWidth(`${s}…`) > sirka) s = s.slice(0, -1)
+    return s === text ? s : `${s}…`
   }
 
   /** Šířka textu v daném písmu. */
@@ -159,8 +239,8 @@ export class Sazba {
   ) {
     if (!obsah) return
     const velikost = opts.velikost ?? 9.6
-    const sirka = opts.sirka ?? SIRKA
-    const x = opts.x ?? OKRAJ.levy
+    const sirka = opts.sirka ?? this.sirka
+    const x = opts.x ?? this.levyKraj
     const radek = opts.radek ?? velikost * 0.5
     this.pismo(velikost, opts.tucne, opts.barva)
     const radky = this.doc.splitTextToSize(obsah, sirka) as string[]
@@ -177,16 +257,37 @@ export class Sazba {
     this.misto(1)
     this.doc.setDrawColor(barva[0], barva[1], barva[2])
     this.doc.setLineWidth(0.2)
-    this.doc.line(OKRAJ.levy, this.y, PRAVY_KRAJ, this.y)
+    this.doc.line(this.levyKraj, this.y, this.pravyKraj, this.y)
   }
 
-  /** Nadpis oddílu: text a pod ním tenká linka. */
-  nadpis(text: string, velikost = 13.5) {
+  /**
+   * Nadpis oddílu: text a pod ním tenká linka.
+   *
+   * S `x` a `sirka` se omezí na jeden sloupec dvoustrany; bez nich jde přes
+   * celou sazbu.
+   */
+  nadpis(
+    text: string,
+    velikost = 13.5,
+    opts: { x?: number; sirka?: number; mezeraPo?: number; vpravo?: string } = {},
+  ) {
+    const x = opts.x ?? this.levyKraj
+    const sirka = opts.sirka ?? this.sirka
     this.misto(velikost * 0.6 + 14)
-    this.text(text, { velikost, tucne: true, radek: velikost * 0.34 })
+    const zaklad = this.y
+    // Doplněk se sází na účaří nadpisu vpravo, tedy „(hodnocení 1 až 10)"
+    // vedle názvu oddílu. Vlastní řádek by kvůli třem slovům byl plýtvání.
+    if (opts.vpravo) {
+      this.pismo(velikost * 0.62, false, BARVA.slaba)
+      this.doc.text(opts.vpravo, x + sirka, zaklad, { align: "right" })
+    }
+    this.text(text, { velikost, tucne: true, radek: velikost * 0.34, x, sirka })
     this.mezera(3)
-    this.linka()
-    this.mezera(6)
+    this.misto(1)
+    this.doc.setDrawColor(BARVA.linka[0], BARVA.linka[1], BARVA.linka[2])
+    this.doc.setLineWidth(0.2)
+    this.doc.line(x, this.y, x + sirka, this.y)
+    this.mezera(opts.mezeraPo ?? 6)
   }
 
   /**
@@ -212,8 +313,8 @@ export class Sazba {
     opts: { vyska?: number; x?: number; sirka?: number; barva?: RGB } = {},
   ) {
     const vyska = opts.vyska ?? 2.6
-    const x = opts.x ?? OKRAJ.levy
-    const sirka = opts.sirka ?? SIRKA
+    const x = opts.x ?? this.levyKraj
+    const sirka = opts.sirka ?? this.sirka
     const r = vyska / 2
     this.doc.setFillColor(BARVA.drazka[0], BARVA.drazka[1], BARVA.drazka[2])
     this.doc.roundedRect(x, y, sirka, vyska, r, r, "F")
@@ -243,16 +344,16 @@ export class Sazba {
   ) {
     const odsazeni = opts.odsazeni ?? 0
     const velikost = opts.velikost ?? 9.8
-    const x = OKRAJ.levy + odsazeni
-    const sirka = SIRKA - odsazeni
+    const x = this.levyKraj + odsazeni
+    const sirka = this.sirka - odsazeni
 
     this.misto(11)
     const zaklad = this.y
 
-    const sirkaStitku = this.stitek(stitekText, stitekBarvy, PRAVY_KRAJ, zaklad - 1)
+    const sirkaStitku = this.stitek(stitekText, stitekBarvy, this.pravyKraj, zaklad - 1)
 
     this.pismo(9.4, true, BARVA.text)
-    const konecHodnoty = PRAVY_KRAJ - sirkaStitku - (sirkaStitku ? 3 : 0)
+    const konecHodnoty = this.pravyKraj - sirkaStitku - (sirkaStitku ? 3 : 0)
     this.doc.text(hodnota, konecHodnoty, zaklad, { align: "right" })
     const sirkaHodnoty = this.doc.getTextWidth(hodnota)
 
@@ -273,16 +374,16 @@ export class Sazba {
   radekChybi(nazev: string, popis: string, odsazeni = 0) {
     this.misto(9)
     const zaklad = this.y
-    const x = OKRAJ.levy + odsazeni
+    const x = this.levyKraj + odsazeni
     this.pismo(9.4, false, BARVA.text2)
     this.doc.text(nazev, x, zaklad)
     this.pismo(8.4, false, BARVA.slaba)
-    this.doc.text(popis, PRAVY_KRAJ, zaklad, { align: "right" })
+    this.doc.text(popis, this.pravyKraj, zaklad, { align: "right" })
     this.y = zaklad + 3.2
     this.doc.setDrawColor(BARVA.linka[0], BARVA.linka[1], BARVA.linka[2])
     this.doc.setLineWidth(0.4)
     this.doc.setLineDashPattern([1, 1.2], 0)
-    this.doc.line(x, this.y + 1.2, x + SIRKA - odsazeni, this.y + 1.2)
+    this.doc.line(x, this.y + 1.2, x + this.sirka - odsazeni, this.y + 1.2)
     this.doc.setLineDashPattern([], 0)
     this.y += 6.4
   }
@@ -296,7 +397,7 @@ export class Sazba {
     // Čtyři údaje ve třech sloupcích nechají poslední osamocený; dva sloupce
     // je rozdělí na dvě plné řady.
     if (polozky.length === 4 && sloupcu === 3) sloupcu = 2
-    const sirkaSloupce = SIRKA / sloupcu
+    const sirkaSloupce = this.sirka / sloupcu
     for (let i = 0; i < polozky.length; i += sloupcu) {
       const rada = polozky.slice(i, i + sloupcu)
       // nejvyšší buňka v řadě určuje výšku
@@ -312,7 +413,7 @@ export class Sazba {
       this.misto(vyska)
       const zaklad = this.y
       rada.forEach((p, j) => {
-        const x = OKRAJ.levy + j * sirkaSloupce
+        const x = this.levyKraj + j * sirkaSloupce
         this.pismo(6.8, true, BARVA.slaba)
         this.doc.text(p.popis.toUpperCase(), x, zaklad, { charSpace: 0.35 })
         this.pismo(velikost, true, BARVA.text)
@@ -331,18 +432,18 @@ export class Sazba {
     const velikost = opts.velikost ?? 9.6
     const radek = velikost * 0.52
     const odsazeni = opts.odsazeni ?? 0
-    const sirka = SIRKA - odsazeni
+    const sirka = this.sirka - odsazeni
     this.pismo(velikost, opts.tucne)
     const radky = this.doc.splitTextToSize(obsah, sirka - 12) as string[]
     const vyska = radky.length * radek + 9
     this.misto(vyska + 2)
     const podklad = opts.barva ?? BARVA.podklad
     this.doc.setFillColor(podklad[0], podklad[1], podklad[2])
-    this.doc.roundedRect(OKRAJ.levy + odsazeni, this.y, sirka, vyska, 3, 3, "F")
+    this.doc.roundedRect(this.levyKraj + odsazeni, this.y, sirka, vyska, 3, 3, "F")
     this.y += 6
     for (const r of radky) {
       this.pismo(velikost, opts.tucne, BARVA.text)
-      this.doc.text(r, OKRAJ.levy + odsazeni + 6, this.y)
+      this.doc.text(r, this.levyKraj + odsazeni + 6, this.y)
       this.y += radek
     }
     this.y += 3
@@ -361,13 +462,29 @@ export class Sazba {
   tabulka(
     sloupce: SloupecTabulky[],
     radky: BunkaTabulky[][],
-    opts: { velikost?: number; x?: number; sirka?: number } = {},
+    opts: {
+      velikost?: number
+      x?: number
+      sirka?: number
+      /** pevná výška řádku; bez ní se dopočítá z velikosti písma */
+      vyskaRadku?: number
+      /** mřížka bez popisků sloupců */
+      bezHlavicky?: boolean
+      /**
+       * Vlasové svislé linky mezi sloupci.
+       *
+       * Tabulka čísel je bez nich čistší a taky se tak sází. Mřížka rozvrhu,
+       * kde je většina buněk prázdná, se ale bez nich rozpadne: oko nemá čeho
+       * se chytit a nepozná, ke kterému dni prázdné místo patří.
+       */
+      svisleLinky?: boolean
+    } = {},
   ) {
     if (!radky.length) return
     const velikost = opts.velikost ?? 9.2
-    const x0 = opts.x ?? OKRAJ.levy
-    const sirka = opts.sirka ?? SIRKA
-    const vyskaRadku = velikost * 0.62 + 4.4
+    const x0 = opts.x ?? this.levyKraj
+    const sirka = opts.sirka ?? this.sirka
+    const vyskaRadku = opts.vyskaRadku ?? velikost * 0.62 + 4.4
     const odsazeniBunky = 2
 
     const hranice = (i: number) => {
@@ -377,15 +494,21 @@ export class Sazba {
     }
 
     const hlavicka = () => {
+      if (opts.bezHlavicky) return
       this.misto(vyskaRadku + 4)
       const zaklad = this.y + 3.4
       this.pismo(6.8, true, BARVA.slaba)
       sloupce.forEach((sl, i) => {
         if (!sl.popis) return
         const levy = hranice(i)
-        const pravy = hranice(i) + sirka * sl.podil
-        if (sl.vpravo) {
-          this.doc.text(sl.popis.toUpperCase(), pravy - odsazeniBunky, zaklad, {
+        const sirkaSloupce = sirka * sl.podil
+        if (sl.stred || sl.popisNaStred) {
+          this.doc.text(sl.popis.toUpperCase(), levy + sirkaSloupce / 2, zaklad, {
+            align: "center",
+            charSpace: 0.35,
+          })
+        } else if (sl.vpravo) {
+          this.doc.text(sl.popis.toUpperCase(), levy + sirkaSloupce - odsazeniBunky, zaklad, {
             align: "right",
             charSpace: 0.35,
           })
@@ -401,9 +524,10 @@ export class Sazba {
     }
 
     hlavicka()
+    const zacatekMrizky = this.y
 
     radky.forEach((radek, r) => {
-      if (this.y + vyskaRadku > A4.vyska - OKRAJ.dolni) {
+      if (this.y + vyskaRadku > this.g.vyskaStrany - this.g.okraj.dolni) {
         this.zalom()
         hlavicka()
       }
@@ -416,6 +540,22 @@ export class Sazba {
         const pravy = levy + sirkaSloupce
         const b = typeof bunka === "string" ? { text: bunka } : bunka
 
+        if (b.kolecko) {
+          // Kolečko sedí přesně uprostřed buňky, vodorovně i svisle. Papírová
+          // předloha to má stejně a je to jediné, co v té mřížce drží oko.
+          const stred = { x: levy + sirkaSloupce / 2, y: this.y + vyskaRadku / 2 }
+          const polomer = Math.min(1.6, vyskaRadku * 0.3)
+          this.doc.setDrawColor(BARVA.text[0], BARVA.text[1], BARVA.text[2])
+          this.doc.setLineWidth(0.3)
+          if (b.kolecko === "plne") {
+            this.doc.setFillColor(BARVA.text[0], BARVA.text[1], BARVA.text[2])
+            this.doc.circle(stred.x, stred.y, polomer, "FD")
+          } else {
+            this.doc.setDrawColor(BARVA.slaba[0], BARVA.slaba[1], BARVA.slaba[2])
+            this.doc.circle(stred.x, stred.y, polomer, "S")
+          }
+          return
+        }
         if (typeof b.pruh === "number") {
           this.pruh(zaklad - 1.6, b.pruh, {
             x: levy + odsazeniBunky,
@@ -428,14 +568,14 @@ export class Sazba {
         if (!b.text) return
 
         this.pismo(velikost, b.tucne, b.barva ?? (b.tucne ? BARVA.text : BARVA.text2))
-        if (sl.vpravo) {
-          this.doc.text(b.text, pravy - odsazeniBunky, zaklad, { align: "right" })
+        const mistoNaText = Math.max(4, sirkaSloupce - odsazeniBunky * 2)
+        const text = this.orizni(b.text, mistoNaText)
+        if (sl.stred) {
+          this.doc.text(text, levy + sirkaSloupce / 2, zaklad, { align: "center" })
+        } else if (sl.vpravo) {
+          this.doc.text(text, pravy - odsazeniBunky, zaklad, { align: "right" })
         } else {
-          const [prvni] = this.doc.splitTextToSize(
-            b.text,
-            Math.max(8, sirkaSloupce - odsazeniBunky * 2),
-          ) as string[]
-          this.doc.text(prvni ?? b.text, levy + odsazeniBunky, zaklad)
+          this.doc.text(text, levy + odsazeniBunky, zaklad)
         }
       })
       this.y += vyskaRadku
@@ -445,6 +585,15 @@ export class Sazba {
         this.doc.line(x0, this.y, x0 + sirka, this.y)
       }
     })
+
+    if (opts.svisleLinky) {
+      this.doc.setDrawColor(BARVA.drazka[0], BARVA.drazka[1], BARVA.drazka[2])
+      this.doc.setLineWidth(0.12)
+      for (let i = 1; i < sloupce.length; i++) {
+        const x = hranice(i)
+        this.doc.line(x, zacatekMrizky, x, this.y)
+      }
+    }
     this.y += 2
   }
 
@@ -464,11 +613,11 @@ export class Sazba {
     // Nad sloupcem je řádek na hodnotu, pod ním na popisek.
     this.misto(vyska + 12)
     const zaklad = this.y + 4
-    const rozestup = SIRKA / body.length
+    const rozestup = this.sirka / body.length
     const sirkaSloupce = Math.min(rozestup * 0.42, 7)
 
     body.forEach((b, i) => {
-      const stred = OKRAJ.levy + rozestup * (i + 0.5)
+      const stred = this.levyKraj + rozestup * (i + 0.5)
       const x = stred - sirkaSloupce / 2
       this.doc.setFillColor(BARVA.drazka[0], BARVA.drazka[1], BARVA.drazka[2])
       this.doc.roundedRect(x, zaklad, sirkaSloupce, vyska, 1, 1, "F")
@@ -497,10 +646,11 @@ export class Sazba {
       this.doc.setPage(i)
       this.doc.setDrawColor(BARVA.linka[0], BARVA.linka[1], BARVA.linka[2])
       this.doc.setLineWidth(0.2)
-      this.doc.line(OKRAJ.levy, A4.vyska - 14, PRAVY_KRAJ, A4.vyska - 14)
+      const yLinka = this.g.vyskaStrany - 14
+      this.doc.line(this.levyKraj, yLinka, this.pravyKraj, yLinka)
       this.pismo(7.4, false, BARVA.slaba)
-      this.doc.text(popis, OKRAJ.levy, A4.vyska - 9.5)
-      this.doc.text(`${i}/${stran}`, PRAVY_KRAJ, A4.vyska - 9.5, { align: "right" })
+      this.doc.text(popis, this.levyKraj, yLinka + 4.5)
+      this.doc.text(`${i}/${stran}`, this.pravyKraj, yLinka + 4.5, { align: "right" })
     }
   }
 }
