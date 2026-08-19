@@ -7,7 +7,7 @@ import { NAZVY_METRIK, NAZVY_REFLEXE, UI, cislo } from "@/lib/planner/i18n"
 import { denniSkore } from "@/lib/planner/stats"
 import { RatingInput } from "./rating-input"
 import { AutoTextarea } from "./auto-textarea"
-import { Prstenec, barvaPasma, pasmoSkore, usePocitadlo } from "./score-ring"
+import { Prstenec, barvaPasma, barvaPasmaText, pasmoSkore, usePocitadlo } from "./score-ring"
 import {
   HODINY,
   METRIKY,
@@ -197,7 +197,7 @@ export function DayBoard(props: DayBoardProps) {
                 <span
                   className="pl-metrika-hodnota"
                   style={
-                    typeof v === "number" ? { color: barvaPasma(pasmoSkore(v)) } : undefined
+                    typeof v === "number" ? { color: barvaPasmaText(pasmoSkore(v)) } : undefined
                   }
                 >
                   {typeof v === "number" ? cislo(v, lang, 0) : "–"}

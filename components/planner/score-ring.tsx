@@ -21,12 +21,30 @@ export function pasmoSkore(v: number | undefined): "nizko" | "stred" | "vysoko" 
   return "nizko"
 }
 
-/** Barva pro dané pásmo. Vrací CSS proměnnou, ať se drží tématu. */
+/**
+ * Barva pásma pro GRAFIKU: obrys prstence, čára grafu, výplň.
+ *
+ * Vrací CSS proměnnou, ať se drží motivu. Na grafiku stačí kontrast 3:1,
+ * proto je odstín sytější než u textu.
+ */
 export function barvaPasma(pasmo: ReturnType<typeof pasmoSkore>): string {
   if (pasmo === "vysoko") return "var(--el-akcent)"
   if (pasmo === "stred") return "var(--el-jantar)"
   if (pasmo === "nizko") return "var(--el-rubin)"
   return "var(--el-mlha)"
+}
+
+/**
+ * Barva pásma pro TEXT, tedy pro číslo hodnocení.
+ *
+ * Ve světlém motivu je tmavší než grafická: zelená, která drží na obrysu
+ * prstence, by jako drobné číslo na bílé nedosáhla na 4,5:1.
+ */
+export function barvaPasmaText(pasmo: ReturnType<typeof pasmoSkore>): string {
+  if (pasmo === "vysoko") return "var(--el-akcent-text)"
+  if (pasmo === "stred") return "var(--el-jantar-text)"
+  if (pasmo === "nizko") return "var(--el-rubin-text)"
+  return "var(--wm-text-2)"
 }
 
 function omezenyPohyb(): boolean {

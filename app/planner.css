@@ -20,48 +20,177 @@
 /* Akcentové tokeny i pro koučovskou sekci, kde .pl-root není: grafy deníku
    se kreslí i v detailu klienta u kouče a bez těchto hodnot by tam přišly
    o barvy. Světlé odstíny jsou tmavší než ty z tmavého tématu, protože na
-   bílém podkladu by zářivá zelená nedržela kontrast. */
+   bílém podkladu by zářivá zelená nedržela kontrast.
+
+   Rozdělení na „barvu" a „barvu textu" není zbytečné: na bílé drží zelená
+   #0f9d6d kontrast 3,5:1, což stačí na obrys prstence a čáru grafu (norma
+   žádá 3:1 na grafiku), ale ne na drobné číslo (tam je 4,5:1). Text proto
+   dostává tmavší odstín a grafika ten sytější. */
 :root {
   --el-akcent: #0f9d6d;
+  --el-akcent-text: #0a6f4c;
   --el-akcent-tmavy: #0b7f57;
   --el-akcent-mekky: rgba(15, 157, 109, 0.12);
   --el-modra: #007aff;
   --el-modra-mekka: rgba(0, 122, 255, 0.1);
   --el-jantar: #c96b00;
+  --el-jantar-text: #a85800;
   --el-jantar-mekky: rgba(201, 107, 0, 0.1);
   --el-rubin: #d70015;
+  --el-rubin-text: #b00013;
   --el-rubin-mekky: rgba(215, 0, 21, 0.08);
   --el-mlha: #e9e9ef;
+
+  /* Plochy, linky a stíny musí být i tady, ne jen uvnitř .pl-root: tytéž
+     třídy (.pl-card, .pl-tabs, .pl-input, .pl-table) kreslí i koučovská
+     sekce, která obal .pl-root nemá. Bez těchto hodnot by tam karty přišly
+     o stín a vstupy o pozadí, protože neznámá proměnná není chyba, jen
+     neplatná deklarace, které si nikdo nevšimne. */
+  --pl-linka: rgba(18, 20, 26, 0.07);
+  --pl-plocha-1: rgba(18, 20, 26, 0.028);
+  --pl-plocha-2: rgba(18, 20, 26, 0.045);
+  --pl-plocha-3: rgba(18, 20, 26, 0.06);
+  --pl-plocha-4: rgba(18, 20, 26, 0.1);
+  --pl-vstup: #ffffff;
+  --pl-vstup-fokus: #ffffff;
+  --pl-lesk: rgba(255, 255, 255, 0);
+  --pl-stin: 0 1px 2px rgba(18, 20, 26, 0.05), 0 8px 24px rgba(18, 20, 26, 0.04);
+  --pl-stin-lepeny: 5px 0 6px -5px rgba(18, 20, 26, 0.16);
+  --pl-stin-tab: 0 1px 3px rgba(18, 20, 26, 0.12);
+  --pl-obrys-tab: rgba(18, 20, 26, 0.06);
+  --pl-hero-zar: rgba(15, 157, 109, 0.1);
+  --pl-sklo-plne: rgba(250, 250, 252, 0.97);
+  --pl-zar-1: rgba(15, 157, 109, 0.07);
+  --pl-zar-2: rgba(0, 122, 255, 0.05);
+  --el-akcent-zar: rgba(15, 157, 109, 0.22);
+  --el-na-akcentu: #12141a;
+  --el-na-jantaru: #12141a;
+  --el-na-rubinu: #ffffff;
+  --el-btn-akcent-od: #0f9d6d;
+  --el-btn-akcent-do: #0a7550;
+  --el-btn-akcent-text: #ffffff;
+  --el-btn-akcent-od-hover: #14ab78;
+  --el-btn-akcent-do-hover: #0b7f57;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --el-akcent: #2fe6a6;
+    --el-akcent-text: #2fe6a6;
     --el-akcent-tmavy: #14c98a;
     --el-akcent-mekky: rgba(47, 230, 166, 0.13);
     --el-modra: #5b9bff;
     --el-modra-mekka: rgba(91, 155, 255, 0.13);
     --el-jantar: #ffb340;
+    --el-jantar-text: #ffb340;
     --el-jantar-mekky: rgba(255, 179, 64, 0.13);
     --el-rubin: #ff6b6b;
+    --el-rubin-text: #ff6b6b;
     --el-rubin-mekky: rgba(255, 107, 107, 0.13);
     --el-mlha: #232733;
   }
 }
 :root[data-theme="dark"] {
   --el-akcent: #2fe6a6;
+  --el-akcent-text: #2fe6a6;
   --el-akcent-tmavy: #14c98a;
   --el-akcent-mekky: rgba(47, 230, 166, 0.13);
   --el-modra: #5b9bff;
   --el-modra-mekka: rgba(91, 155, 255, 0.13);
   --el-jantar: #ffb340;
+  --el-jantar-text: #ffb340;
   --el-jantar-mekky: rgba(255, 179, 64, 0.13);
   --el-rubin: #ff6b6b;
+  --el-rubin-text: #ff6b6b;
   --el-rubin-mekky: rgba(255, 107, 107, 0.13);
   --el-mlha: #232733;
 }
 
+/* ── světlý deník (výchozí) ───────────────────────────────────────────────
+   Klient si volí mezi světlým a tmavým a volba se pamatuje v prohlížeči.
+   Výchozí je světlý, protože do deníku se píše i za bílého dne v kanceláři
+   a tam je bílý list čitelnější. Tmavý zůstává: na velké prstence a grafy
+   večer sedne líp.
+
+   Obojí stojí na týchž tokenech, žádná větev nemá vlastní pravidla. Kdyby
+   je měla, opravila by se chyba jen v jednom motivu a v druhém by zůstala,
+   protože si jí nikdo nevšimne dřív, než ho někdo zapne. */
 .pl-root {
-  /* přebití diagnostické palety: vždy tma */
+  --wm-bg: #f4f5f7;
+  --wm-surface: #ffffff;
+  --wm-surface-2: #f0f1f5;
+  --wm-text: #12141a;
+  --wm-text-2: #5b6270;
+  --wm-text-3: #676d7a;
+  --wm-border: #c9ccd4;
+  --wm-border-light: #e5e7ee;
+  --wm-brand: #12141a;
+  --wm-brand-fg: #ffffff;
+  --wm-glass: rgba(250, 250, 252, 0.86);
+  --wm-blue: #007aff;
+  --wm-blue-light: #ebf5ff;
+  --wm-blue-dark: #0056cc;
+  --wm-green: #0f9d6d;
+  --wm-green-light: #e6f7f0;
+  --wm-red: #d70015;
+  --wm-red-light: #fff1f0;
+  --wm-orange: #c96b00;
+  --wm-orange-light: #fff5e6;
+  --wm-gray: #8e8e93;
+  --wm-fill-4: rgba(18, 20, 26, 0.05);
+  --wm-tint-blue: rgba(0, 122, 255, 0.08);
+  --wm-ok-fg: #0b7f57;
+  --wm-caution-fg: #a85800;
+  --wm-invalid-fg: #d70015;
+  --wm-track: #e6e8ee;
+  --wm-bar-muted: #9aa0ac;
+
+  --el-akcent: #0f9d6d;
+  --el-akcent-text: #0a6f4c;
+  --el-akcent-tmavy: #0b7f57;
+  --el-akcent-mekky: rgba(15, 157, 109, 0.1);
+  --el-modra: #007aff;
+  --el-modra-mekka: rgba(0, 122, 255, 0.1);
+  --el-jantar: #c96b00;
+  --el-jantar-text: #a85800;
+  --el-jantar-mekky: rgba(201, 107, 0, 0.1);
+  --el-rubin: #d70015;
+  --el-rubin-text: #b00013;
+  --el-rubin-mekky: rgba(215, 0, 21, 0.07);
+  --el-mlha: #e6e8ee;
+
+  /* Plochy, linky a stíny. Ve světlém motivu je stín tmavý a šum tmavý,
+     v tmavém obojí obráceně; kdyby se psaly natvrdo do pravidel, druhý
+     motiv by z nich zdědil nesmysly. */
+  --pl-zar-1: rgba(15, 157, 109, 0.07);
+  --pl-zar-2: rgba(0, 122, 255, 0.05);
+  --pl-sklo-plne: rgba(250, 250, 252, 0.97);
+  --pl-linka: rgba(18, 20, 26, 0.07);
+  --pl-plocha-1: rgba(18, 20, 26, 0.028);
+  --pl-plocha-2: rgba(18, 20, 26, 0.045);
+  --pl-plocha-3: rgba(18, 20, 26, 0.06);
+  --pl-plocha-4: rgba(18, 20, 26, 0.1);
+  --pl-vstup: #ffffff;
+  --pl-vstup-fokus: #ffffff;
+  --pl-lesk: rgba(255, 255, 255, 0);
+  --pl-stin: 0 1px 2px rgba(18, 20, 26, 0.05), 0 8px 24px rgba(18, 20, 26, 0.04);
+  --pl-stin-lepeny: 5px 0 6px -5px rgba(18, 20, 26, 0.16);
+  --pl-stin-tab: 0 1px 3px rgba(18, 20, 26, 0.12);
+  --pl-obrys-tab: rgba(18, 20, 26, 0.06);
+  --pl-hero-zar: rgba(15, 157, 109, 0.1);
+  --el-akcent-zar: rgba(15, 157, 109, 0.22);
+  /* text na akcentové ploše: na tmavě zelené drží bílá, na světle zelené tma */
+  --el-na-akcentu: #12141a;
+  --el-na-jantaru: #12141a;
+  --el-na-rubinu: #ffffff;
+  --el-btn-akcent-od: #0f9d6d;
+  --el-btn-akcent-do: #0a7550;
+  --el-btn-akcent-text: #ffffff;
+  --el-btn-akcent-od-hover: #14ab78;
+  --el-btn-akcent-do-hover: #0b7f57;
+}
+
+/* ── tmavý deník ──────────────────────────────────────────────────────── */
+.pl-root[data-tema="tmave"] {
   --wm-bg: #07080b;
   --wm-surface: #101218;
   --wm-surface-2: #181b23;
@@ -91,18 +220,52 @@
   --wm-track: #20242e;
   --wm-bar-muted: #4a5060;
 
-  /* akcenty deníku: zelená výkonu, modrá spánku, jantar výstrahy */
   --el-akcent: #2fe6a6;
+  --el-akcent-text: #2fe6a6;
   --el-akcent-tmavy: #14c98a;
   --el-akcent-mekky: rgba(47, 230, 166, 0.13);
   --el-modra: #5b9bff;
   --el-modra-mekka: rgba(91, 155, 255, 0.13);
   --el-jantar: #ffb340;
+  --el-jantar-text: #ffb340;
   --el-jantar-mekky: rgba(255, 179, 64, 0.13);
   --el-rubin: #ff6b6b;
+  --el-rubin-text: #ff6b6b;
   --el-rubin-mekky: rgba(255, 107, 107, 0.13);
   --el-mlha: #232733;
+
+  --pl-zar-1: rgba(47, 230, 166, 0.06);
+  --pl-zar-2: rgba(91, 155, 255, 0.05);
+  --pl-sklo-plne: rgba(10, 11, 15, 0.97);
+  --pl-linka: rgba(255, 255, 255, 0.06);
+  --pl-plocha-1: rgba(148, 158, 178, 0.04);
+  --pl-plocha-2: rgba(148, 158, 178, 0.06);
+  --pl-plocha-3: rgba(148, 158, 178, 0.09);
+  --pl-plocha-4: rgba(148, 158, 178, 0.18);
+  --pl-vstup: rgba(148, 158, 178, 0.07);
+  --pl-vstup-fokus: rgba(148, 158, 178, 0.05);
+  --pl-lesk: rgba(255, 255, 255, 0.02);
+  --pl-stin: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --pl-stin-lepeny: 5px 0 6px -5px rgba(0, 0, 0, 0.55);
+  --pl-stin-tab: 0 1px 4px rgba(0, 0, 0, 0.4);
+  --pl-obrys-tab: rgba(255, 255, 255, 0.07);
+  --pl-hero-zar: rgba(47, 230, 166, 0.09);
+  --el-akcent-zar: rgba(47, 230, 166, 0.3);
+  --el-na-akcentu: #05130d;
+  --el-na-jantaru: #2a1c04;
+  --el-na-rubinu: #2a0b0b;
+  --el-btn-akcent-od: #2fe6a6;
+  --el-btn-akcent-do: #14c98a;
+  --el-btn-akcent-text: #05130d;
+  --el-btn-akcent-od-hover: #43ecb3;
+  --el-btn-akcent-do-hover: #2fe6a6;
 }
+
+/* Podklad celého dokumentu jde s deníkem, ne se systémem. Bez toho by při
+   tmavém nastavení systému a světlém deníku prosvítala tmavá barva při
+   přetažení stránky za okraj, což vypadá jako chyba vykreslování. */
+body:has(.pl-root) { background: #f4f5f7; }
+body:has(.pl-root[data-tema="tmave"]) { background: #07080b; }
 
 /* ── kostra ───────────────────────────────────────────────────────────────── */
 
@@ -114,8 +277,8 @@
   /* Tichá záře nahoře. Jemná natolik, že si jí nikdo nevšimne, ale bez ní
      je černá plocha mrtvá jako vypnutý monitor. */
   background:
-    radial-gradient(1100px 520px at 50% -180px, rgba(47, 230, 166, 0.06), transparent 60%),
-    radial-gradient(900px 480px at 88% 4%, rgba(91, 155, 255, 0.05), transparent 55%),
+    radial-gradient(1100px 520px at 50% -180px, var(--pl-zar-1), transparent 60%),
+    radial-gradient(900px 480px at 88% 4%, var(--pl-zar-2), transparent 55%),
     var(--wm-bg);
   background-attachment: fixed;
 }
@@ -130,8 +293,8 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(10, 11, 15, 0.97);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--pl-sklo-plne);
+  border-bottom: 1px solid var(--pl-linka);
 }
 @supports (backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px)) {
   .pl-topbar {
@@ -168,8 +331,8 @@
 .pl-tabs {
   display: inline-flex;
   align-items: center;
-  background: rgba(148, 158, 178, 0.09);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: var(--pl-plocha-3);
+  border: 1px solid var(--pl-linka);
   border-radius: 11px;
   padding: 2px;
   gap: 2px;
@@ -194,7 +357,7 @@
 .pl-tabs button[data-active="true"] {
   background: var(--wm-surface-2);
   color: var(--wm-text);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 4px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 0 1px var(--pl-obrys-tab), var(--pl-stin-tab);
 }
 
 .pl-btn {
@@ -227,15 +390,15 @@
   border-color: var(--wm-brand);
   color: var(--wm-brand-fg);
 }
-.pl-root .pl-btn-primary:hover:not(:disabled) { background: #ffffff; border-color: #ffffff; }
+.pl-root .pl-btn-primary:hover:not(:disabled) { opacity: 0.88; }
 .pl-btn-akcent {
-  background: linear-gradient(180deg, var(--el-akcent) 0%, var(--el-akcent-tmavy) 100%);
+  background: linear-gradient(180deg, var(--el-btn-akcent-od) 0%, var(--el-btn-akcent-do) 100%);
   border-color: transparent;
-  color: #05130d;
-  box-shadow: 0 6px 22px rgba(47, 230, 166, 0.22);
+  color: var(--el-btn-akcent-text);
+  box-shadow: 0 6px 20px var(--el-akcent-zar);
 }
 .pl-btn-akcent:hover:not(:disabled) {
-  background: linear-gradient(180deg, #43ecb3 0%, var(--el-akcent) 100%);
+  background: linear-gradient(180deg, var(--el-btn-akcent-od-hover) 0%, var(--el-btn-akcent-do-hover) 100%);
   border-color: transparent;
 }
 .pl-btn-quiet {
@@ -274,17 +437,17 @@
   cursor: default;
 }
 button.pl-chip { cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
-button.pl-chip:hover { background: rgba(148, 158, 178, 0.18); color: var(--wm-text); }
+button.pl-chip:hover { background: var(--pl-plocha-4); color: var(--wm-text); }
 .pl-chip-akcent {
   background: var(--el-akcent-mekky);
-  color: var(--el-akcent);
+  color: var(--el-akcent-text);
 }
 
 .pl-input {
   width: 100%;
   min-height: var(--pl-ovladani);
   border: 1px solid var(--wm-border-light);
-  background: rgba(148, 158, 178, 0.07);
+  background: var(--pl-vstup);
   color: var(--wm-text);
   border-radius: 11px;
   padding: 8px 13px;
@@ -298,7 +461,7 @@ textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
 .pl-input::placeholder { color: var(--wm-text-3); }
 .pl-input:focus {
   border-color: var(--el-akcent);
-  background: rgba(148, 158, 178, 0.05);
+  background: var(--pl-vstup-fokus);
   box-shadow: 0 0 0 3px var(--el-akcent-mekky);
 }
 .pl-label {
@@ -326,11 +489,10 @@ textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
 /* ── karty ────────────────────────────────────────────────────────────────── */
 
 .pl-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0) 40%),
-    var(--wm-surface);
+  background: linear-gradient(180deg, var(--pl-lesk) 0%, transparent 40%), var(--wm-surface);
   border: 1px solid var(--wm-border-light);
   border-radius: 20px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--pl-stin);
   padding: 20px;
 }
 .pl-card-label {
@@ -366,7 +528,7 @@ textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
   background: var(--wm-surface);
   border: 1px solid var(--wm-border-light);
   border-radius: 22px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--pl-stin);
   padding: 24px;
   margin-top: 16px;
 }
@@ -419,7 +581,7 @@ textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
 .pl-box {
   border: 1px solid var(--wm-border-light);
   border-radius: 15px;
-  background: rgba(148, 158, 178, 0.04);
+  background: var(--pl-plocha-1);
   overflow: hidden;
 }
 .pl-scroll { overflow-x: auto; }
@@ -437,8 +599,8 @@ textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
   border-radius: 22px;
   margin-top: 16px;
   background:
-    radial-gradient(560px 260px at 12% -40%, rgba(47, 230, 166, 0.09), transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0) 45%),
+    radial-gradient(560px 260px at 12% -40%, var(--pl-hero-zar), transparent 60%),
+    linear-gradient(180deg, var(--pl-lesk) 0%, transparent 45%),
     var(--wm-surface);
 }
 .pl-hero-datum { min-width: 180px; }
@@ -518,7 +680,7 @@ textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
   min-height: 40px;
   border: 1px solid var(--wm-border-light);
   border-radius: 10px;
-  background: rgba(148, 158, 178, 0.06);
+  background: var(--pl-plocha-2);
   color: var(--wm-text-2);
   font: inherit;
   font-size: 14px;
@@ -540,20 +702,20 @@ textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
 .pl-skala button[data-pasmo="nizko"][aria-pressed="true"] {
   background: var(--el-rubin);
   border-color: var(--el-rubin);
-  color: #2a0b0b;
+  color: var(--el-na-rubinu);
   box-shadow: 0 4px 16px var(--el-rubin-mekky);
 }
 .pl-skala button[data-pasmo="stred"][aria-pressed="true"] {
   background: var(--el-jantar);
   border-color: var(--el-jantar);
-  color: #2a1c04;
+  color: var(--el-na-jantaru);
   box-shadow: 0 4px 16px var(--el-jantar-mekky);
 }
 .pl-skala button[data-pasmo="vysoko"][aria-pressed="true"] {
   background: var(--el-akcent);
   border-color: var(--el-akcent);
-  color: #05130d;
-  box-shadow: 0 4px 16px rgba(47, 230, 166, 0.28);
+  color: var(--el-na-akcentu);
+  box-shadow: 0 4px 16px var(--el-akcent-zar);
 }
 
 .pl-metrika { padding: 14px 0; border-bottom: 1px solid var(--wm-border-light); }
@@ -606,7 +768,7 @@ textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
   transition: background 0.15s ease;
 }
 .pl-navyk-radek:last-child { border-bottom: none; }
-.pl-navyk-radek:hover:not(:disabled) { background: rgba(148, 158, 178, 0.06); }
+.pl-navyk-radek:hover:not(:disabled) { background: var(--pl-plocha-2); }
 .pl-navyk-radek:disabled { opacity: 0.4; cursor: default; }
 .pl-navyk-radek .pl-dot { margin: 0; flex: none; }
 .pl-navyk-nazev { flex: 1; min-width: 0; transition: color 0.2s ease; }
@@ -634,7 +796,7 @@ textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
   font-size: 11.5px;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
-  color: var(--wm-text-3);
+  color: var(--wm-text-2);
 }
 .pl-cas-radek .pl-cell { text-align: left; font-size: 14px; padding: 11px 8px; }
 
@@ -683,7 +845,7 @@ textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
 /* Dnešek dostane nádech akcentu, ať je v sedmi sloupcích hned vidět. */
 .pl-grid th[data-today="true"],
 .pl-grid td[data-today="true"] { background: var(--el-akcent-mekky); }
-.pl-grid thead th[data-today="true"] { color: var(--el-akcent); }
+.pl-grid thead th[data-today="true"] { color: var(--el-akcent-text); }
 
 .pl-rowhead,
 .pl-hour {
@@ -691,7 +853,7 @@ textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
   left: 0;
   z-index: 1;
   background: var(--wm-surface-2);
-  box-shadow: 5px 0 6px -5px rgba(0, 0, 0, 0.55);
+  box-shadow: var(--pl-stin-lepeny);
 }
 .pl-grid thead .pl-rowhead,
 .pl-grid thead .pl-hour { z-index: 2; }
@@ -712,7 +874,7 @@ textarea.pl-input { padding: 10px 13px; line-height: 1.5; }
   width: 62px;
   font-size: 11.5px;
   font-variant-numeric: tabular-nums;
-  color: var(--wm-text-3);
+  color: var(--wm-text-2);
   text-align: center;
   padding: 0 8px;
 }
@@ -773,7 +935,7 @@ textarea.pl-cell {
 .pl-dot[data-done="true"] {
   background: var(--el-akcent);
   border-color: var(--el-akcent);
-  box-shadow: 0 0 14px rgba(47, 230, 166, 0.35);
+  box-shadow: 0 0 14px var(--el-akcent-zar);
   animation: pl-pop 0.32s cubic-bezier(0.34, 1.5, 0.64, 1);
 }
 .pl-dot[data-done="true"]::after {
@@ -783,7 +945,7 @@ textarea.pl-cell {
   top: 4px;
   width: 5px;
   height: 10px;
-  border: solid #05130d;
+  border: solid var(--el-na-akcentu);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -862,7 +1024,7 @@ textarea.pl-cell {
 .pl-table td:last-child { padding-right: 0; }
 .pl-table tbody tr:last-child td { border-bottom: none; }
 .pl-table tbody tr { transition: background 0.15s ease; }
-.pl-table tbody tr:hover { background: rgba(148, 158, 178, 0.05); }
+.pl-table tbody tr:hover { background: var(--pl-plocha-2); }
 .pl-num {
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -896,8 +1058,8 @@ textarea.pl-cell {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.pl-delta[data-dir="up"] { color: var(--el-akcent); background: var(--el-akcent-mekky); }
-.pl-delta[data-dir="down"] { color: var(--el-jantar); background: var(--el-jantar-mekky); }
+.pl-delta[data-dir="up"] { color: var(--el-akcent-text); background: var(--el-akcent-mekky); }
+.pl-delta[data-dir="down"] { color: var(--el-jantar-text); background: var(--el-jantar-mekky); }
 .pl-delta[data-dir="flat"] { color: var(--wm-text-3); background: var(--wm-fill-4); }
 
 .pl-note {
@@ -1093,8 +1255,8 @@ textarea.pl-cell {
   z-index: 30;
   display: none;
   grid-template-columns: repeat(5, 1fr);
-  background: rgba(10, 11, 15, 0.97);
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--pl-sklo-plne);
+  border-top: 1px solid var(--pl-linka);
   padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
 }
 @supports (backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px)) {
@@ -1130,7 +1292,7 @@ textarea.pl-cell {
   transition: transform 0.2s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 .pl-dolninav button[data-active="true"] {
-  color: var(--el-akcent);
+  color: var(--el-akcent-text);
 }
 .pl-dolninav button[data-active="true"] svg { transform: translateY(-1px); }
 
@@ -1243,7 +1405,8 @@ textarea.pl-cell {
     size: A4 landscape;
     margin: 8mm;
   }
-  .pl-root {
+  .pl-root,
+  .pl-root[data-tema="tmave"] {
     background: #ffffff;
     --wm-bg: #ffffff;
     --wm-surface: #ffffff;
@@ -1254,13 +1417,37 @@ textarea.pl-cell {
     --wm-border: #c2c2c6;
     --wm-border-light: #e2e2e6;
     --el-akcent: #111111;
+    --el-akcent-text: #111111;
     --el-akcent-tmavy: #111111;
+    --el-akcent-zar: transparent;
+    --el-na-akcentu: #ffffff;
+    --el-na-jantaru: #ffffff;
+    --el-na-rubinu: #ffffff;
+    --el-btn-akcent-od: #111111;
+    --el-btn-akcent-do: #111111;
+    --el-btn-akcent-text: #ffffff;
+    --pl-lesk: transparent;
+    --pl-stin: none;
+    --pl-stin-lepeny: none;
+    --pl-stin-tab: none;
+    --pl-obrys-tab: transparent;
+    --pl-plocha-1: transparent;
+    --pl-plocha-2: transparent;
+    --pl-plocha-3: transparent;
+    --pl-plocha-4: transparent;
+    --pl-vstup: #ffffff;
+    --pl-vstup-fokus: #ffffff;
+    --pl-hero-zar: transparent;
+    --pl-zar-1: transparent;
+    --pl-zar-2: transparent;
     --el-akcent-mekky: #ffffff;
     --el-modra: #2456a8;
     --el-modra-mekka: #ffffff;
     --el-jantar: #8a5c00;
+    --el-jantar-text: #8a5c00;
     --el-jantar-mekky: #ffffff;
     --el-rubin: #b00013;
+    --el-rubin-text: #b00013;
     --el-rubin-mekky: #ffffff;
     --el-mlha: #e8e8ec;
   }
@@ -1313,7 +1500,8 @@ textarea.pl-cell {
   .pl-grid th[data-today="true"],
   .pl-grid td[data-today="true"] { background: #ffffff; }
 
-  .pl-dot {
+  .pl-dot,
+  .pl-dot[data-done="true"] {
     width: 13px;
     height: 13px;
     margin: 1px auto;

@@ -340,6 +340,8 @@ const STEJNE_V_OBOU = new Set([
   "statRozsah",
   "statVyvoj",
   "ucetNadpis",
+  // „Tmavý" se česky i slovensky píše stejně; „Světlý" a „Svetlý" už ne.
+  "temaTmave",
   "rodMuz",
   "rodZena",
   "jazyk",

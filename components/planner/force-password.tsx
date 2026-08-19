@@ -5,6 +5,7 @@ import type { Gender, Lang } from "@/lib/diagnostic/types"
 import { applyGender } from "@/lib/diagnostic/gender"
 import { UI } from "@/lib/planner/i18n"
 import { zkontrolujHeslo } from "@/lib/planner/heslo"
+import type { Tema } from "@/lib/planner/storage"
 
 // Vynucená změna hesla po prvním přihlášení.
 //
@@ -19,6 +20,8 @@ import { zkontrolujHeslo } from "@/lib/planner/heslo"
 
 export interface ForcePasswordProps {
   lang: Lang
+  /** motiv se předává, protože obrazovka má vlastní kořen .pl-root */
+  tema: Tema
   email: string
   jmeno: string
   gender: Gender
@@ -28,7 +31,7 @@ export interface ForcePasswordProps {
 }
 
 export function ForcePassword(props: ForcePasswordProps) {
-  const { lang, email, jmeno, gender } = props
+  const { lang, email, jmeno, gender, tema } = props
   const t = UI[lang]
 
   const [stavajici, setStavajici] = useState("")
@@ -61,7 +64,7 @@ export function ForcePassword(props: ForcePasswordProps) {
   }
 
   return (
-    <div className="pl-root pl-prihlaseni">
+    <div className="pl-root pl-prihlaseni" data-tema={tema}>
       <div className="pl-prihlaseni-obal pl-anim">
         <div className="pl-znacka">WINNING MINDS</div>
         <h1 className="pl-prihlaseni-titul">{t.zmenHesloNadpis}</h1>

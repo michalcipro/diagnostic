@@ -20,7 +20,16 @@ import { StatsPanel } from "@/components/planner/stats-panel"
 import { HabitsPanel } from "@/components/planner/habits-panel"
 import { AccountPanel } from "@/components/planner/account-panel"
 import { ForcePassword } from "@/components/planner/force-password"
-import { nactiJazyk, nactiRelaci, ulozJazyk, ulozRelaci, zapomenRelaci } from "@/lib/planner/storage"
+import {
+  nactiJazyk,
+  nactiRelaci,
+  nactiTema,
+  ulozJazyk,
+  ulozRelaci,
+  ulozTema,
+  zapomenRelaci,
+} from "@/lib/planner/storage"
+import type { Tema } from "@/lib/planner/storage"
 import { nazevSouboru, sestavTydenniPdf } from "@/lib/planner/pdf"
 
 // Týdenní plánovač – klientská část.
@@ -93,6 +102,31 @@ function IkonaZalozky({ z }: { z: Zalozka }) {
   )
 }
 
+/** Slunce nebo měsíc podle toho, na co se přepne. */
+function IkonaTemy({ tema }: { tema: Tema }) {
+  const spolecne = {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.8,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+    width: 17,
+    height: 17,
+  }
+  return tema === "svetle" ? (
+    <svg {...spolecne}>
+      <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2z" />
+    </svg>
+  ) : (
+    <svg {...spolecne}>
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2.6v2.4M12 19v2.4M2.6 12h2.4M19 12h2.4M5.4 5.4l1.7 1.7M16.9 16.9l1.7 1.7M18.6 5.4l-1.7 1.7M7.1 16.9l-1.7 1.7" />
+    </svg>
+  )
+}
+
 /** Jak dlouho se čeká po dopsání, než se text odešle. */
 const PRODLEVA_MS = 900
 
@@ -112,6 +146,10 @@ function jeDenPrazdny(d: PlannerDay): boolean {
 
 export default function PlannerPage() {
   const [lang, setLang] = useState<Lang>("cs")
+  // Výchozí je světlý. Uloženou volbu načte efekt při startu, tedy ještě
+  // během obrazovky „Načítám"; kdyby se četla už při prvním vykreslení,
+  // rozešel by se výsledek na serveru s výsledkem v prohlížeči.
+  const [tema, setTema] = useState<Tema>("svetle")
   const [session, setSession] = useState("")
   const [ja, setJa] = useState<PlannerIdentity | null>(null)
   const [booting, setBooting] = useState(true)
@@ -226,6 +264,8 @@ export default function PlannerPage() {
   useEffect(() => {
     const ulozenyJazyk = nactiJazyk()
     if (ulozenyJazyk) setLang(ulozenyJazyk)
+    const ulozeneTema = nactiTema()
+    if (ulozeneTema) setTema(ulozeneTema)
     // Telefon otevírá dnešek: týdenní dvoustrana je pracovna velké obrazovky,
     // na výšku drženém displeji se den vyplňuje rovnou, bez posouvání mřížky.
     if (window.innerWidth < 721) setZalozka("den")
@@ -477,11 +517,20 @@ export default function PlannerPage() {
     window.setTimeout(() => URL.revokeObjectURL(url), 4000)
   }, [odesli, ja, navyky, lang, gender])
 
+  /** Světlý nebo tmavý deník. Volba se pamatuje v prohlížeči. */
+  const prepniTema = useCallback(() => {
+    setTema((stare) => {
+      const nove: Tema = stare === "svetle" ? "tmave" : "svetle"
+      ulozTema(nove)
+      return nove
+    })
+  }, [])
+
   // ── vykreslení ────────────────────────────────────────────────────────────
 
   if (booting) {
     return (
-      <div className="pl-root pl-prihlaseni">
+      <div className="pl-root pl-prihlaseni" data-tema={tema}>
         <div className="pl-prihlaseni-obal">
           <p className="pl-note">{t.nacitam}</p>
         </div>
@@ -491,7 +540,7 @@ export default function PlannerPage() {
 
   if (!api.isRemoteEnabled()) {
     return (
-      <div className="pl-root pl-prihlaseni">
+      <div className="pl-root pl-prihlaseni" data-tema={tema}>
         <div className="pl-prihlaseni-obal">
           <p className="pl-note">{t.bezPripojeni}</p>
         </div>
@@ -506,6 +555,7 @@ export default function PlannerPage() {
     return (
       <ForcePassword
         lang={lang}
+        tema={tema}
         email={ja.email}
         jmeno={ja.name}
         gender={gender}
@@ -531,7 +581,7 @@ export default function PlannerPage() {
 
   if (!session || !ja) {
     return (
-      <div className="pl-root pl-prihlaseni">
+      <div className="pl-root pl-prihlaseni" data-tema={tema}>
         <div className="pl-prihlaseni-obal pl-anim">
           <div className="pl-znacka">WINNING MINDS</div>
           <h1 className="pl-prihlaseni-titul">{t.appName}</h1>
@@ -605,12 +655,23 @@ export default function PlannerPage() {
                 </button>
               ))}
             </div>
-            <Link
-              href="/"
-              style={{ fontSize: 13, color: "var(--wm-text-3)", textDecoration: "none" }}
-            >
-              Winning Minds
-            </Link>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <button
+                type="button"
+                className="pl-btn pl-btn-quiet pl-krok"
+                onClick={prepniTema}
+                aria-label={`${t.temaPrepnout}: ${tema === "svetle" ? t.temaTmave : t.temaSvetle}`}
+                title={t.temaPrepnout}
+              >
+                <IkonaTemy tema={tema} />
+              </button>
+              <Link
+                href="/"
+                style={{ fontSize: 13, color: "var(--wm-text-3)", textDecoration: "none" }}
+              >
+                Winning Minds
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -645,7 +706,7 @@ export default function PlannerPage() {
   const naDnesku = zalozka === "tyden" ? monday === pondeli(dnesniDatum) : datum === dnesniDatum
 
   return (
-    <div className="pl-root">
+    <div className="pl-root" data-tema={tema}>
       <header className="pl-topbar pl-noprint">
         <div className="pl-topbar-inner">
           <span className="pl-brand pl-top-brand">WINNING MINDS</span>
@@ -685,6 +746,15 @@ export default function PlannerPage() {
               </button>
             ))}
           </div>
+          <button
+            type="button"
+            className="pl-btn pl-btn-quiet pl-krok pl-top-tema"
+            onClick={prepniTema}
+            aria-label={`${t.temaPrepnout}: ${tema === "svetle" ? t.temaTmave : t.temaSvetle}`}
+            title={t.temaPrepnout}
+          >
+            <IkonaTemy tema={tema} />
+          </button>
         </div>
       </header>
 

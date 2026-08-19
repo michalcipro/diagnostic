@@ -7,7 +7,8 @@ import type { Lang } from "@/lib/diagnostic/types"
 import { UI } from "@/lib/planner/i18n"
 import { zkontrolujHeslo } from "@/lib/planner/heslo"
 import { activate, chybaText, fetchPlannerInvite, isRemoteEnabled, type PlannerInvite } from "@/lib/planner/remote"
-import { ulozJazyk, ulozRelaci } from "@/lib/planner/storage"
+import { nactiTema, ulozJazyk, ulozRelaci } from "@/lib/planner/storage"
+import type { Tema } from "@/lib/planner/storage"
 
 // Založení deníku z pozvánky.
 //
@@ -20,6 +21,10 @@ export default function PlannerStartPage({ params }: { params: Promise<{ token: 
   const { token } = use(params)
   const router = useRouter()
 
+  // Motiv se čte i tady, ať zakládání deníku vypadá stejně jako zbytek
+  // aplikace. Načítá se v efektu, ne při prvním vykreslení, aby se výsledek
+  // na serveru nerozešel s prohlížečem.
+  const [tema, setTema] = useState<Tema>("svetle")
   const [pozvanka, setPozvanka] = useState<PlannerInvite | null>(null)
   const [lang, setLang] = useState<Lang>("cs")
   const [heslo, setHeslo] = useState("")
@@ -28,6 +33,8 @@ export default function PlannerStartPage({ params }: { params: Promise<{ token: 
   const [chyba, setChyba] = useState<string | null>(null)
 
   useEffect(() => {
+    const ulozeneTema = nactiTema()
+    if (ulozeneTema) setTema(ulozeneTema)
     if (!isRemoteEnabled()) {
       setPozvanka({ status: "notfound" })
       return
@@ -73,7 +80,7 @@ export default function PlannerStartPage({ params }: { params: Promise<{ token: 
 
   if (pozvanka === null) {
     return (
-      <div className="pl-root">
+      <div className="pl-root" data-tema={tema}>
         <div className="pl-wrap" style={{ paddingTop: 90, maxWidth: 420 }}>
           <p className="pl-note">{UI.cs.nacitam}</p>
         </div>
@@ -89,7 +96,7 @@ export default function PlannerStartPage({ params }: { params: Promise<{ token: 
           ? t.pozvankaVyprsela
           : t.pozvankaNeplatna
     return (
-      <div className="pl-root">
+      <div className="pl-root" data-tema={tema}>
         <div className="pl-wrap" style={{ paddingTop: 90, maxWidth: 420 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, margin: "0 0 8px" }}>{t.aktivaceNadpis}</h1>
           <p className="pl-note">{hlaska}</p>
@@ -99,7 +106,7 @@ export default function PlannerStartPage({ params }: { params: Promise<{ token: 
   }
 
   return (
-    <div className="pl-root">
+    <div className="pl-root" data-tema={tema}>
       <div className="pl-wrap" style={{ paddingTop: 80, maxWidth: 420 }}>
         <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.18em", margin: 0 }}>
           WINNING MINDS

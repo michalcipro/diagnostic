@@ -195,6 +195,11 @@ export interface PlannerUI {
   bodu: string
   hodin: string
 
+  // vzhled
+  temaSvetle: string
+  temaTmave: string
+  temaPrepnout: string
+
   // účet
   ucetNadpis: string
   jmeno: string
@@ -359,6 +364,9 @@ export const UI: Record<Lang, PlannerUI> = {
     hodin: "hodin",
 
     ucetNadpis: "Účet",
+    temaSvetle: "Světlý",
+    temaTmave: "Tmavý",
+    temaPrepnout: "Přepnout vzhled",
     jmeno: "Jméno",
     rod: "Oslovení",
     rodMuz: "mužský rod",
@@ -520,6 +528,9 @@ export const UI: Record<Lang, PlannerUI> = {
     hodin: "hours",
 
     ucetNadpis: "Account",
+    temaSvetle: "Light",
+    temaTmave: "Dark",
+    temaPrepnout: "Switch appearance",
     jmeno: "Name",
     rod: "Form of address",
     rodMuz: "masculine",
@@ -681,6 +692,9 @@ export const UI: Record<Lang, PlannerUI> = {
     hodin: "hodín",
 
     ucetNadpis: "Účet",
+    temaSvetle: "Svetlý",
+    temaTmave: "Tmavý",
+    temaPrepnout: "Prepnúť vzhľad",
     jmeno: "Meno",
     rod: "Oslovenie",
     rodMuz: "mužský rod",
