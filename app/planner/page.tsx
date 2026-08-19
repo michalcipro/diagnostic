@@ -19,6 +19,7 @@ import { DayBoard } from "@/components/planner/day-board"
 import { StatsPanel } from "@/components/planner/stats-panel"
 import { HabitsPanel } from "@/components/planner/habits-panel"
 import { AccountPanel } from "@/components/planner/account-panel"
+import { ForcePassword } from "@/components/planner/force-password"
 import { nactiJazyk, nactiRelaci, ulozJazyk, ulozRelaci, zapomenRelaci } from "@/lib/planner/storage"
 import { nazevSouboru, sestavTydenniPdf } from "@/lib/planner/pdf"
 
@@ -428,6 +429,36 @@ export default function PlannerPage() {
           <p className="pl-note">{t.bezPripojeni}</p>
         </div>
       </div>
+    )
+  }
+
+  // Účet s dočasným heslem od kouče se dál nedostane. Kdyby šlo změnu
+  // odložit, neudělal by ji nikdo a heslo, které zná i někdo další, by
+  // v deníku zůstalo napořád.
+  if (session && ja && ja.mustChangePassword) {
+    return (
+      <ForcePassword
+        lang={lang}
+        email={ja.email}
+        jmeno={ja.name}
+        gender={gender}
+        onZmenit={async (stavajici, nove) => {
+          await api.changePassword(session, stavajici, nove)
+        }}
+        onHotovo={() => {
+          // Server při změně hesla ukončil i tuhle relaci, takže se
+          // z prohlížeče musí zahodit taky, jinak by se klient díval na
+          // přihlášené rozhraní, které při prvním dotazu spadne.
+          zapomenRelaci()
+          setSession("")
+          setJa(null)
+        }}
+        onOdhlasit={() => {
+          zapomenRelaci()
+          setSession("")
+          setJa(null)
+        }}
+      />
     )
   }
 

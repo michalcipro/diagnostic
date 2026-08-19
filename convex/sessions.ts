@@ -109,7 +109,10 @@ export async function zaznamenejPristup(
     | "export-vzorku"
     | "smazani-vysledku"
     | "vytvoreni-pozvanky"
-    | "vytvoreni-deniku",
+    | "vytvoreni-deniku"
+    | "otevreni-deniku"
+    | "zmena-sdileni-deniku"
+    | "reset-hesla-deniku",
   resultId?: Id<"eliteDiagnosticResults">,
 ): Promise<void> {
   await ctx.db.insert("pristupovyLog", { coachId, akce, resultId, at: Date.now() })

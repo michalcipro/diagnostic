@@ -174,6 +174,16 @@ export const me = query({
       gender: v.optional(genderValidator),
       lang: v.string(),
       createdAt: v.number(),
+      /**
+       * Co z deníku vidí kouč.
+       *
+       * Vrací se klientovi schválně a vždycky: úroveň nastavuje kouč, ale
+       * klient o ní musí vědět. Deník, o kterém člověk netuší, že do něj
+       * někdo vidí, je horší než deník, do kterého se nedá psát.
+       */
+      sdileni: v.union(v.literal("nic"), v.literal("cisla"), v.literal("vse")),
+      /** účet běží na dočasném heslu od kouče a čeká na vlastní */
+      mustChangePassword: v.boolean(),
     }),
     v.null(),
   ),
@@ -186,6 +196,8 @@ export const me = query({
         gender: k.gender,
         lang: k.lang,
         createdAt: k.createdAt,
+        sdileni: k.sdileni ?? "nic",
+        mustChangePassword: k.mustChangePassword === true,
       }
     } catch {
       return null

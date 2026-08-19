@@ -4,10 +4,15 @@ import { useState } from "react"
 import type { Gender, Lang } from "@/lib/diagnostic/types"
 import { JAZYKY, KOD_JAZYKA } from "@/lib/diagnostic/lang"
 import { UI } from "@/lib/planner/i18n"
+import { applyGender } from "@/lib/diagnostic/gender"
 import { zkontrolujHeslo } from "@/lib/planner/heslo"
 import type { PlannerIdentity } from "@/lib/planner/types"
 
-// Účet klienta: jméno, rod, jazyk, heslo a odnesení dat.
+// Účet klienta: co z deníku vidí kouč, jméno, rod, jazyk, heslo a odnesení dat.
+//
+// První věc na obrazovce je schválně sdílení. Klient má vědět, kdo se mu do
+// deníku dívá, dřív než začne řešit svoje jméno, a má to vědět bez hledání
+// v nastavení. Nastavuje to kouč, ale tady se to čte běžnou větou.
 //
 // E-mail se tudy měnit nedá – drží účet a měnit ho smí kouč, který deník
 // založil. Rod tu je proto, že na něm stojí správné české a slovenské tvary
@@ -33,6 +38,13 @@ export function AccountPanel(props: AccountPanelProps) {
   const [jazyk, setJazyk] = useState<Lang>(lang)
   const [ulozeno, setUlozeno] = useState(false)
   const [chyba, setChyba] = useState<string | null>(null)
+
+  // Rodové tvary v popisu sdílení: „naposledy psal" versus „psala".
+  const rod = (text: string) => applyGender(text, gender ?? "male")
+  const nazevUrovne = { nic: t.sdileniNic, cisla: t.sdileniCisla, vse: t.sdileniVse }[ja.sdileni]
+  const popisUrovne = rod(
+    { nic: t.sdileniNicPopis, cisla: t.sdileniCislaPopis, vse: t.sdileniVsePopis }[ja.sdileni],
+  )
 
   const [stavajici, setStavajici] = useState("")
   const [nove, setNove] = useState("")
@@ -77,6 +89,17 @@ export function AccountPanel(props: AccountPanelProps) {
   return (
     <div style={{ marginTop: 16, maxWidth: 560 }}>
       <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 14px" }}>{t.ucetNadpis}</h2>
+
+      <div className="pl-card" style={{ marginBottom: 14 }}>
+        <div className="pl-card-label">{t.sdileniNadpis}</div>
+        <p style={{ margin: "10px 0 0", fontSize: 15, fontWeight: 620 }}>{nazevUrovne}</p>
+        <p style={{ margin: "6px 0 0", fontSize: 14, lineHeight: 1.55, color: "var(--wm-text-2)" }}>
+          {popisUrovne}
+        </p>
+        <p className="pl-note" style={{ marginTop: 10, marginBottom: 0 }}>
+          {t.sdileniKdo}
+        </p>
+      </div>
 
       <div className="pl-card">
         <label className="pl-label" htmlFor="ucet-jmeno">

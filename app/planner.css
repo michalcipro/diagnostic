@@ -632,6 +632,75 @@ textarea.pl-cell {
   margin-left: 8px;
 }
 
+/* ── sdílení deníku s koučem ──────────────────────────────────────────────
+   Volba úrovně a sdělení o tom, co je zamčené. Obojí musí být čitelné na
+   první pohled: klient i kouč tady čtou tutéž věc, jen z jiné strany. */
+
+.pl-volby {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
+  gap: 8px;
+  margin-top: 6px;
+}
+.pl-volba {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 11px 13px;
+  border-radius: 12px;
+  border: 1px solid var(--wm-border-light);
+  background: var(--wm-surface);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.pl-volba:hover { border-color: var(--wm-border); }
+.pl-volba[data-active="true"] {
+  border-color: var(--wm-blue);
+  background: var(--wm-tint-blue);
+}
+.pl-volba-n { font-size: 14px; font-weight: 620; color: var(--wm-text); }
+.pl-volba-p { font-size: 12px; line-height: 1.4; color: var(--wm-text-2); }
+
+/* Co kouč nevidí, případně co klientovi zůstává. Přerušovaný rámeček proto,
+   že tady nic nechybí omylem: je to prázdné místo se sjednaným důvodem. */
+.pl-zamek {
+  margin-top: 14px;
+  padding: 13px 15px;
+  border: 1px dashed var(--wm-border);
+  border-radius: 12px;
+  background: var(--wm-surface-2);
+  color: var(--wm-text-2);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+/* Vygenerované heslo. Musí jít přečíst z obrazovky a nadiktovat do telefonu,
+   proto jednotná šířka znaku a velikost, která se nemusí luštit. */
+.pl-heslo { border-color: var(--wm-blue); }
+.pl-udaje {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 12px 0 0;
+  font-size: 14px;
+}
+.pl-udaje dt {
+  color: var(--wm-text-3);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  align-self: center;
+}
+.pl-udaje dd { margin: 0; overflow-wrap: anywhere; }
+.pl-heslo-v {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 /* ── telefon ──────────────────────────────────────────────────────────────
    Sedm sloupců textu se na tři sta padesát pixelů nevejde a smrsknout je
    znamená je zahodit. Rozdělí se to proto podle toho, co se vejít může:

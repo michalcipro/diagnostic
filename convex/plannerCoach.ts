@@ -4,45 +4,28 @@ import {
   filtrViditelnosti,
   requireCoach,
   requireCoachProZapis,
-  vyzadujMastera,
   zaznamenejPristup,
 } from "./sessions"
-import type { Coach } from "./sessions"
 import { makeToken } from "./nahoda"
+import { overPristupKDenikum } from "./plannerPilot"
 
-// Plánovač z pohledu kouče.
+// Správa deníků z pohledu kouče: zakládání, přehled, blokování.
 //
-// Kouč deník zakládá a vidí, že si ho klient vede. DO OBSAHU NEVIDÍ, a to ani
-// master. Není to opomenutí v oprávněních: deník je osobní zápisník, ne
-// dotazník, jehož výsledek se s koučem probírá. Kdyby do něj kouč viděl,
-// přestal by být tím, čím má být, a lidé by si do něj přestali psát pravdu.
+// ODSUD SE OBSAH DENÍKU NEVRACÍ. Ani na úrovni `vse`, ani masterovi. Jde
+// získat jedině jméno, e-mail, jazyk, stav účtu, úroveň sdílení, počet
+// založených dnů a čas poslední aktivity. Nic z toho neprozrazuje, co je
+// uvnitř.
 //
-// Odsud jde získat jedině: jméno, e-mail, jazyk, stav účtu, počet založených
-// dnů a čas poslední aktivity. Nic z toho neprozrazuje, co je uvnitř.
-
-/**
- * Pilotní režim.
- *
- * Dokud je zapnutý, smí s deníky pracovat výhradně master účet. Ostatní kouči
- * o plánovači nevědí: záložka se jim v přehledu nezobrazí a serverové funkce
- * je odmítnou, takže se k nim nedostanou ani přímým voláním API.
- *
- * Je to jediné místo, kde se to vypíná. Až bude plánovač schválený, přepne se
- * tahle konstanta na `false` a deníky začnou fungovat pro všechny naše kouče
- * se stejnou viditelností, jakou mají u diagnostiky: kouč vidí své klienty,
- * master celou naši větev, do větví externích koučů nevidí nikdo.
- */
-const PILOTNI_REZIM = true
-
-/** Zkontroluje, jestli kouč smí v pilotním režimu s deníky pracovat. */
-function overPristup(kouc: Coach): void {
-  if (PILOTNI_REZIM) vyzadujMastera(kouc)
-}
+// Nahlížení do deníku má vlastní soubor, plannerCoachRead.ts, a vlastní
+// pravidla. Je oddělené schválně: díky tomu jde o téhle části strojově
+// tvrdit, že se přes ni obsah nedostane, a to tvrzení platí i po každé
+// pozdější úpravě. Hlídá to scripts/audit-pristupu.cjs.
 
 /** Jak dlouho platí nepoužitá pozvánka do deníku. */
 const PLATNOST_POZVANKY_DNI = 30
 
 const genderValidator = v.union(v.literal("male"), v.literal("female"))
+const sdileniValidator = v.union(v.literal("nic"), v.literal("cisla"), v.literal("vse"))
 const JAZYKY = new Set(["cs", "en", "sk"])
 
 const MEZ = { jmeno: 120, email: 200 } as const
@@ -59,11 +42,12 @@ export const createPlannerInvite = mutation({
     email: v.string(),
     gender: v.optional(genderValidator),
     lang: v.string(),
+    sdileni: v.optional(sdileniValidator),
   },
   returns: v.object({ token: v.string() }),
   handler: async (ctx, args) => {
     const kouc = await requireCoachProZapis(ctx, args.sessionToken)
-    overPristup(kouc)
+    overPristupKDenikum(kouc)
     const jmeno = args.name.trim()
     const email = normalizeEmail(args.email)
     if (jmeno.length < 2) throw new ConvexError("Zadej jméno klienta.")
@@ -87,6 +71,7 @@ export const createPlannerInvite = mutation({
       email,
       gender: args.gender,
       lang: args.lang,
+      sdileni: args.sdileni ?? "nic",
       createdAt: Date.now(),
       expiresAt: Date.now() + PLATNOST_POZVANKY_DNI * 24 * 60 * 60 * 1000,
     })
@@ -144,11 +129,15 @@ export const listPlannerClients = query({
       lastLoginAt: v.optional(v.number()),
       dnu: v.number(),
       lastActivityAt: v.optional(v.number()),
+      /** chybějící hodnota u starších účtů znamená `nic`, viz schema.ts */
+      sdileni: v.union(v.literal("nic"), v.literal("cisla"), v.literal("vse")),
+      /** účet čeká na to, až si klient změní vygenerované heslo */
+      cekaNaZmenuHesla: v.boolean(),
     }),
   ),
   handler: async (ctx, args) => {
     const kouc = await requireCoach(ctx, args.sessionToken)
-    overPristup(kouc)
+    overPristupKDenikum(kouc)
     const viditelny = await filtrViditelnosti(ctx, kouc)
     const vse = await ctx.db.query("plannerClients").collect()
     return vse
@@ -165,6 +154,8 @@ export const listPlannerClients = query({
         lastLoginAt: k.lastLoginAt,
         dnu: k.dnu ?? 0,
         lastActivityAt: k.lastActivityAt,
+        sdileni: k.sdileni ?? "nic",
+        cekaNaZmenuHesla: k.mustChangePassword === true,
       }))
   },
 })
@@ -182,11 +173,12 @@ export const listPlannerInvites = query({
       createdAt: v.number(),
       expiresAt: v.number(),
       usedAt: v.optional(v.number()),
+      sdileni: v.union(v.literal("nic"), v.literal("cisla"), v.literal("vse")),
     }),
   ),
   handler: async (ctx, args) => {
     const kouc = await requireCoach(ctx, args.sessionToken)
-    overPristup(kouc)
+    overPristupKDenikum(kouc)
     const viditelny = await filtrViditelnosti(ctx, kouc)
     const vse = await ctx.db.query("plannerInvites").withIndex("by_created").order("desc").take(200)
     return vse
@@ -200,6 +192,7 @@ export const listPlannerInvites = query({
         createdAt: p.createdAt,
         expiresAt: p.expiresAt,
         usedAt: p.usedAt,
+        sdileni: p.sdileni ?? "nic",
       }))
   },
 })
@@ -210,7 +203,7 @@ export const revokePlannerInvite = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const kouc = await requireCoachProZapis(ctx, args.sessionToken)
-    overPristup(kouc)
+    overPristupKDenikum(kouc)
     const p = await ctx.db.get(args.inviteId)
     if (!p) return null
     const viditelny = await filtrViditelnosti(ctx, kouc)
@@ -232,7 +225,7 @@ export const setPlannerClientActive = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const kouc = await requireCoachProZapis(ctx, args.sessionToken)
-    overPristup(kouc)
+    overPristupKDenikum(kouc)
     const klient = await ctx.db.get(args.clientId)
     if (!klient) throw new ConvexError("Deník nenalezen.")
     const viditelny = await filtrViditelnosti(ctx, kouc)

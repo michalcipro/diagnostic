@@ -44,6 +44,13 @@ const ZAMERNE_VEREJNE = {
  * pouští dovnitř requireClient, ne requireCoach. Kdyby tu requireClient
  * nebyl, hlásil by audit všechny funkce deníku jako díru a přestalo by se
  * na něj koukat, což je horší než kdyby nekontroloval nic.
+ *
+ * Poslední dvě položky jsou zvláštní případ. Koučovské akce nad hesly
+ * klientů běží v Node prostředí, kde na databázi nedosáhnou, takže kouče
+ * ověřit samy nemůžou: dělá to za ně vnitřní mutace, kterou zavolají. Volání
+ * té mutace se proto počítá jako stráž a že ta mutace opravdu ověřuje kouče
+ * i pilotní bránu, se kontroluje zvlášť níž. Bez obojího by tahle výjimka
+ * byla jen dírou s komentářem.
  */
 const STRAZE = [
   "requireCoach",
@@ -51,7 +58,9 @@ const STRAZE = [
   "filtrViditelnosti",
   "whoAmI",
   "requireClient",
-  "overPristup",
+  "overPristupKDenikum",
+  "plannerAuthInternal.zalozKlientaSHeslem",
+  "plannerAuthInternal.pripravResetHesla",
 ]
 
 /**
@@ -182,37 +191,165 @@ function chibiText(chybi) {
 // Hlídá se, že brána stojí u každé koučovské funkce a že opravdu vyžaduje
 // mastera. Až se pilot vypne, zůstane brána na místě a změní se jen to, co
 // dělá uvnitř; kontrola proto míří na volání, ne na roli.
+//
+// Brána je jedna jediná, v plannerPilot.ts. Kdyby si každý soubor držel
+// vlastní kopii, přepnula by se jednou jedna a na druhou by se zapomnělo.
 {
-  const zdroj = fs.readFileSync(path.join(KOREN, "plannerCoach.ts"), "utf8")
+  const pilot = fs.readFileSync(path.join(KOREN, "plannerPilot.ts"), "utf8")
   rekni(
-    /function overPristup[\s\S]{0,200}vyzadujMastera/.test(zdroj),
+    /function overPristupKDenikum[\s\S]{0,200}vyzadujMastera/.test(pilot),
     "pilotní brána deníku vyžaduje mastera",
   )
-  const re = /export const (\w+) = (query|mutation|action)\(/g
-  let m
-  while ((m = re.exec(zdroj))) {
-    const jmeno = m[1]
-    // Pozvánku načítá klient bez účtu, ten žádnou roli nemá.
-    if (jmeno === "getPlannerInvite") continue
-    const dalsi = zdroj.indexOf("\nexport const ", re.lastIndex)
-    const telo = zdroj.slice(m.index, dalsi === -1 ? zdroj.length : dalsi)
-    rekni(telo.includes("overPristup(kouc)"), `plannerCoach.${jmeno} projde pilotní bránou`)
+
+  for (const soubor of ["plannerCoach.ts", "plannerCoachRead.ts"]) {
+    const zdroj = fs.readFileSync(path.join(KOREN, soubor), "utf8")
+    rekni(
+      !/const PILOTNI_REZIM/.test(zdroj),
+      `${soubor} nemá vlastní kopii pilotní konstanty`,
+    )
+    const re = /export const (\w+) = (query|mutation|action)\(/g
+    let m
+    while ((m = re.exec(zdroj))) {
+      const jmeno = m[1]
+      // Pozvánku načítá klient bez účtu, ten žádnou roli nemá.
+      if (jmeno === "getPlannerInvite") continue
+      const dalsi = zdroj.indexOf("\nexport const ", re.lastIndex)
+      const telo = zdroj.slice(m.index, dalsi === -1 ? zdroj.length : dalsi)
+      rekni(
+        telo.includes("overPristupKDenikum(kouc)"),
+        `${soubor.replace(".ts", "")}.${jmeno} projde pilotní bránou`,
+      )
+    }
+  }
+
+  // Koučovské akce nad hesly klientů běží v Node a stráž mají uvnitř
+  // vnitřních mutací, protože akce na databázi nedosáhne.
+  const vnitrni = fs.readFileSync(path.join(KOREN, "plannerAuthInternal.ts"), "utf8")
+  for (const jmeno of ["zalozKlientaSHeslem", "pripravResetHesla"]) {
+    const od = vnitrni.indexOf(`export const ${jmeno} =`)
+    rekni(od !== -1, `plannerAuthInternal.${jmeno} existuje`)
+    if (od === -1) continue
+    const dalsi = vnitrni.indexOf("\nexport const ", od + 10)
+    const telo = vnitrni.slice(od, dalsi === -1 ? vnitrni.length : dalsi)
+    rekni(
+      telo.includes("requireCoachProZapis") && telo.includes("overPristupKDenikum(kouc)"),
+      `plannerAuthInternal.${jmeno} ověří kouče i pilotní bránu`,
+    )
   }
 }
 
 // ---------------------------------------------------------------------------
-// Deník: kouč do obsahu nevidí
+// Deník: volné texty jdou ke kouči jedinou cestou
 // ---------------------------------------------------------------------------
 //
-// Nejde o oprávnění, ale o povahu věci. Deník je osobní zápisník, ne dotazník,
-// jehož výsledek se s koučem probírá. Kdyby do něj kouč viděl, přestal by být
-// tím, čím má být, a lidé by si do něj přestali psát pravdu. Proto se hlídá,
-// že koučovská část se tabulek se zápisky vůbec nedotkne.
+// Kolik z deníku kouč uvidí, se řídí úrovní sdílení u klienta. Čísla a návyky
+// se pouštějí na úrovni `cisla`, volné texty teprve na `vse`. Tohle je to
+// místo, kde se to dá pokazit tiše: stačí přidat pole do návratové hodnoty
+// a texty vytečou o úroveň níž, aniž by to někdo poznal.
+//
+// Proto se hlídá dvojí. Za prvé, že správa klientů v plannerCoach.ts se
+// deníkových tabulek nedotkne vůbec. Za druhé, že v plannerCoachRead.ts
+// projde každé čtení textu podmínkou `sTexty`.
 {
-  const zdroj = fs.readFileSync(path.join(KOREN, "plannerCoach.ts"), "utf8")
+  const sprava = fs.readFileSync(path.join(KOREN, "plannerCoach.ts"), "utf8")
   for (const tabulka of ["plannerDays", "plannerWeeks", "plannerHabits"]) {
-    rekni(!zdroj.includes(tabulka), `plannerCoach nesahá na tabulku ${tabulka}`)
+    rekni(!sprava.includes(tabulka), `plannerCoach nesahá na tabulku ${tabulka}`)
   }
+
+  const cteni = fs.readFileSync(path.join(KOREN, "plannerCoachRead.ts"), "utf8")
+
+  // Pole s volným textem. `notes` je poznámka k týdnu, `schedule` rozvrh dne
+  // a `reflection` tři otázky na konci dne.
+  const TEXTOVA_POLE = ["schedule", "reflection", "notes"]
+  for (const pole of TEXTOVA_POLE) {
+    // Čtení textu z dokumentu: `d.schedule`, `t.notes` a podobně.
+    const re = new RegExp(`\\b[a-z]\\.${pole}\\b`, "g")
+    const radky = cteni.split("\n")
+    let nalezeno = 0
+    let hlidano = 0
+    for (const radek of radky) {
+      const zasahy = radek.match(re)
+      if (!zasahy) continue
+      nalezeno += zasahy.length
+      if (radek.includes("sTexty ?")) hlidano += zasahy.length
+    }
+    rekni(nalezeno > 0, `plannerCoachRead vrací pole ${pole}`)
+    rekni(
+      nalezeno === hlidano,
+      `plannerCoachRead čte ${pole} jedině pod podmínkou sTexty (nehlídaných: ${nalezeno - hlidano})`,
+    )
+  }
+
+  // Seznam hlídaných polí je psaný ručně, takže by o nově přidaném textu
+  // nevěděl. Proti tomu stojí kontrola úplnosti: výstup dne i týdne smí mít
+  // přesně tyhle klíče. Kdo přidá další, musí sem sáhnout a rozhodnout, jestli
+  // je to text, nebo číslo. Bez toho by nové pole tiše proteklo na nižší
+  // úroveň a všechno ostatní by dál svítilo zeleně.
+  const klice = (jmeno) => {
+    const od = cteni.indexOf(`function ${jmeno}(`)
+    if (od === -1) return null
+    const konec = cteni.indexOf("\n}", od)
+    const telo = cteni.slice(od, konec === -1 ? cteni.length : konec)
+    return (telo.match(/^\s{4}(\w+):/gm) ?? []).map((x) => x.trim().replace(":", ""))
+  }
+  const denKlice = klice("naVystup")
+  const tydenKlice = klice("tydenNaVystup")
+  rekni(
+    denKlice !== null &&
+      denKlice.join(",") === "date,schedule,reflection,ratings,habits,updatedAt",
+    `výstup dne pro kouče má očekávané klíče (má: ${denKlice?.join(",")})`,
+  )
+  rekni(
+    tydenKlice !== null && tydenKlice.join(",") === "monday,notes",
+    `výstup týdne pro kouče má očekávané klíče (má: ${tydenKlice?.join(",")})`,
+  )
+
+  // Podmínka smí vzniknout jediným způsobem, a to z úrovně `vse`.
+  const prirazeni = cteni.match(/const sTexty = [^\n]*/g) ?? []
+  rekni(prirazeni.length === 1, "plannerCoachRead určuje sTexty na jednom místě")
+  rekni(
+    prirazeni.length === 1 && prirazeni[0].includes('uroven === "vse"'),
+    "plannerCoachRead pouští texty jen na úrovni vse",
+  )
+
+  // Úroveň `nic` nesmí načíst ani jeden den: co se nenačte, nemůže uniknout.
+  const detail = cteni.slice(cteni.indexOf("export const plannerClientDetail"))
+  const konecVetve = detail.indexOf("await zaznamenejPristup")
+  const predVetvi = detail.slice(0, konecVetve === -1 ? detail.length : konecVetve)
+  rekni(
+    !predVetvi.includes('.query("plannerDays"'),
+    "plannerCoachRead na úrovni nic vůbec nenačte dny",
+  )
+  rekni(
+    /if \(uroven === "nic"\)/.test(predVetvi),
+    "plannerCoachRead končí u úrovně nic dřív, než se čte deník",
+  )
+
+  // Nahlédnutí do deníku musí nechat stopu, stejně jako otevření výsledku.
+  rekni(
+    cteni.includes('zaznamenejPristup(ctx, kouc._id, "otevreni-deniku")'),
+    "plannerCoachRead zapisuje nahlédnutí do přístupového logu",
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Deník: klient ví, co z něj kouč vidí
+// ---------------------------------------------------------------------------
+//
+// Dohled, o kterém člověk neví, by z deníku udělal hlášení. Úroveň sdílení
+// proto musí chodit i klientovi, ne jen kouči, a rozhraní ji musí ukázat.
+{
+  const klient = fs.readFileSync(path.join(KOREN, "planner.ts"), "utf8")
+  const me = klient.slice(klient.indexOf("export const me = query"))
+  const konec = me.indexOf("\nexport const ")
+  const telo = konec === -1 ? me : me.slice(0, konec)
+  rekni(telo.includes("sdileni:"), "planner.me vrací klientovi úroveň sdílení")
+
+  const ucet = fs.readFileSync(
+    path.join(KOREN, "..", "components", "planner", "account-panel.tsx"),
+    "utf8",
+  )
+  rekni(ucet.includes("sdileniNadpis"), "účet klienta ukazuje, co z deníku vidí kouč")
 }
 
 const neprosle = POUZE_MASTER.filter((k) => !nalezenoMaster.has(k))

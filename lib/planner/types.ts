@@ -136,12 +136,18 @@ export interface PlannerWeek {
 }
 
 /** Přihlášený klient tak, jak ho vidí aplikace. */
+/** Kolik z deníku vidí kouč. Klient tuhle hodnotu vidí taky, viz účet. */
+export type UrovenSdileni = "nic" | "cisla" | "vse"
+
 export interface PlannerIdentity {
   name: string
   email: string
   gender?: Gender
   lang: Lang
   createdAt: number
+  sdileni: UrovenSdileni
+  /** účet běží na dočasném heslu od kouče a čeká na vlastní */
+  mustChangePassword: boolean
 }
 
 /** Klient v přehledu kouče. */
@@ -158,6 +164,9 @@ export interface PlannerClientRow {
   dnu: number
   /** poslední den, ke kterému něco zapsal */
   posledniZapis?: string
+  sdileni: UrovenSdileni
+  /** čeká na to, až si klient změní vygenerované heslo */
+  cekaNaZmenuHesla: boolean
 }
 
 /** Pozvánka do plánovače v přehledu kouče. */
@@ -170,4 +179,5 @@ export interface PlannerInviteRow {
   createdAt: number
   expiresAt: number
   usedAt?: number
+  sdileni: UrovenSdileni
 }

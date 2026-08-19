@@ -182,6 +182,9 @@ export default defineSchema({
       v.literal("smazani-vysledku"),
       v.literal("vytvoreni-pozvanky"),
       v.literal("vytvoreni-deniku"),
+      v.literal("otevreni-deniku"),
+      v.literal("zmena-sdileni-deniku"),
+      v.literal("reset-hesla-deniku"),
       v.literal("prihlaseni"),
     ),
     resultId: v.optional(v.id("eliteDiagnosticResults")),
@@ -195,22 +198,52 @@ export default defineSchema({
   //
   // Elektronická podoba papírového Weekly Planneru. Stojí vedle diagnostiky,
   // ne uvnitř ní: diagnostika je jednorázový dotazník, jehož výsledek vidí
-  // kouč, kdežto deník je osobní zápisník, který si klient vede sám a do
-  // kterého kouč nevidí. Jsou to dva různé druhy dat s různým režimem, takže
-  // mají i vlastní účty, vlastní relace a vlastní tabulky.
+  // kouč, kdežto deník je osobní zápisník, který si klient vede sám. Jsou to
+  // dva různé druhy dat s různým režimem, takže mají i vlastní účty, vlastní
+  // relace a vlastní tabulky.
+  //
+  // Kolik z deníku vidí kouč, se řídí polem `sdileni` u klienta. Vždycky to
+  // ví i klient sám, viz komentář u toho pole.
   // ───────────────────────────────────────────────────────────────────────────
 
   /**
    * Klientský účet plánovače.
    *
-   * Vzniká výhradně z pozvánky kouče, tudy se nikdo nezaregistruje sám.
-   * Heslo si klient volí při aktivaci, takže ho nikdo jiný nikdy nezná.
+   * Vzniká výhradně od kouče, tudy se nikdo nezaregistruje sám. Buď z
+   * pozvánky, kde si klient volí heslo sám, nebo rovnou s vygenerovaným
+   * heslem, které si klient musí při prvním přihlášení změnit.
    */
   plannerClients: defineTable({
     email: v.string(),
     name: v.string(),
     passwordHash: v.string(),
     salt: v.string(),
+    /**
+     * Vynucená změna hesla při nejbližším přihlášení.
+     *
+     * Zapíná se u účtů založených s vygenerovaným heslem: to heslo prošlo
+     * cizí schránkou, takže musí co nejdřív přestat platit. Dokud je příznak
+     * nastavený, relace se sice založí, ale klient se dostane jen na
+     * obrazovku se změnou hesla.
+     */
+    mustChangePassword: v.optional(v.boolean()),
+    /**
+     * Kolik z deníku vidí kouč.
+     *
+     * `nic` je stav, ve kterém plánovač vznikl: kouč vidí, že si klient deník
+     * vede, ne co v něm je. `cisla` odemkne hodnocení, návyky a statistiky,
+     * ale volné texty ne. `vse` odemkne i texty.
+     *
+     * Chybějící hodnota znamená `nic`, ne výchozí úroveň nových účtů. Je to
+     * schválně: účty založené dřív vznikly za slibu, že do deníku nikdo
+     * nevidí, a změna výchozí hodnoty ten slib nesmí zrušit zpětně.
+     *
+     * Ať je úroveň jakákoli, klient ji vidí na svém účtu běžnou větou.
+     * Nepřiznaný dohled tahle aplikace nedělá.
+     */
+    sdileni: v.optional(
+      v.union(v.literal("nic"), v.literal("cisla"), v.literal("vse")),
+    ),
     /** rod kvůli českým a slovenským textům; angličtina ho neřeší */
     gender: v.optional(v.union(v.literal("male"), v.literal("female"))),
     lang: v.string(),
@@ -252,6 +285,10 @@ export default defineSchema({
     email: v.string(),
     gender: v.optional(v.union(v.literal("male"), v.literal("female"))),
     lang: v.string(),
+    /** úroveň, se kterou účet vznikne; chybějící hodnota znamená `nic` */
+    sdileni: v.optional(
+      v.union(v.literal("nic"), v.literal("cisla"), v.literal("vse")),
+    ),
     createdAt: v.number(),
     expiresAt: v.number(),
     usedAt: v.optional(v.number()),

@@ -17,8 +17,11 @@ nesdílí kód ani data s koučovací platformou.
 
 Vedle diagnostiky běží **týdenní plánovač**: elektronická podoba papírového
 plánovače Winning Minds. Klient si pod vlastním přihlášením vede deník, aplikace
-z něj počítá týdenní, měsíční a roční statistiky. Do obsahu deníku nevidí nikdo
-kromě klienta, ani master.
+z něj počítá týdenní, měsíční a roční statistiky.
+
+Kolik z deníku vidí kouč, se nastavuje **u každého klienta zvlášť**: nic z obsahu,
+čísla bez volných textů, nebo celý deník. Klient svou úroveň vždycky vidí na svém
+účtu, takže nepřiznaný dohled tu nastavit nejde.
 
 Ven jdou dva dokumenty: **týdenní list** jako věrná kopie papírové předlohy (A4 na
 šířku) a **přehled deníku** za týden, měsíc nebo rok (A4 na výšku), sázený stejným
@@ -54,7 +57,7 @@ convex/                  # backend: schema + eliteDiagnostic (diagnostika)
 | Respondent | vyplní dotazník na přímém odkazu, po odeslání vidí **pouze potvrzení** |
 | Kouč | `/kouc` – po přihlášení seznam vyplnění, kompletní vyhodnocení, tisk do PDF, tvorba pozvánek |
 | Master | navíc správa účtů koučů a zakládání deníků |
-| Klient s deníkem | `/planner` – vlastní zápisky a statistiky; **nikdo jiný do nich nevidí** |
+| Klient s deníkem | `/planner` – vlastní zápisky a statistiky; kolik z nich vidí kouč, **klient vždycky ví** |
 
 Odpovědi ani vyhodnocení se z backendu nikdy nevrací bez platné přihlášené relace,
 která se ověřuje **serverově** v Convexu. Kontrola jen v prohlížeči by nestačila –

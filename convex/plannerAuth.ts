@@ -5,6 +5,7 @@ import crypto from "node:crypto"
 import { action } from "./_generated/server"
 import { internal } from "./_generated/api"
 import type { Id } from "./_generated/dataModel"
+import { makeHeslo } from "./nahoda"
 
 // Přihlašování klientů do týdenního plánovače.
 //
@@ -13,13 +14,21 @@ import type { Id } from "./_generated/dataModel"
 // účtů v convex/auth.ts, jen nad vlastními tabulkami – deník je jiný druh
 // dat než diagnostika a nemá s ní sdílet ani účty, ani relace.
 //
-// Účet nevzniká registrací, ale aktivací pozvánky od kouče. Heslo si volí
-// klient sám při aktivaci, takže ho nikdo jiný nikdy nezná.
+// Účet nevzniká registrací, vždycky ho zakládá kouč. Buď pozvánkou, kde si
+// klient volí heslo sám a nikdo jiný ho nikdy nezná, nebo rovnou s dočasným
+// heslem, které vygeneruje server a klient si ho musí při prvním přihlášení
+// změnit. Druhá cesta je tu proto, že aplikace neposílá e-maily: bez ní by
+// klient, který zapomene heslo, neměl jak se dostat zpátky.
 
 // Explicitní typy návratových hodnot. Bez nich TypeScript zacyklí odvozování,
 // protože akce volají funkce přes `internal`, které se generují mimo jiné
 // i z tohoto souboru (Convex chyby TS7022 / TS7023).
-type Prihlaseni = { sessionToken: string; name: string; lang: string }
+type Prihlaseni = {
+  sessionToken: string
+  name: string
+  lang: string
+  mustChangePassword: boolean
+}
 type KlientZaznam = {
   id: Id<"plannerClients">
   email: string
@@ -28,6 +37,7 @@ type KlientZaznam = {
   salt: string
   active: boolean
   lang: string
+  mustChangePassword: boolean
 } | null
 type KlientPodleId = {
   id: Id<"plannerClients">
@@ -36,6 +46,7 @@ type KlientPodleId = {
   passwordHash: string
   salt: string
   active: boolean
+  mustChangePassword: boolean
 } | null
 type Pozvanka = {
   id: Id<"plannerInvites">
@@ -143,7 +154,12 @@ async function sConvexChybou<T>(jmeno: string, fn: () => Promise<T>): Promise<T>
  */
 export const activate = action({
   args: { token: v.string(), password: v.string() },
-  returns: v.object({ sessionToken: v.string(), name: v.string(), lang: v.string() }),
+  returns: v.object({
+    sessionToken: v.string(),
+    name: v.string(),
+    lang: v.string(),
+    mustChangePassword: v.boolean(),
+  }),
   handler: async (ctx, args): Promise<Prihlaseni> =>
     sConvexChybou("activate", async () => {
       const pozvanka: Pozvanka = await ctx.runQuery(internal.plannerAuthInternal.getInvite, {
@@ -173,7 +189,12 @@ export const activate = action({
         token: sessionToken,
         days: SESSION_DAYS,
       })
-      return { sessionToken, name: pozvanka.name, lang: pozvanka.lang }
+      return {
+        sessionToken,
+        name: pozvanka.name,
+        lang: pozvanka.lang,
+        mustChangePassword: false,
+      }
     }),
 })
 
@@ -186,7 +207,12 @@ export const activate = action({
  */
 export const login = action({
   args: { email: v.string(), password: v.string() },
-  returns: v.object({ sessionToken: v.string(), name: v.string(), lang: v.string() }),
+  returns: v.object({
+    sessionToken: v.string(),
+    name: v.string(),
+    lang: v.string(),
+    mustChangePassword: v.boolean(),
+  }),
   handler: async (ctx, args): Promise<Prihlaseni> => {
     const email = normalizeEmail(args.email)
     const chyba = "Nesprávný e-mail nebo heslo."
@@ -218,7 +244,12 @@ export const login = action({
     await ctx.runMutation(internal.plannerAuthInternal.zaznamenejPrihlaseni, {
       clientId: klient.id,
     })
-    return { sessionToken, name: klient.name, lang: klient.lang }
+    return {
+      sessionToken,
+      name: klient.name,
+      lang: klient.lang,
+      mustChangePassword: klient.mustChangePassword,
+    }
   },
 })
 
@@ -247,4 +278,71 @@ export const changePassword = action({
     })
     return { ok: true }
   },
+})
+
+/**
+ * Založení deníku rovnou, s dočasným heslem pro klienta.
+ *
+ * Druhá cesta vedle pozvánky, pro situaci, kdy je snazší heslo nadiktovat než
+ * posílat odkaz. Heslo se vrátí jedním jediným zavoláním a nikde se neuloží
+ * v čitelné podobě, takže ho nejde zobrazit znovu, jen vygenerovat nové.
+ *
+ * Kdo smí zakládat deníky, se kontroluje uvnitř volané mutace: akce sama na
+ * databázi nedosáhne, takže tady by se ověřit nedalo.
+ */
+export const createPlannerClientWithPassword = action({
+  args: {
+    sessionToken: v.string(),
+    name: v.string(),
+    email: v.string(),
+    gender: v.optional(v.union(v.literal("male"), v.literal("female"))),
+    lang: v.string(),
+    sdileni: v.union(v.literal("nic"), v.literal("cisla"), v.literal("vse")),
+  },
+  returns: v.object({ clientId: v.id("plannerClients"), password: v.string() }),
+  handler: async (ctx, args): Promise<{ clientId: Id<"plannerClients">; password: string }> =>
+    sConvexChybou("createPlannerClientWithPassword", async () => {
+      const heslo = makeHeslo()
+      const salt = crypto.randomBytes(16).toString("hex")
+      const clientId: Id<"plannerClients"> = await ctx.runMutation(
+        internal.plannerAuthInternal.zalozKlientaSHeslem,
+        {
+          coachSessionToken: args.sessionToken,
+          name: args.name,
+          email: args.email,
+          gender: args.gender,
+          lang: args.lang,
+          sdileni: args.sdileni,
+          passwordHash: hashPassword(heslo, salt),
+          salt,
+        },
+      )
+      return { clientId, password: heslo }
+    }),
+})
+
+/**
+ * Nové dočasné heslo pro klienta, který se nemůže přihlásit.
+ *
+ * Ukončí všechny jeho relace a znovu zapne vynucenou změnu. Kouč heslo
+ * jednou uvidí a předá ho dál; uložený je zase jen otisk.
+ */
+export const resetPlannerPassword = action({
+  args: { sessionToken: v.string(), clientId: v.id("plannerClients") },
+  returns: v.object({ name: v.string(), email: v.string(), password: v.string() }),
+  handler: async (ctx, args): Promise<{ name: string; email: string; password: string }> =>
+    sConvexChybou("resetPlannerPassword", async () => {
+      const heslo = makeHeslo()
+      const salt = crypto.randomBytes(16).toString("hex")
+      const kdo: { name: string; email: string } = await ctx.runMutation(
+        internal.plannerAuthInternal.pripravResetHesla,
+        {
+          coachSessionToken: args.sessionToken,
+          clientId: args.clientId,
+          passwordHash: hashPassword(heslo, salt),
+          salt,
+        },
+      )
+      return { ...kdo, password: heslo }
+    }),
 })

@@ -10,6 +10,7 @@ import type {
   PlannerInviteRow,
   ReflectionKey,
   ScheduleSlot,
+  UrovenSdileni,
 } from "./types"
 
 // Napojení plánovače na Convex.
@@ -63,12 +64,23 @@ const listInvitesRef = makeFunctionReference<"query">("plannerCoach:listPlannerI
 const revokeInviteRef = makeFunctionReference<"mutation">("plannerCoach:revokePlannerInvite")
 const setClientActiveRef = makeFunctionReference<"mutation">("plannerCoach:setPlannerClientActive")
 
+const createClientWithPasswordRef = makeFunctionReference<"action">(
+  "plannerAuth:createPlannerClientWithPassword",
+)
+const resetPasswordRef = makeFunctionReference<"action">("plannerAuth:resetPlannerPassword")
+const clientDetailRef = makeFunctionReference<"mutation">(
+  "plannerCoachRead:plannerClientDetail",
+)
+const setSdileniRef = makeFunctionReference<"mutation">("plannerCoachRead:setPlannerSdileni")
+
 // ── přihlášení ───────────────────────────────────────────────────────────────
 
 export interface Prihlaseni {
   sessionToken: string
   name: string
   lang: Lang
+  /** true u účtu s dočasným heslem od kouče: nejdřív si zvolí vlastní */
+  mustChangePassword: boolean
 }
 
 export async function login(email: string, password: string): Promise<Prihlaseni> {
@@ -76,6 +88,7 @@ export async function login(email: string, password: string): Promise<Prihlaseni
     sessionToken: string
     name: string
     lang: string
+    mustChangePassword: boolean
   }
   return { ...r, lang: r.lang as Lang }
 }
@@ -85,6 +98,7 @@ export async function activate(token: string, password: string): Promise<Prihlas
     sessionToken: string
     name: string
     lang: string
+    mustChangePassword: boolean
   }
   return { ...r, lang: r.lang as Lang }
 }
@@ -99,7 +113,15 @@ export async function changePassword(
 
 export async function whoAmI(sessionToken: string): Promise<PlannerIdentity | null> {
   const r = (await client().query(meRef, { sessionToken })) as
-    | { name: string; email: string; gender?: Gender; lang: string; createdAt: number }
+    | {
+        name: string
+        email: string
+        gender?: Gender
+        lang: string
+        createdAt: number
+        sdileni: UrovenSdileni
+        mustChangePassword: boolean
+      }
     | null
   if (!r) return null
   return { ...r, lang: r.lang as Lang }
@@ -295,6 +317,7 @@ export async function createPlannerInvite(
   email: string,
   gender: Gender | undefined,
   lang: Lang,
+  sdileni: UrovenSdileni,
 ): Promise<string> {
   const r = (await client().mutation(createInviteRef, {
     sessionToken,
@@ -302,8 +325,41 @@ export async function createPlannerInvite(
     email,
     gender,
     lang,
+    sdileni,
   })) as { token: string }
   return r.token
+}
+
+/** Založení deníku rovnou, s dočasným heslem. Heslo se vrátí jen tenhle jednou. */
+export async function createPlannerClientWithPassword(
+  sessionToken: string,
+  name: string,
+  email: string,
+  gender: Gender | undefined,
+  lang: Lang,
+  sdileni: UrovenSdileni,
+): Promise<string> {
+  const r = (await client().action(createClientWithPasswordRef, {
+    sessionToken,
+    name,
+    email,
+    gender,
+    lang,
+    sdileni,
+  })) as { clientId: string; password: string }
+  return r.password
+}
+
+/** Nové dočasné heslo pro klienta, který se nemůže přihlásit. */
+export async function resetPlannerPassword(
+  sessionToken: string,
+  clientId: string,
+): Promise<{ name: string; email: string; password: string }> {
+  return (await client().action(resetPasswordRef, { sessionToken, clientId })) as {
+    name: string
+    email: string
+    password: string
+  }
 }
 
 export async function listPlannerClients(sessionToken: string): Promise<PlannerClientRow[]> {
@@ -318,6 +374,8 @@ export async function listPlannerClients(sessionToken: string): Promise<PlannerC
     lastLoginAt?: number
     dnu: number
     lastActivityAt?: number
+    sdileni: UrovenSdileni
+    cekaNaZmenuHesla: boolean
   }[]
   return r.map((k) => ({
     id: k.id,
@@ -332,6 +390,8 @@ export async function listPlannerClients(sessionToken: string): Promise<PlannerC
     posledniZapis: k.lastActivityAt
       ? new Date(k.lastActivityAt).toISOString().slice(0, 10)
       : undefined,
+    sdileni: k.sdileni,
+    cekaNaZmenuHesla: k.cekaNaZmenuHesla,
   }))
 }
 
@@ -345,6 +405,7 @@ export async function listPlannerInvites(sessionToken: string): Promise<PlannerI
     createdAt: number
     expiresAt: number
     usedAt?: number
+    sdileni: UrovenSdileni
   }[]
   return r.map((p) => ({ ...p, lang: p.lang as Lang }))
 }
@@ -362,4 +423,50 @@ export async function setPlannerClientActive(
   active: boolean,
 ): Promise<void> {
   await client().mutation(setClientActiveRef, { sessionToken, clientId, active })
+}
+
+/**
+ * Deník klienta tak, jak ho smí vidět kouč.
+ *
+ * Je to mutace, ne dotaz: každé nahlédnutí server zapisuje do přístupového
+ * logu. `texty` říká, jestli přišly i volné texty, nebo jen čísla.
+ */
+export interface DenikKlienta {
+  name: string
+  email: string
+  gender?: Gender
+  lang: Lang
+  active: boolean
+  createdAt: number
+  lastLoginAt?: number
+  lastActivityAt?: number
+  dnu: number
+  sdileni: UrovenSdileni
+  texty: boolean
+  days: PlannerDay[]
+  habits: PlannerHabit[]
+  weeks: { monday: string; notes: string }[]
+}
+
+export async function plannerClientDetail(
+  sessionToken: string,
+  clientId: string,
+  od: string,
+  do_: string,
+): Promise<DenikKlienta> {
+  const r = (await client().mutation(clientDetailRef, {
+    sessionToken,
+    clientId,
+    od,
+    do: do_,
+  })) as DenikKlienta & { lang: string }
+  return { ...r, lang: r.lang as Lang }
+}
+
+export async function setPlannerSdileni(
+  sessionToken: string,
+  clientId: string,
+  sdileni: UrovenSdileni,
+): Promise<void> {
+  await client().mutation(setSdileniRef, { sessionToken, clientId, sdileni })
 }

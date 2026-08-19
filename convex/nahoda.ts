@@ -49,3 +49,35 @@ export function makeToken(): string {
   const alphabet = "abcdefghijkmnpqrstuvwxyz23456789"
   return Array.from(kryptoBajty(24), (b) => alphabet[b % alphabet.length]).join("")
 }
+
+/**
+ * Slova pro dočasné heslo do deníku.
+ *
+ * Přesně 64, aby se 256 hodnot bajtu dělilo beze zbytku a výběr slova nebyl
+ * zkreslený ve prospěch začátku seznamu. Všechna jsou krátká a bez háčků a
+ * čárek: heslo se diktuje do telefonu a píše na mobilu, takže každý háček je
+ * překlep navíc.
+ */
+const SLOVA = [
+  "voda", "sova", "most", "klid", "vlna", "kolo", "ryba", "pero",
+  "mrak", "hora", "pole", "dech", "kruh", "lano", "lampa", "kniha",
+  "ruka", "noha", "ucho", "zima", "jaro", "kmen", "list", "sopka",
+  "prah", "potok", "louka", "buk", "dub", "javor", "vrba", "kapr",
+  "sumec", "okoun", "vlk", "jelen", "srna", "sokol", "orel", "holub",
+  "sysel", "straka", "datel", "husa", "kachna", "kohout", "koza", "ovce",
+  "osel", "tygr", "opice", "zebra", "lama", "panda", "bobr", "sob",
+  "bizon", "kuna", "vydra", "slon", "hroch", "kobra", "brouk", "pavouk",
+]
+
+/**
+ * Dočasné heslo, které kouč předá klientovi, například `vlna-klid-most-sova`.
+ *
+ * Čtyři slova ze seznamu o 64 položkách dávají 24 bitů, tedy zhruba šestnáct
+ * milionů možností. Na trvalé heslo by to bylo málo, na tohle stačí: platí
+ * jen do prvního přihlášení, kdy si klient musí zvolit vlastní, a hádání
+ * navíc omezuje strop na neúspěšná přihlášení. Proti čitelnosti je to dobrá
+ * výměna, protože heslo, které nejde nadiktovat, skončí opsané s překlepem.
+ */
+export function makeHeslo(): string {
+  return Array.from(kryptoBajty(4), (b) => SLOVA[b % SLOVA.length]).join("-")
+}

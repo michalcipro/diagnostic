@@ -206,6 +206,21 @@ export interface PlannerUI {
   stavajiciHeslo: string
   ulozeno: string
 
+  // co z deníku vidí kouč
+  sdileniNadpis: string
+  sdileniNic: string
+  sdileniCisla: string
+  sdileniVse: string
+  sdileniNicPopis: string
+  sdileniCislaPopis: string
+  sdileniVsePopis: string
+  sdileniKdo: string
+
+  // dočasné heslo od kouče
+  zmenHesloNadpis: string
+  zmenHesloPopis: string
+  zmenHesloHotovo: string
+
   // stav
   ukladam: string
   ulozenoAuto: string
@@ -352,6 +367,22 @@ export const UI: Record<Lang, PlannerUI> = {
     zmenaHesla: "Změna hesla",
     stavajiciHeslo: "Stávající heslo",
     ulozeno: "Uloženo.",
+    sdileniNadpis: "Co z deníku vidí tvůj kouč",
+    sdileniNic: "Nic z obsahu",
+    sdileniCisla: "Hodnocení a návyky",
+    sdileniVse: "Celý deník",
+    sdileniNicPopis:
+      "Kouč vidí jen to, že si deník vedeš, a kdy jsi do něj naposledy {psal|psala}. Co je uvnitř, nevidí.",
+    sdileniCislaPopis:
+      "Kouč vidí tvoje hodnocení, odškrtnuté návyky a statistiky. Rozvrh dne, reflexi ani poznámky nevidí, ty zůstávají jenom tvoje.",
+    sdileniVsePopis:
+      "Kouč vidí celý deník včetně rozvrhu, reflexe a poznámek. Kdykoli se s ním můžeš domluvit na užším rozsahu.",
+    sdileniKdo: "Nastavuje to kouč, ale vidíš to tady vždycky. Když ti to nesedí, řekni mu to.",
+
+    zmenHesloNadpis: "Zvol si vlastní heslo",
+    zmenHesloPopis:
+      "{Přihlásil|Přihlásila} ses heslem, které ti dal kouč. Než začneš psát, nastav si vlastní, které zná jenom tvoje hlava.",
+    zmenHesloHotovo: "Heslo je změněné. Přihlas se prosím znovu, už tím novým.",
 
     ukladam: "Ukládám…",
     ulozenoAuto: "Uloženo",
@@ -367,7 +398,7 @@ export const UI: Record<Lang, PlannerUI> = {
     koucPozvanky: "Pozvánky",
     koucBezKlientu: "Zatím tu není žádný deník.",
     koucSoukromi:
-      "Do obsahu deníku nevidíš. Je to osobní zápisník klienta, ne dotazník: vidíš jen to, že si ho vede.",
+      "Kolik z deníku uvidíš, určuje úroveň sdílení u každého klienta zvlášť. Klient ji vidí taky, na svém účtu. Nepřiznaný dohled tady nejde nastavit.",
     koucPosledniZapis: "Poslední zápis",
     koucZablokovat: "Zablokovat",
     koucOdblokovat: "Obnovit přístup",
@@ -497,6 +528,22 @@ export const UI: Record<Lang, PlannerUI> = {
     zmenaHesla: "Change password",
     stavajiciHeslo: "Current password",
     ulozeno: "Saved.",
+    sdileniNadpis: "What your coach sees",
+    sdileniNic: "Nothing from the content",
+    sdileniCisla: "Ratings and habits",
+    sdileniVse: "The whole journal",
+    sdileniNicPopis:
+      "Your coach only sees that you keep a journal and when you last wrote in it. Not what is inside.",
+    sdileniCislaPopis:
+      "Your coach sees your ratings, ticked habits and statistics. The daily schedule, reflection and notes stay yours alone.",
+    sdileniVsePopis:
+      "Your coach sees the whole journal, including the schedule, reflection and notes. You can agree on a narrower range at any time.",
+    sdileniKdo: "Your coach sets this, but you always see it here. If it does not sit right with you, say so.",
+
+    zmenHesloNadpis: "Choose your own password",
+    zmenHesloPopis:
+      "You signed in with the password your coach gave you. Before you start writing, set one that only you know.",
+    zmenHesloHotovo: "Password changed. Please sign in again with the new one.",
 
     ukladam: "Saving…",
     ulozenoAuto: "Saved",
@@ -512,7 +559,7 @@ export const UI: Record<Lang, PlannerUI> = {
     koucPozvanky: "Invitations",
     koucBezKlientu: "No planners here yet.",
     koucSoukromi:
-      "You cannot see what is written inside. It is a personal journal, not a questionnaire: you only see that it is being kept.",
+      "How much of the journal you see is set per client. The client sees the same setting on their account. Watching without telling them is not possible here.",
     koucPosledniZapis: "Last entry",
     koucZablokovat: "Block",
     koucOdblokovat: "Restore access",
@@ -642,6 +689,22 @@ export const UI: Record<Lang, PlannerUI> = {
     zmenaHesla: "Zmena hesla",
     stavajiciHeslo: "Súčasné heslo",
     ulozeno: "Uložené.",
+    sdileniNadpis: "Čo z denníka vidí tvoj kouč",
+    sdileniNic: "Nič z obsahu",
+    sdileniCisla: "Hodnotenia a návyky",
+    sdileniVse: "Celý denník",
+    sdileniNicPopis:
+      "Kouč vidí len to, že si denník vedieš, a kedy si doň naposledy {písal|písala}. Čo je vnútri, nevidí.",
+    sdileniCislaPopis:
+      "Kouč vidí tvoje hodnotenia, odškrtnuté návyky a štatistiky. Rozvrh dňa, reflexiu ani poznámky nevidí, tie zostávajú iba tvoje.",
+    sdileniVsePopis:
+      "Kouč vidí celý denník vrátane rozvrhu, reflexie a poznámok. Kedykoľvek sa s ním môžeš dohodnúť na užšom rozsahu.",
+    sdileniKdo: "Nastavuje to kouč, ale vidíš to tu vždy. Keď ti to nesedí, povedz mu to.",
+
+    zmenHesloNadpis: "Zvoľ si vlastné heslo",
+    zmenHesloPopis:
+      "{Prihlásil|Prihlásila} si sa heslom, ktoré ti dal kouč. Než začneš písať, nastav si vlastné, ktoré pozná len tvoja hlava.",
+    zmenHesloHotovo: "Heslo je zmenené. Prihlás sa prosím znova, už tým novým.",
 
     ukladam: "Ukladám…",
     ulozenoAuto: "Uložené",
@@ -657,7 +720,7 @@ export const UI: Record<Lang, PlannerUI> = {
     koucPozvanky: "Pozvánky",
     koucBezKlientu: "Zatiaľ tu nie je žiadny denník.",
     koucSoukromi:
-      "Do obsahu denníka nevidíš. Je to osobný zápisník klienta, nie dotazník: vidíš len to, že si ho vedie.",
+      "Koľko z denníka uvidíš, určuje úroveň zdieľania u každého klienta zvlášť. Klient ju vidí tiež, na svojom účte. Nepriznaný dohľad sa tu nastaviť nedá.",
     koucPosledniZapis: "Posledný zápis",
     koucZablokovat: "Zablokovať",
     koucOdblokovat: "Obnoviť prístup",

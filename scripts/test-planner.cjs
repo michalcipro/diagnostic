@@ -52,6 +52,7 @@ export * as shrnuti from "../lib/planner/shrnuti"
 export * as i18n from "../lib/planner/i18n"
 export * as typy from "../lib/planner/types"
 export * as heslo from "../lib/planner/heslo"
+export * as nahoda from "../convex/nahoda"
 export { applyGender } from "../lib/diagnostic/gender"
 `,
   )
@@ -75,7 +76,7 @@ export { applyGender } from "../lib/diagnostic/gender"
 }
 
 const M = nactiModuly()
-const { datum: D, stats: S, shrnuti: SH, i18n: I, typy: T, heslo: H, applyGender } = M
+const { datum: D, stats: S, shrnuti: SH, i18n: I, typy: T, heslo: H, nahoda: N, applyGender } = M
 
 // ---------------------------------------------------------------------------
 // 1) kalendář
@@ -429,6 +430,45 @@ rekni(
 rekni(!H.zkontrolujHeslo("Kotva-Rybnik-42x", "cs"), "rozumné heslo projde")
 for (const lang of ["cs", "en", "sk"]) {
   rekni(typeof H.zkontrolujHeslo("abc", lang) === "string", `${lang}: hláška o hesle existuje`)
+}
+
+// ---------------------------------------------------------------------------
+// 8) dočasné heslo od kouče
+// ---------------------------------------------------------------------------
+//
+// Heslo se diktuje do telefonu a píše na mobilu, takže na něm záleží dvojí:
+// aby v něm nebylo nic, co se dá přeslechnout nebo přepsat, a aby výběr slov
+// nebyl zkreslený. Seznam má proto přesně 64 položek: 256 hodnot bajtu se na
+// něj dělí beze zbytku, takže žádné slovo nevychází častěji než jiné.
+
+console.log("\n– dočasné heslo –")
+
+{
+  const vzorek = Array.from({ length: 400 }, () => N.makeHeslo())
+  const slova = new Set()
+  let spatny = 0
+  for (const h of vzorek) {
+    const casti = h.split("-")
+    if (casti.length !== 4) spatny++
+    for (const c of casti) {
+      if (!/^[a-z]{3,6}$/.test(c)) spatny++
+      slova.add(c)
+    }
+  }
+  rekni(spatny === 0, `heslo je čtyři krátká slova bez diakritiky (vadných: ${spatny})`)
+  rekni(
+    slova.size === 64,
+    `ve vzorku se objeví všech 64 slov seznamu (objevilo se ${slova.size})`,
+  )
+  rekni(new Set(vzorek).size > 390, "hesla se ve vzorku neopakují")
+
+  // Dočasné heslo musí projít vlastní kontrolou hesel: kdyby ji neprošlo,
+  // klient by dostal heslo, které si sám nastavit nesmí.
+  const problem = vzorek.filter((h) => H.zkontrolujHeslo(h, "cs"))
+  rekni(problem.length === 0, `vygenerované heslo projde kontrolou hesel (vadných: ${problem.length})`)
+
+  rekni(N.makeToken().length === 24, "token do odkazu má pořád 24 znaků")
+  rekni(/^[a-km-np-z2-9]+$/.test(N.makeToken()), "token nemá znaky, které se pletou")
 }
 
 // ---------------------------------------------------------------------------

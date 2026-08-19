@@ -45,25 +45,68 @@ za archivací a s výslovným upozorněním, co to udělá.
 | Role | Přístup |
 | --- | --- |
 | Klient | vlastní deník, statistiky, export dat, tisk i PDF |
-| Master | zakládá deníky, vidí jméno, e-mail, počet dnů a čas poslední aktivity |
+| Master | zakládá deníky, vidí jméno, e-mail, počet dnů a čas poslední aktivity, plus tolik z obsahu, kolik má u klienta nastavenou úroveň |
 | Kouč | v pilotním provozu nic |
 
-**Do obsahu deníku nevidí nikdo kromě klienta, ani master.** Není to opomenutí
-v oprávněních, ale povaha věci: deník je osobní zápisník, ne dotazník, jehož
-výsledek se s koučem probírá. Kdyby do něj kouč viděl, přestal by být tím, čím
-má být, a lidé by si do něj přestali psát pravdu.
+## Co z deníku vidí kouč
 
-Hlídá to statická kontrola: `scripts/audit-pristupu.cjs` ověřuje, že se
-`convex/plannerCoach.ts` tabulek `plannerDays`, `plannerWeeks` ani
-`plannerHabits` vůbec nedotkne. Kdyby to někdo v budoucnu zkusil obejít,
-neprojde audit.
+Řídí to pole `sdileni` u klienta a nastavuje ho kouč při zakládání deníku.
+Úrovně jsou tři:
+
+| Úroveň | Co projde ke kouči |
+| --- | --- |
+| `nic` | vůbec nic z obsahu; kouč ví jen, že si klient deník vede |
+| `cisla` | hodnocení, odškrtnuté návyky, série a statistiky |
+| `vse` | celý deník včetně rozvrhu, reflexe a poznámek k týdnu |
+
+Výchozí úroveň nových deníků je `cisla`. **Účet, který úroveň nemá vyplněnou,
+se čte jako `nic`**: deníky založené dřív vznikly za slibu, že do nich nikdo
+nevidí, a zavedení sdílení ten slib nesmí zrušit zpětně.
+
+Platí u toho jedno pravidlo bez výjimky: **klient vždycky vidí, co vidí kouč**,
+běžnou větou na svém účtu. Dohled, o kterém člověk neví, by z deníku udělal
+hlášení a lidé by si do něj přestali psát pravdu; přiznaný dohled nestojí nic.
+
+Hlídají to statické kontroly v `scripts/audit-pristupu.cjs`:
+
+- `convex/plannerCoach.ts`, tedy správa klientů, se tabulek `plannerDays`,
+  `plannerWeeks` ani `plannerHabits` vůbec nedotkne,
+- v `convex/plannerCoachRead.ts` projde každé čtení volného textu podmínkou
+  `sTexty` a ta smí vzniknout jedině z úrovně `vse`,
+- na úrovni `nic` se nenačte ani jeden den, takže není co pustit ven,
+- výstup dne i týdne má přesně očekávané klíče, takže nově přidané pole
+  neproteče tiše,
+- `planner.me` vrací úroveň i klientovi a účet klienta ji zobrazuje.
+
+Každé nahlédnutí kouče do deníku se zapisuje do přístupového logu jako
+`otevreni-deniku`, stejně jako otevření výsledku diagnostiky.
 
 ## Účty
 
-Deník nevzniká registrací, ale pozvánkou. Master v přehledu → záložka **Deníky**
-zadá jméno, e-mail, oslovení a jazyk a dostane jednorázový odkaz
-`/planner/start/<token>`, který klientovi pošle. Klient si na něm zvolí heslo
-a tím účet vznikne; heslo od té chvíle nezná nikdo jiný.
+Deník nevzniká registrací, vždycky ho zakládá kouč. Master v přehledu →
+záložka **Deníky** zadá jméno, e-mail, oslovení, jazyk a úroveň sdílení
+a vybere si jednu ze dvou cest:
+
+**Odkazem.** Dostane jednorázový odkaz `/planner/start/<token>` s platností
+30 dnů. Klient si na něm zvolí heslo a tím účet vznikne; heslo od té chvíle
+nezná nikdo jiný. Nejbezpečnější cesta, protože heslo nikam neputuje.
+
+**S heslem.** Účet vznikne rovnou a kouč jednou uvidí přihlašovací údaje
+i s vygenerovaným heslem tvaru `vlna-klid-most-sova`. Předá je klientovi sám.
+Účet je založený s příznakem `mustChangePassword`, takže se klient při prvním
+přihlášení dostane jedině na obrazovku se změnou hesla: dočasné heslo prošlo
+cizí schránkou a musí co nejdřív přestat platit. Uložený je jen otisk, takže
+heslo nejde zobrazit podruhé, jen vygenerovat nové tlačítkem **Nové heslo**.
+
+Heslo generuje `makeHeslo()` v `convex/nahoda.ts`: čtyři slova ze seznamu
+o 64 položkách, tedy 24 bitů. Na trvalé heslo by to bylo málo, na dočasné
+stačí, protože platí do prvního přihlášení a hádání navíc omezuje strop na
+neúspěšná přihlášení. Seznam má přesně 64 položek proto, aby se 256 hodnot
+bajtu dělilo beze zbytku a výběr slova nebyl zkreslený.
+
+Aplikace **neposílá e-maily**. Odkaz i přihlašovací údaje předává kouč sám.
+Kvůli tomu neexistuje samoobslužné „zapomenuté heslo" a jedinou cestou zpátky
+je tlačítko **Nové heslo** u kouče.
 
 - Odkaz platí 30 dnů a použít se dá jednou.
 - Hesla se ukládají hashovaná (PBKDF2-SHA256, 210 000 iterací, vlastní sůl).
