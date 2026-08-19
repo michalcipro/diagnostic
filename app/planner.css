@@ -618,6 +618,20 @@ textarea.pl-cell {
 @media (max-width: 1080px) {
   .pl-spread { grid-template-columns: minmax(0, 1fr); }
 }
+/* Nápověda k tažení. Na širokých obrazovkách nemá co dělat, tam se nic
+   neposouvá. Stojí schválně nad dotazem na šířku: kdyby byla pod ním,
+   přebilo by pozdější `display: none` zapnutí v dotazu a nápověda by se
+   neukázala nikdy. */
+.pl-tahni {
+  display: none;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--wm-text-3);
+  margin-left: 8px;
+}
+
 /* ── telefon ──────────────────────────────────────────────────────────────
    Sedm sloupců textu se na tři sta padesát pixelů nevejde a smrsknout je
    znamená je zahodit. Rozdělí se to proto podle toho, co se vejít může:
@@ -683,20 +697,10 @@ textarea.pl-cell {
   .pl-grid-rozvrh .pl-rowhead,
   .pl-grid-reflexe .pl-rowhead { width: 108px; }
 
-  .pl-tahni { display: block; }
+  .pl-tahni { display: inline; }
 }
 
-/* Nápověda k tažení. Na širokých obrazovkách nemá co dělat, tam se nic
-   neposouvá. */
-.pl-tahni {
-  display: none;
-  font-size: 11.5px;
-  font-weight: 500;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--wm-text-3);
-  margin-left: 8px;
-}
+
 
 @media (prefers-reduced-motion: reduce) {
   .pl-dot,
