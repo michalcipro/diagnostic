@@ -50,6 +50,7 @@
   letter-spacing: 0.18em;
   white-space: nowrap;
 }
+.pl-top-mezera { flex: 1; }
 
 /* ── ovládací prvky ───────────────────────────────────────────────────────── */
 
@@ -339,25 +340,40 @@ textarea.pl-input {
 .pl-grid td[data-today="true"] { background: var(--wm-tint-blue); }
 .pl-grid thead th[data-today="true"] { color: var(--wm-blue); }
 
-/* Popisek řádku. Přilepený vlevo a bez tučného řezu: je to orientační
-   sloupec, ne nadpis, a tučné písmo v něm přebíjí vlastní obsah mřížky. */
+/* Popisek řádku. Na střed a tučně, stejně jako popisky dnů nad mřížkou:
+   celá mřížka je pak souměrná a čte se jako jeden celek, ne jako sloupec
+   textu s přilepenou tabulkou. Přilepený vlevo zůstává proto, aby při posunu
+   bylo pořád vidět, o který den nebo návyk jde. */
 .pl-rowhead,
 .pl-hour {
   position: sticky;
   left: 0;
   z-index: 1;
   background: var(--wm-surface-2);
+  /* Stín napravo od přilepeného sloupce. Je to jediné, co při posunu mřížky
+     napoví, že vlevo něco drží a vpravo něco pokračuje. */
+  box-shadow: 5px 0 6px -5px rgba(0, 0, 0, 0.16);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .pl-rowhead,
+  :root:not([data-theme="light"]) .pl-hour {
+    box-shadow: 5px 0 6px -5px rgba(0, 0, 0, 0.5);
+  }
+}
+:root[data-theme="dark"] .pl-rowhead,
+:root[data-theme="dark"] .pl-hour {
+  box-shadow: 5px 0 6px -5px rgba(0, 0, 0, 0.5);
 }
 .pl-grid thead .pl-rowhead,
 .pl-grid thead .pl-hour { z-index: 2; }
 
 .pl-rowhead {
-  width: 140px;
+  width: 148px;
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--wm-text);
-  padding: 0 12px;
-  text-align: left;
+  padding: 0 10px;
+  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -602,11 +618,84 @@ textarea.pl-cell {
 @media (max-width: 1080px) {
   .pl-spread { grid-template-columns: minmax(0, 1fr); }
 }
+/* ── telefon ──────────────────────────────────────────────────────────────
+   Sedm sloupců textu se na tři sta padesát pixelů nevejde a smrsknout je
+   znamená je zahodit. Rozdělí se to proto podle toho, co se vejít může:
+
+   Tracker a denní postup ano. Kolečko i jednociferné číslo zaberou málo, tak
+   se zúží popisek řádku a mřížka se vejde celá, bez posouvání.
+
+   Rozvrh a reflexe ne. Ty se posouvají do strany, ale pořádně: sloupec je
+   dost široký na to, aby se v něm dalo psát, první sloupec zůstává přilepený
+   se stínem a pod nadpisem je vidět, že se má táhnout. Useknutá tabulka bez
+   vysvětlení vypadá jako chyba, tohle jako ovládání. */
 @media (max-width: 720px) {
-  .pl-wrap { padding: 0 12px 72px; }
-  .pl-sheet { padding: 16px 14px 12px; border-radius: 16px; }
-  .pl-card { padding: 16px; border-radius: 16px; }
-  .pl-section-title { margin-top: 20px; }
+  /* Horní lišta na dva řádky: značka, stav a jazyk nahoře, záložky pod tím
+     přes celou šířku. Na jeden řádek se to nevejde a zalomené to zabíralo
+     třetinu obrazovky. */
+  .pl-topbar-inner {
+    padding: 8px 16px;
+    gap: 8px 10px;
+    row-gap: 8px;
+  }
+  .pl-top-brand { font-size: 10.5px; letter-spacing: 0.16em; order: 1; }
+  .pl-top-mezera { display: none; }
+  .pl-top-status { order: 2; margin-left: auto; min-width: 0; }
+  .pl-top-lang { order: 3; }
+  .pl-top-tabs {
+    order: 4;
+    flex-basis: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .pl-top-tabs::-webkit-scrollbar { display: none; }
+
+  .pl-wrap { padding: 0 16px 72px; }
+  .pl-sheet { padding: 18px 16px 14px; border-radius: 18px; }
+  .pl-card { padding: 16px; border-radius: 18px; }
+  .pl-section-title { margin-top: 22px; }
+
+  /* Tracker a postup se vejdou celé. */
+  .pl-grid-tracker { min-width: 0; }
+  /* Popisek se na telefonu zalomí, ne ořízne: „Za co jsem vděčný" se do sta
+     pixelů na jeden řádek nevejde a tři tečky z něj udělají hádanku. */
+  .pl-grid .pl-rowhead {
+    font-size: 12px;
+    padding: 6px 8px;
+    white-space: normal;
+    line-height: 1.25;
+  }
+  .pl-grid-tracker .pl-rowhead { width: 104px; }
+  .pl-grid-tracker .pl-dot { width: 20px; height: 20px; margin: 4px auto; }
+  .pl-grid-tracker .pl-dot[data-done="true"]::after {
+    left: 5.5px;
+    top: 2.5px;
+    width: 4px;
+    height: 8.5px;
+    border-width: 0 1.7px 1.7px 0;
+  }
+  .pl-grid-tracker .pl-score { font-size: 13px; padding: 6px 0; }
+  .pl-grid-tracker thead th { font-size: 10px; padding: 7px 2px; }
+
+  /* Rozvrh a reflexe se táhnou, ale s pohodlně širokými sloupci. */
+  .pl-grid-rozvrh { min-width: 660px; }
+  .pl-grid-reflexe { min-width: 940px; }
+  .pl-grid-rozvrh .pl-rowhead,
+  .pl-grid-reflexe .pl-rowhead { width: 108px; }
+
+  .pl-tahni { display: block; }
+}
+
+/* Nápověda k tažení. Na širokých obrazovkách nemá co dělat, tam se nic
+   neposouvá. */
+.pl-tahni {
+  display: none;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--wm-text-3);
+  margin-left: 8px;
 }
 
 @media (prefers-reduced-motion: reduce) {

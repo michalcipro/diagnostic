@@ -179,6 +179,19 @@ podle čeho by se dal záznam poznat. Políčka rozvrhu i reflexe proto rostou
 podle obsahu (`components/planner/auto-textarea.tsx`) a řádek mřížky se srovná
 podle nejvyšší buňky, takže všechny dny zůstanou zarovnané.
 
+Popisky řádků jsou na střed a tučně, stejně jako popisky dnů nad mřížkou.
+Celá mřížka je pak souměrná a čte se jako jeden celek, ne jako sloupec textu
+s přilepenou tabulkou.
+
+Na telefonu se to dělí podle toho, co se vejít může. **Tracker a denní postup
+ano**: kolečko i jednociferné číslo zaberou málo, takže se zúží popisek řádku
+a mřížka se vejde celá, bez posouvání. **Rozvrh a reflexe ne**, sedm sloupců
+textu se na tři sta padesát pixelů nevejde a smrsknout je znamená je zahodit.
+Ty se posouvají do strany, ale pořádně: sloupec je dost široký na to, aby se
+v něm dalo psát, první sloupec zůstává přilepený se stínem a pod nadpisem je
+vidět, že se má táhnout. Useknutá tabulka bez vysvětlení vypadá jako chyba,
+tohle jako ovládání.
+
 Mřížka se nesmršťuje pod čitelnou míru. Když se na obrazovku nevejde, posune se
 vodorovně a **první sloupec zůstane přilepený**, takže je pořád vidět, o který
 den nebo návyk jde. Dřív se místo toho sloupce zužovaly, až se text ořízl, a na

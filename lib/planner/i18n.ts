@@ -108,6 +108,7 @@ export interface PlannerUI {
   dalsi: string
   tisk: string
   pdf: string
+  tahniDoStrany: string
 
   // přihlášení
   prihlaseni: string
@@ -252,6 +253,7 @@ export const UI: Record<Lang, PlannerUI> = {
     dalsi: "Další",
     tisk: "Tisk",
     pdf: "Uložit PDF",
+    tahniDoStrany: "táhni do strany",
 
     prihlaseni: "Přihlášení do deníku",
     email: "E-mail",
@@ -396,6 +398,7 @@ export const UI: Record<Lang, PlannerUI> = {
     dalsi: "Next",
     tisk: "Print",
     pdf: "Save PDF",
+    tahniDoStrany: "swipe sideways",
 
     prihlaseni: "Sign in to your planner",
     email: "E-mail",
@@ -540,6 +543,7 @@ export const UI: Record<Lang, PlannerUI> = {
     dalsi: "Ďalší",
     tisk: "Tlač",
     pdf: "Uložiť PDF",
+    tahniDoStrany: "ťahaj do strany",
 
     prihlaseni: "Prihlásenie do denníka",
     email: "E-mail",

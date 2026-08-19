@@ -535,8 +535,8 @@ export default function PlannerPage() {
     <div className="pl-root">
       <header className="pl-topbar pl-noprint">
         <div className="pl-topbar-inner">
-          <span className="pl-brand">WINNING MINDS</span>
-          <div className="pl-tabs">
+          <span className="pl-brand pl-top-brand">WINNING MINDS</span>
+          <div className="pl-tabs pl-top-tabs">
             {(["tyden", "den", "statistiky", "navyky", "ucet"] as Zalozka[]).map((z) => (
               <button
                 key={z}
@@ -559,11 +559,14 @@ export default function PlannerPage() {
               </button>
             ))}
           </div>
-          <div style={{ flex: 1 }} />
-          <span className="pl-status" data-state={stav === "chyba" ? "error" : undefined}>
+          <div className="pl-top-mezera" />
+          <span
+            className="pl-status pl-top-status"
+            data-state={stav === "chyba" ? "error" : undefined}
+          >
             {stavText}
           </span>
-          <div className="pl-tabs">
+          <div className="pl-tabs pl-top-lang">
             {JAZYKY.map((j) => (
               <button
                 key={j}

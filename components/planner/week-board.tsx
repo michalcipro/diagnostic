@@ -100,7 +100,10 @@ export function WeekBoard(props: WeekBoardProps) {
       <div className="pl-spread" style={{ marginTop: 4 }}>
         {/* ── levý sloupec ─────────────────────────────────────────────── */}
         <div>
-          <div className="pl-section-title">{t.weeklySchedule}</div>
+          <div className="pl-section-title">
+            {t.weeklySchedule}
+            <span className="pl-tahni">{t.tahniDoStrany}</span>
+          </div>
           {/* Mřížka se na úzké obrazovce posouvá vodorovně a první
               sloupec zůstává přilepený, takže se nic neschovává. */}
 
@@ -282,7 +285,10 @@ export function WeekBoard(props: WeekBoardProps) {
       </div>
 
       {/* ── denní reflexe přes celou šířku ───────────────────────────────── */}
-      <div className="pl-section-title">{t.dailyReflection}</div>
+      <div className="pl-section-title">
+        {t.dailyReflection}
+        <span className="pl-tahni">{t.tahniDoStrany}</span>
+      </div>
       <div className="pl-box">
         <table className="pl-grid pl-grid-reflexe">
           <thead>

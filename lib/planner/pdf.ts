@@ -216,6 +216,8 @@ export function sestavTydenniPdf(v: PdfVstupTydne): Blob {
   const vyskaRadkuVpravo = mez(radkuVpravo ? mistoNaRadkyVpravo / radkuVpravo : 6.4, 3.4, 9)
 
   const podilNazvu = 0.34
+  /** Popisek řádku je na střed a tučně, stejně jako v aplikaci. */
+  const sloupecPopisku = { popis: "", podil: podilNazvu, stred: true }
   const podilDnePrava = (1 - podilNazvu) / 7
   const sloupceDnu = zkratky.map((z) => ({ popis: z, podil: podilDnePrava, stred: true }))
 
@@ -252,9 +254,9 @@ export function sestavTydenniPdf(v: PdfVstupTydne): Blob {
   s.nadpis(t.habitTracker, 9.5, { x: xPravy, sirka: sirkaPrava, mezeraPo: 2 })
   if (viditelne.length) {
     s.tabulka(
-      [{ popis: "", podil: podilNazvu }, ...sloupceDnu],
+      [sloupecPopisku, ...sloupceDnu],
       viditelne.map((h) => [
-        { text: ocisti(h.target ? `${h.name}  ${h.target}\u00D7` : h.name) },
+        { text: ocisti(h.target ? `${h.name}  ${h.target}\u00D7` : h.name), tucne: true },
         ...data.map((datum) => ({
           kolecko: (dny.get(datum)?.habits.includes(h.id) ? "plne" : "prazdne") as
             | "plne"
@@ -280,9 +282,9 @@ export function sestavTydenniPdf(v: PdfVstupTydne): Blob {
     vpravo: t.dailyProgressHint,
   })
   s.tabulka(
-    [{ popis: "", podil: podilNazvu }, ...sloupceDnu],
+    [sloupecPopisku, ...sloupceDnu],
     METRIKY.map((m) => [
-      { text: NAZVY_METRIK[lang][m] },
+      { text: NAZVY_METRIK[lang][m], tucne: true },
       ...data.map((datum) => {
         const hodnota = dny.get(datum)?.ratings[m]
         return {
@@ -329,11 +331,11 @@ export function sestavTydenniPdf(v: PdfVstupTydne): Blob {
   const podilDneDole = (1 - podilPopisku) / 7
   s.tabulka(
     [
-      { popis: "", podil: podilPopisku },
+      { popis: "", podil: podilPopisku, stred: true },
       ...zkratky.map((z) => ({ popis: z, podil: podilDneDole, stred: true })),
     ],
     REFLEXE.map((klic) => [
-      { text: ocisti(applyGender(NAZVY_REFLEXE[lang][klic], gender)), barva: BARVA.slaba },
+      { text: ocisti(applyGender(NAZVY_REFLEXE[lang][klic], gender)), tucne: true },
       ...data.map((datum) => ({ text: ocisti(dny.get(datum)?.reflection[klic] ?? "") })),
     ]),
     // Menší řez než jinde schválně: do sloupce se tak vejde celá věta,
