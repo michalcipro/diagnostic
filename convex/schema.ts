@@ -181,6 +181,7 @@ export default defineSchema({
       v.literal("export-vzorku"),
       v.literal("smazani-vysledku"),
       v.literal("vytvoreni-pozvanky"),
+      v.literal("vytvoreni-deniku"),
       v.literal("prihlaseni"),
     ),
     resultId: v.optional(v.id("eliteDiagnosticResults")),
@@ -188,4 +189,132 @@ export default defineSchema({
   })
     .index("by_coach", ["coachId"])
     .index("by_at", ["at"]),
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Týdenní plánovač
+  //
+  // Elektronická podoba papírového Weekly Planneru. Stojí vedle diagnostiky,
+  // ne uvnitř ní: diagnostika je jednorázový dotazník, jehož výsledek vidí
+  // kouč, kdežto deník je osobní zápisník, který si klient vede sám a do
+  // kterého kouč nevidí. Jsou to dva různé druhy dat s různým režimem, takže
+  // mají i vlastní účty, vlastní relace a vlastní tabulky.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Klientský účet plánovače.
+   *
+   * Vzniká výhradně z pozvánky kouče, tudy se nikdo nezaregistruje sám.
+   * Heslo si klient volí při aktivaci, takže ho nikdo jiný nikdy nezná.
+   */
+  plannerClients: defineTable({
+    email: v.string(),
+    name: v.string(),
+    passwordHash: v.string(),
+    salt: v.string(),
+    /** rod kvůli českým a slovenským textům; angličtina ho neřeší */
+    gender: v.optional(v.union(v.literal("male"), v.literal("female"))),
+    lang: v.string(),
+    /** kouč, který deník založil; jen on vidí, že klient deník má */
+    coachId: v.id("coaches"),
+    active: v.boolean(),
+    createdAt: v.number(),
+    lastLoginAt: v.optional(v.number()),
+    /**
+     * Kolik dnů deníku klient založil a kdy do něj naposledy sáhl.
+     *
+     * Odvozené hodnoty, které se udržují při zápisu. Jsou tu proto, aby kouč
+     * viděl, že si klient deník vede, aniž by se kvůli tomu musel načítat
+     * obsah: kdyby se počítalo dotazem přes dny, sahalo by se do zápisků
+     * pokaždé, když se otevře přehled klientů.
+     */
+    dnu: v.optional(v.number()),
+    lastActivityAt: v.optional(v.number()),
+  })
+    .index("by_email", ["email"])
+    .index("by_coach", ["coachId"]),
+
+  /** Přihlášené relace klientů. Oddělené od koučovských, ať se nemíchají role. */
+  plannerSessions: defineTable({
+    token: v.string(),
+    clientId: v.id("plannerClients"),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+    lastSeenAt: v.optional(v.number()),
+  })
+    .index("by_token", ["token"])
+    .index("by_client", ["clientId"]),
+
+  /** Jednorázová pozvánka do plánovače. Klient si na ní nastaví heslo. */
+  plannerInvites: defineTable({
+    token: v.string(),
+    coachId: v.id("coaches"),
+    name: v.string(),
+    email: v.string(),
+    gender: v.optional(v.union(v.literal("male"), v.literal("female"))),
+    lang: v.string(),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+    usedAt: v.optional(v.number()),
+    clientId: v.optional(v.id("plannerClients")),
+  })
+    .index("by_token", ["token"])
+    .index("by_coach", ["coachId"])
+    .index("by_created", ["createdAt"]),
+
+  /**
+   * Návyk, který si klient definoval sám. Jediná měnitelná část plánovače.
+   *
+   * Archivace místo mazání je záměr: smazaný návyk by zpětně změnil čísla za
+   * loňský rok, což je u statistiky, která má ukazovat postup, to nejhorší,
+   * co se může stát. Smazat návyk jde, ale klient je předem upozorněn na to,
+   * co se tím stane.
+   */
+  plannerHabits: defineTable({
+    clientId: v.id("plannerClients"),
+    name: v.string(),
+    order: v.number(),
+    /** kolik dnů v týdnu si klient dal za cíl; bez cíle se jen počítá */
+    target: v.optional(v.number()),
+    archivedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  }).index("by_client", ["clientId"]),
+
+  /**
+   * Jeden den deníku.
+   *
+   * Všechno, co se k jednomu dni zapisuje, je v jednom dokumentu: rozvrh,
+   * hodnocení, reflexe i odškrtnuté návyky. Odškrtnutí kolečka je tak jediný
+   * zápis a odznačení totéž, což je přesně to chování, které plánovač slibuje.
+   *
+   * Index je složený z klienta a data, takže se týden, měsíc i rok načtou
+   * jedním rozsahovým dotazem – řetězce „YYYY-MM-DD" se řadí jako kalendář.
+   */
+  plannerDays: defineTable({
+    clientId: v.id("plannerClients"),
+    date: v.string(),
+    schedule: v.array(v.object({ hour: v.number(), text: v.string() })),
+    ratings: v.object({
+      /** v hodinách, ne na škále 1 až 10 */
+      sleep: v.optional(v.number()),
+      energy: v.optional(v.number()),
+      focus: v.optional(v.number()),
+      mood: v.optional(v.number()),
+      productivity: v.optional(v.number()),
+    }),
+    reflection: v.object({
+      grateful: v.optional(v.string()),
+      win: v.optional(v.string()),
+      improve: v.optional(v.string()),
+    }),
+    habits: v.array(v.id("plannerHabits")),
+    updatedAt: v.number(),
+  }).index("by_client_date", ["clientId", "date"]),
+
+  /** Poznámky a nápady k týdnu. Klíčem je pondělí toho týdne. */
+  plannerWeeks: defineTable({
+    clientId: v.id("plannerClients"),
+    monday: v.string(),
+    notes: v.string(),
+    updatedAt: v.number(),
+  }).index("by_client_monday", ["clientId", "monday"]),
 })

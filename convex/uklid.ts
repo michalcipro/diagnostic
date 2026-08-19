@@ -22,6 +22,8 @@ export const LHUTY = {
   pokusy: 7,
   /** vypršelé relace */
   relace: 30,
+  /** nepoužité pozvánky do deníku po vypršení platnosti */
+  pozvankyDenik: 90,
 } as const
 
 const den = 24 * 60 * 60 * 1000
@@ -42,6 +44,8 @@ export const probehni = internalMutation({
     log: v.number(),
     pokusy: v.number(),
     relace: v.number(),
+    pozvankyDenik: v.number(),
+    relaceDenik: v.number(),
   }),
   handler: async (ctx) => {
     const now = Date.now()
@@ -113,6 +117,42 @@ export const probehni = internalMutation({
       }
     }
 
-    return { vysledky, vzorky, pozvanky, log: staryLog.length, pokusy, relace }
+    // Pozvánky do deníku. Použité se nemažou: váže se na ně účet klienta,
+    // takže by po nich zůstal deník bez stopy, odkud vznikl.
+    const starePozvankyDenik = await ctx.db
+      .query("plannerInvites")
+      .withIndex("by_created", (q) => q.lt("createdAt", now - LHUTY.pozvankyDenik * den))
+      .take(DAVKA)
+    let pozvankyDenik = 0
+    for (const p of starePozvankyDenik) {
+      if (p.usedAt) continue
+      if (p.expiresAt < now - LHUTY.pozvankyDenik * den) {
+        await ctx.db.delete(p._id)
+        pozvankyDenik++
+      }
+    }
+
+    // Vypršelé relace deníku. Zápisky samotné se neuklízejí vůbec: patří
+    // klientovi, ne nám, a mazat mu je po lhůtě by bylo totéž jako vyhodit
+    // někomu zápisník ze stolu.
+    const stareRelaceDenik = await ctx.db.query("plannerSessions").take(DAVKA)
+    let relaceDenik = 0
+    for (const r of stareRelaceDenik) {
+      if (r.expiresAt < now - LHUTY.relace * den) {
+        await ctx.db.delete(r._id)
+        relaceDenik++
+      }
+    }
+
+    return {
+      vysledky,
+      vzorky,
+      pozvanky,
+      log: staryLog.length,
+      pokusy,
+      relace,
+      pozvankyDenik,
+      relaceDenik,
+    }
   },
 })

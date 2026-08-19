@@ -29,10 +29,30 @@ const ZAMERNE_VEREJNE = {
   "auth.login": "přihlášení samo o sobě",
   "sessions.logout":
     "maže relaci podle jejího vlastního tokenu; kdo token má, může se rovnou přihlásit, takže odhlášení nic nepřidává",
+  "plannerAuth.login": "přihlášení do deníku samo o sobě",
+  "plannerAuth.activate":
+    "klient si zakládá deník na jednorázový odkaz od kouče; oprávnění nese token, účet ještě neexistuje",
+  "plannerCoach.getPlannerInvite":
+    "klient musí načíst svou pozvánku podle tokenu z odkazu, který dostal",
+  "planner.logout": "totéž co sessions.logout, jen pro relaci deníku",
 }
 
-/** Výrazy, které se považují za stráž. */
-const STRAZE = ["requireCoach", "vyzadujMastera", "filtrViditelnosti", "whoAmI"]
+/**
+ * Výrazy, které se považují za stráž.
+ *
+ * Deník má vlastní účty i vlastní relace, takže i vlastní stráž: klienta
+ * pouští dovnitř requireClient, ne requireCoach. Kdyby tu requireClient
+ * nebyl, hlásil by audit všechny funkce deníku jako díru a přestalo by se
+ * na něj koukat, což je horší než kdyby nekontroloval nic.
+ */
+const STRAZE = [
+  "requireCoach",
+  "vyzadujMastera",
+  "filtrViditelnosti",
+  "whoAmI",
+  "requireClient",
+  "overPristup",
+]
 
 /**
  * Funkce, do kterých smí výhradně master.
@@ -152,6 +172,47 @@ function chibiText(chybi) {
   const zapis = /^(\s*)await ctx\.db\.insert\("normSamples"/m.exec(telo)
   rekni(!!zapis, "submitWithInvite ukládá anonymní kopii do normSamples")
   rekni(!!zapis && zapis[1].length === 4, "zápis do normSamples není schovaný v podmínce")
+}
+
+// ---------------------------------------------------------------------------
+// Deník: koučovské funkce projdou pilotní bránou
+// ---------------------------------------------------------------------------
+//
+// Dokud je plánovač v pilotním provozu, smí s deníky pracovat jen master.
+// Hlídá se, že brána stojí u každé koučovské funkce a že opravdu vyžaduje
+// mastera. Až se pilot vypne, zůstane brána na místě a změní se jen to, co
+// dělá uvnitř; kontrola proto míří na volání, ne na roli.
+{
+  const zdroj = fs.readFileSync(path.join(KOREN, "plannerCoach.ts"), "utf8")
+  rekni(
+    /function overPristup[\s\S]{0,200}vyzadujMastera/.test(zdroj),
+    "pilotní brána deníku vyžaduje mastera",
+  )
+  const re = /export const (\w+) = (query|mutation|action)\(/g
+  let m
+  while ((m = re.exec(zdroj))) {
+    const jmeno = m[1]
+    // Pozvánku načítá klient bez účtu, ten žádnou roli nemá.
+    if (jmeno === "getPlannerInvite") continue
+    const dalsi = zdroj.indexOf("\nexport const ", re.lastIndex)
+    const telo = zdroj.slice(m.index, dalsi === -1 ? zdroj.length : dalsi)
+    rekni(telo.includes("overPristup(kouc)"), `plannerCoach.${jmeno} projde pilotní bránou`)
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Deník: kouč do obsahu nevidí
+// ---------------------------------------------------------------------------
+//
+// Nejde o oprávnění, ale o povahu věci. Deník je osobní zápisník, ne dotazník,
+// jehož výsledek se s koučem probírá. Kdyby do něj kouč viděl, přestal by být
+// tím, čím má být, a lidé by si do něj přestali psát pravdu. Proto se hlídá,
+// že koučovská část se tabulek se zápisky vůbec nedotkne.
+{
+  const zdroj = fs.readFileSync(path.join(KOREN, "plannerCoach.ts"), "utf8")
+  for (const tabulka of ["plannerDays", "plannerWeeks", "plannerHabits"]) {
+    rekni(!zdroj.includes(tabulka), `plannerCoach nesahá na tabulku ${tabulka}`)
+  }
 }
 
 const neprosle = POUZE_MASTER.filter((k) => !nalezenoMaster.has(k))

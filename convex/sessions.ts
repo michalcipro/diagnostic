@@ -104,7 +104,12 @@ export async function requireCoachProZapis(
 export async function zaznamenejPristup(
   ctx: MutationCtx,
   coachId: Id<"coaches">,
-  akce: "otevreni-vysledku" | "export-vzorku" | "smazani-vysledku" | "vytvoreni-pozvanky",
+  akce:
+    | "otevreni-vysledku"
+    | "export-vzorku"
+    | "smazani-vysledku"
+    | "vytvoreni-pozvanky"
+    | "vytvoreni-deniku",
   resultId?: Id<"eliteDiagnosticResults">,
 ): Promise<void> {
   await ctx.db.insert("pristupovyLog", { coachId, akce, resultId, at: Date.now() })

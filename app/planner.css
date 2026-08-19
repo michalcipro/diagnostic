@@ -1,0 +1,619 @@
+/* Weekly Planner – elektronická podoba papírové předlohy Winning Minds.
+ *
+ * Vizuál vychází z tištěného plánovače: papírový podklad, tenká mřížka,
+ * černé pruhy nadpisů, prázdná kolečka trackeru. Barvy jsou vlastní tokeny,
+ * ne natvrdo psané hodnoty, protože se všechny musí převrátit v tmavém
+ * režimu; papír, který v noci svítí do očí, je k ničemu.
+ */
+
+:root {
+  --pl-paper: #f9f7f2;
+  --pl-paper-2: #ffffff;
+  --pl-ink: #1f1f1f;
+  --pl-ink-2: #5c5850;
+  --pl-ink-3: #8b877e;
+  --pl-rule: #e2ded4;
+  --pl-rule-2: #ece8df;
+  --pl-frame: #b8b4aa;
+  --pl-band: #141414;
+  --pl-band-fg: #ffffff;
+  --pl-mark: #1f1f1f;
+  --pl-accent: #007aff;
+  --pl-good: #248a3d;
+  --pl-warn: #c93400;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pl-paper: #17171a;
+    --pl-paper-2: #1f1f23;
+    --pl-ink: #f0efec;
+    --pl-ink-2: #a9a69f;
+    --pl-ink-3: #7d7a74;
+    --pl-rule: #34343a;
+    --pl-rule-2: #2a2a2f;
+    --pl-frame: #4a4a52;
+    --pl-band: #e9e7e2;
+    --pl-band-fg: #17171a;
+    --pl-mark: #f0efec;
+    --pl-accent: #0a84ff;
+    --pl-good: #30d158;
+    --pl-warn: #ff9f0a;
+  }
+}
+
+/* ── kostra ───────────────────────────────────────────────────────────────── */
+
+.pl-root {
+  min-height: 100vh;
+  background: var(--wm-bg);
+  color: var(--pl-ink);
+}
+
+.pl-wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px 80px;
+}
+
+.pl-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--wm-glass);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--wm-border-light);
+}
+.pl-topbar-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pl-brand {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--pl-ink);
+  white-space: nowrap;
+}
+
+.pl-tabs {
+  display: inline-flex;
+  background: var(--wm-fill-4);
+  border-radius: 10px;
+  padding: 2px;
+  gap: 2px;
+}
+.pl-tabs button {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--wm-text-2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pl-tabs button[data-active="true"] {
+  background: var(--wm-surface);
+  color: var(--wm-text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.pl-btn {
+  border: 1px solid var(--wm-border-light);
+  background: var(--wm-surface);
+  color: var(--wm-text);
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.pl-btn:hover:not(:disabled) {
+  border-color: var(--wm-border);
+}
+.pl-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.pl-btn-primary {
+  background: var(--wm-brand);
+  border-color: var(--wm-brand);
+  color: var(--wm-brand-fg);
+}
+.pl-btn-quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--wm-text-2);
+}
+.pl-btn-danger {
+  color: var(--wm-red);
+  border-color: var(--wm-border-light);
+}
+
+/* ── list plánovače ───────────────────────────────────────────────────────── */
+
+.pl-sheet {
+  background: var(--pl-paper);
+  border: 1px solid var(--pl-frame);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 16px;
+  /* Papír má mřížku, po které se píše. Je to jemné, ale drží to celou
+     dvoustranu pohromadě stejně jako v tisku. */
+  background-image:
+    linear-gradient(var(--pl-rule-2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--pl-rule-2) 1px, transparent 1px);
+  background-size: 12px 12px;
+}
+
+.pl-band {
+  background: var(--pl-band);
+  color: var(--pl-band-fg);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  padding: 7px 10px;
+  border-radius: 4px;
+}
+
+.pl-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--pl-ink);
+  margin: 14px 0 6px;
+}
+.pl-section-hint {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--pl-ink-3);
+  margin-left: 8px;
+}
+
+.pl-box {
+  border: 1px solid var(--pl-frame);
+  background: var(--pl-paper-2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* ── mřížky ───────────────────────────────────────────────────────────────── */
+
+.pl-grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 12px;
+}
+.pl-grid th,
+.pl-grid td {
+  border: 1px solid var(--pl-rule);
+  padding: 0;
+  vertical-align: middle;
+}
+.pl-grid thead th {
+  background: var(--pl-paper);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--pl-ink);
+  padding: 6px 2px;
+  text-align: center;
+  border-bottom: 1.5px solid var(--pl-frame);
+}
+.pl-grid thead th[data-today="true"],
+.pl-grid td[data-today="true"] {
+  background: var(--wm-tint-blue);
+}
+.pl-grid .pl-rowhead {
+  width: 116px;
+  background: var(--pl-paper);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--pl-ink-2);
+  padding: 0 8px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pl-grid .pl-hour {
+  width: 54px;
+  background: var(--pl-paper);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--pl-ink-3);
+  text-align: right;
+  padding: 0 6px;
+}
+
+/* Buňka je celá klikatelná a vstup v ní nemá vlastní rámeček: mřížku kreslí
+   tabulka, takže dvojitá linka by list zaplevelila. */
+.pl-cell {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--pl-ink);
+  font: inherit;
+  font-size: 11.5px;
+  padding: 4px 6px;
+  outline: none;
+  min-height: 26px;
+}
+.pl-cell:focus {
+  background: var(--wm-tint-blue);
+}
+.pl-cell::placeholder {
+  color: transparent;
+}
+
+textarea.pl-cell {
+  resize: none;
+  line-height: 1.35;
+  display: block;
+}
+
+/* ── kolečka trackeru ─────────────────────────────────────────────────────── */
+
+.pl-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1.6px solid var(--pl-frame);
+  background: transparent;
+  display: block;
+  margin: 3px auto;
+  cursor: pointer;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.4, 0.64, 1),
+    background 0.14s ease,
+    border-color 0.14s ease;
+}
+.pl-dot:hover:not(:disabled) {
+  border-color: var(--pl-mark);
+  transform: scale(1.08);
+}
+.pl-dot:active:not(:disabled) {
+  transform: scale(0.9);
+  transition-duration: 0.06s;
+}
+.pl-dot[data-done="true"] {
+  background: var(--pl-mark);
+  border-color: var(--pl-mark);
+  animation: pl-pop 0.28s cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+.pl-dot[data-done="true"]::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2.5px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--pl-paper-2);
+  border-width: 0 1.8px 1.8px 0;
+  transform: rotate(45deg);
+}
+.pl-dot:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+@keyframes pl-pop {
+  0% { transform: scale(0.8); }
+  60% { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+
+/* ── hodnocení 1 až 10 ────────────────────────────────────────────────────── */
+
+.pl-score {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--pl-ink);
+  font: inherit;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: center;
+  padding: 5px 2px;
+  outline: none;
+  cursor: pointer;
+  min-height: 28px;
+  /* Šipky číselníku by v úzkém sloupci zabraly polovinu místa. */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.pl-score::-webkit-outer-spin-button,
+.pl-score::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.pl-score:focus {
+  background: var(--wm-tint-blue);
+}
+
+/* Sloupec s hodnotou dostane jemný podklad podle výše hodnocení, ať je na
+   list vidět, kde týden šel nahoru a kde dolů, bez čtení čísel. */
+.pl-heat {
+  position: relative;
+}
+.pl-heat::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--pl-mark);
+  opacity: calc(var(--pl-v, 0) * 0.13);
+  pointer-events: none;
+}
+
+/* ── statistiky ───────────────────────────────────────────────────────────── */
+
+.pl-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.pl-card {
+  background: var(--wm-surface);
+  border: 1px solid var(--wm-border-light);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.pl-card-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wm-text-3);
+}
+.pl-card-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+  color: var(--wm-text);
+}
+.pl-card-note {
+  font-size: 12px;
+  color: var(--wm-text-2);
+  margin-top: 4px;
+}
+
+.pl-delta {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.pl-delta[data-dir="up"] { color: var(--pl-good); }
+.pl-delta[data-dir="down"] { color: var(--pl-warn); }
+.pl-delta[data-dir="flat"] { color: var(--wm-text-3); }
+
+.pl-bar-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--wm-track);
+  overflow: hidden;
+}
+.pl-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--wm-brand);
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pl-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.pl-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--wm-text-3);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--wm-border-light);
+}
+.pl-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--wm-border-light);
+  vertical-align: middle;
+}
+.pl-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.pl-num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ── drobnosti ────────────────────────────────────────────────────────────── */
+
+.pl-note {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--wm-text-2);
+}
+.pl-status {
+  font-size: 12px;
+  color: var(--wm-text-3);
+  min-width: 74px;
+  text-align: right;
+}
+.pl-status[data-state="error"] {
+  color: var(--wm-red);
+}
+.pl-footer-motto {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--pl-ink-2);
+  padding: 14px 0 4px;
+}
+
+.pl-input {
+  width: 100%;
+  border: 1px solid var(--wm-border-light);
+  background: var(--wm-surface);
+  color: var(--wm-text);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 14px;
+  outline: none;
+}
+.pl-input:focus {
+  border-color: var(--wm-blue);
+  box-shadow: 0 0 0 3px var(--wm-tint-blue);
+}
+.pl-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--wm-text-2);
+  margin-bottom: 5px;
+}
+
+/* ── responzivita ─────────────────────────────────────────────────────────── */
+
+/* Dvoustrana se skládá vedle sebe jen tam, kde je na ni místo. Pod tím se
+   sloupce poskládají pod sebe a mřížka rozvrhu se schová úplně: sedm sloupců
+   textových polí na telefonu se nedá vyplnit, od toho je denní pohled. */
+.pl-spread {
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(0, 1fr);
+  gap: 16px;
+}
+@media (max-width: 1080px) {
+  .pl-spread {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 720px) {
+  .pl-only-wide {
+    display: none;
+  }
+  .pl-wrap {
+    padding: 0 10px 72px;
+  }
+  .pl-sheet {
+    padding: 10px;
+  }
+}
+.pl-hint-narrow {
+  display: none;
+}
+@media (max-width: 720px) {
+  .pl-hint-narrow {
+    display: block;
+  }
+}
+
+/* ── tisk ─────────────────────────────────────────────────────────────────── */
+
+/* Tištěný list má vyjít jako papírová předloha: A4 na šířku, jeden týden na
+   stránku, bez ovládacích prvků. Vstupní pole se tisknou jako obyčejný text,
+   jinak by prohlížeč kreslil rámečky formuláře. */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 8mm;
+  }
+  :root {
+    --pl-paper: #ffffff;
+    --pl-paper-2: #ffffff;
+    --pl-ink: #000000;
+    --pl-ink-2: #333333;
+    --pl-ink-3: #666666;
+    --pl-rule: #cccccc;
+    --pl-rule-2: #e6e6e6;
+    --pl-frame: #999999;
+    --pl-band: #141414;
+    --pl-band-fg: #ffffff;
+    --pl-mark: #000000;
+  }
+  body {
+    background: #ffffff;
+  }
+  .pl-topbar,
+  .pl-noprint {
+    display: none !important;
+  }
+  .pl-wrap {
+    max-width: none;
+    padding: 0;
+  }
+  .pl-sheet {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    background-image: none;
+  }
+  .pl-spread {
+    grid-template-columns: minmax(0, 1.28fr) minmax(0, 1fr);
+    gap: 8px;
+  }
+  .pl-only-wide {
+    display: revert;
+  }
+  .pl-band {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .pl-dot[data-done="true"] {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .pl-cell,
+  .pl-score {
+    color: #000000;
+  }
+  .pl-grid {
+    font-size: 8.5px;
+  }
+  .pl-cell {
+    font-size: 8px;
+    min-height: 0;
+    padding: 2px 3px;
+  }
+  .pl-grid thead th,
+  .pl-grid .pl-rowhead,
+  .pl-grid .pl-hour {
+    font-size: 7.5px;
+  }
+  .pl-dot {
+    width: 13px;
+    height: 13px;
+    margin: 1px auto;
+  }
+  .pl-dot[data-done="true"]::after {
+    left: 3.4px;
+    top: 1px;
+    width: 3px;
+    height: 6px;
+    border-width: 0 1.4px 1.4px 0;
+  }
+  .pl-heat::before {
+    display: none;
+  }
+}

@@ -13,6 +13,17 @@ nesdílí kód ani data s koučovací platformou.
   dostane jen potvrzení, vyhodnocení s ním kouč prochází osobně
 - **Design:** Apple HIG, světlý i tmavý režim, export do PDF / tisk
 
+## Weekly Planner
+
+Vedle diagnostiky běží **týdenní plánovač**: elektronická podoba papírového
+plánovače Winning Minds. Klient si pod vlastním přihlášením vede deník, aplikace
+z něj počítá týdenní, měsíční a roční statistiky. Do obsahu deníku nevidí nikdo
+kromě klienta, ani master.
+
+**Zatím je v pilotním provozu a pracovat s ním smí výhradně master účet.** Ostatní
+kouči záložku „Deníky" nevidí a server je odmítne. Podrobnosti, včetně toho, jak
+pilot vypnout, jsou v [docs/weekly-planner.md](docs/weekly-planner.md).
+
 ## Stack
 
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS · Convex
@@ -21,10 +32,14 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS · Convex
 
 ```
 app/                     # / (info), /t/[token] (dotazník na pozvánku),
-                         # /kouc (chráněná sekce), /setup/[token] (založení master účtu)
+                         # /kouc (chráněná sekce), /setup/[token] (založení master účtu),
+                         # /planner (deník klienta), /planner/start/[token] (založení deníku)
 components/diagnostic/   # sdílené UI (přepínač jazyka, grafy skóre, ReportView)
+components/planner/      # UI plánovače (týdenní list, denní pohled, statistiky, návyky)
 lib/diagnostic/          # logika: structure, scoring, i18n, items, content, remote
-convex/                  # backend: schema + eliteDiagnostic (submit, listForCoach, getForCoach)
+lib/planner/             # logika deníku: datum, stats, shrnuti, i18n, pdf, remote
+convex/                  # backend: schema + eliteDiagnostic (diagnostika)
+                         # + planner, plannerAuth, plannerCoach (deník)
 ```
 
 ## Kdo co vidí
@@ -33,7 +48,8 @@ convex/                  # backend: schema + eliteDiagnostic (submit, listForCoa
 | --- | --- |
 | Respondent | vyplní dotazník na přímém odkazu, po odeslání vidí **pouze potvrzení** |
 | Kouč | `/kouc` – po přihlášení seznam vyplnění, kompletní vyhodnocení, tisk do PDF, tvorba pozvánek |
-| Master | navíc správa účtů koučů |
+| Master | navíc správa účtů koučů a zakládání deníků |
+| Klient s deníkem | `/planner` – vlastní zápisky a statistiky; **nikdo jiný do nich nevidí** |
 
 Odpovědi ani vyhodnocení se z backendu nikdy nevrací bez platné přihlášené relace,
 která se ověřuje **serverově** v Convexu. Kontrola jen v prohlížeči by nestačila –
@@ -200,6 +216,19 @@ npm install
 npx convex dev      # 1. terminál: přihlásí, vytvoří dev projekt, zapíše .env.local
 npm run dev         # 2. terminál: http://localhost:3000
 ```
+
+## Kontroly před commitem
+
+```bash
+npx tsc --noEmit    # frontend
+npm run build       # sestavení
+npm run audit       # přístupová pravidla, jazyky, texty, plánovač, typy backendu
+```
+
+`npm run audit` spouští mimo jiné `scripts/typy-convex.cjs`, který zkontroluje
+Convex backend i bez nasazeného projektu: složka `convex` je v `tsconfig.json`
+vyloučená, protože se opírá o `convex/_generated`, a bez téhle kontroly by se
+serverové chyby poznaly až při nasazování.
 
 ## Nasazení na Vercel – přesný postup
 

@@ -27,9 +27,9 @@ const nextConfig = {
         ],
       },
       {
-        // Odkaz na dotazník i sekce kouče nemají co dělat ve vyhledávačích.
-        // Token v adrese se do indexu dostat nesmí.
-        source: "/(t|kouc|setup)/:cesta*",
+        // Odkaz na dotazník, sekce kouče ani deník nemají co dělat ve
+        // vyhledávačích. Token v adrese se do indexu dostat nesmí.
+        source: "/(t|kouc|setup|planner)/:cesta*",
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" }],
       },
     ]

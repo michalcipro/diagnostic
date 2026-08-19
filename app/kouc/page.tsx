@@ -5,6 +5,7 @@ import { LangToggle } from "@/components/diagnostic/lang-toggle"
 import { ManualView } from "@/components/diagnostic/manual-view"
 import { CoachCard } from "@/components/diagnostic/coach-card"
 import { ExternalPanel } from "@/components/diagnostic/external-panel"
+import { CoachPlannerPanel } from "@/components/planner/coach-planner-panel"
 import { ReportView } from "@/components/diagnostic/report-view"
 import { VzorceReport } from "@/components/vzorce/report"
 import { ArchetypyReport } from "@/components/archetypy/report"
@@ -80,7 +81,7 @@ export default function CoachPage() {
   const [detailLang, setDetailLang] = useState<Lang>("cs")
 
   const [tab, setTab] = useState<
-    "results" | "invites" | "manual" | "coaches" | "norms" | "externi" | "pristupy"
+    "results" | "invites" | "manual" | "coaches" | "norms" | "externi" | "pristupy" | "denik"
   >("results")
   const [externi, setExterni] = useState<ExternalUsage[] | null>(null)
   const [pristupy, setPristupy] = useState<PristupZaznam[] | null>(null)
@@ -508,7 +509,28 @@ export default function CoachPage() {
             Přístupy
           </button>
         )}
+        {/*
+          Týdenní plánovač je zatím v pilotním provozu a vidí na něj pouze
+          master. Skrytí záložky je jen pohodlí; ostatní kouče odmítne i server
+          (PILOTNI_REZIM v convex/plannerCoach.ts), takže se sem nedostanou ani
+          přímým voláním API.
+        */}
+        {meInfo.role === "master" && (
+          <button type="button" data-active={tab === "denik"} onClick={() => setTab("denik")}>
+            Deníky
+          </button>
+        )}
       </div>
+
+      {tab === "denik" && meInfo.role === "master" && (
+        <div className="mb-8">
+          <CoachPlannerPanel
+            sessionToken={session}
+            lang={lang}
+            origin={typeof window === "undefined" ? "" : window.location.origin}
+          />
+        </div>
+      )}
 
       {tab === "manual" && (
         <div className="mb-8">

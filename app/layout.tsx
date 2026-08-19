@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import "./globals.css"
 import "./diagnostic.css"
+import "./planner.css"
 
 export const metadata: Metadata = {
   title: {
