@@ -12,6 +12,7 @@ nesdílí kód ani data s koučovací platformou.
 - **Výsledky vidí pouze kouč** v chráněné sekci `/kouc`; respondent po odeslání
   dostane jen potvrzení, vyhodnocení s ním kouč prochází osobně
 - **Design:** Apple HIG, světlý i tmavý režim, export do PDF / tisk
+- **Deník:** vlastní vizuální okruh s prstenci a grafy, světlý i tmavý na přepínač
 
 ## Weekly Planner
 

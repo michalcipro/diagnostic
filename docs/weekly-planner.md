@@ -206,10 +206,67 @@ Osobní zápisky mají jít vzít s sebou; bez exportu by byl deník past.
 
 ## Vzhled
 
-Plánovač používá tytéž tokeny `--wm-*`, tytéž karty a tutéž typografii jako
-vyhodnocení diagnostiky. Otevírají se ze stejné domény a mají vypadat jako
-jeden produkt, ne jako dva programy vedle sebe. Papírová podoba předlohy se
-drží tam, kde na ni dojde: v tisku a v PDF.
+Klientský deník je samostatný vizuální okruh, ne jen jiná stránka diagnostiky.
+Stojí na velkých číslech, prstencích a grafech, protože se do něj kouká denně
+a musí být čitelný na jeden pohled z telefonu.
+
+### Dva motivy
+
+Deník má **světlý** a **tmavý** motiv. Výchozí je světlý, protože se do deníku
+píše i za bílého dne v kanceláři a tam je bílý list čitelnější. Tmavý se
+zapíná ikonou v horní liště a volba se pamatuje v prohlížeči
+(`lib/planner/storage.ts`, klíč `wm-planner:tema`).
+
+Systémové nastavení se schválně nečte: kdyby se motiv řídil systémem, dostala
+by polovina lidí tmavý deník, aniž by o to stála, a druhá by nevěděla, že
+tmavý existuje.
+
+Obojí stojí na týchž tokenech. Světlá paleta je na `.pl-root`, tmavá na
+`.pl-root[data-tema="tmave"]`, žádný motiv nemá vlastní pravidla. Kdyby je
+měl, opravila by se chyba jen v jednom a v druhém by zůstala, protože si jí
+nikdo nevšimne dřív, než ho někdo zapne.
+
+Tokeny `--pl-*` (plochy, linky, stíny, záře) a `--el-*` (akcenty) jsou navíc
+i na globálním `:root`. Tytéž třídy totiž kreslí i koučovská sekce, která obal
+`.pl-root` nemá, a bez nich by tam karty přišly o stín a vstupy o pozadí:
+neznámá proměnná není chyba, jen neplatná deklarace, které si nikdo nevšimne.
+
+Barva pásma má **dvě podoby**, viz `components/planner/score-ring.tsx`.
+`barvaPasma()` vrací sytější odstín pro grafiku, kde norma žádá kontrast 3:1
+(obrys prstence, čára grafu). `barvaPasmaText()` vrací tmavší odstín pro text,
+kde je hranice 4,5:1. Zelená, která na bílé drží na obrysu prstence, by jako
+drobné číslo nestačila. Ze stejného důvodu má text na barevné výplni škály
+vlastní token pro každou barvu (`--el-na-akcentu`, `--el-na-jantaru`,
+`--el-na-rubinu`): bílá na jantarovém podkladu má kontrast 1,8:1.
+
+Hlídá to `scripts/test-planner.cjs`, oddíl „motivy": každý použitý token musí
+být ve světlém motivu, v tmavém i na globálním `:root`, v pravidlech nesmí být
+barva natvrdo a tiskový blok musí přebít i tmavou větev (ta má vyšší
+specificitu, takže bez toho by se z tmavého motivu tiskl neon na papír).
+
+Kontrast se neodhaduje. Skript v prohlížeči čte skutečně vykreslené barvy
+včetně průhledných vrstev nad kartou a v obou motivech na mobilu i na počítači
+musí vyjít nula textů pod hranicí WCAG AA.
+
+### Denní pohled
+
+Hlavní obrazovka telefonu. Nahoře tři prstence: skóre dne, návyky a spánek.
+Oblouk se po otevření dotáhne na hodnotu a číslo uvnitř k ní dopočítá; obojí
+se vypíná, když si člověk v systému vyžádá omezený pohyb. Pod nimi vstupy
+v pořadí, v jakém se den vyplňuje: hodnocení, návyky, reflexe, rozvrh.
+
+Hodnocení je řada čipů 1 až 10, ne číselník. Vybraný čip nese barvu svého
+pásma, takže se stav dá přečíst z dálky bez čtení číslic. Na telefonu se řada
+láme na dva řádky po pěti, ať se dá trefit palcem.
+
+Záložky drží spodní navigace s ikonami, protože palec dosáhne dolů, ne nahoru.
+Na širokých obrazovkách ji CSS skryje a záložky sedí v horní liště.
+
+### Papír a mřížka
+
+Papírová podoba předlohy se drží tam, kde na ni dojde: v tisku a v PDF. Tisk
+je světlý v obou motivech, tmavé téma by na papíře vypilo toner a nepřineslo
+nic.
 
 Ovládací prvky mají jednotnou výšku (`--pl-ovladani`), odstupy drží
 čtyřpixelovou mřížku a krajní sloupce tabulek lícují s okrajem karty. Bez toho

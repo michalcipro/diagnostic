@@ -474,6 +474,95 @@ console.log("\n– dočasné heslo –")
 }
 
 // ---------------------------------------------------------------------------
+// 9) motivy deníku
+// ---------------------------------------------------------------------------
+//
+// Deník má světlý a tmavý motiv postavený na týchž tokenech. Pokazit se to dá
+// tiše dvěma způsoby a oba se v praxi staly:
+//
+// 1. Token se použije v pravidle, ale chybí v jednom motivu. Neznámá proměnná
+//    není chyba, jen neplatná deklarace, takže druhý motiv prostě přijde
+//    o stín nebo o pozadí a nikdo si toho nevšimne, dokud ho nezapne.
+// 2. Do pravidla se napíše barva natvrdo. Vypadá dobře v tom motivu, ve
+//    kterém ji člověk psal, a rozbije ten druhý. Přesně tak se do vybraného
+//    tlačítka škály dostala bílá, která na jantarovém podkladu není vidět.
+//
+// Tokeny musí být navíc i na globálním :root, protože tytéž třídy kreslí
+// i koučovská sekce, která obal .pl-root nemá.
+
+console.log("\n– motivy –")
+
+{
+  const css = fs.readFileSync(path.join(KOREN, "app", "planner.css"), "utf8")
+
+  /** Tělo pravidla se zadaným selektorem, hledané párováním závorek. */
+  const blok = (selektor) => {
+    const od = css.indexOf(selektor + " {")
+    if (od === -1) return null
+    let hloubka = 0
+    for (let i = css.indexOf("{", od); i < css.length; i++) {
+      if (css[i] === "{") hloubka++
+      else if (css[i] === "}" && --hloubka === 0) return css.slice(od, i)
+    }
+    return null
+  }
+
+  const svetly = blok(".pl-root")
+  const tmavy = blok('.pl-root[data-tema="tmave"]')
+  const globalni = blok(":root")
+  rekni(!!svetly && !!tmavy && !!globalni, "planner.css má oba motivy i globální tokeny")
+
+  if (svetly && tmavy && globalni) {
+    // `--pl-v` se předává inline z komponenty, `--pl-ovladani` je rozměr
+    // ve vlastním bloku; barvy to nejsou a do motivů nepatří.
+    const MIMO = new Set(["--pl-v", "--pl-ovladani"])
+    const pouzite = [...new Set([...css.matchAll(/var\((--(?:pl|el)-[a-z0-9-]+)/g)].map((m) => m[1]))]
+      .filter((t) => !MIMO.has(t))
+      .sort()
+
+    for (const [jmeno, telo] of [
+      ["světlém motivu", svetly],
+      ["tmavém motivu", tmavy],
+      ["globálním :root", globalni],
+    ]) {
+      const chybejici = pouzite.filter((t) => !telo.includes(`${t}:`))
+      rekni(
+        chybejici.length === 0,
+        `všechny tokeny jsou v ${jmeno}${chybejici.length ? ` (chybí: ${chybejici.join(", ")})` : ` (${pouzite.length})`}`,
+      )
+    }
+
+    // Barvy natvrdo v pravidlech. Definice tokenů se vynechávají, protože
+    // právě ty barvu obsahovat mají; hledá se barva v běžné vlastnosti, tedy
+    // tam, kde se váže na jeden motiv. Tisk je výjimka: tam se sází na papír
+    // a odstíny na motivu nezávisí.
+    const tisk = css.indexOf("@media print {")
+    const telo = css
+      .slice(0, tisk === -1 ? css.length : tisk)
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .split("\n")
+      // Podklad dokumentu je jediné místo, kde barva přes token jít nemůže:
+      // `body` stojí nad kořenem motivu, takže jeho proměnné ještě nezná.
+      .filter((r) => !/^\s*--[a-z0-9-]+\s*:/.test(r) && !r.includes("body:has("))
+      .join("\n")
+    const barvy = [
+      ...telo.matchAll(/(?:^|[\s:,(])(#[0-9a-fA-F]{3,8})\b/g),
+      ...telo.matchAll(/(rgba?\([^)]*\))/g),
+    ].map((m) => m[1])
+    rekni(
+      barvy.length === 0,
+      `v pravidlech není barva natvrdo${barvy.length ? ` (${[...new Set(barvy)].slice(0, 6).join(", ")})` : ""}`,
+    )
+
+    // Tisk musí přebít i tmavou větev, ta má vyšší specificitu.
+    rekni(
+      /@media print \{[\s\S]{0,400}\.pl-root,\s*\n?\s*\.pl-root\[data-tema="tmave"\]/.test(css),
+      "tiskový blok přebíjí i tmavý motiv",
+    )
+  }
+}
+
+// ---------------------------------------------------------------------------
 
 console.log(`\n${chyb === 0 ? "Vše v pořádku." : `Chyb: ${chyb}`}`)
 process.exit(chyb === 0 ? 0 : 1)
