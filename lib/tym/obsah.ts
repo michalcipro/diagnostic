@@ -52,6 +52,8 @@ export interface TymTexty {
   nalezyTitul: string
   nalezyUvod: string
   prvniPraskne: string
+  /** štítek u nálezu, který má přednost před ostatními */
+  silaVysoka: string
   stitkyNalezu: { coJeVidet: string; coToDela: string; coSTim: string; coNedelat: string }
   bezNalezu: string
 
@@ -104,6 +106,7 @@ const CS: TymTexty = {
     "sebedůvěra sama o sobě je dobrá zpráva; vysoká sebedůvěra vedle chybějícího " +
     "bezpečí v komunikaci je něco úplně jiného.",
   prvniPraskne: "Tohle praskne první",
+  silaVysoka: "Vysoká priorita",
   stitkyNalezu: {
     coJeVidet: "Co je v datech vidět",
     coToDela: "Co to se skupinou dělá",
@@ -365,6 +368,7 @@ const EN: TymTexty = {
     "its own is good news; high confidence next to missing safety in communication " +
     "is something else entirely.",
   prvniPraskne: "This breaks first",
+  silaVysoka: "High priority",
   stitkyNalezu: {
     coJeVidet: "What the data shows",
     coToDela: "What it does to the group",

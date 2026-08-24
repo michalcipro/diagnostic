@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { LangToggle } from "@/components/diagnostic/lang-toggle"
 import { ManualView } from "@/components/diagnostic/manual-view"
+import { TymKouce, TymyMaster } from "@/components/tym/panel"
 import { CoachCard } from "@/components/diagnostic/coach-card"
 import { ExternalPanel } from "@/components/diagnostic/external-panel"
 import { CoachPlannerPanel } from "@/components/planner/coach-planner-panel"
@@ -81,7 +82,15 @@ export default function CoachPage() {
   const [detailLang, setDetailLang] = useState<Lang>("cs")
 
   const [tab, setTab] = useState<
-    "results" | "invites" | "manual" | "coaches" | "norms" | "externi" | "pristupy" | "denik"
+    | "results"
+    | "invites"
+    | "manual"
+    | "tymy"
+    | "coaches"
+    | "norms"
+    | "externi"
+    | "pristupy"
+    | "denik"
   >("results")
   const [externi, setExterni] = useState<ExternalUsage[] | null>(null)
   const [pristupy, setPristupy] = useState<PristupZaznam[] | null>(null)
@@ -461,6 +470,18 @@ export default function CoachPage() {
         <button type="button" data-active={tab === "manual"} onClick={() => setTab("manual")}>
           {t.tabManual}
         </button>
+        {(meInfo.role === "master" || meInfo.role === "external") && (
+          <button
+            type="button"
+            data-active={tab === "tymy"}
+            onClick={() => {
+              setTab("tymy")
+              if (meInfo.role === "master" && coaches === null) void loadCoaches()
+            }}
+          >
+            Týmy
+          </button>
+        )}
         {meInfo.role === "master" && (
           <button
             type="button"
@@ -529,6 +550,22 @@ export default function CoachPage() {
             lang={lang}
             origin={typeof window === "undefined" ? "" : window.location.origin}
           />
+        </div>
+      )}
+
+      {tab === "tymy" && meInfo.role === "master" && (
+        <div className="mb-8">
+          <TymyMaster
+            sessionToken={session}
+            kouci={coaches ?? []}
+            lang={lang === "en" ? "en" : "cs"}
+          />
+        </div>
+      )}
+
+      {tab === "tymy" && meInfo.role === "external" && (
+        <div className="mb-8">
+          <TymKouce sessionToken={session} lang={lang === "en" ? "en" : "cs"} />
         </div>
       )}
 

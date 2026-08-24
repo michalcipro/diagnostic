@@ -149,7 +149,12 @@ export async function fetchInvite(token: string): Promise<Invite> {
  * Odešle vyplněný dotazník proti pozvánce. Vrací true při úspěchu.
  * Respondent zpět nedostává žádná data – vyhodnocení vidí jen kouč.
  */
-export async function submitWithInvite(token: string, session: StoredSession): Promise<boolean> {
+export async function submitWithInvite(
+  token: string,
+  session: StoredSession,
+  /** jen u týmové pozvánky: souhlas hráče se sdílením vyhodnocení s koučem */
+  sdilet?: boolean,
+): Promise<boolean> {
   const c = client()
   if (!c) return false
   try {
@@ -158,6 +163,7 @@ export async function submitWithInvite(token: string, session: StoredSession): P
       person: session.person,
       answers: JSON.stringify(session.answers),
       durationSec: sessionDurationSec(session),
+      sdilet,
     })
     return true
   } catch (err) {
@@ -462,4 +468,144 @@ export async function pristupovyLog(sessionToken: string): Promise<PristupZaznam
   const c = client()
   if (!c) throw new Error("not-configured")
   return (await c.query(pristupovyLogRef, { sessionToken })) as PristupZaznam[]
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Týmy a kluby
+// ─────────────────────────────────────────────────────────────────────────────
+
+const createTeamRef = makeFunctionReference<"mutation">("teams:createTeam")
+const setTeamActiveRef = makeFunctionReference<"mutation">("teams:setTeamActive")
+const listTeamsRef = makeFunctionReference<"query">("teams:listTeams")
+const mojeTymyRef = makeFunctionReference<"query">("teams:mojeTymy")
+const createPlayerInviteRef = makeFunctionReference<"mutation">("teams:createPlayerInvite")
+const listPlayersRef = makeFunctionReference<"query">("teams:listPlayers")
+const teamReportRef = makeFunctionReference<"query">("teams:teamReport")
+
+/** Tým v přehledu mastera. */
+export interface TeamRow {
+  id: string
+  nazev: string
+  coachId: string
+  coachName: string
+  active: boolean
+  note?: string
+  createdAt: number
+  pozvano: number
+  odevzdano: number
+}
+
+/** Tým očima kouče, který ho vede. */
+export interface MujTym {
+  id: string
+  nazev: string
+  active: boolean
+  pozvano: number
+  odevzdano: number
+}
+
+/** Řádek soupisky: jeden štítek hráče. */
+export interface PlayerRow {
+  inviteId: string
+  token: string
+  stitek: string
+  lang: string
+  createdAt: number
+  expiresAt?: number
+  odevzdanoAt?: number
+  sdileno: boolean
+  jmeno?: string
+  resultId?: string
+}
+
+/** Souhrnný profil týmu tak, jak ho spočítal server. */
+export interface TeamReport {
+  nazev: string
+  pozvano: number
+  odevzdano: number
+  zapocteno: number
+  oblasti: {
+    id: string
+    prumer: number
+    smodch: number
+    min: number
+    max: number
+    pasma: { priority: number; stabilization: number; strong: number; elite: number }
+    rozkol: boolean
+    plosna: boolean
+  }[]
+  opory: string[]
+  priority: string[]
+  zlomy: string[]
+  nalezy: { kod: string; sila: "vysoka" | "stredni"; oblasti: string[] }[]
+  maloDat: boolean
+}
+
+export async function createTeam(
+  sessionToken: string,
+  nazev: string,
+  coachId: string,
+  note?: string,
+): Promise<{ id: string }> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  try {
+    return (await c.mutation(createTeamRef, { sessionToken, nazev, coachId, note })) as { id: string }
+  } catch (e) {
+    throw new Error(chybaText(e, "Tým se nepodařilo založit."))
+  }
+}
+
+export async function setTeamActive(
+  sessionToken: string,
+  teamId: string,
+  active: boolean,
+): Promise<void> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  await c.mutation(setTeamActiveRef, { sessionToken, teamId, active })
+}
+
+export async function listTeams(sessionToken: string): Promise<TeamRow[]> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(listTeamsRef, { sessionToken })) as TeamRow[]
+}
+
+export async function mojeTymy(sessionToken: string): Promise<MujTym[]> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(mojeTymyRef, { sessionToken })) as MujTym[]
+}
+
+export async function createPlayerInvite(
+  sessionToken: string,
+  teamId: string,
+  stitek: string,
+  lang: string,
+): Promise<{ token: string }> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  try {
+    return (await c.mutation(createPlayerInviteRef, { sessionToken, teamId, stitek, lang })) as {
+      token: string
+    }
+  } catch (e) {
+    throw new Error(chybaText(e, "Odkaz se nepodařilo vystavit."))
+  }
+}
+
+export async function listPlayers(sessionToken: string, teamId: string): Promise<PlayerRow[]> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(listPlayersRef, { sessionToken, teamId })) as PlayerRow[]
+}
+
+export async function teamReport(
+  sessionToken: string,
+  teamId: string,
+): Promise<TeamReport | null> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(teamReportRef, { sessionToken, teamId })) as TeamReport | null
 }

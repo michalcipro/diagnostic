@@ -3,7 +3,7 @@
 import { use, useEffect, useMemo, useRef, useState } from "react"
 import { LangToggle } from "@/components/diagnostic/lang-toggle"
 import { UI } from "@/lib/diagnostic/i18n"
-import { JAZYKY_TYMU, nazevTestu } from "@/lib/diagnostic/nazvy"
+import { JAZYKY_TYMU, SOUHLAS, nazevTestu } from "@/lib/diagnostic/nazvy"
 import { testMeta } from "@/lib/diagnostic/test-meta"
 import { applyGender } from "@/lib/diagnostic/gender"
 import { getItems, itemText, type Item } from "@/lib/diagnostic/items"
@@ -129,6 +129,44 @@ function InviteProblem({ kind, lang }: { kind: "invalid" | "used" | "expired"; l
   )
 }
 
+/**
+ * Volba sdílení na konci týmového dotazníku.
+ *
+ * Stojí nad tlačítkem Odeslat, ne v nastavení: je to rozhodnutí, které má hráč
+ * udělat vědomě, ne ho někde najít. Zaškrtnutí znamená odmítnutí, takže kdo
+ * projde bez čtení, skončí u sdílení, které si kouč objednal.
+ */
+function SouhlasKarta({
+  lang,
+  gender,
+  nesdilet,
+  onChange,
+}: {
+  lang: Lang
+  gender: "male" | "female"
+  nesdilet: boolean
+  onChange: (v: boolean) => void
+}) {
+  const s = SOUHLAS[lang === "en" ? "en" : "cs"]
+  return (
+    <section className="diag-card mt-8 p-6">
+      <h2 className="text-[16px] font-bold tracking-tight">{s.nadpis}</h2>
+      <label className="mt-4 flex cursor-pointer items-start gap-3">
+        <input
+          type="checkbox"
+          checked={nesdilet}
+          onChange={(e) => onChange(e.target.checked)}
+          className="mt-[3px] h-[18px] w-[18px] shrink-0 accent-[var(--wm-blue)]"
+        />
+        <span className="text-[15px] font-semibold leading-snug">{s.volba}</span>
+      </label>
+      <p className="mt-3 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
+        {applyGender(s.vysvetleni, gender)}
+      </p>
+    </section>
+  )
+}
+
 function Questionnaire({
   token,
   testId,
@@ -165,6 +203,9 @@ function Questionnaire({
   const [block, setBlock] = useState(0)
   const [showMissing, setShowMissing] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  // Souhlas se sdílením. Výchozí je sdílet: kouč si test objednal a hráč, který
+  // nic nezmění, obvykle nic namítat nechce. Odmítnutí je vědomý krok.
+  const [nesdilet, setNesdilet] = useState(false)
   const topRef = useRef<HTMLDivElement>(null)
 
   // Rozpracované odpovědi se drží pod tokenem – klient si může dát pauzu
@@ -227,7 +268,9 @@ function Questionnaire({
     // Odeslání kouči proti pozvánce. Respondent výsledky nevidí – projde je
     // s ním kouč osobně, proto se po odeslání zobrazuje jen potvrzení.
     setSubmitting(true)
-    const ok = isRemoteEnabled() ? await submitWithInvite(token, done) : false
+    const ok = isRemoteEnabled()
+      ? await submitWithInvite(token, done, tymova ? !nesdilet : undefined)
+      : false
     setSubmitting(false)
     // Po úspěšném odeslání odpovědi z prohlížeče zmizí. Na sdíleném počítači
     // by je jinak našel další, kdo si stránku otevře; server je má a klient
@@ -476,6 +519,15 @@ function Questionnaire({
                   {t.jumpToFirstMissing}
                 </button>
               </div>
+            )}
+
+            {tymova && block === blocks - 1 && (
+              <SouhlasKarta
+                lang={lang}
+                gender={session.person.gender ?? "male"}
+                nesdilet={nesdilet}
+                onChange={setNesdilet}
+              />
             )}
 
             <div className="mt-8 flex items-center justify-between">
