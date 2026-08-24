@@ -10,14 +10,17 @@ export function LangToggle({
   lang,
   onChange,
   className,
+  jazyky = JAZYKY,
 }: {
   lang: Lang
   onChange: (lang: Lang) => void
   className?: string
+  /** Z čeho se vybírá. Týmová větev slovenštinu nenabízí. */
+  jazyky?: readonly Lang[]
 }) {
   return (
     <div className={`diag-segment ${className ?? ""}`} role="tablist" aria-label="Language">
-      {JAZYKY.map((l) => (
+      {jazyky.map((l) => (
         <button
           key={l}
           type="button"

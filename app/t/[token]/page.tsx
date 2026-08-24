@@ -2,7 +2,8 @@
 
 import { use, useEffect, useMemo, useRef, useState } from "react"
 import { LangToggle } from "@/components/diagnostic/lang-toggle"
-import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
+import { UI } from "@/lib/diagnostic/i18n"
+import { JAZYKY_TYMU, nazevTestu } from "@/lib/diagnostic/nazvy"
 import { testMeta } from "@/lib/diagnostic/test-meta"
 import { applyGender } from "@/lib/diagnostic/gender"
 import { getItems, itemText, type Item } from "@/lib/diagnostic/items"
@@ -45,6 +46,7 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
       testId={invite.testId as TestId}
       inviteLang={(invite.lang as Lang) ?? "cs"}
       clientName={invite.clientName ?? ""}
+      tym={invite.tym}
     />
   )
 }
@@ -132,12 +134,17 @@ function Questionnaire({
   testId,
   inviteLang,
   clientName,
+  tym,
 }: {
   token: string
   testId: TestId
   inviteLang: Lang
   clientName: string
+  /** název týmu, když odkaz přišel z klubu; jinak nevyplněno */
+  tym?: string
 }) {
+  // Klubová větev má vlastní názvosloví a nabízí jen dva jazyky.
+  const tymova = tym !== undefined
   // Vzorce nepatří do rodiny ELITE, takže nemají model ani variantu.
   const parsed = parseTestId(testId)
   const variant = parsed?.variant ?? "business"
@@ -264,12 +271,12 @@ function Questionnaire({
               </div>
             )}
           </div>
-          <LangToggle lang={lang} onChange={setLang} />
+          <LangToggle lang={lang} onChange={setLang} jazyky={tymova ? JAZYKY_TYMU : undefined} />
         </div>
       </div>
 
       <div className="diag-container pb-24 pt-8">
-        <h1 className="text-[22px] font-bold tracking-tight">{TEST_NAMES[testId][lang]}</h1>
+        <h1 className="text-[22px] font-bold tracking-tight">{nazevTestu(testId, lang, tymova)}</h1>
 
         {stage === "intro" && (
           <div className="mt-6 flex flex-col gap-5">

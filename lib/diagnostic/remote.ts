@@ -107,6 +107,8 @@ export interface Invite {
   testId?: TestId
   lang?: Lang
   clientName?: string
+  /** název týmu; jen u týmové pozvánky. Podle něj dotazník pozná větev. */
+  tym?: string
 }
 
 /** Pozvánka v přehledu kouče. */
