@@ -52,6 +52,25 @@ export default defineSchema({
     .index("by_coach", ["coachId"]),
 
   // Pozvánka = jeden odkaz pro jednoho klienta na jeden konkrétní test.
+  // Týmy a kluby.
+  //
+  // Vlastní větev vedle koučování jednotlivců. Klub dostane svého kouče, ten
+  // rozešle hráčům odkazy a pracuje s jejich výsledky. Master do výsledků
+  // jednotlivých hráčů nevidí; z týmu zná název a souhrnný profil, nic víc.
+  //
+  // Kdo tým vede, je vždycky externí kouč: klub je cizí organizace a jeho
+  // hráči nejsou naši klienti.
+  teams: defineTable({
+    nazev: v.string(),
+    coachId: v.id("coaches"),
+    createdAt: v.number(),
+    active: v.boolean(),
+    /** interní poznámka mastera, například smluvní podmínky klubu */
+    note: v.optional(v.string()),
+  })
+    .index("by_coach", ["coachId"])
+    .index("by_created", ["createdAt"]),
+
   invitations: defineTable({
     token: v.string(), // neuhodnutelný token v odkazu /t/<token>
     testId: v.string(),
@@ -63,6 +82,15 @@ export default defineSchema({
      * U záznamů z doby před externími kouči chybí; ty patří nám.
      */
     coachId: v.optional(v.id("coaches")),
+    /**
+     * Tým, do kterého pozvánka patří. U pozvánek mimo týmovou větev chybí.
+     *
+     * `clientName` u týmové pozvánky nese štítek hráče, který si kouč zvolil,
+     * třeba „Player 7". Přiřazení štítku ke jménu drží kouč u sebe, v aplikaci
+     * nikde není. Hráč si při vyplňování může štítek nechat, nebo místo něj
+     * napsat svoje jméno; tím se rozhoduje, jestli ho kouč uvidí jmenovitě.
+     */
+    teamId: v.optional(v.id("teams")),
     createdAt: v.number(),
     /**
      * Do kdy odkaz platí. Nepoužitá pozvánka se po uplynutí neotevře:
@@ -76,6 +104,7 @@ export default defineSchema({
   })
     .index("by_token", ["token"])
     .index("by_coach", ["coachId"])
+    .index("by_team", ["teamId"])
     .index("by_created", ["createdAt"]),
 
   // Anonymní vzorek pro tvorbu norem.
@@ -150,12 +179,26 @@ export default defineSchema({
      * u záznamů z doby před externími kouči; ty patří nám.
      */
     coachId: v.optional(v.id("coaches")),
+    /** Tým, do jehož souhrnu vyplnění vstupuje. Mimo týmovou větev chybí. */
+    teamId: v.optional(v.id("teams")),
+    /** Štítek z pozvánky, třeba „Player 7". Drží se i když hráč vyplní jméno. */
+    stitek: v.optional(v.string()),
+    /**
+     * Jestli hráč souhlasil, aby jeho vyhodnocení viděl kouč.
+     *
+     * Nesouhlas skryje vyhodnocení i odpovědi před koučem; do souhrnu týmu
+     * vstupují tak jako tak, o čemž je hráč před odesláním zpraven. Chybí
+     * u vyplnění mimo týmovou větev a u záznamů pořízených dřív; tam se
+     * sdílení řeší tím, čí je to větev.
+     */
+    sdilet: v.optional(v.boolean()),
     /** párovací klíč k anonymnímu vzorku, viz normSamples.vymazovyKlic */
     vymazovyKlic: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_created", ["createdAt"])
-    .index("by_coach", ["coachId"]),
+    .index("by_coach", ["coachId"])
+    .index("by_team", ["teamId"]),
 
   // Neúspěšná přihlášení. Bez stropu by šlo hesla zkoušet ve smyčce: Convex
   // vystavuje auth:login na veřejném API a PBKDF2 útok jen zpomalí.

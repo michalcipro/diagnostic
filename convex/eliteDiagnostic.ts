@@ -72,9 +72,9 @@ const personValidator = v.object({
 // ---------------------------------------------------------------------------
 
 /** Jak dlouho platí nepoužitá pozvánka. */
-const PLATNOST_POZVANKY_DNI = 30
+export const PLATNOST_POZVANKY_DNI = 30
 
-const MEZ = {
+export const MEZ = {
   jmeno: 120,
   role: 200,
   datum: 40,
@@ -84,7 +84,7 @@ const MEZ = {
 } as const
 
 /** Zkontroluje délku textu; prázdný a nevyplněný vstup projde. */
-function delka(hodnota: string | undefined, mez: number, popis: string): void {
+export function delka(hodnota: string | undefined, mez: number, popis: string): void {
   if (hodnota !== undefined && hodnota.length > mez) {
     throw new ConvexError(`${popis} je příliš dlouhé (nejvýš ${mez} znaků).`)
   }
@@ -165,6 +165,17 @@ function vymazovyKlic(): string {
 // ---------------------------------------------------------------------------
 
 /** Vytvoří pozvánku na jedno použití. Pouze pro kouče. */
+/**
+ * Nesdílené vyhodnocení hráče nevidí nikdo z koučů.
+ *
+ * Ani ten, kdo pozvánku vystavil: v týmové větvi si hráč před odesláním volí,
+ * jestli k němu kouč smí, a kdyby to obešel vlastník pozvánky, byla by ta volba
+ * na oko. Do souhrnu týmu záznam vstupuje dál, o čemž hráč ví.
+ */
+function sdileno(d: { sdilet?: boolean }): boolean {
+  return d.sdilet !== false
+}
+
 export const createInvite = mutation({
   args: {
     sessionToken: v.string(),
@@ -216,6 +227,8 @@ export const getInvite = query({
     testId: v.optional(v.string()),
     lang: v.optional(v.string()),
     clientName: v.optional(v.string()),
+    /** název týmu; jen u týmové pozvánky, jinak chybí */
+    tym: v.optional(v.string()),
   }),
   handler: async (ctx, args) => {
     const inv = await ctx.db
@@ -231,11 +244,15 @@ export const getInvite = query({
     if (inv.expiresAt !== undefined && inv.expiresAt < Date.now()) {
       return { status: "expired" as const, lang: inv.lang }
     }
+    // Název týmu se hráči ukáže, ať vidí, od koho odkaz je. Zároveň podle něj
+    // dotazník pozná, že má nabídnout volbu sdílení a vlastní vyhodnocení.
+    const tym = inv.teamId ? await ctx.db.get(inv.teamId) : null
     return {
       status: "ok" as const,
       testId: inv.testId,
       lang: inv.lang,
       clientName: inv.clientName,
+      tym: tym?.nazev,
     }
   },
 })
@@ -308,6 +325,11 @@ export const submitWithInvite = mutation({
     answers: v.string(), // JSON { "1": 4, … }
     /** doba vyplňování v sekundách; vstupuje do kontroly validity */
     durationSec: v.optional(v.number()),
+    /**
+     * Jen u týmové pozvánky: jestli hráč dovolil kouči vidět jeho vyhodnocení.
+     * Chybí, když se pozvánka týmu netýká.
+     */
+    sdilet: v.optional(v.boolean()),
   },
   returns: v.object({ ok: v.boolean() }),
   handler: async (ctx, args) => {
@@ -385,6 +407,13 @@ export const submitWithInvite = mutation({
       complete: answeredCount === itemCount,
       durationSec,
       coachId: inv.coachId,
+      // Týmová vazba se přebírá z pozvánky, ne od klienta: kdyby o ní
+      // rozhodoval prohlížeč, dalo by se vyplnění podstrčit cizímu týmu.
+      teamId: inv.teamId,
+      stitek: inv.teamId ? inv.clientName : undefined,
+      // Sdílení se řeší jen v týmové větvi. Mimo ni o přístupu rozhoduje to,
+      // čí je to větev, a hodnota by jen mátla.
+      sdilet: inv.teamId ? args.sdilet !== false : undefined,
       vymazovyKlic: klic,
       createdAt: now,
     })
@@ -448,7 +477,7 @@ export const listForCoach = query({
       .withIndex("by_created")
       .order("desc")
       .take(500)
-    const docs = vsechna.filter((d) => vidi(d.coachId))
+    const docs = vsechna.filter((d) => vidi(d.coachId) && sdileno(d))
     return docs.map((d) => ({
       id: d._id,
       testId: d.testId,
@@ -494,7 +523,7 @@ export const getForCoach = mutation({
     if (!d) return null
     // Cizí větev se nevrací ani na přímý dotaz s uhodnutým id.
     const vidi = await filtrViditelnosti(ctx, me)
-    if (!vidi(d.coachId)) return null
+    if (!vidi(d.coachId) || !sdileno(d)) return null
     await zaznamenejPristup(ctx, me._id, "otevreni-vysledku", d._id)
     return {
       id: d._id,
@@ -621,7 +650,9 @@ export const removeForCoach = mutation({
     const doc = await ctx.db.get(args.id)
     if (!doc) return { ok: true, vzorekSmazan: false }
     const vidi = await filtrViditelnosti(ctx, me)
-    if (!vidi(doc.coachId)) throw new ConvexError("Tohle vyplnění do tvé větve nepatří.")
+    if (!vidi(doc.coachId) || !sdileno(doc)) {
+      throw new ConvexError("Tohle vyplnění do tvé větve nepatří.")
+    }
 
     let vzorekSmazan = false
     if (doc.vymazovyKlic) {

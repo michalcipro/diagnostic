@@ -83,6 +83,9 @@ const POUZE_MASTER = [
   "eliteDiagnostic.normStats",
   "eliteDiagnostic.normExport",
   "eliteDiagnostic.externalUsage",
+  "teams.createTeam",
+  "teams.setTeamActive",
+  "teams.listTeams",
 ]
 
 /** Funkce, u kterých se během průchodu potvrdilo, že mastera vyžadují. */

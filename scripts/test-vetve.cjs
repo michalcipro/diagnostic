@@ -160,5 +160,44 @@ rekni(filtrViditelnosti(KOUCI.M)(zeStarePozvanky.coachId), "master na ně vidí"
 rekni(!filtrViditelnosti(KOUCI.E1)(zeStarePozvanky.coachId), "externí na ně nevidí")
 rekni(!filtrViditelnosti(KOUCI.K)(zeStarePozvanky.coachId), "náš kouč na ně nevidí, vlastníka nemají")
 
+// ---------------------------------------------------------------------------
+// Týmová větev: hráč rozhoduje, jestli kouč na jeho vyhodnocení uvidí.
+// ---------------------------------------------------------------------------
+//
+// Klub vede externí kouč, takže do jeho větve nevidí nikdo od nás. Uvnitř
+// větve je ale ještě druhé síto: hráč si při odesílání volí, jestli kouč smí
+// k jeho vyhodnocení. Odmítnutí musí platit i proti tomu, kdo pozvánku
+// vystavil, jinak by ta volba byla na oko.
+
+console.log("\n– týmová větev: souhlas hráče –")
+
+/** convex/eliteDiagnostic.ts: sdileno() */
+const sdileno = (d) => d.sdilet !== false
+
+const TYMOVA = [
+  { id: "t-sdili", coachId: "E1", teamId: "T1", sdilet: true },
+  { id: "t-nesdili", coachId: "E1", teamId: "T1", sdilet: false },
+]
+
+const listProKouce = (me) =>
+  TYMOVA.filter((d) => filtrViditelnosti(me)(d.coachId) && sdileno(d)).map((d) => d.id)
+const getProKouce = (me, id) => {
+  const d = TYMOVA.find((x) => x.id === id)
+  if (!d) return null
+  return filtrViditelnosti(me)(d.coachId) && sdileno(d) ? d.id : null
+}
+
+rekni(JSON.stringify(listProKouce(KOUCI.E1)) === JSON.stringify(["t-sdili"]), "kouč týmu vidí jen sdílená vyhodnocení")
+rekni(getProKouce(KOUCI.E1, "t-nesdili") === null, "kouč nedostane nesdílené ani na přímý dotaz")
+rekni(getProKouce(KOUCI.E1, "t-sdili") === "t-sdili", "kouč dostane sdílené")
+rekni(getProKouce(KOUCI.M, "t-sdili") === null, "master nedostane ani sdílené vyplnění hráče")
+rekni(getProKouce(KOUCI.M, "t-nesdili") === null, "master nedostane nesdílené vyplnění hráče")
+rekni(getProKouce(KOUCI.K, "t-sdili") === null, "náš kouč do klubu nevidí")
+
+// Do souhrnu týmu vstupují obě vyplnění; na tom právě stojí, že se dá tým
+// vyhodnotit, i když se část hráčů kouči neotevře.
+const doSouhrnu = TYMOVA.filter((d) => d.teamId === "T1").length
+rekni(doSouhrnu === 2, "do souhrnu týmu jde i vyplnění, které hráč nesdílel")
+
 console.log(chyb === 0 ? "\nizolace větví sedí" : `\nNALEZENO CHYB: ${chyb}`)
 process.exit(chyb === 0 ? 0 : 1)
