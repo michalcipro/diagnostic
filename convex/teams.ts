@@ -5,6 +5,9 @@ import type { Id } from "./_generated/dataModel"
 import { requireCoach, requireCoachProZapis, vyzadujMastera, zaznamenejPristup } from "./sessions"
 import { MEZ, PLATNOST_POZVANKY_DNI, delka } from "./eliteDiagnostic"
 import { makeToken } from "./nahoda"
+import { evaluate } from "../lib/diagnostic/scoring"
+import { getStructure } from "../lib/diagnostic/structure"
+import { tymovyProfil } from "../lib/tym/agregace"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Týmy a kluby.
@@ -273,5 +276,97 @@ export const listPlayers = query({
       })
     }
     return out
+  },
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Souhrnný profil týmu
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Počítá se tady na serveru, ne v prohlížeči. Dva důvody, oba důležité:
+//
+// 1) Kdyby server vrátil odpovědi jednotlivých hráčů a souhrn se skládal až
+//    v prohlížeči, master by si z nich poskládal individuální profily. Slíbili
+//    jsme, že do nich nevidí, a slib má držet kód, ne dobrá vůle.
+// 2) Skórování potřebuje vyhodnocovací klíče. Ty do prohlížeče nepatří ani
+//    koučovi, natož hráči; viz scripts/audit-balicku.cjs.
+//
+// Do souhrnu vstupují všechna odevzdaná vyplnění včetně těch, u kterých hráč
+// odmítl sdílení s koučem. Hráč o tom před odesláním ví.
+
+const oblastProfilValidator = v.object({
+  id: v.string(),
+  prumer: v.number(),
+  smodch: v.number(),
+  min: v.number(),
+  max: v.number(),
+  pasma: v.object({
+    priority: v.number(),
+    stabilization: v.number(),
+    strong: v.number(),
+    elite: v.number(),
+  }),
+  rozkol: v.boolean(),
+  plosna: v.boolean(),
+})
+
+export const teamReport = query({
+  args: { sessionToken: v.string(), teamId: v.id("teams") },
+  returns: v.union(
+    v.null(),
+    v.object({
+      nazev: v.string(),
+      pozvano: v.number(),
+      odevzdano: v.number(),
+      zapocteno: v.number(),
+      oblasti: v.array(oblastProfilValidator),
+      opory: v.array(v.string()),
+      priority: v.array(v.string()),
+      zlomy: v.array(v.string()),
+      nalezy: v.array(
+        v.object({
+          kod: v.string(),
+          sila: v.union(v.literal("vysoka"), v.literal("stredni")),
+          oblasti: v.array(v.string()),
+        }),
+      ),
+      maloDat: v.boolean(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const me = await requireCoach(ctx, args.sessionToken)
+    const tym = await ctx.db.get(args.teamId)
+    if (!tym) return null
+    if (String(tym.coachId) !== String(me._id) && me.role !== "master") {
+      throw new ConvexError("Tenhle tým nevedeš.")
+    }
+
+    const vyplneni = await ctx.db
+      .query("eliteDiagnosticResults")
+      .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
+      .collect()
+
+    const struktura = getStructure("elite200")
+    const vysledky = []
+    for (const d of vyplneni) {
+      let odpovedi: Record<string, number>
+      try {
+        odpovedi = JSON.parse(d.answers) as Record<string, number>
+      } catch {
+        continue // rozbitý záznam se do profilu nepočítá, ale nesmí ho shodit
+      }
+      const mapa: Record<number, 1 | 2 | 3 | 4 | 5> = {}
+      for (const [k, val] of Object.entries(odpovedi)) {
+        mapa[Number(k)] = val as 1 | 2 | 3 | 4 | 5
+      }
+      vysledky.push(evaluate(struktura, mapa, { durationSec: d.durationSec }))
+    }
+
+    const pozvanky = await ctx.db
+      .query("invitations")
+      .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
+      .collect()
+
+    return tymovyProfil(tym.nazev, pozvanky.length, vyplneni.length, vysledky)
   },
 })
