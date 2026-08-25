@@ -29,6 +29,7 @@ import {
   logout as doLogout,
   logoutAll,
   setCoachActive,
+  setCoachPouzeTymy,
   whoAmI,
   type CoachIdentity,
   type CoachRow,
@@ -74,6 +75,8 @@ export default function CoachPage() {
   const [cEmail, setCEmail] = useState("")
   const [cPassword, setCPassword] = useState("")
   const [cRole, setCRole] = useState<"coach" | "external">("coach")
+  // Klubový kouč: vystavuje odkazy jen svým hráčům a jen Players Survey.
+  const [cPouzeTymy, setCPouzeTymy] = useState(true)
   const [cNote, setCNote] = useState("")
   const [cPhone, setCPhone] = useState("")
 
@@ -92,6 +95,14 @@ export default function CoachPage() {
     | "pristupy"
     | "denik"
   >("results")
+
+  // Klubový kouč nemá co dělat v obecných pozvánkách, tak ho tam nepustíme
+  // ani omylem: kdyby na záložce zůstal po změně práv, přepne se na týmy.
+  // Vyplněné diagnostiky mu zůstávají: vidí v nich vyhodnocení hráčů, kteří
+  // mu je zpřístupnili, a bez toho by mu byla celá větev k ničemu.
+  useEffect(() => {
+    if (meInfo?.pouzeTymy && tab === "invites") setTab("tymy")
+  }, [meInfo?.pouzeTymy, tab])
   const [externi, setExterni] = useState<ExternalUsage[] | null>(null)
   const [pristupy, setPristupy] = useState<PristupZaznam[] | null>(null)
   const [norms, setNorms] = useState<NormStats | null>(null)
@@ -154,7 +165,17 @@ export default function CoachPage() {
       const res = await doLogin(email, password)
       window.localStorage.setItem(SESSION_KEY, res.sessionToken)
       setSession(res.sessionToken)
-      setMeInfo({ name: res.name, email, role: res.role as CoachIdentity["role"] })
+      // Kdo jsem a co smím se bere z whoAmI, ne z odpovědi na přihlášení:
+      // přihlášení vrací jen jméno a roli, kdežto omezení klubového kouče
+      // sedí u účtu a rozhraní podle něj skrývá, co stejně neprojde.
+      setMeInfo(
+        (await whoAmI(res.sessionToken)) ?? {
+          name: res.name,
+          email,
+          role: res.role as CoachIdentity["role"],
+          pouzeTymy: false,
+        },
+      )
       setPassword("")
       await load(res.sessionToken)
     } catch (err) {
@@ -251,7 +272,7 @@ export default function CoachPage() {
     e.preventDefault()
     setError(null)
     try {
-      await addCoach(session, cName, cEmail, cPassword, cRole, cNote, cPhone)
+      await addCoach(session, cName, cEmail, cPassword, cRole, cNote, cPhone, cRole === "external" && cPouzeTymy)
       setCName("")
       setCEmail("")
       setCPassword("")
@@ -464,9 +485,11 @@ export default function CoachPage() {
         <button type="button" data-active={tab === "results"} onClick={() => setTab("results")}>
           {t.tabResults}
         </button>
-        <button type="button" data-active={tab === "invites"} onClick={() => setTab("invites")}>
-          {t.tabInvites}
-        </button>
+        {!meInfo.pouzeTymy && (
+          <button type="button" data-active={tab === "invites"} onClick={() => setTab("invites")}>
+            {t.tabInvites}
+          </button>
+        )}
         <button type="button" data-active={tab === "manual"} onClick={() => setTab("manual")}>
           {t.tabManual}
         </button>
@@ -639,6 +662,25 @@ export default function CoachPage() {
                 </div>
               </div>
 
+              {cRole === "external" && (
+                <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl bg-[var(--wm-surface-2)] p-4">
+                  <input
+                    type="checkbox"
+                    checked={cPouzeTymy}
+                    onChange={(e) => setCPouzeTymy(e.target.checked)}
+                    className="mt-[3px] h-[18px] w-[18px] shrink-0 accent-[var(--wm-blue)]"
+                  />
+                  <span>
+                    <span className="block text-[14px] font-semibold">Klubový kouč, jen týmy</span>
+                    <span className="mt-1 block text-[13px] leading-relaxed text-[var(--wm-text-2)]">
+                      Vystavuje odkazy pouze hráčům svých týmů a pouze na Players Survey. Z nabídky
+                      testů si nevybírá a obecné pozvánky nevystaví. Vypnutím dostane plný přístup
+                      jako každý externí kouč. Přepnout to jde i později.
+                    </span>
+                  </span>
+                </label>
+              )}
+
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 <label className="block">
                   <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">Jméno</span>
@@ -705,13 +747,17 @@ export default function CoachPage() {
                   await setCoachActive(session, c.id, !c.active)
                   await loadCoaches()
                 }}
+                onTogglePouzeTymy={async () => {
+                  await setCoachPouzeTymy(session, c.id, !c.pouzeTymy)
+                  await loadCoaches()
+                }}
               />
             ))}
           </div>
         </div>
       )}
 
-      {tab === "invites" && (
+      {tab === "invites" && !meInfo.pouzeTymy && (
         <div className="mb-8">
           {!formOpen ? (
             <button

@@ -78,6 +78,7 @@ const STRAZE = [
 const POUZE_MASTER = [
   "sessions.listCoaches",
   "sessions.setCoachActive",
+  "sessions.setCoachPouzeTymy",
   "sessions.pristupovyLog",
   "auth.addCoach",
   "eliteDiagnostic.normStats",

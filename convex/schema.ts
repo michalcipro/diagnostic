@@ -31,6 +31,14 @@ export default defineSchema({
     /** interní poznámka mastera k účtu, například smluvní podmínky */
     note: v.optional(v.string()),
     active: v.boolean(),
+    /**
+     * Klubový kouč: smí jen vystavovat odkazy svým hráčům a jen Players Survey.
+     * Nic jiného si nevybere, dokud mu master nedá plný přístup.
+     *
+     * Chybí u účtů, které vznikly dřív, a u nich to znamená plný přístup;
+     * tichým zúžením práv existujícím koučům by přestalo fungovat, co dělali.
+     */
+    pouzeTymy: v.optional(v.boolean()),
     createdAt: v.number(),
     lastLoginAt: v.optional(v.number()),
   }).index("by_email", ["email"]),
@@ -293,6 +301,14 @@ export default defineSchema({
     /** kouč, který deník založil; jen on vidí, že klient deník má */
     coachId: v.id("coaches"),
     active: v.boolean(),
+    /**
+     * Klubový kouč: smí jen vystavovat odkazy svým hráčům a jen Players Survey.
+     * Nic jiného si nevybere, dokud mu master nedá plný přístup.
+     *
+     * Chybí u účtů, které vznikly dřív, a u nich to znamená plný přístup;
+     * tichým zúžením práv existujícím koučům by přestalo fungovat, co dělali.
+     */
+    pouzeTymy: v.optional(v.boolean()),
     createdAt: v.number(),
     lastLoginAt: v.optional(v.number()),
     /**

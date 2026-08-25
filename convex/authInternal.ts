@@ -55,6 +55,8 @@ export const insertCoach = internalMutation({
     passwordHash: v.string(),
     salt: v.string(),
     role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
+    /** klubový kouč: jen týmové odkazy a jen Players Survey */
+    pouzeTymy: v.optional(v.boolean()),
     phone: v.optional(v.string()),
     note: v.optional(v.string()),
   },
@@ -71,6 +73,7 @@ export const insertCoach = internalMutation({
       passwordHash: args.passwordHash,
       salt: args.salt,
       role: args.role,
+      pouzeTymy: args.pouzeTymy,
       phone: args.phone,
       note: args.note,
       active: true,

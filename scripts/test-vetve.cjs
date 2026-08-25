@@ -199,5 +199,33 @@ rekni(getProKouce(KOUCI.K, "t-sdili") === null, "náš kouč do klubu nevidí")
 const doSouhrnu = TYMOVA.filter((d) => d.teamId === "T1").length
 rekni(doSouhrnu === 2, "do souhrnu týmu jde i vyplnění, které hráč nesdílel")
 
+// ---------------------------------------------------------------------------
+// Klubový kouč: jen týmové odkazy a jen Players Survey
+// ---------------------------------------------------------------------------
+//
+// Zúžení se hlídá na serveru, ne schovaným tlačítkem. Kdyby stačilo skrýt
+// záložku, dala by se funkce zavolat přímo a kouč by si vystavil pozvánku
+// na kterýkoli test.
+
+console.log("\n– klubový kouč –")
+
+const KLUBOVY = { id: "E3", role: "external", pouzeTymy: true }
+const PLNY = { id: "E1", role: "external" }
+
+/** convex/eliteDiagnostic.ts: createInvite se zvoleným testem */
+const obecnaPozvanka = (me, testId) => {
+  if (me.pouzeTymy === true) throw new Error("jen týmové odkazy")
+  if (!["elite200-sport", "vzorce", "archetypy"].includes(testId)) throw new Error("neznámý test")
+  return { coachId: me.id, testId }
+}
+
+/** convex/teams.ts: createPlayerInvite – test se nezadává, je vždycky týž. */
+const createPlayerInvite = (me) => ({ coachId: me.id, testId: "elite200-sport" })
+
+rekni(hodi(() => obecnaPozvanka(KLUBOVY, "vzorce")), "klubový kouč nevystaví obecnou pozvánku")
+rekni(hodi(() => obecnaPozvanka(KLUBOVY, "elite200-sport")), "nevystaví ji ani na Players Survey")
+rekni(createPlayerInvite(KLUBOVY).testId === "elite200-sport", "hráči vystaví odkaz na Players Survey")
+rekni(obecnaPozvanka(PLNY, "vzorce").testId === "vzorce", "externí kouč s plným přístupem vybírá dál")
+
 console.log(chyb === 0 ? "\nizolace větví sedí" : `\nNALEZENO CHYB: ${chyb}`)
 process.exit(chyb === 0 ? 0 : 1)

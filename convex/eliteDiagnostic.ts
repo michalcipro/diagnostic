@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { kryptoBajty, makeToken } from "./nahoda"
+import { vyhodnoceniHrace } from "./vyhodnoceniHrace"
 import {
   filtrViditelnosti,
   requireCoach,
@@ -187,6 +188,12 @@ export const createInvite = mutation({
   returns: v.object({ token: v.string() }),
   handler: async (ctx, args) => {
     const me = await requireCoachProZapis(ctx, args.sessionToken)
+    // Klubový kouč si test nevybírá. Odkazy vystavuje jen svým hráčům přes
+    // teams.createPlayerInvite a vždycky na Players Survey. Kdyby se to hlídalo
+    // jen schovaným tlačítkem, stačilo by zavolat tuhle funkci přímo.
+    if (me.pouzeTymy === true) {
+      throw new ConvexError("Tenhle účet vystavuje odkazy jen svým hráčům, v záložce Týmy.")
+    }
     if (!TEST_IDS.has(args.testId)) {
       throw new ConvexError(`Neznámý testId: ${args.testId}`)
     }
@@ -331,7 +338,16 @@ export const submitWithInvite = mutation({
      */
     sdilet: v.optional(v.boolean()),
   },
-  returns: v.object({ ok: v.boolean() }),
+  returns: v.object({
+    ok: v.boolean(),
+    /**
+     * Vyhodnocení pro hráče. Vrací se jen u týmové pozvánky a jen v odpovědi
+     * na jeho vlastní odeslání: nikde se neukládá a nedá se o něj požádat
+     * podruhé. Odkaz je na jedno použití, takže po zavření okna je pryč,
+     * a přesně tak to hráči říkáme.
+     */
+    vyhodnoceni: v.optional(v.any()),
+  }),
   handler: async (ctx, args) => {
     const inv = await ctx.db
       .query("invitations")
@@ -444,7 +460,28 @@ export const submitWithInvite = mutation({
 
     // Pozvánku spotřebuj – odkaz už podruhé nepustí.
     await ctx.db.patch(inv._id, { usedAt: now, resultId })
-    return { ok: true }
+    if (!inv.teamId) return { ok: true }
+
+    // Klubová větev: hráč své vyhodnocení uvidí. Skládá se tady, ne v prohlížeči,
+    // aby v něm nemusely být vyhodnocovací klíče.
+    const tym = await ctx.db.get(inv.teamId)
+    // `ciste` prošlo kontrolou položku po položce, takže hodnoty jsou 1 až 5;
+    // typ to ale nenese, protože klíče jsou řetězce. Přeskládá se pro skórování.
+    const proSkore: Record<number, 1 | 2 | 3 | 4 | 5> = {}
+    for (const [k, val] of Object.entries(ciste)) {
+      proSkore[Number(k)] = val as 1 | 2 | 3 | 4 | 5
+    }
+    return {
+      ok: true,
+      vyhodnoceni: vyhodnoceniHrace(proSkore, {
+        lang: inv.lang,
+        tym: tym?.nazev ?? "",
+        jmeno: args.person.name || inv.clientName || "",
+        gender: args.person.gender ?? "male",
+        durationSec,
+        datum: args.person.fillDate,
+      }),
+    }
   },
 })
 

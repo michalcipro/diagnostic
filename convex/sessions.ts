@@ -178,13 +178,19 @@ export const me = query({
       name: v.string(),
       email: v.string(),
       role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
+      pouzeTymy: v.boolean(),
     }),
     v.null(),
   ),
   handler: async (ctx, args) => {
     try {
       const coach = await requireCoach(ctx, args.sessionToken)
-      return { name: coach.name, email: coach.email, role: coach.role }
+      return {
+        name: coach.name,
+        email: coach.email,
+        role: coach.role,
+        pouzeTymy: coach.pouzeTymy === true,
+      }
     } catch {
       return null
     }
@@ -217,6 +223,7 @@ export const listCoaches = query({
       phone: v.optional(v.string()),
       note: v.optional(v.string()),
       active: v.boolean(),
+      pouzeTymy: v.boolean(),
       createdAt: v.number(),
       lastLoginAt: v.optional(v.number()),
     }),
@@ -233,6 +240,7 @@ export const listCoaches = query({
       phone: c.phone,
       note: c.note,
       active: c.active,
+      pouzeTymy: c.pouzeTymy === true,
       createdAt: c.createdAt,
       lastLoginAt: c.lastLoginAt,
     }))
@@ -255,6 +263,28 @@ export const setCoachActive = mutation({
         .collect()
       for (const s of sessions) await ctx.db.delete(s._id)
     }
+    return null
+  },
+})
+
+/**
+ * Zúžení nebo rozšíření práv klubového kouče. Smí jen master.
+ *
+ * Zapnuto: kouč vystavuje odkazy jen svým hráčům a jen Players Survey.
+ * Vypnuto: chová se jako každý externí kouč, tedy vybírá si z celé nabídky.
+ */
+export const setCoachPouzeTymy = mutation({
+  args: { sessionToken: v.string(), coachId: v.id("coaches"), pouzeTymy: v.boolean() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const me = await requireCoach(ctx, args.sessionToken)
+    vyzadujMastera(me)
+    const kouc = await ctx.db.get(args.coachId)
+    if (!kouc) throw new ConvexError("Takový kouč neexistuje.")
+    if (kouc.role !== "external") {
+      throw new ConvexError("Tohle nastavení má smysl jen u externího kouče.")
+    }
+    await ctx.db.patch(args.coachId, { pouzeTymy: args.pouzeTymy })
     return null
   },
 })

@@ -269,6 +269,8 @@ export const addCoach = action({
      * audit-role-neuplny
      */
     role: v.optional(v.union(v.literal("coach"), v.literal("external"))),
+    /** klubový kouč: jen týmové odkazy a jen Players Survey */
+    pouzeTymy: v.optional(v.boolean()),
     phone: v.optional(v.string()),
     note: v.optional(v.string()),
   },
@@ -292,6 +294,8 @@ export const addCoach = action({
       passwordHash: hashPassword(args.password, salt),
       salt,
       role: args.role ?? "coach",
+      // Zúžení dává smysl jen u externího účtu; u našeho kouče se ignoruje.
+      pouzeTymy: args.role === "external" ? args.pouzeTymy === true : undefined,
       phone: args.phone?.trim() || undefined,
       note: args.note?.trim() || undefined,
     })

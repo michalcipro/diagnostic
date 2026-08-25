@@ -21,6 +21,7 @@ export function CoachCard({
   onSave,
   onReset,
   onToggleActive,
+  onTogglePouzeTymy,
 }: {
   coach: CoachRow
   /** vlastní účet: heslo si master mění jinudy, přes stávající heslo */
@@ -28,6 +29,8 @@ export function CoachCard({
   onSave: (data: { name: string; email: string; phone?: string; note?: string }) => Promise<void>
   onReset: () => Promise<string>
   onToggleActive: () => Promise<void>
+  /** přepne klubovému kouči zúžení na týmové odkazy; jen u externího účtu */
+  onTogglePouzeTymy: () => Promise<void>
 }) {
   const [upravuji, setUpravuji] = useState(false)
   const [uklada, setUklada] = useState(false)
@@ -99,6 +102,11 @@ export function CoachCard({
                   {stitek}
                 </span>
               )}
+              {coach.pouzeTymy && (
+                <span className="rounded-full bg-[var(--wm-tint-blue)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--wm-blue-dark)]">
+                  jen týmy
+                </span>
+              )}
               {!coach.active && (
                 <span className="rounded-full bg-[var(--wm-red-light)] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--wm-invalid-fg)]">
                   zablokován
@@ -132,6 +140,20 @@ export function CoachCard({
                 className="diag-press inline-flex h-10 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)] disabled:opacity-50"
               >
                 {resetuji ? "Vystavuji…" : "Nové heslo"}
+              </button>
+            )}
+            {coach.role === "external" && (
+              <button
+                type="button"
+                onClick={() => void onTogglePouzeTymy()}
+                title={
+                  coach.pouzeTymy
+                    ? "Dá koučovi plný přístup: bude si vybírat z celé nabídky testů."
+                    : "Zúží kouče na klub: vystaví odkaz jen svým hráčům a jen na Players Survey."
+                }
+                className="diag-press inline-flex h-10 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
+              >
+                {coach.pouzeTymy ? "Dát plný přístup" : "Omezit na týmy"}
               </button>
             )}
             {coach.role !== "master" && (

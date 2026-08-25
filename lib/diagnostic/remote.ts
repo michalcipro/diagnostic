@@ -58,6 +58,7 @@ const logoutAllRef = makeFunctionReference<"mutation">("sessions:logoutAll")
 const listCoachesRef = makeFunctionReference<"query">("sessions:listCoaches")
 const addCoachRef = makeFunctionReference<"action">("auth:addCoach")
 const setCoachActiveRef = makeFunctionReference<"mutation">("sessions:setCoachActive")
+const setCoachPouzeTymyRef = makeFunctionReference<"mutation">("sessions:setCoachPouzeTymy")
 const changePasswordRef = makeFunctionReference<"action">("auth:changePassword")
 const resetCoachPasswordRef = makeFunctionReference<"action">("auth:resetCoachPassword")
 const updateCoachRef = makeFunctionReference<"action">("auth:updateCoach")
@@ -212,6 +213,12 @@ export interface CoachIdentity {
   name: string
   email: string
   role: CoachRole
+  /**
+   * Klubový kouč: vystavuje odkazy jen svým hráčům a jen Players Survey.
+   * Vynucuje to server, tohle je jen pro rozhraní, ať nenabízí, co stejně
+   * neprojde.
+   */
+  pouzeTymy: boolean
 }
 
 export interface CoachRow extends CoachIdentity {
@@ -299,10 +306,32 @@ export async function addCoach(
   role: "coach" | "external" = "coach",
   note?: string,
   phone?: string,
+  /** klubový kouč: jen týmové odkazy a jen Players Survey */
+  pouzeTymy?: boolean,
 ): Promise<void> {
   const c = client()
   if (!c) throw new Error("not-configured")
-  await c.action(addCoachRef, { sessionToken, name, email, password, role, note, phone })
+  await c.action(addCoachRef, {
+    sessionToken,
+    name,
+    email,
+    password,
+    role,
+    note,
+    phone,
+    pouzeTymy,
+  })
+}
+
+/** Zúžení práv klubového kouče na týmové odkazy. Pouze master. */
+export async function setCoachPouzeTymy(
+  sessionToken: string,
+  coachId: string,
+  pouzeTymy: boolean,
+): Promise<void> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  await c.mutation(setCoachPouzeTymyRef, { sessionToken, coachId, pouzeTymy })
 }
 
 /** Zapnutí/vypnutí přístupu kouče – pouze master. */
