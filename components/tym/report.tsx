@@ -2,6 +2,16 @@
 
 import { useState } from "react"
 import { TYM, type TymLang } from "@/lib/tym/obsah"
+import { RAMEC } from "@/lib/tym/ramec"
+import { VYKLAD } from "@/lib/tym/vyklad"
+import {
+  oblastiKOtazkam,
+  oblastiSPraci,
+  sestavPlan,
+  sestavShrnuti,
+  tvarKlic,
+  urovenKlic,
+} from "@/lib/tym/plan"
 import type { NalezKod } from "@/lib/tym/typy"
 import type { TeamReport } from "@/lib/diagnostic/remote"
 import type { DimensionId } from "@/lib/diagnostic/types"
@@ -21,8 +31,16 @@ const POSLOUPNOST: DimensionId[] = ["A", "B", "C", "D", "E", "F", "G"]
 
 export function TymReport({ data, lang }: { data: TeamReport; lang: TymLang }) {
   const t = TYM[lang]
+  const r = RAMEC[lang]
+  const v = VYKLAD[lang]
   const oblasti = new Map(data.oblasti.map((o) => [o.id, o]))
   const prvni = data.nalezy[0]
+  const shrnuti = sestavShrnuti(data, lang)
+  const plan = sestavPlan(data, lang)
+  // Oblast, která má vlastní kroky v plánu, je nedostane znovu v přehledu
+  // oblastí. Dvakrát totéž učí čtenáře, že se části reportu dají přeskakovat.
+  const vPlanu = new Set<string>(plan.map((f) => f.oblast).filter((x): x is DimensionId => x !== null))
+  const sPraci = oblastiSPraci(data, vPlanu)
 
   return (
     <div className="max-w-[62rem]">
@@ -56,6 +74,40 @@ export function TymReport({ data, lang }: { data: TeamReport; lang: TymLang }) {
           </p>
         </div>
       )}
+
+      {/* ---- shrnutí pro kouče ---- */}
+      <section className="mb-10">
+        <Nadpis>{r.shrnutiTitul}</Nadpis>
+        <p className="mb-5 max-w-[46rem] text-[14.5px] leading-relaxed text-[var(--wm-text-2)]">
+          {r.shrnutiUvod}
+        </p>
+        <div className="grid gap-5 lg:grid-cols-2">
+          <ShrnutiBlok titul={r.drziTitul} barva="var(--wm-green)" radky={shrnuti.drzi} />
+          <ShrnutiBlok titul={r.krehkeTitul} barva="var(--wm-orange)" radky={shrnuti.krehke} />
+        </div>
+        <div className="diag-card mt-5 border-l-[3px] border-l-[var(--wm-blue)] p-5">
+          <h3 className="text-[15px] font-bold tracking-tight">{r.prvniKrokTitul}</h3>
+          <p className="mt-1.5 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
+            {shrnuti.prvniKrok}
+          </p>
+        </div>
+      </section>
+
+      {/* ---- jak report číst ---- */}
+      <section className="mb-10">
+        <Nadpis>{r.jakCistTitul}</Nadpis>
+        <div className="max-w-[46rem] space-y-3">
+          {r.jakCistOdstavce.map((odstavec) => (
+            <p key={odstavec.slice(0, 24)} className="text-[14.5px] leading-relaxed text-[var(--wm-text-2)]">
+              {odstavec}
+            </p>
+          ))}
+        </div>
+        <h3 className="mt-6 text-[11.5px] font-bold uppercase tracking-[0.12em] text-[var(--wm-text-3)]">
+          {r.coToNeniTitul}
+        </h3>
+        <Odrazky polozky={r.coToNeni} />
+      </section>
 
       {/* ---- co z toho plyne ---- */}
       <section className="mb-10">
@@ -121,11 +173,136 @@ export function TymReport({ data, lang }: { data: TeamReport; lang: TymLang }) {
           {POSLOUPNOST.map((id) => {
             const o = oblasti.get(id)
             if (!o) return null
-            return <OblastRadek key={id} o={o} nazev={t.oblasti[id]} t={t} />
+            return (
+              <OblastRadek
+                key={id}
+                o={o}
+                nazev={t.oblasti[id]}
+                t={t}
+                r={r}
+                vyklad={v[id]}
+                sPraci={sPraci.has(id)}
+              />
+            )
           })}
         </div>
       </section>
+
+      {/* ---- plán práce ---- */}
+      <section className="mt-10">
+        <Nadpis>{r.planTitul}</Nadpis>
+        <p className="mb-5 max-w-[46rem] text-[14.5px] leading-relaxed text-[var(--wm-text-2)]">
+          {r.planUvod}
+        </p>
+        <div className="space-y-5">
+          {plan.map((faze) => (
+            <div key={faze.poradi} className="diag-card p-5">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <span className="text-[11.5px] font-bold uppercase tracking-[0.12em] text-[var(--wm-blue)]">
+                  {r.planTydny(faze.odTydne, faze.doTydne)}
+                </span>
+                <span className="text-[12.5px] font-semibold text-[var(--wm-text-3)]">
+                  {faze.nazevOblasti}
+                </span>
+              </div>
+              <h3 className="mt-1.5 text-[17px] font-bold tracking-tight">{faze.nazev}</h3>
+              <Popisek>{r.planProc}</Popisek>
+              <p className="text-[14px] leading-relaxed text-[var(--wm-text-2)]">{faze.duvod}</p>
+              <Popisek>{r.planKroky}</Popisek>
+              <Cislovane polozky={faze.kroky} />
+              <Popisek>{r.planZnaky}</Popisek>
+              <Odrazky polozky={faze.znaky} />
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 rounded-xl bg-[var(--wm-surface-2)] p-4 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
+          {r.planPoznamka}
+        </p>
+      </section>
+
+      {/* ---- individuální rozhovory ---- */}
+      <section className="mt-10">
+        <Nadpis>{r.rozhovoryTitul}</Nadpis>
+        <p className="mb-4 max-w-[46rem] text-[14.5px] leading-relaxed text-[var(--wm-text-2)]">
+          {r.rozhovoryUvod}
+        </p>
+        <Odrazky polozky={r.rozhovoryJak} />
+        <h3 className="mt-6 text-[11.5px] font-bold uppercase tracking-[0.12em] text-[var(--wm-text-3)]">
+          {r.rozhovoryOtazkyTitul}
+        </h3>
+        <div className="mt-3 grid gap-4 lg:grid-cols-2">
+          {(oblastiKOtazkam(data) as DimensionId[]).map((id) => (
+            <div key={id} className="diag-card p-4">
+              <h4 className="text-[14px] font-bold tracking-tight">{t.oblasti[id]}</h4>
+              <Odrazky polozky={v[id].otazky} />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ---- mantinely použití ---- */}
+      <section className="mt-10">
+        <Nadpis>{r.mantinelyTitul}</Nadpis>
+        <p className="mb-4 max-w-[46rem] text-[14.5px] leading-relaxed text-[var(--wm-text-2)]">
+          {r.mantinelyUvod}
+        </p>
+        <Odrazky polozky={r.mantinely} />
+      </section>
     </div>
+  )
+}
+
+function ShrnutiBlok({
+  titul,
+  barva,
+  radky,
+}: {
+  titul: string
+  barva: string
+  radky: string[]
+}) {
+  return (
+    <div className="diag-card p-5">
+      <div className="h-[3px] w-[28px] rounded-full" style={{ background: barva }} />
+      <h3 className="mt-3 text-[15px] font-bold tracking-tight">{titul}</h3>
+      <Odrazky polozky={radky} />
+    </div>
+  )
+}
+
+function Popisek({ children }: { children: React.ReactNode }) {
+  return (
+    <h4 className="mt-4 mb-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--wm-text-3)]">
+      {children}
+    </h4>
+  )
+}
+
+function Odrazky({ polozky }: { polozky: string[] }) {
+  if (!polozky.length) return null
+  return (
+    <ul className="mt-2 space-y-1.5">
+      {polozky.map((p) => (
+        <li key={p.slice(0, 28)} className="flex gap-2.5 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
+          <span className="mt-[8px] h-[4px] w-[4px] shrink-0 rounded-[1px] bg-[var(--wm-text-3)]" />
+          <span>{p}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function Cislovane({ polozky }: { polozky: string[] }) {
+  if (!polozky.length) return null
+  return (
+    <ol className="mt-2 space-y-1.5">
+      {polozky.map((p, i) => (
+        <li key={p.slice(0, 28)} className="flex gap-2.5 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
+          <span className="shrink-0 text-[13px] font-bold text-[var(--wm-blue)]">{i + 1}</span>
+          <span>{p}</span>
+        </li>
+      ))}
+    </ol>
   )
 }
 
@@ -310,10 +487,16 @@ function OblastRadek({
   o,
   nazev,
   t,
+  r,
+  vyklad,
+  sPraci,
 }: {
   o: TeamReport["oblasti"][number]
   nazev: string
   t: (typeof TYM)[TymLang]
+  r: (typeof RAMEC)[TymLang]
+  vyklad: (typeof VYKLAD)[TymLang][DimensionId]
+  sPraci: boolean
 }) {
   const celkem = o.pasma.priority + o.pasma.stabilization + o.pasma.strong + o.pasma.elite
   return (
@@ -367,12 +550,37 @@ function OblastRadek({
       </div>
 
       {celkem > 0 && (
-        <div className="mt-2.5 flex gap-1.5 text-[11.5px] text-[var(--wm-text-3)]">
-          <Pasmo n={o.pasma.priority} barva="var(--wm-red)" />
-          <Pasmo n={o.pasma.stabilization} barva="var(--wm-orange)" />
-          <Pasmo n={o.pasma.strong} barva="var(--wm-blue)" />
-          <Pasmo n={o.pasma.elite} barva="var(--wm-green)" />
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-[var(--wm-text-3)]">
+          <span className="flex gap-1.5">
+            <Pasmo n={o.pasma.priority} barva="var(--wm-red)" />
+            <Pasmo n={o.pasma.stabilization} barva="var(--wm-orange)" />
+            <Pasmo n={o.pasma.strong} barva="var(--wm-blue)" />
+            <Pasmo n={o.pasma.elite} barva="var(--wm-green)" />
+          </span>
+          <span>{r.rozsahTymu(Math.round(o.min), Math.round(o.max))}</span>
         </div>
+      )}
+
+      <Popisek>{r.popiskyVykladu.coMeri}</Popisek>
+      <p className="text-[14px] leading-relaxed text-[var(--wm-text-2)]">
+        {vyklad.coMeri} {vyklad.procZalezi}
+      </p>
+
+      <Popisek>{r.popiskyVykladu.stav}</Popisek>
+      <p className="text-[14px] leading-relaxed text-[var(--wm-text-2)]">
+        {vyklad.uroven[urovenKlic(o.prumer)]}
+      </p>
+      <p className="mt-2 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
+        {vyklad.tvar[tvarKlic(o)]}
+      </p>
+
+      {sPraci && (
+        <>
+          <Popisek>{r.popiskyVykladu.prace}</Popisek>
+          <Cislovane polozky={vyklad.prace} />
+          <Popisek>{r.popiskyVykladu.znaky}</Popisek>
+          <Odrazky polozky={vyklad.znaky} />
+        </>
       )}
     </div>
   )

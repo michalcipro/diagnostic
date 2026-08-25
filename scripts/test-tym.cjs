@@ -38,6 +38,9 @@ fs.writeFileSync(
 export { getStructure, ELITE200_FACETS, ELITE200_REVERSED } from "../lib/diagnostic/structure"
 export { tymovyProfil } from "../lib/tym/agregace"
 export { TYM } from "../lib/tym/obsah"
+export { VYKLAD } from "../lib/tym/vyklad"
+export { RAMEC } from "../lib/tym/ramec"
+export { sestavPlan, sestavShrnuti } from "../lib/tym/plan"
 `,
 )
 let M
@@ -241,6 +244,124 @@ for (const jazyk of ["cs", "en"]) {
   rekni(en(4, 11).includes("4 completed surveys did not pass"), "en: množné číslo sedí")
   rekni(!CESKA_PISMENA.test(en(3, 9)), "en: hláška je bez ř, ě a ů")
   rekni(M.TYM.cs.nezapoctenoTitul !== M.TYM.en.nezapoctenoTitul, "nadpis není v obou jazycích stejný")
+}
+
+console.log("\n– výklad oblastí –")
+
+const UROVNE = ["nizka", "stredni", "vysoka"]
+const TVARY = ["vyrovnana", "rozptyl", "zlom", "plosna"]
+const ZNACKA_RODU = /\{[^{}]*\|[^{}]*\}/
+
+for (const jazyk of ["cs", "en"]) {
+  const v = M.VYKLAD[jazyk]
+  const chybi = OBLASTI.filter((id) => !v[id])
+  rekni(!chybi.length, `${jazyk}: všech sedm oblastí má výklad${chybi.length ? ` (chybí ${chybi.join(", ")})` : ""}`)
+
+  const neuplne = OBLASTI.filter((id) => {
+    const o = v[id]
+    if (!o) return true
+    if (!UROVNE.every((u) => o.uroven[u] && o.uroven[u].length > 80)) return true
+    if (!TVARY.every((t2) => o.tvar[t2] && o.tvar[t2].length > 60)) return true
+    return (
+      o.coMeri.length < 60 ||
+      o.procZalezi.length < 120 ||
+      o.prace.length < 3 ||
+      o.znaky.length < 2 ||
+      o.otazky.length < 2
+    )
+  })
+  rekni(!neuplne.length, `${jazyk}: výklad je úplný a není odbytý${neuplne.length ? ` (${neuplne.join(", ")})` : ""}`)
+
+  // Týmový report se nepouští přes applyGender, protože kouč u otázky do
+  // rozhovoru dopředu nezná pohlaví hráče. Značka by se vytiskla doslova.
+  const sRodem = OBLASTI.filter((id) => {
+    const o = v[id]
+    if (!o) return false
+    const vse = [o.coMeri, o.procZalezi, ...Object.values(o.uroven), ...Object.values(o.tvar), ...o.prace, ...o.znaky, ...o.otazky]
+    return vse.some((x) => ZNACKA_RODU.test(x))
+  })
+  rekni(!sRodem.length, `${jazyk}: výklad je bez značek rodu${sRodem.length ? ` (${sRodem.join(", ")})` : ""}`)
+}
+
+{
+  const opsane = OBLASTI.filter((id) => M.VYKLAD.cs[id].coMeri === M.VYKLAD.en[id].coMeri)
+  rekni(!opsane.length, `anglický výklad není opsaná čeština${opsane.length ? ` (${opsane.join(", ")})` : ""}`)
+  const ceske = OBLASTI.filter((id) => {
+    const o = M.VYKLAD.en[id]
+    const vse = [o.coMeri, o.procZalezi, ...Object.values(o.uroven), ...Object.values(o.tvar), ...o.prace, ...o.znaky, ...o.otazky]
+    return vse.some((x) => CESKA_PISMENA.test(x))
+  })
+  rekni(!ceske.length, `anglický výklad je bez ř, ě a ů${ceske.length ? ` (${ceske.join(", ")})` : ""}`)
+}
+
+console.log("\n– rámec reportu –")
+
+for (const jazyk of ["cs", "en"]) {
+  const r = M.RAMEC[jazyk]
+  const seznamy = { jakCistOdstavce: 3, coToNeni: 3, rozhovoryJak: 3, mantinely: 4 }
+  const kratke = Object.entries(seznamy).filter(([klic, kolik]) => (r[klic] ?? []).length < kolik)
+  rekni(!kratke.length, `${jazyk}: rámec má všechny seznamy${kratke.length ? ` (${kratke.map(([k]) => k).join(", ")})` : ""}`)
+  rekni(r.fazeNazvy.length === 3 && r.fazeNazvy.every(Boolean), `${jazyk}: tři fáze plánu mají název`)
+  rekni(Object.values(r.pasma).every((x) => x && x.length > 2), `${jazyk}: pásma mají název`)
+  if (jazyk === "en") {
+    const vse = [...r.jakCistOdstavce, ...r.coToNeni, ...r.rozhovoryJak, ...r.mantinely, ...r.fazeNazvy]
+    rekni(!vse.some((x) => CESKA_PISMENA.test(x)), "en: rámec je bez ř, ě a ů")
+  }
+}
+rekni(M.RAMEC.cs.shrnutiTitul !== M.RAMEC.en.shrnutiTitul, "rámec není v obou jazycích stejný")
+
+console.log("\n– plán a shrnutí –")
+
+{
+  const p = profil([...opakuj(3, () => hrac(4, { D: 5 })), ...opakuj(3, () => hrac(4, { D: 1 }))])
+  for (const jazyk of ["cs", "en"]) {
+    const plan = M.sestavPlan(p, jazyk)
+    rekni(plan.length === 3, `${jazyk}: plán má tři fáze (má ${plan.length})`)
+    rekni(
+      plan.every((f) => f.duvod && f.kroky.length >= 3 && f.znaky.length >= 2),
+      `${jazyk}: každá fáze má důvod, kroky i ukazatele`,
+    )
+    rekni(plan[0].oblast === "D", `${jazyk}: první fáze řeší zlomovou linii (řeší ${plan[0].oblast})`)
+    rekni(plan[1].oblast !== "D", `${jazyk}: druhá fáze už řeší něco jiného`)
+    rekni(
+      plan[0].odTydne === 1 && plan[2].doTydne === 12,
+      `${jazyk}: plán pokrývá dvanáct týdnů`,
+    )
+    const shrnuti = M.sestavShrnuti(p, jazyk)
+    rekni(shrnuti.krehke.length > 0 && shrnuti.prvniKrok.length > 40, `${jazyk}: shrnutí není prázdné`)
+  }
+}
+{
+  // Když se tým dělí ve dvou oblastech, plán začne u té nižší, ne u té,
+  // která je dřív v abecedě.
+  const p = profil([
+    ...opakuj(3, () => hrac(4, { C: 5, D: 4 })),
+    ...opakuj(3, () => hrac(4, { C: 3, D: 1 })),
+  ])
+  const plan = M.sestavPlan(p, "cs")
+  const prumery = new Map(p.oblasti.map((o) => [o.id, o.prumer]))
+  const nejnizsiZlom = [...p.zlomy].sort((a, b) => prumery.get(a) - prumery.get(b))[0]
+  rekni(p.zlomy.length >= 2, `v testu jsou aspoň dva zlomy (je ${p.zlomy.length})`)
+  rekni(
+    plan[0].oblast === nejnizsiZlom,
+    `plán začne u nejnižšího zlomu (${nejnizsiZlom}, začal u ${plan[0].oblast})`,
+  )
+}
+{
+  // Vyrovnaný tým nemá zlom ani plošnou slabinu; plán se přesto musí sestavit.
+  const p = profil(opakuj(8, () => hrac(4)))
+  const plan = M.sestavPlan(p, "cs")
+  rekni(plan.length === 3, "i u vyrovnaného týmu se plán sestaví")
+  rekni(plan[0].oblast !== plan[1].oblast, "první dvě fáze neřeší tutéž oblast")
+  const shrnuti = M.sestavShrnuti(p, "cs")
+  rekni(shrnuti.drzi.length > 0, "vyrovnaný tým má v shrnutí o co se opřít")
+}
+{
+  // Prázdný profil nesmí shodit plán ani shrnutí.
+  const p = M.tymovyProfil("Prázdný", 3, 3, [])
+  rekni(M.sestavPlan(p, "cs").length === 0, "prázdný profil nevyrobí plán")
+  const shrnuti = M.sestavShrnuti(p, "cs")
+  rekni(shrnuti.drzi.length === 1 && shrnuti.krehke.length === 1, "prázdný profil má náhradní texty")
 }
 
 console.log(chyb === 0 ? "\ntýmové vyhodnocení sedí" : `\nNALEZENO CHYB: ${chyb}`)

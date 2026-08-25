@@ -9,7 +9,7 @@
     "lint": "next lint",
     "convex:dev": "convex dev",
     "convex:deploy": "convex deploy",
-    "audit": "node scripts/audit-pristupu.cjs && node scripts/audit-balicku.cjs && node scripts/test-vetve.cjs && node scripts/test-vzorce-sk.cjs && node scripts/test-archetypy.cjs && node scripts/test-jazyky.cjs && node scripts/test-tym.cjs && node scripts/test-planner.cjs && node scripts/typy-convex.cjs"
+    "audit": "node scripts/audit-pristupu.cjs && node scripts/audit-balicku.cjs && node scripts/test-vetve.cjs && node scripts/test-vzorce-sk.cjs && node scripts/test-archetypy.cjs && node scripts/test-jazyky.cjs && node scripts/test-tym.cjs && node scripts/test-pdf-tymu.cjs && node scripts/test-planner.cjs && node scripts/typy-convex.cjs"
   },
   "dependencies": {
     "convex": "^1.31.7",
@@ -25,6 +25,7 @@
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "pdfjs-dist": "^4.10.38"
   }
 }
