@@ -48,6 +48,15 @@ export function TymReport({ data, lang }: { data: TeamReport; lang: TymLang }) {
         </div>
       )}
 
+      {data.odevzdano > data.zapocteno && (
+        <div className="diag-card mb-8 border-l-[3px] border-l-[var(--wm-orange)] p-5">
+          <h2 className="text-[15px] font-bold tracking-tight">{t.nezapoctenoTitul}</h2>
+          <p className="mt-1.5 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
+            {t.nezapocteno(data.odevzdano - data.zapocteno, data.zapocteno)}
+          </p>
+        </div>
+      )}
+
       {/* ---- co z toho plyne ---- */}
       <section className="mb-10">
         <Nadpis>{t.nalezyTitul}</Nadpis>
@@ -315,6 +324,11 @@ function OblastRadek({
           {o.plosna && (
             <span className="rounded-full bg-[var(--wm-track)] px-2 py-0.5 font-semibold text-[var(--wm-text-2)]">
               {t.plosna}
+            </span>
+          )}
+          {o.rozptyl && (
+            <span className="rounded-full bg-[var(--wm-orange-light)] px-2 py-0.5 font-semibold text-[var(--wm-caution-fg)]">
+              {t.velkyRozptyl}
             </span>
           )}
           {o.rozkol && (

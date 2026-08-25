@@ -62,6 +62,11 @@ function oblastProfil(id: DimensionId, vysledky: DiagnosticResult[]): OblastProf
 
   const smodch = smerodatnaOdchylka(hodnoty)
   const podilSlabych = (pasma.priority + pasma.stabilization) / skore.length
+  // Zlomová linie a velký rozptyl se hlásí zvlášť. Dřív stačil k obojímu
+  // rozptyl, takže jediný člověk daleko od zbytku vypadal jako dvě skupiny
+  // s mezerou mezi sebou. Kouč by pak hledal dvě party tam, kde je jeden
+  // osamělý hráč, a řešil by to úplně jinak, než by měl.
+  const rozkol = najdiRozkol(hodnoty)
   return {
     id,
     prumer: prumer(hodnoty),
@@ -69,7 +74,8 @@ function oblastProfil(id: DimensionId, vysledky: DiagnosticResult[]): OblastProf
     min: Math.min(...hodnoty),
     max: Math.max(...hodnoty),
     pasma,
-    rozkol: najdiRozkol(hodnoty) || smodch >= VYSOKY_ROZPTYL,
+    rozkol,
+    rozptyl: !rozkol && smodch >= VYSOKY_ROZPTYL,
     // Plošná slabina: skoro nikdo nad stabilizací a zároveň malý rozptyl.
     // To není součet problémů jednotlivců, to je věc kultury a vedení.
     plosna: podilSlabych >= 0.75 && smodch < 12,
@@ -166,7 +172,9 @@ function najdiNalezy(o: Map<DimensionId, OblastProfil>, vysledky: DiagnosticResu
   if (
     !out.length &&
     vsechny.length === OBLASTI.length &&
-    vsechny.every((x) => x.pasma.priority / Math.max(1, soucet(x.pasma)) < 0.2 && !x.rozkol)
+    vsechny.every(
+      (x) => x.pasma.priority / Math.max(1, soucet(x.pasma)) < 0.2 && !x.rozkol && !x.rozptyl,
+    )
   ) {
     pridej("vyrovnany-zaklad", "stredni", [])
   }
@@ -181,8 +189,19 @@ export function tymovyProfil(
   nazev: string,
   pozvano: number,
   odevzdano: number,
-  vysledky: DiagnosticResult[],
+  vsechna: DiagnosticResult[],
 ): TymovyProfil {
+  // Dotazník, který neprošel kontrolou spolehlivosti, do profilu nepatří.
+  // Jeho skóre neměří to, co měřit mělo, ale do průměru i do rozptylu by
+  // promluvilo stejnou vahou jako poctivé vyplnění a umí vyrobit zlomovou
+  // linii, která v týmu není. Kouč se o vyřazených dozví z rozdílu mezi
+  // odevzdanými a započtenými, report ho pojmenuje.
+  //
+  // Mírné příznaky (upřímnost, odpověďový styl) končí na „opatrně" a počítají
+  // se dál. Ty popisují, JAK o sobě hráč vypovídá; to je věc k výkladu, ne
+  // důvod vyhodnocení zahodit.
+  const vysledky = vsechna.filter((v) => v.validity.overall !== "invalid")
+
   const oblasti = OBLASTI.map((id) => oblastProfil(id, vysledky)).filter(
     (x): x is OblastProfil => x !== null,
   )

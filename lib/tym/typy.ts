@@ -50,8 +50,17 @@ export interface OblastProfil {
    * Zlomová linie: tým se v téhle oblasti dělí na dvě skupiny s mezerou mezi
    * nimi. Pod tlakem se právě tady mužstvo rozpadne na ty, kdo si poradí,
    * a ty, kdo ne.
+   *
+   * Je to něco jiného než velký rozptyl, viz níž, a report to nesmí plést.
+   * Dvě skupiny se řeší skládáním sestavy a rozdílnou přípravou; jeden člověk
+   * mimo se řeší rozhovorem s ním.
    */
   rozkol: boolean
+  /**
+   * Velké rozdíly bez zřetelné mezery. Typicky jeden nebo dva lidé daleko od
+   * zbytku. Tým se tady nedělí na party, jen má někoho, kdo vyčnívá.
+   */
+  rozptyl: boolean
   /**
    * Slabina rovnoměrně přes celý kádr. Pak to není součet problémů
    * jednotlivců, ale věc kultury a vedení, a řeší se jinak.

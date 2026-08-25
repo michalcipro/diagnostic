@@ -307,6 +307,7 @@ const oblastProfilValidator = v.object({
     elite: v.number(),
   }),
   rozkol: v.boolean(),
+  rozptyl: v.boolean(),
   plosna: v.boolean(),
 })
 
@@ -359,6 +360,8 @@ export const teamReport = query({
       for (const [k, val] of Object.entries(odpovedi)) {
         mapa[Number(k)] = val as 1 | 2 | 3 | 4 | 5
       }
+      // Neplatná vyplnění se z profilu vyřadí až v tymovyProfil, aby to
+      // pravidlo platilo pro každého, kdo profil počítá, a dalo se testovat.
       vysledky.push(evaluate(struktura, mapa, { durationSec: d.durationSec }))
     }
 

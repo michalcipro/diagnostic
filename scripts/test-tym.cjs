@@ -53,7 +53,13 @@ try {
 const S200 = M.getStructure("elite200")
 const OBRACENE = new Set(M.ELITE200_REVERSED)
 
-/** Hráč, u kterého mají vybrané oblasti či fazety zadanou úroveň 1 až 5. */
+/**
+ * Hráč, u kterého mají vybrané oblasti či fazety zadanou úroveň 1 až 5.
+ *
+ * Vyplňuje i položky validity tak, jak je vyplní člověk, který dotazník čte.
+ * Bez toho by vznikl neplatný dotazník, ten se do profilu nezapočítá a testy
+ * níž by měřily prázdný tým místo toho, co měřit mají.
+ */
 function hrac(zaklad, uprava = {}) {
   const a = {}
   for (const f of M.ELITE200_FACETS) {
@@ -61,6 +67,29 @@ function hrac(zaklad, uprava = {}) {
     for (const i of f.items) a[i] = OBRACENE.has(i) ? 6 - uroven : uroven
   }
   for (let i = 1; i <= 200; i++) if (a[i] === undefined) a[i] = 3
+  return sPlatnouValiditou(a)
+}
+
+/** Doplní kontrolní položky tak, aby dotazník prošel kontrolou spolehlivosti. */
+function sPlatnouValiditou(a) {
+  for (const [polozka, hodnota] of Object.entries(S200.validity.attention)) {
+    a[Number(polozka)] = hodnota
+  }
+  if (S200.validity.infrequency) {
+    for (const i of S200.validity.infrequency.expectAgree) a[i] = 4
+    for (const i of S200.validity.infrequency.expectDisagree) a[i] = 2
+  }
+  for (const i of S200.validity.honesty.items) a[i] = 2
+  return a
+}
+
+/** Hráč, který dotazník odklikal bez čtení: neprojde kontrolou pozornosti. */
+function nedbalyHrac(zaklad = 3) {
+  const a = {}
+  for (let i = 1; i <= 200; i++) a[i] = zaklad
+  for (const [polozka, hodnota] of Object.entries(S200.validity.attention)) {
+    a[Number(polozka)] = hodnota === 5 ? 1 : hodnota + 1
+  }
   return a
 }
 
@@ -112,6 +141,59 @@ const opakuj = (n, f) => Array.from({ length: n }, f)
   rekni(!p.opory.includes("A"), "rozkolísaná oblast se nevydává za oporu")
 }
 
+{
+  // Jeden člověk daleko od zbytku není zlomová linie. Report u zlomů tvrdí,
+  // že nejde o obvyklý rozptyl, ale o dvě skupiny s mezerou mezi sebou;
+  // kdyby se sem dostal osamělý hráč, bylo by to tvrzení nepravdivé a kouč
+  // by hledal dvě party tam, kde je jeden člověk, se kterým je třeba mluvit.
+  const p = profil([...opakuj(5, () => hrac(3, { A: 5 })), hrac(3, { A: 1 })])
+  const a = p.oblasti.find((x) => x.id === "A")
+  rekni(a.rozptyl && !a.rozkol, "jeden hráč mimo se hlásí jako rozptyl, ne jako zlom")
+  rekni(!p.zlomy.includes("A"), "osamělý hráč se nedostane mezi zlomové linie")
+  rekni(!p.opory.includes("A"), "oblast s osamělým hráčem není opora")
+
+  const deleny = profil([...opakuj(3, () => hrac(3, { A: 5 })), ...opakuj(3, () => hrac(3, { A: 1 }))])
+  const da = deleny.oblasti.find((x) => x.id === "A")
+  rekni(da.rozkol && !da.rozptyl, "skutečné dvě skupiny se hlásí jako zlom, ne jako rozptyl")
+  rekni(deleny.zlomy.includes("A"), "skutečný zlom se dostane mezi zlomové linie")
+}
+{
+  const p = profil([...opakuj(5, () => hrac(4)), hrac(4, { G: 1 })])
+  rekni(
+    !kody(p).includes("vyrovnany-zaklad"),
+    "tým s jedním člověkem úplně mimo není vyrovnaný základ",
+  )
+}
+{
+  // Neplatné vyplnění se do profilu nepočítá. Kdyby se počítalo, stačilo by
+  // pár lidí, kteří dotazník odklikali bez čtení, a kouč by dostal zlomovou
+  // linii, která v týmu není, nebo by mu naopak skutečná zmizela v průměru.
+  const platni = opakuj(12, () => hrac(4))
+  const nedbali = opakuj(3, () => nedbalyHrac(1))
+  const p = M.tymovyProfil(
+    "Zkouška",
+    15,
+    15,
+    [...platni, ...nedbali].map((a) => M.evaluate(S200, a, { durationSec: 2400 })),
+  )
+  rekni(p.zapocteno === 12, `neplatná vyplnění se nezapočítávají (započteno ${p.zapocteno} z 15)`)
+  rekni(p.odevzdano === 15, "odevzdaná se hlásí všechna, aby byl rozdíl vidět")
+
+  const cisty = profil(platni)
+  const stejne = p.oblasti.every((o) => {
+    const c = cisty.oblasti.find((x) => x.id === o.id)
+    return c && Math.abs(o.prumer - c.prumer) < 0.001
+  })
+  rekni(stejne, "profil vyjde stejně, jako by nedbalá vyplnění vůbec nepřišla")
+  rekni(!p.zlomy.length, "nedbalá vyplnění nevyrobí zlomovou linii")
+}
+{
+  const p = M.tymovyProfil("Zkouška", 6, 6, opakuj(6, () => nedbalyHrac(3)).map((a) => M.evaluate(S200, a, { durationSec: 2400 })))
+  rekni(p.zapocteno === 0, "tým samých neplatných vyplnění nemá co započítat")
+  rekni(p.oblasti.length === 0 && p.nalezy.length === 0, "prázdný profil nevymyslí nálezy")
+  rekni(p.maloDat, "prázdný profil hlásí, že je málo dat")
+}
+
 console.log("\n– texty česky a anglicky –")
 
 const KODY = [
@@ -142,6 +224,23 @@ for (const jazyk of ["cs", "en"]) {
     return CESKA_PISMENA.test([n.nadpis, n.coJeVidet, n.coToDela, n.coNedelat, ...n.coSTim].join(" "))
   })
   rekni(!ceske.length, `anglické texty jsou bez ř, ě a ů${ceske.length ? ` (${ceske.join(", ")})` : ""}`)
+}
+
+{
+  // Hláška o nezapočtených dotaznících se skládá z čísel, takže se v ní dá
+  // snadno pokazit skloňování. Kouč by pak hned viděl, že text psal stroj.
+  const cs = M.TYM.cs.nezapocteno
+  rekni(cs(1, 11).includes("Jeden odevzdaný dotazník neprošel"), "cs: jeden nezapočtený dotazník se skloňuje")
+  rekni(cs(3, 9).includes("3 odevzdané dotazníky neprošly"), "cs: dva až čtyři se skloňují")
+  rekni(cs(7, 5).includes("7 odevzdaných dotazníků neprošlo"), "cs: pět a víc se skloňuje")
+  rekni(cs(2, 1).includes("jednom dotazníku"), "cs: profil na jednom dotazníku se skloňuje")
+  rekni(cs(2, 6).includes("6 dotaznících"), "cs: profil na více dotaznících se skloňuje")
+
+  const en = M.TYM.en.nezapocteno
+  rekni(en(1, 11).includes("One completed survey did not pass"), "en: jednotné číslo sedí")
+  rekni(en(4, 11).includes("4 completed surveys did not pass"), "en: množné číslo sedí")
+  rekni(!CESKA_PISMENA.test(en(3, 9)), "en: hláška je bez ř, ě a ů")
+  rekni(M.TYM.cs.nezapoctenoTitul !== M.TYM.en.nezapoctenoTitul, "nadpis není v obou jazycích stejný")
 }
 
 console.log(chyb === 0 ? "\ntýmové vyhodnocení sedí" : `\nNALEZENO CHYB: ${chyb}`)

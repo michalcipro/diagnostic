@@ -33,6 +33,9 @@ export interface TymTexty {
   pocty: (odevzdano: number, pozvano: number) => string
   maloDatTitul: string
   maloDat: string
+  /** hlásí se jen tehdy, když nějaké vyplnění neprošlo kontrolou spolehlivosti */
+  nezapoctenoTitul: string
+  nezapocteno: (kolik: number, zapocteno: number) => string
 
   oblastiTitul: string
   oblastiUvod: string
@@ -40,6 +43,8 @@ export interface TymTexty {
   legendaRozptyl: string
   plosna: string
   rozkol: string
+  /** velké rozdíly bez zřetelné mezery; jiná věc než zlomová linie */
+  velkyRozptyl: string
 
   oporyTitul: string
   oporyUvod: string
@@ -74,6 +79,26 @@ const CS: TymTexty = {
     "usuzovat na konkrétní hráče. Hráčům, kteří si nepřáli sdílet své vyhodnocení, " +
     "jsme slíbili opak, tak s tím podle toho zacházej. Vypovídací hodnota roste " +
     "výrazně zhruba od osmi odevzdaných dotazníků.",
+  nezapoctenoTitul: "Některé dotazníky se do profilu nepočítají",
+  nezapocteno: (kolik, zapocteno) => {
+    // Čeština rozlišuje jedna, dva až čtyři a pět a víc. Bez toho by v reportu
+    // stálo „5 odevzdané dotazníky neprošly", což kouči hned prozradí, že text
+    // skládal stroj.
+    const veta =
+      kolik === 1
+        ? "Jeden odevzdaný dotazník neprošel kontrolou spolehlivosti, takže do profilu nevstupuje."
+        : kolik < 5
+          ? `${kolik} odevzdané dotazníky neprošly kontrolou spolehlivosti, takže do profilu nevstupují.`
+          : `${kolik} odevzdaných dotazníků neprošlo kontrolou spolehlivosti, takže do profilu nevstupují.`
+    const zaklad =
+      zapocteno === 1 ? "jednom dotazníku" : `${zapocteno} dotaznících`
+    return (
+      `${veta} Bývá za tím vyplňování ve spěchu nebo bez čtení otázek. ` +
+      `Profil stojí na ${zaklad}. Neznamená to, že je s hráčem něco v nepořádku; ` +
+      "znamená to, že tyhle odpovědi neměří to, co měly. Pokud ti na těch lidech " +
+      "záleží, pošli jim odkaz znovu a dej jim na vyplnění klid."
+    )
+  },
 
   oblastiTitul: "Sedm oblastí napříč týmem",
   oblastiUvod:
@@ -84,6 +109,7 @@ const CS: TymTexty = {
   legendaRozptyl: "rozptyl",
   plosna: "napříč celým kádrem",
   rozkol: "tým se dělí",
+  velkyRozptyl: "někdo vyčnívá",
 
   oporyTitul: "O co se dá opřít",
   oporyUvod:
@@ -334,6 +360,15 @@ const EN: TymTexty = {
     "be read back to particular players. Players who chose not to share their own " +
     "results were promised the opposite, so handle it accordingly. The profile " +
     "becomes meaningfully robust from roughly eight completed surveys.",
+  nezapoctenoTitul: "Some surveys are not counted in the profile",
+  nezapocteno: (kolik, zapocteno) =>
+    `${kolik === 1 ? "One completed survey did" : `${kolik} completed surveys did`} not pass ` +
+    "the reliability checks, so it does not enter the profile. The usual cause is " +
+    "rushing through the questions or not reading them. The profile rests on " +
+    `${zapocteno} ${zapocteno === 1 ? "survey" : "surveys"}. ` +
+    "This does not mean anything is wrong with the player; it means these answers " +
+    "do not measure what they were meant to measure. If those people matter to you, " +
+    "send them the link again and give them room to fill it in properly.",
 
   oblastiTitul: "The seven areas across the team",
   oblastiUvod:
@@ -344,6 +379,7 @@ const EN: TymTexty = {
   legendaRozptyl: "spread",
   plosna: "across the whole squad",
   rozkol: "the team splits",
+  velkyRozptyl: "someone stands apart",
 
   oporyTitul: "What you can build on",
   oporyUvod:

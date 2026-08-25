@@ -34,6 +34,7 @@ export interface TymPdfVstup {
     max: number
     pasma: { priority: number; stabilization: number; strong: number; elite: number }
     rozkol: boolean
+    rozptyl: boolean
     plosna: boolean
   }[]
   opory: string[]
@@ -75,6 +76,12 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
 
   if (data.maloDat) {
     s.ramecek(`${t.maloDatTitul}. ${t.maloDat}`, { velikost: 9.4 })
+    s.mezera(4)
+  }
+
+  if (data.odevzdano > data.zapocteno) {
+    const kolik = data.odevzdano - data.zapocteno
+    s.ramecek(`${t.nezapoctenoTitul}. ${t.nezapocteno(kolik, data.zapocteno)}`, { velikost: 9.4 })
     s.mezera(4)
   }
 
@@ -219,8 +226,14 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
     s.doc.roundedRect(x, s.y - 0.4, w, 1.8, 0.9, 0.9, "F")
     s.y += 4
 
-    if (o.rozkol || o.plosna) {
-      const znacky = [o.rozkol ? t.rozkol : null, o.plosna ? t.plosna : null].filter(Boolean).join("  ·  ")
+    if (o.rozkol || o.rozptyl || o.plosna) {
+      const znacky = [
+        o.rozkol ? t.rozkol : null,
+        o.rozptyl ? t.velkyRozptyl : null,
+        o.plosna ? t.plosna : null,
+      ]
+        .filter(Boolean)
+        .join("  ·  ")
       s.pismo(8, true, o.rozkol ? CERVENA : BARVA.slaba)
       s.doc.text(znacky, OKRAJ.levy, s.y)
       s.y += 4

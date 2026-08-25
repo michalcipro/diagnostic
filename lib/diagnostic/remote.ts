@@ -565,6 +565,7 @@ export interface TeamReport {
     max: number
     pasma: { priority: number; stabilization: number; strong: number; elite: number }
     rozkol: boolean
+    rozptyl: boolean
     plosna: boolean
   }[]
   opory: string[]
