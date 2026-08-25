@@ -103,17 +103,25 @@ function odpovedi(M, S200, obracene, zaklad, uprava, seminko, dojem = 0) {
   return a
 }
 
-/** Vyhodnocení všech šesti hráček a hotový profil týmu. */
+/**
+ * Vyhodnocení všech šesti hráček a hotový profil týmu.
+ *
+ * Vrací i samotné odpovědi, protože případ užití z nich staví vyhodnocení
+ * jedné hráčky. Bez nich by se musely generovat podruhé a mohly by se
+ * rozejít s tím, co je v profilu.
+ */
 function sestavTym(M) {
   const S200 = M.getStructure("elite200")
   const obracene = new Set(M.ELITE200_REVERSED)
-  const vysledky = HRACKY.map((h, i) =>
-    M.evaluate(S200, odpovedi(M, S200, obracene, h.zaklad, h.uprava, 20260825 + i * 7919, h.dojem ?? 0), {
-      durationSec: 2100 + i * 180,
-    }),
+  const odpovediHracek = HRACKY.map((h, i) =>
+    odpovedi(M, S200, obracene, h.zaklad, h.uprava, 20260825 + i * 7919, h.dojem ?? 0),
+  )
+  const vysledky = odpovediHracek.map((a, i) =>
+    M.evaluate(S200, a, { durationSec: 2100 + i * 180 }),
   )
   return {
     nazev: NAZEV,
+    odpovedi: odpovediHracek,
     vysledky,
     profil: M.tymovyProfil(NAZEV, POZVANO, HRACKY.length, vysledky),
   }
