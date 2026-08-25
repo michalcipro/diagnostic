@@ -114,7 +114,10 @@ export function MapaTymu({ data, lang }: { data: TeamReport; lang: TymLang }) {
 
         <div className="diag-card overflow-hidden p-0">
           <div className="grid lg:grid-cols-[minmax(0,1fr)_300px]">
-            <div className="min-w-0 p-4 sm:p-5">
+            {/* Mapa má pevný poměr stran, lišta vpravo je vyšší. Bez vystředění
+                by celé volné místo zůstalo pod obrázkem a vypadalo by to jako
+                chyba; takhle je nahoře i dole stejně. */}
+            <div className="flex min-w-0 items-center p-4 sm:p-5">
               <Plocha
                 oblasti={oblasti}
                 casti={casti}
@@ -135,9 +138,14 @@ export function MapaTymu({ data, lang }: { data: TeamReport; lang: TymLang }) {
                   type="button"
                   {...vazba(o.id as DimensionId)}
                   title={vetaOblasti(o, lang)}
-                  className={`grid w-full grid-cols-[1fr_auto] items-start gap-3 rounded-lg border-t border-[var(--wm-border-light)] p-2 text-left first:border-t-0 ${
+                  // Proužek vlevo se kreslí vnitřním stínem, ne rámečkem:
+                  // rámeček by řádek posunul a lišta by při najíždění poskakovala.
+                  className={`grid w-full grid-cols-[1fr_auto] items-start gap-2 rounded-lg border-t border-[var(--wm-border-light)] p-2 pl-3 text-left transition-colors first:border-t-0 ${
                     zaostreno === o.id ? "bg-[var(--wm-surface-2)]" : ""
                   }`}
+                  style={
+                    zaostreno === o.id ? { boxShadow: "inset 3px 0 0 var(--wm-blue)" } : undefined
+                  }
                 >
                   <span>
                     <span className="block text-[13.5px] font-semibold leading-tight">
