@@ -311,6 +311,16 @@ const oblastProfilValidator = v.object({
   plosna: v.boolean(),
 })
 
+const castProfilValidator = v.object({
+  id: v.string(),
+  oblast: v.string(),
+  prumer: v.number(),
+  smodch: v.number(),
+  min: v.number(),
+  max: v.number(),
+  riziko: v.boolean(),
+})
+
 export const teamReport = query({
   args: { sessionToken: v.string(), teamId: v.id("teams") },
   returns: v.union(
@@ -321,6 +331,8 @@ export const teamReport = query({
       odevzdano: v.number(),
       zapocteno: v.number(),
       oblasti: v.array(oblastProfilValidator),
+      casti: v.array(castProfilValidator),
+      trhliny: v.array(v.object({ oblast: v.string(), cast: v.string() })),
       opory: v.array(v.string()),
       priority: v.array(v.string()),
       zlomy: v.array(v.string()),

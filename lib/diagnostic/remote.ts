@@ -568,6 +568,16 @@ export interface TeamReport {
     rozptyl: boolean
     plosna: boolean
   }[]
+  casti: {
+    id: string
+    oblast: string
+    prumer: number
+    smodch: number
+    min: number
+    max: number
+    riziko: boolean
+  }[]
+  trhliny: { oblast: string; cast: string }[]
   opory: string[]
   priority: string[]
   zlomy: string[]

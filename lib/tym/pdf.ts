@@ -8,6 +8,16 @@ import {
   type RGB,
 } from "../diagnostic/pdf/sazba"
 import { TYM, type TymLang } from "./obsah"
+import { CASTI, KRATCE, MAPA, shodaKratce, slovoUrovne } from "./slova"
+import {
+  MAPA_ROZSAH,
+  krokSkaly,
+  podilX,
+  podilY,
+  rozestrkej,
+  rozprostri,
+  vyberUkazku,
+} from "./mapa-geometrie"
 import { RAMEC } from "./ramec"
 import { VYKLAD } from "./vyklad"
 import {
@@ -41,6 +51,27 @@ const PORADI: DimensionId[] = ["A", "B", "C", "D", "E", "F", "G"]
 const CERVENA: RGB = [255, 59, 48]
 const ZELENA: RGB = [48, 209, 88]
 const ORANZOVA: RGB = [255, 149, 0]
+
+/** Podklady kvadrantů. Světlé natolik, aby text nad nimi zůstal čitelný. */
+const CERVENA_SVETLA: RGB = [255, 241, 240]
+const ZELENA_SVETLA: RGB = [232, 249, 237]
+const ORANZOVA_SVETLA: RGB = [255, 245, 230]
+
+/** Pětistupňová škála a barva textu na ní. Stejné hodnoty jako v aplikaci. */
+const SKALA: RGB[] = [
+  [134, 182, 228],
+  [95, 154, 214],
+  [53, 116, 184],
+  [35, 89, 160],
+  [13, 60, 107],
+]
+const SKALA_TEXT: RGB[] = [
+  [16, 36, 58],
+  [16, 36, 58],
+  [255, 255, 255],
+  [255, 255, 255],
+  [255, 255, 255],
+]
 
 /** Malý prostrkaný popisek nad odstavcem. */
 function popisek(s: Sazba, text: string, barva: RGB = BARVA.slaba, odsazeni = 0) {
@@ -84,6 +115,254 @@ function cislovane(s: Sazba, polozky: string[], velikost = 9.6) {
     })
     s.mezera(1.8)
   })
+}
+
+/** Pás se čtyřmi pásmy, aby číslo 0 až 100 něco znamenalo. */
+function pasmaSkaly(s: Sazba, t: (typeof MAPA)[TymLang]) {
+  const podklady = [CERVENA_SVETLA, ORANZOVA_SVETLA, BARVA.podklad, ZELENA_SVETLA]
+  const sirka = SIRKA / 4
+  s.misto(24)
+  const zaklad = s.y
+  let nejnizsi = zaklad
+  t.pasma.forEach((p, i) => {
+    const x = OKRAJ.levy + i * sirka
+    const b = podklady[i]
+    s.doc.setFillColor(b[0], b[1], b[2])
+    s.doc.roundedRect(x + 0.6, zaklad, sirka - 1.2, 20, 2, 2, "F")
+    s.pismo(8.6, true, BARVA.text)
+    s.doc.text(p.rozsah, x + 4, zaklad + 6)
+    s.pismo(7.6, false, BARVA.text2)
+    const radky = s.doc.splitTextToSize(p.popis, sirka - 8) as string[]
+    radky.slice(0, 3).forEach((r, k) => s.doc.text(r, x + 4, zaklad + 11 + k * 3.4))
+    nejnizsi = Math.max(nejnizsi, zaklad + 11 + radky.length * 3.4)
+  })
+  s.y = Math.max(zaklad + 20, nejnizsi) + 3
+}
+
+/**
+ * Mapa týmu.
+ *
+ * Stejné souřadnice jako na obrazovce, jen bez zaostřování. Popisky dostanou
+ * bílou podložku, protože v PDF neexistuje obrys textu a přes vlásečnice by
+ * se přestaly číst.
+ */
+function nakresliMapu(s: Sazba, data: TymPdfVstup, t: (typeof MAPA)[TymLang], lang: TymLang) {
+  const VYSKA = 104
+  const LEVY = 26
+  const SIRKA_PLOCHY = SIRKA - LEVY
+  const { xMin, xMax, xDel, yMax, yDel } = MAPA_ROZSAH
+
+  s.misto(VYSKA + 26)
+  const y0 = s.y + 8
+  const x0 = OKRAJ.levy + LEVY
+  const X = (u: number) => x0 + podilX(u) * SIRKA_PLOCHY
+  const Y = (sd: number) => y0 + podilY(sd) * VYSKA
+
+  s.doc.setFillColor(CERVENA_SVETLA[0], CERVENA_SVETLA[1], CERVENA_SVETLA[2])
+  s.doc.rect(X(xMin), Y(yDel), X(xDel) - X(xMin), Y(yMax) - Y(yDel), "F")
+  s.doc.setFillColor(ZELENA_SVETLA[0], ZELENA_SVETLA[1], ZELENA_SVETLA[2])
+  s.doc.rect(X(xDel), Y(0), X(xMax) - X(xDel), Y(yDel) - Y(0), "F")
+
+  s.doc.setLineWidth(0.15)
+  s.doc.setDrawColor(BARVA.linka[0], BARVA.linka[1], BARVA.linka[2])
+  for (const v of [55, 60, 65, 70, 75, 80]) {
+    s.doc.line(X(v), Y(0), X(v), Y(yMax))
+    s.pismo(6.6, false, BARVA.slaba)
+    s.doc.text(String(v), X(v), Y(yMax) + 4, { align: "center" })
+  }
+  s.doc.setDrawColor(BARVA.slaba[0], BARVA.slaba[1], BARVA.slaba[2])
+  s.doc.setLineDashPattern([0.8, 0.8], 0)
+  s.doc.line(X(xDel), Y(0), X(xDel), Y(yMax))
+  s.doc.line(X(xMin), Y(yDel), X(xMax), Y(yDel))
+  s.doc.setLineDashPattern([], 0)
+
+  // Osy slovy. Číslo samo trenérovi neřekne, kterým směrem je líp.
+  s.pismo(7.4, true, BARVA.text2)
+  s.doc.text(t.osaXVlevo, X(xMin), Y(yMax) + 9)
+  s.doc.text(t.osaXVpravo, X(xMax), Y(yMax) + 9, { align: "right" })
+  s.pismo(7, false, BARVA.slaba)
+  s.doc.text(t.osaX, (X(xMin) + X(xMax)) / 2, Y(yMax) + 9, { align: "center" })
+  s.pismo(7.4, true, BARVA.text2)
+  s.doc.text(t.osaYNahore, X(xMin) - 3, Y(1), { align: "right" })
+  s.doc.text(t.osaYDole, X(xMin) - 3, Y(yMax - 1), { align: "right" })
+
+  const rohy: [number, number, "left" | "right", { titul: string; popis: string }][] = [
+    [X(xMin) + 2, Y(0) + 4, "left", t.rohy[0]],
+    [X(xMax) - 2, Y(0) + 4, "right", t.rohy[1]],
+    [X(xMin) + 2, Y(yMax) - 5.5, "left", t.rohy[2]],
+    [X(xMax) - 2, Y(yMax) - 5.5, "right", t.rohy[3]],
+  ]
+  for (const [rx, ry, kotva, r] of rohy) {
+    s.pismo(6.8, true, BARVA.text2)
+    s.doc.text(r.titul, rx, ry, { align: kotva })
+    s.pismo(6.4, false, BARVA.slaba)
+    s.doc.text(r.popis, rx, ry + 3, { align: kotva })
+  }
+
+  const ukazka = vyberUkazku(data.oblasti, data.casti)
+  const nazev = (id: string) => KRATCE[lang][id as DimensionId] ?? id
+  // Popisky rohů drží místo; uhnout musí popisek oblasti, ne vysvětlivka.
+  const prekazky = rohy.flatMap(([rx, ry, kotva, r]) => [
+    { x: rx, y: ry, sirka: s.sirkaTextu(r.titul, 6.8, true), vpravo: kotva === "left" },
+    { x: rx, y: ry + 3, sirka: s.sirkaTextu(r.popis, 6.4), vpravo: kotva === "left" },
+  ])
+  const popisky = rozestrkej(
+    rozprostri(
+      data.oblasti.map((o) => {
+      const x = X(o.prumer)
+      const sirka = s.sirkaTextu(nazev(o.id), 7.4, true) + 3
+        return { data: o, x, y: Y(o.smodch), ty: Y(o.smodch), sirka, vpravo: x + sirka < X(xMax) }
+      }),
+      6.4,
+    ),
+    4.4,
+    prekazky,
+  )
+
+  // Vlásečnice od oblasti k jejím částem: ukazují, jak daleko utekly.
+  s.doc.setLineWidth(0.15)
+  s.doc.setDrawColor(200, 200, 206)
+  for (const p of popisky) {
+    for (const c of data.casti.filter((x) => x.oblast === p.data.id)) {
+      s.doc.line(p.x, p.y, X(c.prumer), Y(c.smodch))
+    }
+  }
+
+  for (const c of data.casti) {
+    const cx = X(c.prumer)
+    const cy = Y(c.smodch)
+    if (c.riziko) {
+      const d = 1.5
+      s.doc.setFillColor(CERVENA[0], CERVENA[1], CERVENA[2])
+      s.doc.lines([[d, d], [d, -d], [-d, -d]], cx - d, cy, [1, 1], "F", true)
+    } else {
+      s.doc.setFillColor(SKALA[3][0], SKALA[3][1], SKALA[3][2])
+      s.doc.circle(cx, cy, 1.4, "F")
+    }
+  }
+
+  for (const p of popisky) {
+    s.doc.setFillColor(255, 255, 255)
+    s.doc.setDrawColor(BARVA.text[0], BARVA.text[1], BARVA.text[2])
+    s.doc.setLineWidth(0.5)
+    s.doc.circle(p.x, p.y, 2.9, "FD")
+    s.pismo(7, true, BARVA.text)
+    s.doc.text(p.data.id, p.x, p.y + 1.1, { align: "center" })
+
+    if (p.skryt) continue
+    const tx = p.vpravo ? p.x + 4 : p.x - 4
+    const sirkaTextu = s.sirkaTextu(nazev(p.data.id), 7.4, true)
+    s.doc.setFillColor(255, 255, 255)
+    s.doc.rect(p.vpravo ? tx - 0.6 : tx - sirkaTextu - 0.6, p.ty - 2, sirkaTextu + 1.2, 3.4, "F")
+    s.pismo(7.4, true, BARVA.text)
+    s.doc.text(nazev(p.data.id), tx, p.ty + 0.6, { align: p.vpravo ? "left" : "right" })
+  }
+
+  // Ukázka čtení na skutečném případu. V PDF si čtenář nemůže na nic najet,
+  // takže je tenhle jeden vysvětlený případ to jediné, co ho naučí mapu číst.
+  if (ukazka) {
+    const ox = X(ukazka.oblast.prumer)
+    const oy = Y(ukazka.oblast.smodch)
+    const cx = X(ukazka.cast.prumer)
+    const cy = Y(ukazka.cast.smodch)
+    s.doc.setDrawColor(ORANZOVA[0], ORANZOVA[1], ORANZOVA[2])
+    s.doc.setLineWidth(0.3)
+    s.doc.setLineDashPattern([0.7, 0.7], 0)
+    s.doc.line(cx, cy - 2.4, ox, oy + 3.2)
+    s.doc.setLineDashPattern([], 0)
+  }
+
+  s.y = Y(yMax) + 14
+
+  // Legenda tvarů. Barva sama význam nenese, tvar a slovo ano.
+  s.pismo(7.4, false, BARVA.text2)
+  let lx = OKRAJ.levy
+  s.doc.setDrawColor(BARVA.text2[0], BARVA.text2[1], BARVA.text2[2])
+  s.doc.setLineWidth(0.4)
+  s.doc.circle(lx + 1.4, s.y - 1, 1.4, "D")
+  s.doc.text(t.legenda[0], lx + 4.4, s.y)
+  lx += 6 + s.sirkaTextu(t.legenda[0], 7.4) + 8
+  s.doc.setFillColor(SKALA[3][0], SKALA[3][1], SKALA[3][2])
+  s.doc.circle(lx + 1.4, s.y - 1, 1.4, "F")
+  s.doc.text(t.legenda[1], lx + 4.4, s.y)
+  lx += 6 + s.sirkaTextu(t.legenda[1], 7.4) + 8
+  s.doc.setFillColor(CERVENA[0], CERVENA[1], CERVENA[2])
+  s.doc.lines([[1.5, 1.5], [1.5, -1.5], [-1.5, -1.5]], lx, s.y - 1, [1, 1], "F", true)
+  s.doc.text(t.legenda[2], lx + 4.4, s.y)
+  s.mezera(4)
+
+  // Vysvětlení ukázky stojí pod grafem, kde je vždycky čitelné a jmenuje
+  // oblast i část. Popisek plovoucí v ploše by se pral se jmény oblastí.
+  if (ukazka) {
+    s.pismo(8, true, ORANZOVA)
+    s.misto(5)
+    const sirkaTitulku = s.sirkaTextu(`${t.prikladTitul}. `, 8, true)
+    s.doc.text(`${t.prikladTitul}.`, OKRAJ.levy, s.y)
+    s.text(
+      t.prikladVeta(
+        KRATCE[lang][ukazka.oblast.id as DimensionId] ?? ukazka.oblast.id,
+        CASTI[lang][ukazka.cast.id] ?? ukazka.cast.id,
+      ),
+      { velikost: 8, barva: BARVA.text2, radek: 3.8, x: OKRAJ.levy + sirkaTitulku, sirka: SIRKA - sirkaTitulku },
+    )
+    s.mezera(3)
+  }
+}
+
+/** Mřížka jednadvaceti částí, tři na řádek. */
+function nakresliCasti(s: Sazba, data: TymPdfVstup, t: (typeof MAPA)[TymLang], lang: TymLang) {
+  const SLOUPEC_NAZVU = 42
+  const MEZERA = 1.6
+  const sirkaDlazdice = (SIRKA - SLOUPEC_NAZVU - 2 * MEZERA) / 3
+  const vyska = 16
+
+  s.pismo(6.6, true, BARVA.slaba)
+  s.misto(6)
+  t.castiZahlavi.forEach((h, i) => {
+    const x = i === 0 ? OKRAJ.levy : OKRAJ.levy + SLOUPEC_NAZVU + (i - 1) * (sirkaDlazdice + MEZERA)
+    s.doc.text(h.toUpperCase(), x, s.y, { charSpace: 0.3 })
+  })
+  s.mezera(3)
+
+  for (const o of data.oblasti) {
+    const casti = data.casti.filter((c) => c.oblast === o.id)
+    if (!casti.length) continue
+    s.misto(vyska + 3)
+    const y = s.y
+    s.pismo(8, true, BARVA.text)
+    const nazev = KRATCE[lang][o.id as DimensionId] ?? o.id
+    const radky = s.doc.splitTextToSize(nazev, SLOUPEC_NAZVU - 3) as string[]
+    radky.slice(0, 2).forEach((r, k) => s.doc.text(r, OKRAJ.levy, y + 6 + k * 3.6))
+    s.pismo(6.8, false, BARVA.slaba)
+    s.doc.text(t.celkem(Math.round(o.prumer)), OKRAJ.levy, y + 6 + Math.min(2, radky.length) * 3.6 + 1)
+
+    casti.forEach((c, i) => {
+      const x = OKRAJ.levy + SLOUPEC_NAZVU + i * (sirkaDlazdice + MEZERA)
+      const k = krokSkaly(c.prumer) - 1
+      const b = SKALA[k]
+      const tb = SKALA_TEXT[k]
+      s.doc.setFillColor(b[0], b[1], b[2])
+      s.doc.roundedRect(x, y, sirkaDlazdice, vyska, 2, 2, "F")
+      s.pismo(7, true, tb)
+      const nazevCasti = CASTI[lang][c.id] ?? c.id
+      const rc = s.doc.splitTextToSize(nazevCasti, sirkaDlazdice - 6) as string[]
+      rc.slice(0, 2).forEach((r, j) => s.doc.text(r, x + 3, y + 4.4 + j * 3.2))
+      s.pismo(12, true, tb)
+      s.doc.text(String(Math.round(c.prumer)), x + 3, y + vyska - 3.2)
+      s.pismo(6.8, true, tb)
+      s.doc.text(
+        shodaKratce(c.smodch, lang),
+        x + 3 + s.sirkaTextu(String(Math.round(c.prumer)), 12, true) + 2,
+        y + vyska - 3.6,
+      )
+      if (c.riziko) {
+        s.doc.setFillColor(tb[0], tb[1], tb[2])
+        s.doc.lines([[1.2, 1.2], [1.2, -1.2], [-1.2, -1.2]], x + sirkaDlazdice - 5, y + 3.4, [1, 1], "F", true)
+      }
+    })
+    s.y = y + vyska + 2.4
+  }
+  s.mezera(2)
 }
 
 export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
@@ -159,7 +438,65 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
   s.text(shrnuti.prvniKrok, { velikost: 9.8, barva: BARVA.text2, radek: 4.7 })
 
   // =========================================================================
-  // 2. Jak report číst
+  // 2. Co znamenají čísla, mapa týmu, skryté trhliny a části oblastí
+  // =========================================================================
+  const m = MAPA[lang]
+  s.zalom()
+  s.nadpis(m.cislaTitul)
+  s.text(m.cislaUvod, { velikost: 9.6, barva: BARVA.text2, radek: 4.6 })
+  s.mezera(4)
+  pasmaSkaly(s, m)
+  s.mezera(2)
+  s.text(m.cislaPoznamka, { velikost: 9, barva: BARVA.slaba, radek: 4.3 })
+  s.mezera(7)
+
+  s.nadpis(m.titul)
+  s.text(`${m.navodTitul} ${m.navodUvod}`, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
+  s.mezera(2.4)
+  odrazky(s, m.navod, 9.2)
+  s.mezera(4)
+  nakresliMapu(s, data, m, lang)
+
+  if (data.trhliny.length) {
+    s.mezera(4)
+    s.misto(50)
+    s.nadpis(m.trhlinyTitul)
+    s.text(m.trhlinyUvod, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
+    s.mezera(4)
+    for (const tr of data.trhliny) {
+      const o = data.oblasti.find((x) => x.id === tr.oblast)
+      const c = data.casti.find((x) => x.id === tr.cast)
+      if (!o || !c) continue
+      const rozdil = Math.round(o.prumer) - Math.round(c.prumer)
+      s.misto(22)
+      const zacatek = s.y
+      s.text(CASTI[lang][c.id] ?? c.id, { velikost: 10.4, tucne: true, radek: 4.8, x: OKRAJ.levy + 5, sirka: SIRKA - 5 })
+      s.pismo(7.6, true, ORANZOVA)
+      s.doc.text(KRATCE[lang][o.id as DimensionId] ?? o.id, PRAVY_KRAJ, zacatek, { align: "right" })
+      s.mezera(1)
+      s.text(m.trhlinaVeta(Math.round(o.prumer), Math.round(c.prumer), rozdil), {
+        velikost: 9.2,
+        barva: BARVA.text2,
+        radek: 4.4,
+        x: OKRAJ.levy + 5,
+        sirka: SIRKA - 5,
+      })
+      s.doc.setDrawColor(ORANZOVA[0], ORANZOVA[1], ORANZOVA[2])
+      s.doc.setLineWidth(0.8)
+      s.doc.line(OKRAJ.levy, zacatek - 3.4, OKRAJ.levy, s.y - 1)
+      s.mezera(5)
+    }
+  }
+
+  s.mezera(4)
+  s.misto(60)
+  s.nadpis(m.castiTitul)
+  s.text(m.castiUvod, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
+  s.mezera(4)
+  nakresliCasti(s, data, m, lang)
+
+  // =========================================================================
+  // 3. Jak report číst
   // =========================================================================
   s.mezera(6)
   s.misto(70)
@@ -174,7 +511,7 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
   s.mezera(6)
 
   // =========================================================================
-  // 3. Struktura týmu: opory, priority, zlomové linie
+  // 4. Struktura týmu: opory, priority, zlomové linie
   // =========================================================================
   s.mezera(4)
   // Tři sloupce vedle sebe. Na výšku pod sebou by tenhle přehled zabral půl
@@ -225,7 +562,7 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
   s.mezera(6)
 
   // =========================================================================
-  // 4. Co z toho plyne: strukturální nálezy
+  // 5. Co z toho plyne: strukturální nálezy
   // =========================================================================
   s.mezera(3)
   s.nadpis(t.nalezyTitul)
@@ -287,7 +624,7 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
   })
 
   // =========================================================================
-  // 5. Sedm oblastí podrobně
+  // 6. Sedm oblastí podrobně
   // =========================================================================
   s.mezera(4)
   s.misto(80)
@@ -300,66 +637,33 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
     if (!o) continue
     const vy = v[id]
 
-    // Hlavička oblasti se nesmí odtrhnout od grafiky pod sebou.
-    s.misto(40)
+    // Čísla a tvar rozdělení nese mapa a mřížka částí. Tady zůstává jen
+    // hlavička a výklad; kdyby se grafika opakovala i sem, report by o třetinu
+    // narostl a nepřidal by jedinou informaci.
+    s.misto(46)
     s.mezera(2)
     const zaklad = s.y
     s.pismo(12.6, true, BARVA.text)
     s.doc.text(nazevOblasti(id), OKRAJ.levy, zaklad)
     s.pismo(8.4, false, BARVA.slaba)
     s.doc.text(
-      `${t.legendaUroven} ${Math.round(o.prumer)}   ${t.legendaRozptyl} ±${Math.round(o.smodch)}`,
+      `${Math.round(o.prumer)} · ${slovoUrovne(o.prumer, lang)}, ${shodaKratce(o.smodch, lang)}`,
       PRAVY_KRAJ,
       zaklad,
       { align: "right" },
     )
-
-    s.y = zaklad + 3.4
-    s.pruh(s.y, Math.max(2, Math.min(100, o.prumer)), { vyska: 2.6 })
-    s.y += 4.6
-
-    // Rozpětí od nejslabšího po nejsilnějšího hráče.
-    const x = OKRAJ.levy + (SIRKA * Math.max(0, o.min)) / 100
-    const w = Math.max(1, (SIRKA * (o.max - o.min)) / 100)
-    s.doc.setFillColor(BARVA.drazka[0], BARVA.drazka[1], BARVA.drazka[2])
-    s.doc.roundedRect(OKRAJ.levy, s.y, SIRKA, 1, 0.5, 0.5, "F")
-    const barvaRozpeti = o.rozkol ? CERVENA : o.rozptyl ? ORANZOVA : BARVA.tlumena
-    s.doc.setFillColor(barvaRozpeti[0], barvaRozpeti[1], barvaRozpeti[2])
-    s.doc.roundedRect(x, s.y - 0.4, w, 1.8, 0.9, 0.9, "F")
-    s.y += 4.4
+    s.y = zaklad + 3.6
 
     const stitky = [
       o.rozkol ? t.rozkol : null,
       o.rozptyl ? t.velkyRozptyl : null,
       o.plosna ? t.plosna : null,
     ].filter(Boolean)
-    s.pismo(8, true, o.rozkol ? CERVENA : o.rozptyl ? ORANZOVA : BARVA.slaba)
-    s.doc.text(
-      [stitky.join("  ·  "), r.rozsahTymu(Math.round(o.min), Math.round(o.max))]
-        .filter(Boolean)
-        .join("      "),
-      OKRAJ.levy,
-      s.y,
-    )
-    s.y += 3.2
-
-    // Rozložení kádru do pásem. Ukazuje se jen to, co není nula, aby řádek
-    // nesl informaci a ne čtyři nuly.
-    const pasma: [string, number][] = [
-      [r.pasma.priority, o.pasma.priority],
-      [r.pasma.stabilization, o.pasma.stabilization],
-      [r.pasma.strong, o.pasma.strong],
-      [r.pasma.elite, o.pasma.elite],
-    ]
-    const neprazdna = pasma.filter(([, kolik]) => kolik > 0)
-    if (neprazdna.length) {
-      s.pismo(8, false, BARVA.slaba)
-      s.doc.text(
-        `${r.rozlozeni}: ${neprazdna.map(([n, k]) => `${n} ${k}`).join("   ")}`,
-        OKRAJ.levy,
-        s.y,
-      )
-      s.y += 4.6
+    if (stitky.length) {
+      s.pismo(8, true, o.rozkol ? CERVENA : ORANZOVA)
+      s.misto(4)
+      s.doc.text(stitky.join("  ·  "), OKRAJ.levy, s.y)
+      s.y += 4
     }
     s.mezera(1)
 
@@ -389,7 +693,7 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
   }
 
   // =========================================================================
-  // 6. Plán práce na dvanáct týdnů
+  // 7. Plán práce na dvanáct týdnů
   // =========================================================================
   s.mezera(3)
   s.nadpis(r.planTitul)
@@ -432,7 +736,7 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
   s.ramecek(r.planPoznamka, { velikost: 9.2 })
 
   // =========================================================================
-  // 7. Individuální rozhovory
+  // 8. Individuální rozhovory
   // =========================================================================
   s.mezera(3)
   s.nadpis(r.rozhovoryTitul)
@@ -453,7 +757,7 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
   }
 
   // =========================================================================
-  // 8. Mantinely použití
+  // 9. Mantinely použití
   // =========================================================================
   s.mezera(3)
   s.nadpis(r.mantinelyTitul)

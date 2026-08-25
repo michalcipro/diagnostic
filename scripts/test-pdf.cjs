@@ -36,6 +36,7 @@ export { getStructure, ELITE200_FACETS, ELITE200_REVERSED } from "../lib/diagnos
 export { tymovyProfil } from "../lib/tym/agregace"
 export { buildTymPdf } from "../lib/tym/pdf"
 export { RAMEC } from "../lib/tym/ramec"
+export { MAPA, KRATCE, CASTI } from "../lib/tym/slova"
 export { TYM } from "../lib/tym/obsah"
 export { buildManualPdf } from "../lib/diagnostic/manual-pdf"
 export { MANUAL } from "../lib/diagnostic/manual"
@@ -111,6 +112,9 @@ function nadpisyOddilu(lang) {
     r.planTitul,
     r.rozhovoryTitul,
     r.mantinelyTitul,
+    M.MAPA[lang].cislaTitul,
+    M.MAPA[lang].titul,
+    M.MAPA[lang].castiTitul,
   ]
 }
 
@@ -127,16 +131,42 @@ async function nacti(profil, lang) {
   const data = new Uint8Array(await blob.arrayBuffer())
   const doc = await getDocument({ data, useSystemFonts: true }).promise
   const strany = []
+  const prekryvy = []
   for (let i = 1; i <= doc.numPages; i++) {
     const stranka = await doc.getPage(i)
     const obsah = await stranka.getTextContent()
     strany.push(obsah.items.map((x) => x.str).join(" "))
+    prekryvy.push(...najdiPrekryvy(obsah.items, i))
   }
-  return { pocetStran: doc.numPages, strany, vse: strany.join("\n") }
+  return { pocetStran: doc.numPages, strany, prekryvy, vse: strany.join("\n") }
+}
+
+/**
+ * Dva texty, které leží přes sebe.
+ *
+ * Mapa týmu sází popisky do volné plochy a překryv se pozná až v ruce; typová
+ * kontrola o něm neví a rozvržení se mění s každým jiným týmem. Proto se hledá
+ * strojově, na skutečných souřadnicích z hotového PDF.
+ */
+function najdiPrekryvy(polozky, strana) {
+  const boxy = polozky
+    .filter((x) => x.str.trim())
+    .map((x) => ({ t: x.str, x: x.transform[4], y: x.transform[5], w: x.width, h: x.height }))
+  const out = []
+  for (let a = 0; a < boxy.length; a++) {
+    for (let b = a + 1; b < boxy.length; b++) {
+      const A = boxy[a]
+      const B = boxy[b]
+      const vodorovne = A.x < B.x + B.w - 0.5 && B.x < A.x + A.w - 0.5
+      const svisle = Math.abs(A.y - B.y) < Math.min(A.h, B.h) * 0.55
+      if (vodorovne && svisle) out.push(`strana ${strana}: „${A.t}" přes „${B.t}"`)
+    }
+  }
+  return out
 }
 
 async function zkontroluj(profil, lang, rozsah) {
-  const { pocetStran, strany, vse } = await nacti(profil, lang)
+  const { pocetStran, strany, prekryvy, vse } = await nacti(profil, lang)
   const [nejmin, nejvic] = rozsah
   rekni(
     pocetStran >= nejmin && pocetStran <= nejvic,
@@ -156,6 +186,35 @@ async function zkontroluj(profil, lang, rozsah) {
 
   const prazdne = strany.map((x, i) => [i + 1, x.trim().length]).filter(([, d]) => d < 200)
   rekni(!prazdne.length, `${profil.nazev} ${lang}: žádná strana není poloprázdná${prazdne.length ? ` (strany ${prazdne.map(([i]) => i).join(", ")})` : ""}`)
+
+  rekni(
+    !prekryvy.length,
+    `${profil.nazev} ${lang}: žádné dva texty neleží přes sebe${prekryvy.length ? ` (${prekryvy.slice(0, 2).join("; ")})` : ""}`,
+  )
+
+  // Mapa se kreslí ručně do souřadnic, takže se z ní dá snadno něco vytratit,
+  // aniž by o tom překladač věděl.
+  const m = M.MAPA[lang]
+  const prvkyMapy = [
+    ...m.rohy.map((r) => r.titul),
+    m.osaX,
+    m.osaYNahore,
+    m.osaYDole,
+    ...m.legenda,
+    ...m.pasma.map((p) => p.rozsah),
+  ]
+  const bezMezerVse = vse.replace(/\s+/g, "").toLowerCase()
+  const chybiMapa = prvkyMapy.filter((x) => !bezMezerVse.includes(x.replace(/\s+/g, "").toLowerCase()))
+  rekni(!chybiMapa.length, `${profil.nazev} ${lang}: mapa má všechny popisky${chybiMapa.length ? ` (chybí ${chybiMapa.join(", ")})` : ""}`)
+
+  // Názvy částí se berou z jiného souboru než názvy oblastí; kdyby se rozešly,
+  // mřížka by ukazovala identifikátory typu F2.
+  const nazvyCasti = profil.casti.map((c) => M.CASTI[lang][c.id]).filter(Boolean)
+  const chybiCasti = nazvyCasti.filter((x) => !bezMezerVse.includes(x.replace(/\s+/g, "").toLowerCase()))
+  rekni(
+    nazvyCasti.length === profil.casti.length && !chybiCasti.length,
+    `${profil.nazev} ${lang}: všech ${profil.casti.length} částí má název v PDF${chybiCasti.length ? ` (chybí ${chybiCasti.slice(0, 3).join(", ")})` : ""}`,
+  )
 
   rekni(vse.length > 12000, `${profil.nazev} ${lang}: report je opravdu podrobný (${vse.length} znaků)`)
 }
@@ -213,9 +272,12 @@ async function zkontrolujManual(lang) {
     ` oblastí pod 65: ${p.oblasti.filter((o) => o.prumer < 65).length}`
   console.log(`  ${BEZNY.nazev}: ${slozeni(BEZNY)}`)
   console.log(`  ${ROZBITY.nazev}: ${slozeni(ROZBITY)}`)
-  for (const lang of ["cs", "en"]) await zkontroluj(BEZNY, lang, [6, 8])
+  // Rozsah povyrostl, když do reportu přibyla mapa týmu, vysvětlení čísel,
+  // skryté trhliny a mřížka jednadvaceti částí. Je to obsah navíc, ne nafouknutí;
+  // podrobný rozbor oblastí naopak o grafiku přišel, protože ji nese mapa.
+  for (const lang of ["cs", "en"]) await zkontroluj(BEZNY, lang, [8, 10])
   console.log("\n– patologický případ: tým rozdělený na dvě poloviny –")
-  for (const lang of ["cs", "en"]) await zkontroluj(ROZBITY, lang, [6, 9])
+  for (const lang of ["cs", "en"]) await zkontroluj(ROZBITY, lang, [8, 11])
   console.log("\n– manuál pro kouče –")
   for (const lang of ["cs", "sk", "en"]) await zkontrolujManual(lang)
   console.log(chyb === 0 ? "\nPDF sedí" : `\nNALEZENO CHYB: ${chyb}`)

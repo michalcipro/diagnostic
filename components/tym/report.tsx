@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { TYM, type TymLang } from "@/lib/tym/obsah"
 import { RAMEC } from "@/lib/tym/ramec"
+import { MapaTymu } from "./mapa"
 import { VYKLAD } from "@/lib/tym/vyklad"
 import {
   oblastiKOtazkam,
@@ -92,6 +93,9 @@ export function TymReport({ data, lang }: { data: TeamReport; lang: TymLang }) {
           </p>
         </div>
       </section>
+
+      {/* ---- mapa týmu, části oblastí a skryté trhliny ---- */}
+      <MapaTymu data={data} lang={lang} />
 
       {/* ---- jak report číst ---- */}
       <section className="mb-10">

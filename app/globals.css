@@ -40,6 +40,20 @@
      pruzích dobrý poměr; obojí se musí převracet spolu s režimem. */
   --wm-track: #e9e9ef;
   --wm-bar-muted: #909099;
+  /* Pětistupňová škála mapy týmu. Jeden odstín, světle k tmavému; ověřená
+     validátorem na monotonní světlost, odstupy kroků a kontrast světlého
+     konce. Barva textu je ke každému kroku vlastní, protože se v tmavém
+     režimu škála obrací a bílé písmo by pak leželo na světlé dlaždici. */
+  --wm-d1: #86b6e4;
+  --wm-d2: #5f9ad6;
+  --wm-d3: #3574b8;
+  --wm-d4: #2359a0;
+  --wm-d5: #0d3c6b;
+  --wm-on1: #10243a;
+  --wm-on2: #10243a;
+  --wm-on3: #ffffff;
+  --wm-on4: #ffffff;
+  --wm-on5: #ffffff;
   color-scheme: light;
 }
 
@@ -73,6 +87,16 @@
     --wm-invalid-fg: #ff453a;
     --wm-track: #2c2c2e;
     --wm-bar-muted: #68686e;
+    --wm-d1: #1a4f84;
+    --wm-d2: #2969ab;
+    --wm-d3: #4890d4;
+    --wm-d4: #6aabe3;
+    --wm-d5: #94c6ee;
+    --wm-on1: #ffffff;
+    --wm-on2: #ffffff;
+    --wm-on3: #10243a;
+    --wm-on4: #10243a;
+    --wm-on5: #10243a;
     color-scheme: dark;
   }
 }

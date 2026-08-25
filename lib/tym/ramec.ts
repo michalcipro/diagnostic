@@ -90,10 +90,6 @@ const CS: RamecTexty = {
 
   jakCistTitul: "Jak tenhle report číst",
   jakCistOdstavce: [
-    "U každé oblasti najdeš dvě čísla. Úroveň říká, jak vysoko tým v té oblasti je. " +
-      "Rozptyl říká, jak daleko od sebe hráči jsou. Zpravidla platí, že rozptyl " +
-      "prozradí víc: dva týmy se stejnou úrovní se pod tlakem chovají úplně jinak " +
-      "podle toho, jestli jsou vyrovnané, nebo rozdělené.",
     "Rozlišujeme tři tvary rozdělení a každý se řeší jinak. Vyrovnaná oblast se dá " +
       "posouvat společně. Oblast, kde někdo vyčnívá, znamená jednoho nebo dva hráče " +
       "daleko od zbytku; to je věc rozhovoru s nimi, ne týmové porady. Rozdělená " +
@@ -223,10 +219,6 @@ const EN: RamecTexty = {
 
   jakCistTitul: "How to read this report",
   jakCistOdstavce: [
-    "Each area carries two numbers. The level says how high the team sits. The spread " +
-      "says how far apart the players are. As a rule the spread tells you more: two teams " +
-      "at the same level behave completely differently under pressure depending on " +
-      "whether they are even or divided.",
     "We distinguish three shapes of distribution and each is handled differently. An even " +
       "area can be moved collectively. An area where someone stands apart means one or two " +
       "players far from the rest; that is a conversation with them, not a team meeting. A " +

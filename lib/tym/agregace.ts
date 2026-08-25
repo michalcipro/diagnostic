@@ -1,5 +1,5 @@
 import type { BandKey, DimensionId, DiagnosticResult } from "../diagnostic/types"
-import type { Nalez, NalezKod, OblastProfil, Sila, TymovyProfil } from "./typy"
+import type { CastProfil, Nalez, NalezKod, OblastProfil, Sila, TymovyProfil } from "./typy"
 
 // Z profilů jednotlivců udělá profil skupiny.
 //
@@ -19,6 +19,18 @@ const MALO_DAT_POD = 5
 
 /** Nad tímhle rozptylem je oblast nevyrovnaná, i když mezera není zřetelná. */
 const VYSOKY_ROZPTYL = 18
+
+/** Pod touhle úrovní část oblasti brzdí i to, co kolem ní funguje. */
+const CAST_NIZKO = 62
+
+/** Nad tímhle rozptylem se v části tým rozchází natolik, že průměr neplatí. */
+const CAST_ROZCHOD = 18
+
+/** O kolik musí být část pod svojí oblastí, aby to byl nález, a ne šum. */
+const TRHLINA_ROZDIL_U = 6
+
+/** Nebo o kolik musí být rozkolísanější než oblast, ve které leží. */
+const TRHLINA_ROZDIL_SD = 8
 
 /** Mezera mezi dvěma skupinami, od které to je zlomová linie, v bodech. */
 const MEZERA_ZLOMU = 18
@@ -89,6 +101,42 @@ function fazeta(id: string, vysledky: DiagnosticResult[]): number | null {
     .filter((f) => f.id === id && f.reported)
     .map((f) => f.percent)
     return hodnoty.length ? prumer(hodnoty) : null
+}
+
+/**
+ * Profily všech částí, v pořadí, ve kterém je vrací skórování.
+ *
+ * Seznam částí se bere z výsledků, ne ze struktury testu. Struktura nese
+ * i vyhodnocovací klíče a tenhle soubor se dostane do Convexu; není důvod
+ * ho sem tahat kvůli seznamu názvů.
+ */
+function castiProfil(vysledky: DiagnosticResult[]): CastProfil[] {
+  const poradi: string[] = []
+  const podle = new Map<string, { oblast: DimensionId; hodnoty: number[] }>()
+  for (const r of vysledky) {
+    for (const f of r.facets ?? []) {
+      if (!f.reported) continue
+      if (!podle.has(f.id)) {
+        podle.set(f.id, { oblast: f.dimension, hodnoty: [] })
+        poradi.push(f.id)
+      }
+      podle.get(f.id)!.hodnoty.push(f.percent)
+    }
+  }
+  return poradi.map((id) => {
+    const { oblast, hodnoty } = podle.get(id)!
+    const p = prumer(hodnoty)
+    const sd = smerodatnaOdchylka(hodnoty)
+    return {
+      id,
+      oblast,
+      prumer: p,
+      smodch: sd,
+      min: Math.min(...hodnoty),
+      max: Math.max(...hodnoty),
+      riziko: p < CAST_NIZKO || sd >= CAST_ROZCHOD,
+    }
+  })
 }
 
 /** Rozptyl fazety napříč týmem. */
@@ -188,6 +236,36 @@ function najdiNalezy(o: Map<DimensionId, OblastProfil>, vysledky: DiagnosticResu
 
 const soucet = (p: Record<BandKey, number>) => p.priority + p.stabilization + p.strong + p.elite
 
+/**
+ * Skryté trhliny.
+ *
+ * Hlásí se jen tam, kde trenér nemá důvod se dívat: oblast není rozdělená ani
+ * rozkolísaná, tedy vypadá klidně, a přesto v ní leží část výrazně mimo.
+ * Rozdíl pár bodů se nepočítá; to je šum, ne nález, a kdyby se hlásil, přestal
+ * by trenér brát vážně celý oddíl.
+ */
+function najdiTrhliny(
+  oblasti: OblastProfil[],
+  casti: CastProfil[],
+): { oblast: DimensionId; cast: string }[] {
+  const out: { oblast: DimensionId; cast: string }[] = []
+  for (const o of oblasti) {
+    if (o.rozkol || o.rozptyl || o.plosna) continue
+    if (o.prumer < CAST_NIZKO || o.smodch >= CAST_ROZCHOD) continue
+    const spatne = casti
+      .filter(
+        (c) =>
+          c.oblast === o.id &&
+          c.riziko &&
+          (o.prumer - c.prumer >= TRHLINA_ROZDIL_U || c.smodch - o.smodch >= TRHLINA_ROZDIL_SD),
+      )
+      // Nejhorší je ta, která je od oblasti nejdál v obou směrech naráz.
+      .sort((a, b) => b.smodch - b.prumer - (a.smodch - a.prumer))
+    if (spatne.length) out.push({ oblast: o.id, cast: spatne[0].id })
+  }
+  return out
+}
+
 /** Poskládá týmový profil z profilů jednotlivců. */
 export function tymovyProfil(
   nazev: string,
@@ -210,6 +288,7 @@ export function tymovyProfil(
     (x): x is OblastProfil => x !== null,
   )
   const mapa = new Map(oblasti.map((x) => [x.id, x]))
+  const casti = castiProfil(vysledky)
 
   const podilSilnych = (x: OblastProfil) => (x.pasma.strong + x.pasma.elite) / Math.max(1, soucet(x.pasma))
   const podilSlabych = (x: OblastProfil) => x.pasma.priority / Math.max(1, soucet(x.pasma))
@@ -220,6 +299,8 @@ export function tymovyProfil(
     odevzdano,
     zapocteno: vysledky.length,
     oblasti,
+    casti,
+    trhliny: najdiTrhliny(oblasti, casti),
     // Opora je oblast, na kterou se dá spolehnout: většina týmu ji má silnou
     // a zároveň se v ní tým nerozchází. Vysoký průměr s velkým rozptylem
     // oporou není, protože pod tlakem se rozpadne.

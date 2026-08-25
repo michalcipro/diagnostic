@@ -22,8 +22,21 @@ export interface OblastProCteni {
   plosna: boolean
 }
 
+/** Jedna část oblasti tak, jak ji vrací server. */
+export interface CastProCteni {
+  id: string
+  oblast: string
+  prumer: number
+  smodch: number
+  min: number
+  max: number
+  riziko: boolean
+}
+
 export interface ProfilProCteni {
   oblasti: OblastProCteni[]
+  casti: CastProCteni[]
+  trhliny: { oblast: string; cast: string }[]
   opory: string[]
   priority: string[]
   zlomy: string[]

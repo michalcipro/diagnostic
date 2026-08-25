@@ -69,6 +69,28 @@ export interface OblastProfil {
   plosna: boolean
 }
 
+/**
+ * Jedna část oblasti napříč týmem.
+ *
+ * Každá ze sedmi oblastí stojí na třech konkrétnějších věcech. Průměr oblasti
+ * je umí schovat: oblast může mít slušné číslo a přitom v ní jedna část silně
+ * pokulhává. Právě proto se počítají zvlášť.
+ */
+export interface CastProfil {
+  id: string
+  /** oblast, do které část patří */
+  oblast: DimensionId
+  prumer: number
+  smodch: number
+  min: number
+  max: number
+  /**
+   * Část je nízko, nebo se v ní tým výrazně rozchází. Počítá se tady, aby
+   * prahy zůstaly na serveru; klient dostane hotový závěr.
+   */
+  riziko: boolean
+}
+
 export interface TymovyProfil {
   nazev: string
   pozvano: number
@@ -76,6 +98,13 @@ export interface TymovyProfil {
   /** kolik vyplnění mělo použitelné skóre; neúplná se do profilu nepočítají */
   zapocteno: number
   oblasti: OblastProfil[]
+  /** tři části pod každou oblastí, v pořadí dotazníku */
+  casti: CastProfil[]
+  /**
+   * Skrytá trhlina: oblast, která vypadá klidně, a přitom v ní leží část
+   * výrazně mimo. Právě tohle průměr oblasti schová, takže se to hlásí zvlášť.
+   */
+  trhliny: { oblast: DimensionId; cast: string }[]
   /** o co se tým může opřít, když je zle */
   opory: DimensionId[]
   /** kde je práce nejpotřebnější */
