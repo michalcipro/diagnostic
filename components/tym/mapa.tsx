@@ -55,14 +55,20 @@ type Cast = TeamReport["casti"][number]
 export function MapaTymu({ data, lang }: { data: TeamReport; lang: TymLang }) {
   const [zaostreno, setZaostreno] = useState<DimensionId | null>(null)
   const t = MAPA[lang]
+  // Nasazení webu a Convexu jsou dva kroky. Mezi nimi může nový web mluvit se
+  // starým serverem, který části oblastí ještě nevrací; bez téhle pojistky by
+  // se koučovi místo reportu ukázala prázdná stránka.
+  const casti = data.casti ?? []
+  const trhliny = data.trhliny ?? []
+  if (!casti.length) return null
   const oblasti = POSLOUPNOST.map((id) => data.oblasti.find((o) => o.id === id)).filter(
     (o): o is Oblast => o !== undefined,
   )
-  const castiOblasti = (id: string) => data.casti.filter((c) => c.oblast === id)
+  const castiOblasti = (id: string) => casti.filter((c) => c.oblast === id)
   const nazev = (id: string) => KRATCE[lang][id as DimensionId] ?? id
   const nazevCasti = (id: string) => CASTI[lang][id] ?? id
 
-  const ukazka = vyberUkazku(oblasti, data.casti)
+  const ukazka = vyberUkazku(oblasti, casti)
 
   const zaostri = (id: DimensionId | null) => setZaostreno(id)
   const vazba = (id: DimensionId) => ({
@@ -111,7 +117,7 @@ export function MapaTymu({ data, lang }: { data: TeamReport; lang: TymLang }) {
             <div className="min-w-0 p-4 sm:p-5">
               <Plocha
                 oblasti={oblasti}
-                casti={data.casti}
+                casti={casti}
                 nazev={nazev}
                 nazevCasti={nazevCasti}
                 t={t}
@@ -166,13 +172,13 @@ export function MapaTymu({ data, lang }: { data: TeamReport; lang: TymLang }) {
       {/* ---------------- kde se problém schoval ---------------- */}
       <section className="mt-10">
         <Hlavicka kicker={t.trhlinyKicker} titul={t.trhlinyTitul} uvod={t.trhlinyUvod} />
-        {data.trhliny.length === 0 ? (
+        {trhliny.length === 0 ? (
           <p className="text-[14.5px] text-[var(--wm-text-2)]">{t.bezTrhlin}</p>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {data.trhliny.map((tr) => {
+            {trhliny.map((tr) => {
               const o = data.oblasti.find((x) => x.id === tr.oblast)
-              const c = data.casti.find((x) => x.id === tr.cast)
+              const c = casti.find((x) => x.id === tr.cast)
               if (!o || !c) return null
               const rozdil = Math.round(o.prumer) - Math.round(c.prumer)
               return (

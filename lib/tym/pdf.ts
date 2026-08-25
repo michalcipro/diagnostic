@@ -441,6 +441,8 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
   // 2. Co znamenají čísla, mapa týmu, skryté trhliny a části oblastí
   // =========================================================================
   const m = MAPA[lang]
+  // Stejná pojistka jako na obrazovce: starý server části oblastí nevrací.
+  const maCasti = (data.casti ?? []).length > 0
   s.zalom()
   s.nadpis(m.cislaTitul)
   s.text(m.cislaUvod, { velikost: 9.6, barva: BARVA.text2, radek: 4.6 })
@@ -450,50 +452,52 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
   s.text(m.cislaPoznamka, { velikost: 9, barva: BARVA.slaba, radek: 4.3 })
   s.mezera(7)
 
-  s.nadpis(m.titul)
-  s.text(`${m.navodTitul} ${m.navodUvod}`, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
-  s.mezera(2.4)
-  odrazky(s, m.navod, 9.2)
-  s.mezera(4)
-  nakresliMapu(s, data, m, lang)
+  if (maCasti) {
+    s.nadpis(m.titul)
+    s.text(`${m.navodTitul} ${m.navodUvod}`, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
+    s.mezera(2.4)
+    odrazky(s, m.navod, 9.2)
+    s.mezera(4)
+    nakresliMapu(s, data, m, lang)
 
-  if (data.trhliny.length) {
-    s.mezera(4)
-    s.misto(50)
-    s.nadpis(m.trhlinyTitul)
-    s.text(m.trhlinyUvod, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
-    s.mezera(4)
-    for (const tr of data.trhliny) {
-      const o = data.oblasti.find((x) => x.id === tr.oblast)
-      const c = data.casti.find((x) => x.id === tr.cast)
-      if (!o || !c) continue
-      const rozdil = Math.round(o.prumer) - Math.round(c.prumer)
-      s.misto(22)
-      const zacatek = s.y
-      s.text(CASTI[lang][c.id] ?? c.id, { velikost: 10.4, tucne: true, radek: 4.8, x: OKRAJ.levy + 5, sirka: SIRKA - 5 })
-      s.pismo(7.6, true, ORANZOVA)
-      s.doc.text(KRATCE[lang][o.id as DimensionId] ?? o.id, PRAVY_KRAJ, zacatek, { align: "right" })
-      s.mezera(1)
-      s.text(m.trhlinaVeta(Math.round(o.prumer), Math.round(c.prumer), rozdil), {
-        velikost: 9.2,
-        barva: BARVA.text2,
-        radek: 4.4,
-        x: OKRAJ.levy + 5,
-        sirka: SIRKA - 5,
-      })
-      s.doc.setDrawColor(ORANZOVA[0], ORANZOVA[1], ORANZOVA[2])
-      s.doc.setLineWidth(0.8)
-      s.doc.line(OKRAJ.levy, zacatek - 3.4, OKRAJ.levy, s.y - 1)
-      s.mezera(5)
+    if (data.trhliny.length) {
+      s.mezera(4)
+      s.misto(50)
+      s.nadpis(m.trhlinyTitul)
+      s.text(m.trhlinyUvod, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
+      s.mezera(4)
+      for (const tr of data.trhliny) {
+        const o = data.oblasti.find((x) => x.id === tr.oblast)
+        const c = data.casti.find((x) => x.id === tr.cast)
+        if (!o || !c) continue
+        const rozdil = Math.round(o.prumer) - Math.round(c.prumer)
+        s.misto(22)
+        const zacatek = s.y
+        s.text(CASTI[lang][c.id] ?? c.id, { velikost: 10.4, tucne: true, radek: 4.8, x: OKRAJ.levy + 5, sirka: SIRKA - 5 })
+        s.pismo(7.6, true, ORANZOVA)
+        s.doc.text(KRATCE[lang][o.id as DimensionId] ?? o.id, PRAVY_KRAJ, zacatek, { align: "right" })
+        s.mezera(1)
+        s.text(m.trhlinaVeta(Math.round(o.prumer), Math.round(c.prumer), rozdil), {
+          velikost: 9.2,
+          barva: BARVA.text2,
+          radek: 4.4,
+          x: OKRAJ.levy + 5,
+          sirka: SIRKA - 5,
+        })
+        s.doc.setDrawColor(ORANZOVA[0], ORANZOVA[1], ORANZOVA[2])
+        s.doc.setLineWidth(0.8)
+        s.doc.line(OKRAJ.levy, zacatek - 3.4, OKRAJ.levy, s.y - 1)
+        s.mezera(5)
+      }
     }
-  }
 
-  s.mezera(4)
-  s.misto(60)
-  s.nadpis(m.castiTitul)
-  s.text(m.castiUvod, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
-  s.mezera(4)
-  nakresliCasti(s, data, m, lang)
+    s.mezera(4)
+    s.misto(60)
+    s.nadpis(m.castiTitul)
+    s.text(m.castiUvod, { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
+    s.mezera(4)
+    nakresliCasti(s, data, m, lang)
+  }
 
   // =========================================================================
   // 3. Jak report číst
