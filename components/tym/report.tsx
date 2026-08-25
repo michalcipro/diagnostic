@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { TYM, type TymLang } from "@/lib/tym/obsah"
 import type { NalezKod } from "@/lib/tym/typy"
 import type { TeamReport } from "@/lib/diagnostic/remote"
@@ -37,6 +38,7 @@ export function TymReport({ data, lang }: { data: TeamReport; lang: TymLang }) {
         <p className="mt-2 text-[13.5px] text-[var(--wm-text-3)]">
           {t.pocty(data.odevzdano, data.pozvano)}
         </p>
+        <StahnoutPdf data={data} lang={lang} />
       </header>
 
       {data.maloDat && (
@@ -119,6 +121,34 @@ export function TymReport({ data, lang }: { data: TeamReport; lang: TymLang }) {
 }
 
 // ---------------------------------------------------------------------------
+
+/** Stažení reportu. Generátor se načítá až při kliknutí, ne s celou stránkou. */
+function StahnoutPdf({ data, lang }: { data: TeamReport; lang: TymLang }) {
+  const [stahuje, setStahuje] = useState(false)
+  return (
+    <button
+      type="button"
+      disabled={stahuje}
+      onClick={async () => {
+        setStahuje(true)
+        try {
+          const { buildTymPdf, tymPdfFileName } = await import("@/lib/tym/pdf")
+          const url = URL.createObjectURL(buildTymPdf(data, lang))
+          const a = document.createElement("a")
+          a.href = url
+          a.download = tymPdfFileName(data.nazev, lang)
+          a.click()
+          window.setTimeout(() => URL.revokeObjectURL(url), 10_000)
+        } finally {
+          setStahuje(false)
+        }
+      }}
+      className="diag-press mt-5 rounded-full bg-[var(--wm-brand)] px-5 py-2 text-[13px] font-semibold text-[var(--wm-brand-fg)] disabled:opacity-50"
+    >
+      {stahuje ? "…" : lang === "en" ? "Download as PDF" : "Stáhnout jako PDF"}
+    </button>
+  )
+}
 
 function Nadpis({ children }: { children: React.ReactNode }) {
   return (

@@ -11,6 +11,8 @@ import { jeVzorce, parseTestId } from "@/lib/diagnostic/test-id"
 import { clearSession, loadSession, newSession, saveSession } from "@/lib/diagnostic/storage"
 import { fetchInvite, isRemoteEnabled, submitWithInvite, type Invite } from "@/lib/diagnostic/remote"
 import type { Answer, Lang, StoredSession, TestId } from "@/lib/diagnostic/types"
+import type { HracVyhodnoceni } from "@/lib/tym/hrac"
+import { HracReport } from "@/components/tym/hrac-report"
 
 const BLOCK_SIZE = 20
 
@@ -206,6 +208,7 @@ function Questionnaire({
   // Souhlas se sdílením. Výchozí je sdílet: kouč si test objednal a hráč, který
   // nic nezmění, obvykle nic namítat nechce. Odmítnutí je vědomý krok.
   const [nesdilet, setNesdilet] = useState(false)
+  const [vyhodnoceni, setVyhodnoceni] = useState<HracVyhodnoceni | null>(null)
   const topRef = useRef<HTMLDivElement>(null)
 
   // Rozpracované odpovědi se drží pod tokenem – klient si může dát pauzu
@@ -268,9 +271,14 @@ function Questionnaire({
     // Odeslání kouči proti pozvánce. Respondent výsledky nevidí – projde je
     // s ním kouč osobně, proto se po odeslání zobrazuje jen potvrzení.
     setSubmitting(true)
-    const ok = isRemoteEnabled()
+    const odpoved = isRemoteEnabled()
       ? await submitWithInvite(token, done, tymova ? !nesdilet : undefined)
-      : false
+      : { ok: false }
+    const ok = odpoved.ok
+    // V klubové větvi si hráč své vyhodnocení přečte hned. Vrací se v odpovědi
+    // na jeho vlastní odeslání a nikde se neukládá, takže po zavření okna je
+    // pryč; odkaz je na jedno použití a znovu se o něj požádat nedá.
+    if (odpoved.vyhodnoceni) setVyhodnoceni(odpoved.vyhodnoceni)
     setSubmitting(false)
     // Po úspěšném odeslání odpovědi z prohlížeče zmizí. Na sdíleném počítači
     // by je jinak našel další, kdo si stránku otevře; server je má a klient
@@ -562,7 +570,15 @@ function Questionnaire({
 
         {/* Odesláno. Respondent zde záměrně nevidí žádné výsledky – vyhodnocení
             s ním prochází kouč osobně. */}
-        {stage === "sent" && (
+        {stage === "sent" && vyhodnoceni && (
+          <HracReport
+            data={vyhodnoceni}
+            lang={lang === "en" ? "en" : "cs"}
+            sdileno={!nesdilet}
+          />
+        )}
+
+        {stage === "sent" && !vyhodnoceni && (
           <section className="diag-card mt-8 p-8 text-center">
             <div
               className="mx-auto flex h-14 w-14 items-center justify-center rounded-full"

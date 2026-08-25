@@ -1,6 +1,7 @@
 import { ConvexHttpClient } from "convex/browser"
 import { makeFunctionReference } from "convex/server"
 import type { AnswerMap, Lang, PersonInfo, StoredSession, TestId } from "./types"
+import type { HracVyhodnoceni } from "../tym/hrac"
 
 // Napojení na Convex backend.
 //
@@ -155,21 +156,24 @@ export async function submitWithInvite(
   session: StoredSession,
   /** jen u týmové pozvánky: souhlas hráče se sdílením vyhodnocení s koučem */
   sdilet?: boolean,
-): Promise<boolean> {
+): Promise<{ ok: boolean; vyhodnoceni?: HracVyhodnoceni }> {
   const c = client()
-  if (!c) return false
+  if (!c) return { ok: false }
   try {
-    await c.mutation(submitRef, {
+    // U týmové pozvánky se v odpovědi vrací hráčovo vyhodnocení. Nikde se
+    // neukládá a nedá se o něj požádat podruhé: odkaz je na jedno použití,
+    // takže po zavření okna je pryč, a přesně tak to hráči říkáme.
+    const res = (await c.mutation(submitRef, {
       token,
       person: session.person,
       answers: JSON.stringify(session.answers),
       durationSec: sessionDurationSec(session),
       sdilet,
-    })
-    return true
+    })) as { ok: boolean; vyhodnoceni?: HracVyhodnoceni }
+    return { ok: true, vyhodnoceni: res?.vyhodnoceni }
   } catch (err) {
     console.error("[diagnostic] odeslání do Convexu selhalo", err)
-    return false
+    return { ok: false }
   }
 }
 

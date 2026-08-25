@@ -101,7 +101,7 @@ export default function CoachPage() {
   // Vyplněné diagnostiky mu zůstávají: vidí v nich vyhodnocení hráčů, kteří
   // mu je zpřístupnili, a bez toho by mu byla celá větev k ničemu.
   useEffect(() => {
-    if (meInfo?.pouzeTymy && tab === "invites") setTab("tymy")
+    if (meInfo?.pouzeTymy && (tab === "invites" || tab === "manual")) setTab("tymy")
   }, [meInfo?.pouzeTymy, tab])
   const [externi, setExterni] = useState<ExternalUsage[] | null>(null)
   const [pristupy, setPristupy] = useState<PristupZaznam[] | null>(null)
@@ -168,8 +168,10 @@ export default function CoachPage() {
       // Kdo jsem a co smím se bere z whoAmI, ne z odpovědi na přihlášení:
       // přihlášení vrací jen jméno a roli, kdežto omezení klubového kouče
       // sedí u účtu a rozhraní podle něj skrývá, co stejně neprojde.
+      const kdoJsem = await whoAmI(res.sessionToken)
+      if (kdoJsem?.pouzeTymy) setTab("tymy")
       setMeInfo(
-        (await whoAmI(res.sessionToken)) ?? {
+        kdoJsem ?? {
           name: res.name,
           email,
           role: res.role as CoachIdentity["role"],
@@ -483,16 +485,19 @@ export default function CoachPage() {
       {/* záložky */}
       <div className="diag-segment mb-5">
         <button type="button" data-active={tab === "results"} onClick={() => setTab("results")}>
-          {t.tabResults}
+          {/* V klubu se slovo diagnostika neukazuje, viz lib/diagnostic/nazvy.ts. */}
+          {meInfo.pouzeTymy ? (lang === "en" ? "Player results" : "Výsledky hráčů") : t.tabResults}
         </button>
         {!meInfo.pouzeTymy && (
           <button type="button" data-active={tab === "invites"} onClick={() => setTab("invites")}>
             {t.tabInvites}
           </button>
         )}
-        <button type="button" data-active={tab === "manual"} onClick={() => setTab("manual")}>
-          {t.tabManual}
-        </button>
+        {!meInfo.pouzeTymy && (
+          <button type="button" data-active={tab === "manual"} onClick={() => setTab("manual")}>
+            {t.tabManual}
+          </button>
+        )}
         {(meInfo.role === "master" || meInfo.role === "external") && (
           <button
             type="button"
@@ -592,7 +597,7 @@ export default function CoachPage() {
         </div>
       )}
 
-      {tab === "manual" && (
+      {tab === "manual" && !meInfo.pouzeTymy && (
         <div className="mb-8">
           <ManualView lang={lang} onPdf={() => void exportManualPdf(lang)} />
         </div>
