@@ -217,6 +217,30 @@ export class Sazba {
     return s === text ? s : `${s}…`
   }
 
+  /**
+   * Prostrkaný popisek, který končí přesně na dané souřadnici.
+   *
+   * jsPDF si při `align: "right"` a `align: "center"` spočítá šířku textu bez
+   * prostrkání, takže prostrkaný popisek o ně přeteče doprava. Na hlavičkách
+   * tabulek to znamená vjetí do sousedního sloupce, v týmovém reportu to
+   * vyhánělo název oblasti dvanáct milimetrů za sazbu. Šířka se proto počítá
+   * ručně a text se sází zleva. Vrací svoji šířku.
+   */
+  prostrkany(
+    text: string,
+    konec: number,
+    y: number,
+    velikost: number,
+    barva: RGB = BARVA.slaba,
+    prostrkani = 0.4,
+    kotva: "right" | "center" = "right",
+  ): number {
+    const sirka = this.sirkaTextu(text, velikost, true) + prostrkani * text.length
+    this.pismo(velikost, true, barva)
+    this.doc.text(text, kotva === "right" ? konec - sirka : konec - sirka / 2, y, { charSpace: prostrkani })
+    return sirka
+  }
+
   /** Šířka textu v daném písmu. */
   sirkaTextu(t: string, velikost: number, tucne = false): number {
     this.pismo(velikost, tucne)
@@ -503,15 +527,16 @@ export class Sazba {
         const levy = hranice(i)
         const sirkaSloupce = sirka * sl.podil
         if (sl.stred || sl.popisNaStred) {
-          this.doc.text(sl.popis.toUpperCase(), levy + sirkaSloupce / 2, zaklad, {
-            align: "center",
-            charSpace: 0.35,
-          })
+          this.prostrkany(sl.popis.toUpperCase(), levy + sirkaSloupce / 2, zaklad, 6.8, BARVA.slaba, 0.35, "center")
         } else if (sl.vpravo) {
-          this.doc.text(sl.popis.toUpperCase(), levy + sirkaSloupce - odsazeniBunky, zaklad, {
-            align: "right",
-            charSpace: 0.35,
-          })
+          this.prostrkany(
+            sl.popis.toUpperCase(),
+            levy + sirkaSloupce - odsazeniBunky,
+            zaklad,
+            6.8,
+            BARVA.slaba,
+            0.35,
+          )
         } else {
           this.doc.text(sl.popis.toUpperCase(), levy + odsazeniBunky, zaklad, { charSpace: 0.35 })
         }

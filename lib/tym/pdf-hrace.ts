@@ -78,17 +78,23 @@ export function buildHracPdf(data: HracVyhodnoceni, lang: "cs" | "en"): Blob {
   s.nadpis(t.oblastiTitul)
   for (const o of data.oblasti) {
     // Oblast se nesmí rozlomit v půlce, jinak zůstane nadpis na patě strany.
-    s.pismo(10, false, BARVA.text2)
+    // Výška se měří v tom písmu, kterým se opravdu sází: úvod devítkou, výklad
+    // devět osmi. Odhad v desítce nadsazoval a strana se lámala předčasně,
+    // takže třetina první strany zůstávala prázdná.
+    s.pismo(9, false, BARVA.slaba)
     const radkyUvod = s.doc.splitTextToSize(o.uvod, SIRKA) as string[]
+    s.pismo(9.8, false, BARVA.text2)
     const radkyVyklad = s.doc.splitTextToSize(o.vyklad, SIRKA) as string[]
-    const vyska = 13 + (radkyUvod.length + radkyVyklad.length) * 4.7
-    if (s.zbyva() < vyska) s.zalom()
+    // Pohromadě musí zůstat nadpis, pruh, úvod a pár řádků výkladu. Držet
+    // celou oblast vcelku znamenalo nechat na první straně třetinu volnou,
+    // protože nejdelší výklad má přes čtyřicet milimetrů.
+    const spolu = 9 + radkyUvod.length * 4.4 + 1.4 + Math.min(4, radkyVyklad.length) * 4.7
+    if (s.zbyva() < spolu) s.zalom()
 
     const zaklad = s.y
     s.pismo(11.4, true, BARVA.text)
     s.doc.text(o.nazev, OKRAJ.levy, zaklad)
-    s.pismo(7.6, true, PASMO_BARVA[o.band])
-    s.doc.text(t.pasma[o.band].toUpperCase(), PRAVY_KRAJ, zaklad, { align: "right", charSpace: 0.3 })
+    s.prostrkany(t.pasma[o.band].toUpperCase(), PRAVY_KRAJ, zaklad, 7.6, PASMO_BARVA[o.band], 0.3)
 
     s.y = zaklad + 2.6
     s.pruh(s.y, podil(o.percent), { vyska: 2.4, barva: PASMO_BARVA[o.band] })

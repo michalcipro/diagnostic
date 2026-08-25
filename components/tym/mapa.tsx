@@ -248,14 +248,23 @@ export function MapaTymu({ data, lang }: { data: TeamReport; lang: TymLang }) {
                             lang,
                           )}${c.riziko ? `, ${t.potrebujePozornost}` : ""}`}
                         >
-                          <span className="text-[11.5px] font-semibold leading-tight opacity-95">
+                          {/* Kosočtverec rizika sedí v pravém horním rohu, takže
+                              mu název musí uhnout, jinak se schová pod značku. */}
+                          <span
+                            className={`text-[11.5px] font-semibold leading-tight opacity-95${
+                              c.riziko ? " pr-5" : ""
+                            }`}
+                          >
                             {nazevCasti(c.id)}
                           </span>
-                          <span className="flex items-baseline gap-2">
-                            <span className="text-[23px] font-semibold tabular-nums">
+                          {/* Slovo o shodě drží pravý kraj dlaždice a smí se zalomit:
+                              angličtina má „large differences" tam, kde čeština má
+                              „velké rozdíly", a na jeden řádek se to nevejde. */}
+                          <span className="flex items-baseline justify-between gap-2">
+                            <span className="text-[23px] font-semibold leading-none tabular-nums">
                               {Math.round(c.prumer)}
                             </span>
-                            <span className="text-[11.5px] font-semibold opacity-95">
+                            <span className="text-right text-[11.5px] font-semibold leading-tight opacity-95">
                               {shodaKratce(c.smodch, lang)}
                             </span>
                           </span>

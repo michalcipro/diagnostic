@@ -40,6 +40,9 @@ export { MAPA, KRATCE, CASTI } from "../lib/tym/slova"
 export { TYM } from "../lib/tym/obsah"
 export { buildManualPdf } from "../lib/diagnostic/manual-pdf"
 export { MANUAL } from "../lib/diagnostic/manual"
+export { SIRKA_DLAZDICE, velikostSlova } from "../lib/tym/pdf"
+export { shodaKratce } from "../lib/tym/slova"
+export { Sazba, novyDokument, A4, OKRAJ } from "../lib/diagnostic/pdf/sazba"
 `,
 )
 let M
@@ -132,13 +135,15 @@ async function nacti(profil, lang) {
   const doc = await getDocument({ data, useSystemFonts: true }).promise
   const strany = []
   const prekryvy = []
+  const zaOkrajem = []
   for (let i = 1; i <= doc.numPages; i++) {
     const stranka = await doc.getPage(i)
     const obsah = await stranka.getTextContent()
     strany.push(obsah.items.map((x) => x.str).join(" "))
     prekryvy.push(...najdiPrekryvy(obsah.items, i))
+    zaOkrajem.push(...najdiPreteceni(obsah.items, i))
   }
-  return { pocetStran: doc.numPages, strany, prekryvy, vse: strany.join("\n") }
+  return { pocetStran: doc.numPages, strany, prekryvy, zaOkrajem, vse: strany.join("\n") }
 }
 
 /**
@@ -165,8 +170,67 @@ function najdiPrekryvy(polozky, strana) {
   return out
 }
 
+/**
+ * Text, který skončil za okrajem strany.
+ *
+ * Překryv pozná jen srážku dvou textů. Slovo, které vyteče z dlaždice do
+ * volného místa u kraje, se nesrazí s ničím, a přesto je to zjevná chyba
+ * sazby: přesně to ukázala mřížka částí v angličtině. Souřadnice jsou
+ * v bodech, sazba v milimetrech, proto ten převod.
+ */
+function najdiPreteceni(polozky, strana) {
+  const NA_MM = 25.4 / 72
+  const pravy = M.A4.sirka - M.OKRAJ.pravy
+  const out = []
+  for (const x of polozky) {
+    if (!x.str.trim()) continue
+    const konec = (x.transform[4] + x.width) * NA_MM
+    const zacatek = x.transform[4] * NA_MM
+    if (konec > pravy + 0.5 || zacatek < M.OKRAJ.levy - 0.5) {
+      out.push(`strana ${strana}: „${x.str}" končí na ${konec.toFixed(1)} mm`)
+    }
+  }
+  return out
+}
+
+/**
+ * Mřížka částí měřená přímo, ne přes hotové PDF.
+ *
+ * Do dlaždice jde číslo, slovo o shodě a případně vlaječka rizika. Angličtina
+ * má „large differences" tam, kde čeština má „velké rozdíly", takže se to
+ * musí ověřit pro všech jednadvacet částí v obou jazycích, ne jen pro tým,
+ * který zrovna vyšel v simulaci.
+ */
+function zkontrolujMrizku() {
+  const merac = new M.Sazba(M.novyDokument())
+  // Nejširší možný obsah: trojmístné číslo a nejdelší slovo o shodě, které
+  // pro danou směrodatnou odchylku může padnout.
+  const ODCHYLKY = [0, 3, 5, 7, 9, 12, 20]
+  for (const lang of ["cs", "en"]) {
+    const tesne = []
+    for (const sd of ODCHYLKY) {
+      const slovo = M.shodaKratce(sd, lang)
+      const velikost = M.velikostSlova(merac, "100", slovo)
+      if (velikost < 6.8) tesne.push(`${slovo} (${velikost.toFixed(1)} pt)`)
+    }
+    rekni(!tesne.length, `mřížka ${lang}: slovo o shodě se vejde v plné velikosti${tesne.length ? ` (${tesne.join(", ")})` : ""}`)
+
+    // Název části se láme na dvě řádky do místa, které zbude vedle vlaječky.
+    const misto = M.SIRKA_DLAZDICE - 6 - 5
+    const siroke = []
+    for (const [id, nazev] of Object.entries(M.CASTI[lang])) {
+      const radky = merac.doc.splitTextToSize(nazev, misto)
+      if (radky.length > 2) siroke.push(`${id}: ${nazev} (${radky.length} řádky)`)
+      for (const r of radky) {
+        if (merac.sirkaTextu(r, 7, true) > misto + 0.2) siroke.push(`${id}: „${r}" je širší než dlaždice`)
+      }
+    }
+    rekni(!siroke.length, `mřížka ${lang}: názvy všech částí se vejdou do dlaždice${siroke.length ? ` (${siroke.slice(0, 3).join("; ")})` : ""}`)
+  }
+}
+
 async function zkontroluj(profil, lang, rozsah) {
-  const { pocetStran, strany, prekryvy, vse } = await nacti(profil, lang)
+  const { pocetStran, strany, prekryvy, zaOkrajem, vse } = await nacti(profil, lang)
   const [nejmin, nejvic] = rozsah
   rekni(
     pocetStran >= nejmin && pocetStran <= nejvic,
@@ -190,6 +254,11 @@ async function zkontroluj(profil, lang, rozsah) {
   rekni(
     !prekryvy.length,
     `${profil.nazev} ${lang}: žádné dva texty neleží přes sebe${prekryvy.length ? ` (${prekryvy.slice(0, 2).join("; ")})` : ""}`,
+  )
+
+  rekni(
+    !zaOkrajem.length,
+    `${profil.nazev} ${lang}: žádný text nepřetéká za okraj strany${zaOkrajem.length ? ` (${zaOkrajem.slice(0, 3).join("; ")})` : ""}`,
   )
 
   // Mapa se kreslí ručně do souřadnic, takže se z ní dá snadno něco vytratit,
@@ -278,6 +347,8 @@ async function zkontrolujManual(lang) {
   for (const lang of ["cs", "en"]) await zkontroluj(BEZNY, lang, [8, 10])
   console.log("\n– patologický případ: tým rozdělený na dvě poloviny –")
   for (const lang of ["cs", "en"]) await zkontroluj(ROZBITY, lang, [8, 11])
+  console.log("\n– mřížka částí, měřeno přímo –")
+  zkontrolujMrizku()
   console.log("\n– manuál pro kouče –")
   for (const lang of ["cs", "sk", "en"]) await zkontrolujManual(lang)
   console.log(chyb === 0 ? "\nPDF sedí" : `\nNALEZENO CHYB: ${chyb}`)

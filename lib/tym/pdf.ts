@@ -81,6 +81,24 @@ function popisek(s: Sazba, text: string, barva: RGB = BARVA.slaba, odsazeni = 0)
   s.mezera(4.2)
 }
 
+/**
+ * Prostrkaný popisek zarovnaný na pravý kraj sazby.
+ *
+ * jsPDF si při `align: "right"` spočítá šířku textu bez prostrkání, takže
+ * text o to prostrkání přeteče za okraj strany. Bylo to vidět na názvech
+ * oblastí v plánu: „EMOTION REGULATION AND PERFORMANCE UNDER PRESSURE" končilo
+ * dvanáct milimetrů za sazbou. Šířka se proto počítá ručně a text se sází
+ * zleva. Když by se do zbylého místa nevešel, zmenší se.
+ */
+function popisekVpravo(s: Sazba, text: string, y: number, odkud: number) {
+  const PROSTRKANI = 0.4
+  const misto = PRAVY_KRAJ - odkud
+  let velikost = 7.4
+  const sirka = (v: number) => s.sirkaTextu(text, v, true) + PROSTRKANI * text.length
+  while (velikost > 5.4 && sirka(velikost) > misto) velikost -= 0.2
+  s.prostrkany(text, PRAVY_KRAJ, y, velikost, BARVA.slaba, PROSTRKANI)
+}
+
 /** Odrážky. Puntík je čtvereček, aby nekolidoval s číslovanými kroky. */
 function odrazky(s: Sazba, polozky: string[], velikost = 9.6) {
   for (const p of polozky) {
@@ -309,6 +327,27 @@ function nakresliMapu(s: Sazba, data: TymPdfVstup, t: (typeof MAPA)[TymLang], la
   }
 }
 
+/** Šířka dlaždice v mřížce částí. Sdílí ji kreslení i kontrola. */
+export const SIRKA_DLAZDICE = (SIRKA - 42 - 2 * 1.6) / 3
+
+/**
+ * Velikost písma slova vedle čísla, aby se do dlaždice vešlo.
+ *
+ * Angličtina má „large differences" tam, kde čeština „velké rozdíly", takže
+ * pevná velikost přeteče. Vrací nulu, když se slovo nevejde ani nejmenší
+ * velikostí; to je chyba sazby a kontrola na ni upozorní.
+ */
+export function velikostSlova(
+  merac: { sirkaTextu(t: string, velikost: number, tucne?: boolean): number },
+  cislo: string,
+  slovo: string,
+): number {
+  const zbyva = SIRKA_DLAZDICE - 6 - merac.sirkaTextu(cislo, 12, true) - 1.6
+  let velikost = 6.8
+  while (velikost > 4.6 && merac.sirkaTextu(slovo, velikost, true) > zbyva) velikost -= 0.2
+  return merac.sirkaTextu(slovo, velikost, true) <= zbyva ? velikost : 0
+}
+
 /** Mřížka jednadvaceti částí, tři na řádek. */
 function nakresliCasti(s: Sazba, data: TymPdfVstup, t: (typeof MAPA)[TymLang], lang: TymLang) {
   const SLOUPEC_NAZVU = 42
@@ -343,18 +382,26 @@ function nakresliCasti(s: Sazba, data: TymPdfVstup, t: (typeof MAPA)[TymLang], l
       const tb = SKALA_TEXT[k]
       s.doc.setFillColor(b[0], b[1], b[2])
       s.doc.roundedRect(x, y, sirkaDlazdice, vyska, 2, 2, "F")
+
+      // Kosočtverec sedí v pravém horním rohu, takže mu název musí uhnout.
+      // Bez toho se text schová pod značku a je nečitelný.
+      const misto = sirkaDlazdice - 6 - (c.riziko ? 5 : 0)
       s.pismo(7, true, tb)
       const nazevCasti = CASTI[lang][c.id] ?? c.id
-      const rc = s.doc.splitTextToSize(nazevCasti, sirkaDlazdice - 6) as string[]
+      const rc = s.doc.splitTextToSize(nazevCasti, misto) as string[]
       rc.slice(0, 2).forEach((r, j) => s.doc.text(r, x + 3, y + 4.4 + j * 3.2))
+
+      const cislo = String(Math.round(c.prumer))
       s.pismo(12, true, tb)
-      s.doc.text(String(Math.round(c.prumer)), x + 3, y + vyska - 3.2)
-      s.pismo(6.8, true, tb)
-      s.doc.text(
-        shodaKratce(c.smodch, lang),
-        x + 3 + s.sirkaTextu(String(Math.round(c.prumer)), 12, true) + 2,
-        y + vyska - 3.6,
-      )
+      s.doc.text(cislo, x + 3, y + vyska - 3.2)
+
+      // Slovo se zarovnává k pravému okraji dlaždice a zmenšuje se, dokud se
+      // vedle čísla nevejde. Angličtina má „large differences" tam, kde má
+      // čeština „velké rozdíly", takže pevná velikost přeteče.
+      const slovo = shodaKratce(c.smodch, lang)
+      s.pismo(velikostSlova(s, cislo, slovo) || 4.6, true, tb)
+      s.doc.text(slovo, x + sirkaDlazdice - 3, y + vyska - 3.6, { align: "right" })
+
       if (c.riziko) {
         s.doc.setFillColor(tb[0], tb[1], tb[2])
         s.doc.lines([[1.2, 1.2], [1.2, -1.2], [-1.2, -1.2]], x + sirkaDlazdice - 5, y + 3.4, [1, 1], "F", true)
@@ -715,11 +762,9 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
     // je velký a dlouhý název oblasti by do něj vjel; popisek týdnů je krátký
     // a vedle něj zbývá místo.
     if (faze.nazevOblasti) {
-      s.pismo(7.4, true, BARVA.slaba)
-      s.doc.text(faze.nazevOblasti.toUpperCase(), PRAVY_KRAJ, zaklad, {
-        align: "right",
-        charSpace: 0.4,
-      })
+      const tydny = r.planTydny(faze.odTydne, faze.doTydne).toUpperCase()
+      const konecTydnu = OKRAJ.levy + s.sirkaTextu(tydny, 7.4, true) + 0.5 * tydny.length
+      popisekVpravo(s, faze.nazevOblasti.toUpperCase(), zaklad, konecTydnu + 4)
     }
     s.mezera(5)
     s.text(faze.nazev, { velikost: 13, tucne: true, radek: 5.6 })
