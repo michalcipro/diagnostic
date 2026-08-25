@@ -18,6 +18,7 @@ import {
   type TeamRow,
 } from "@/lib/diagnostic/remote"
 import type { TymLang } from "@/lib/tym/obsah"
+import { NAZEV_TYMOVEHO_TESTU } from "@/lib/diagnostic/nazvy"
 
 // Správa týmů.
 //
@@ -338,10 +339,16 @@ export function TymKouce({ sessionToken, lang }: { sessionToken: string; lang: T
       </header>
 
       <form onSubmit={pridej} className="diag-card mb-5 p-5">
-        <h3 className="text-[15px] font-semibold">Přidat hráče</h3>
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-[15px] font-semibold">Přidat hráče</h3>
+          <span className="rounded-full bg-[var(--wm-tint-blue)] px-2.5 py-0.5 text-[11.5px] font-bold text-[var(--wm-blue-dark)]">
+            {NAZEV_TYMOVEHO_TESTU}
+          </span>
+        </div>
         <p className="mt-1 max-w-[68ch] text-[13px] leading-relaxed text-[var(--wm-text-2)]">
-          Označení si volíš sám, třeba Player 1 nebo číslo dresu. Kdo je kdo, víš jenom ty; v aplikaci
-          to nikde není. Hráč si pak sám rozhodne, jestli k označení připojí svoje jméno.
+          Test se nevybírá, je vždycky týž. Označení si volíš sám, třeba Player 1 nebo číslo dresu.
+          Kdo je kdo, víš jenom ty; v aplikaci to nikde není. Hráč si pak sám rozhodne, jestli
+          k označení připojí svoje jméno.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <input

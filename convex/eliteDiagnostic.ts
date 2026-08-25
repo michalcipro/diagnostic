@@ -4,6 +4,7 @@ import { kryptoBajty, makeToken } from "./nahoda"
 import { vyhodnoceniHrace } from "./vyhodnoceniHrace"
 import {
   filtrViditelnosti,
+  jeKlubovy,
   requireCoach,
   requireCoachProZapis,
   vyzadujMastera,
@@ -191,7 +192,7 @@ export const createInvite = mutation({
     // Klubový kouč si test nevybírá. Odkazy vystavuje jen svým hráčům přes
     // teams.createPlayerInvite a vždycky na Players Survey. Kdyby se to hlídalo
     // jen schovaným tlačítkem, stačilo by zavolat tuhle funkci přímo.
-    if (me.pouzeTymy === true) {
+    if (jeKlubovy(me)) {
       throw new ConvexError("Tenhle účet vystavuje odkazy jen svým hráčům, v záložce Týmy.")
     }
     if (!TEST_IDS.has(args.testId)) {

@@ -445,7 +445,10 @@ export default function CoachPage() {
       <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text-3)]">{t.brand}</p>
-          <h1 className="mt-1 text-[28px] font-bold tracking-tight">{t.coachTitle}</h1>
+          <h1 className="mt-1 text-[28px] font-bold tracking-tight">
+            {/* Klubový kouč slovo diagnostika nevidí, viz lib/diagnostic/nazvy.ts. */}
+            {meInfo.pouzeTymy ? (lang === "en" ? "Teams" : "Týmy") : t.coachTitle}
+          </h1>
           <p className="mt-1 text-[14px] text-[var(--wm-text-2)]">
             {meInfo.name}
             {meInfo.role === "master" && (
@@ -679,8 +682,9 @@ export default function CoachPage() {
                     <span className="block text-[14px] font-semibold">Klubový kouč, jen týmy</span>
                     <span className="mt-1 block text-[13px] leading-relaxed text-[var(--wm-text-2)]">
                       Vystavuje odkazy pouze hráčům svých týmů a pouze na Players Survey. Z nabídky
-                      testů si nevybírá a obecné pozvánky nevystaví. Vypnutím dostane plný přístup
-                      jako každý externí kouč. Přepnout to jde i později.
+                      testů si nevybírá a obecné pozvánky nevystaví. Tohle je u externího účtu
+                      výchozí stav: k celému katalogu se pouští vědomě, ne opomenutím. Vypnutím
+                      dostane plný přístup a přepnout to jde i později.
                     </span>
                   </span>
                 </label>

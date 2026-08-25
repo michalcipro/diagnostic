@@ -42,6 +42,20 @@ export async function filtrViditelnosti(
   return (vlastnik) => vlastnik === undefined || !externi.has(String(vlastnik))
 }
 
+/**
+ * Klubový kouč: smí jen vystavovat odkazy svým hráčům a jen Players Survey.
+ *
+ * Chybějící hodnota u externího účtu znamená klubový, ne plný přístup. Je to
+ * bezpečnější směr: nový externí kouč je klub, dokud mu master výslovně
+ * nepovolí zbytek nabídky. Kdyby to bylo obráceně, každý zapomenutý účet by
+ * měl přístup k celému katalogu testů.
+ *
+ * U našich koučů a u mastera nedává smysl a vrací se false.
+ */
+export function jeKlubovy(coach: Pick<Coach, "role" | "pouzeTymy">): boolean {
+  return coach.role === "external" && coach.pouzeTymy !== false
+}
+
 /** Vyhodí chybu, pokud přihlášený není master. */
 export function vyzadujMastera(me: Coach): void {
   if (me.role !== "master") throw new ConvexError("Přístup má pouze master účet.")
@@ -189,7 +203,7 @@ export const me = query({
         name: coach.name,
         email: coach.email,
         role: coach.role,
-        pouzeTymy: coach.pouzeTymy === true,
+        pouzeTymy: jeKlubovy(coach),
       }
     } catch {
       return null
@@ -240,7 +254,7 @@ export const listCoaches = query({
       phone: c.phone,
       note: c.note,
       active: c.active,
-      pouzeTymy: c.pouzeTymy === true,
+      pouzeTymy: jeKlubovy(c),
       createdAt: c.createdAt,
       lastLoginAt: c.lastLoginAt,
     }))

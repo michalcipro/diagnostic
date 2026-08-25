@@ -295,7 +295,9 @@ export const addCoach = action({
       salt,
       role: args.role ?? "coach",
       // Zúžení dává smysl jen u externího účtu; u našeho kouče se ignoruje.
-      pouzeTymy: args.role === "external" ? args.pouzeTymy === true : undefined,
+      // Nezaškrtnuté pole znamená klubový kouč, ne plný přístup: k celému
+      // katalogu se má pouštět vědomě, ne opomenutím.
+      pouzeTymy: args.role === "external" ? args.pouzeTymy !== false : undefined,
       phone: args.phone?.trim() || undefined,
       note: args.note?.trim() || undefined,
     })

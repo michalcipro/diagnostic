@@ -209,12 +209,17 @@ rekni(doSouhrnu === 2, "do souhrnu týmu jde i vyplnění, které hráč nesdíl
 
 console.log("\n– klubový kouč –")
 
+/** convex/sessions.ts: jeKlubovy – chybějící hodnota znamená klubový. */
+const jeKlubovy = (c) => c.role === "external" && c.pouzeTymy !== false
+
 const KLUBOVY = { id: "E3", role: "external", pouzeTymy: true }
-const PLNY = { id: "E1", role: "external" }
+const BEZ_NASTAVENI = { id: "E4", role: "external" }
+const PLNY = { id: "E1", role: "external", pouzeTymy: false }
+const NAS = { id: "K", role: "coach" }
 
 /** convex/eliteDiagnostic.ts: createInvite se zvoleným testem */
 const obecnaPozvanka = (me, testId) => {
-  if (me.pouzeTymy === true) throw new Error("jen týmové odkazy")
+  if (jeKlubovy(me)) throw new Error("jen týmové odkazy")
   if (!["elite200-sport", "vzorce", "archetypy"].includes(testId)) throw new Error("neznámý test")
   return { coachId: me.id, testId }
 }
@@ -226,6 +231,8 @@ rekni(hodi(() => obecnaPozvanka(KLUBOVY, "vzorce")), "klubový kouč nevystaví 
 rekni(hodi(() => obecnaPozvanka(KLUBOVY, "elite200-sport")), "nevystaví ji ani na Players Survey")
 rekni(createPlayerInvite(KLUBOVY).testId === "elite200-sport", "hráči vystaví odkaz na Players Survey")
 rekni(obecnaPozvanka(PLNY, "vzorce").testId === "vzorce", "externí kouč s plným přístupem vybírá dál")
+rekni(hodi(() => obecnaPozvanka(BEZ_NASTAVENI, "vzorce")), "externí účet bez nastavení je klubový, ne plný")
+rekni(obecnaPozvanka(NAS, "vzorce").testId === "vzorce", "našeho kouče se omezení netýká")
 
 console.log(chyb === 0 ? "\nizolace větví sedí" : `\nNALEZENO CHYB: ${chyb}`)
 process.exit(chyb === 0 ? 0 : 1)
