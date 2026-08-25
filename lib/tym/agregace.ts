@@ -151,6 +151,10 @@ function najdiNalezy(o: Map<DimensionId, OblastProfil>, vysledky: DiagnosticResu
   // Zlomová linie pod tlakem.
   if (o.get("D")?.rozkol) pridej("zlom-pod-tlakem", "vysoka", ["D"])
 
+  // Zlomová linie v pozornosti. Hlásí se za tlakem, protože když jsou obě,
+  // rozhoduje ta pod tlakem: bez ní se rutiny pozornosti stejně nepoužijí.
+  if (o.get("C")?.rozkol) pridej("zlom-v-pozornosti", "vysoka", ["C"])
+
   // Pozornost i regulace nízko naráz: pod tlakem se rozpadá hra, ne jen nervy.
   if (nizka("C") && nizka("D")) pridej("pozornost-mizi-pod-tlakem", "vysoka", ["C", "D"])
 

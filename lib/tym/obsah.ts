@@ -252,6 +252,30 @@ const CS: TymTexty = {
         "Nedávej celému týmu stejnou předzápasovou přípravu. Co jednu polovinu " +
         "naladí, druhou zablokuje.",
     },
+    "zlom-v-pozornosti": {
+      nadpis: "Zlomová linie v pozornosti",
+      coJeVidet:
+        "V řízení pozornosti se tým dělí na dvě skupiny s výraznou mezerou mezi " +
+        "nimi. Jedna část má postup, kterým se vrací do hry. Druhá se spoléhá na to, " +
+        "že se prostě soustředí víc.",
+      coToDela:
+        "Na tréninku to nepoznáš, protože tam pozornost udrží obě skupiny. Rozdíl se " +
+        "ukáže tam, kde vůle nestačí: ve druhé polovině zápasů, druhý den turnaje, po " +
+        "dlouhé pauze. Skupina bez postupu tam po jedné chybě ztrácí celé série " +
+        "výměn, protože snaha soustředit se víc obrací pozornost dovnitř, do vlastní " +
+        "hlavy, a problém tím prohlubuje. A protože obě skupiny trénují stejně, jedné " +
+        "trénink pozornost rozvíjí a druhé jenom potvrzuje, že jí to nejde.",
+      coSTim: [
+        "Zjisti, kdo do které skupiny patří, podle chování, ne podle dotazníku: sleduj, co hráč udělá v prvních třech vteřinách po chybě. Kdo postup má, ten ho udělá pokaždé stejně.",
+        "Skupině bez postupu dej jednu rutinu mezi body a nacvič ji do automatismu dřív, než začneš cokoli dalšího. Rutina není pověra; nahrazuje rozhodování ve chvíli, kdy na rozhodování není kapacita.",
+        "Trénuj s rušením záměrně a rozděl zátěž. Skupina s postupem snese víc rušení; skupina bez něj potřebuje nejdřív klid, aby se rutina vůbec uchytila.",
+        "Měř dobu návratu po chybě v počtu míčů a ukazuj ji hráčům. Je to jediné číslo z téhle oblasti, které vidí i oni sami, a mezera mezi skupinami se na něm zavírá dřív než kdekoli jinde.",
+      ],
+      coNedelat:
+        "Neříkej celému týmu, ať se víc soustředí. Skupině s postupem to nic nepřidá " +
+        "a skupině bez něj to vezme i to poslední, co má, protože soustředit se víc " +
+        "je přesně ta věc, která jí pozornost bere.",
+    },
     "pozornost-mizi-pod-tlakem": {
       nadpis: "Pod tlakem se rozpadá hra, ne jen nervy",
       coJeVidet:
@@ -528,6 +552,32 @@ const EN: TymTexty = {
       coNedelat:
         "Do not give the whole team the same pre-match routine. What tunes one half " +
         "up shuts the other half down.",
+    },
+    "zlom-v-pozornosti": {
+      nadpis: "A fault line in attention",
+      coJeVidet:
+        "On attention control the team divides into two groups with a marked gap " +
+        "between them. One part has a procedure for getting back into the match. The " +
+        "other relies on simply concentrating harder.",
+      coToDela:
+        "You will not see it in practice, because there both groups hold attention " +
+        "fine. The difference shows where willpower runs out: in the second half of " +
+        "matches, on the second day of a tournament, after a long delay. There the " +
+        "group without a procedure loses whole runs of points after a single error, " +
+        "because trying to concentrate harder turns attention inward, onto their own " +
+        "head, and deepens the problem. And because both groups train the same way, " +
+        "the session develops one group's attention and merely confirms to the other " +
+        "that they cannot do it.",
+      coSTim: [
+        "Find out who belongs to which group from behaviour, not from a questionnaire: watch what a player does in the first three seconds after an error. Whoever has a procedure does it the same way every time.",
+        "Give the group without a procedure one between-points routine and rehearse it to automaticity before you start anything else. A routine is not superstition; it replaces decision-making at the moment when there is no capacity to decide.",
+        "Train with deliberate interference and split the load. The group with a procedure can take more interference; the group without one first needs quiet for the routine to take hold at all.",
+        "Measure recovery time after an error in number of points and show it to the players. It is the only number in this area they can see for themselves, and the gap between the groups closes on it sooner than anywhere else.",
+      ],
+      coNedelat:
+        "Do not tell the whole team to concentrate harder. It adds nothing for the " +
+        "group with a procedure, and it takes away the last thing the other group has, " +
+        "because concentrating harder is precisely what costs them their attention.",
     },
     "pozornost-mizi-pod-tlakem": {
       nadpis: "Under pressure the play falls apart, not just the nerves",

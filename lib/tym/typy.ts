@@ -19,6 +19,7 @@ export type NalezKod =
   | "nalada-podle-vysledku"
   | "par-nese-naklad"
   | "zlom-pod-tlakem"
+  | "zlom-v-pozornosti"
   | "pozornost-mizi-pod-tlakem"
   | "tvrdi-na-sebe"
   | "bez-opory"

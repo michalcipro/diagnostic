@@ -122,6 +122,29 @@ const opakuj = (n, f) => Array.from({ length: n }, f)
   rekni(p.zlomy.includes("D"), "zlom je vidět v oblasti práce s tlakem")
 }
 {
+  const p = profil([...opakuj(6, () => hrac(4, { C: 5 })), ...opakuj(6, () => hrac(4, { C: 1 }))])
+  rekni(kody(p).includes("zlom-v-pozornosti"), "rozdělená pozornost se pozná jako vlastní nález")
+  rekni(p.zlomy.includes("C"), "zlom je vidět v oblasti pozornosti")
+  rekni(!kody(p).includes("zlom-pod-tlakem"), "zlom v pozornosti se nehlásí jako zlom pod tlakem")
+}
+{
+  // Když se tým dělí v pozornosti i pod tlakem, jde tlak první: bez něj se
+  // rutiny pozornosti stejně nepoužijí.
+  const p = profil([
+    ...opakuj(6, () => hrac(4, { C: 5, D: 5 })),
+    ...opakuj(6, () => hrac(4, { C: 1, D: 1 })),
+  ])
+  const k = kody(p)
+  rekni(
+    k.includes("zlom-pod-tlakem") && k.includes("zlom-v-pozornosti"),
+    "při obou zlomech se hlásí oba nálezy",
+  )
+  rekni(
+    k.indexOf("zlom-pod-tlakem") < k.indexOf("zlom-v-pozornosti"),
+    "zlom pod tlakem je uvedený dřív než zlom v pozornosti",
+  )
+}
+{
   const p = profil(opakuj(12, () => hrac(3, { E: 5, F2: 1 })))
   rekni(kody(p).includes("trajektorie-vyhoreni"), "dřina bez regenerace se pozná")
 }
@@ -201,8 +224,9 @@ console.log("\n– texty česky a anglicky –")
 
 const KODY = [
   "sebejista-ticha-satna", "trajektorie-vyhoreni", "nalada-podle-vysledku",
-  "par-nese-naklad", "zlom-pod-tlakem", "pozornost-mizi-pod-tlakem",
-  "tvrdi-na-sebe", "bez-opory", "krehka-identita", "vyrovnany-zaklad",
+  "par-nese-naklad", "zlom-pod-tlakem", "zlom-v-pozornosti",
+  "pozornost-mizi-pod-tlakem", "tvrdi-na-sebe", "bez-opory", "krehka-identita",
+  "vyrovnany-zaklad",
 ]
 const OBLASTI = ["A", "B", "C", "D", "E", "F", "G"]
 const CESKA_PISMENA = /[řěůŘĚŮ]/
