@@ -86,6 +86,11 @@ export interface ManualTexty {
   archSport: ManualPolozka[]
   archNote: string
 
+  tymBloky: ManualPolozka[]
+  tymRoleTitle: string
+  tymRole: ManualPolozka[]
+  tymNote: string
+
   praktickeBloky: { title: string; polozky: ManualPolozka[] }[]
   zachazeniTitle: string
   zachazeni: string[]
@@ -102,7 +107,8 @@ const CS: ManualTexty = {
   title: "Manuál pro kouče",
   lede:
     "Devět diagnostik ve třech rodinách. Ke každé je tady, komu ji zadat, " +
-    "co v člověku sleduje a co najdeš v jejím vyhodnocení.",
+    "co v člověku sleduje a co najdeš v jejím vyhodnocení. Na konci týmová " +
+    "větev pro celé kluby.",
   obsah: "Obsah",
   pdf: "Stáhnout jako PDF",
   tvrzeni: "tvrzení",
@@ -149,7 +155,15 @@ const CS: ManualTexty = {
         "a kde se pod tlakem obrací proti sobě.",
     },
     {
-      kicker: "Kapitola 6",
+      kicker: "Kapitola 6 · Týmy a kluby",
+      title: "Players Survey",
+      standfirst:
+        "Větev pro celé týmy. Hráč vyplní dotazník a své vyhodnocení vidí jen " +
+        "on; kouč dostane profil celého mužstva. Je to jediné místo v aplikaci, " +
+        "kde výsledek uvidí i ten, kdo test vyplnil.",
+    },
+    {
+      kicker: "Kapitola 7",
       title: "Praktické poznámky",
       standfirst: "Drobnosti, které se vyplatí vědět dřív, než na ně narazíš u klienta.",
     },
@@ -428,6 +442,77 @@ const CS: ManualTexty = {
     "Archetyp není hodnocení. Žádný z dvanácti není lepší. Vyhodnocení proto neříká, " +
     "který mít, ale co s tím, který klient má, a co ho stojí ten, který mu chybí.",
 
+  tymBloky: [
+    {
+      lbl: "Co to je",
+      text:
+        "Players Survey je Performance Diagnostic ELITE 200 ve sportovní variantě " +
+        "pod jiným názvem. Vůči hráči ani klubovému kouči se slovo diagnostika " +
+        "nepoužívá; mluví se o dotazníku a o profilu týmu.",
+    },
+    {
+      lbl: "Kdo tým zakládá",
+      text:
+        "Tým zakládá master a přiřadí ho konkrétnímu externímu kouči. Ten pak " +
+        "v rámci svého týmu vystavuje odkazy pro hráče, nic víc. Na ostatní testy " +
+        "se nedostane, dokud mu master nepovolí plný přístup.",
+    },
+    {
+      lbl: "Štítky místo jmen",
+      text:
+        "Označení hráčů si volí kouč sám. Může to být jméno, může to být Player 1. " +
+        "Hráč si před odesláním může štítek nechat, nebo napsat svoje jméno. " +
+        "Nás v obou případech nezajímá, kdo za štítkem je.",
+    },
+    {
+      lbl: "Volba hráče",
+      text:
+        "Před odesláním si hráč vybere, jestli chce vyhodnocení sdílet s koučem. " +
+        "Když nechce, kouč uvidí jen to, že je odevzdáno. Odpovědi se do profilu " +
+        "týmu i do norem započítají tak jako tak, anonymně.",
+    },
+    {
+      lbl: "Co dostane hráč",
+      text:
+        "Vlastní vyhodnocení hned po odeslání, ke stažení v PDF. Je to jediné " +
+        "místo v aplikaci, kde vyplňující vidí svůj výsledek.",
+    },
+    {
+      lbl: "Co dostane kouč",
+      text:
+        "Profil týmu na šest až osm stran: shrnutí, sedm oblastí s výkladem, " +
+        "strukturální nálezy, plán práce na dvanáct týdnů, otázky do rozhovorů " +
+        "a mantinely použití. Jednotlivé hráče v něm nenajde.",
+    },
+    {
+      lbl: "Jazyky",
+      text: "Jen čeština a angličtina. Slovenština se v téhle větvi nenabízí.",
+    },
+    {
+      lbl: "Malý tým",
+      text:
+        "Pod pěti odevzdanými dotazníky se profil blíží profilu jednotlivce " +
+        "a dá se z něj usuzovat na konkrétní hráče. Report na to kouče sám " +
+        "upozorní a řekne, jak s tím zacházet.",
+    },
+  ],
+  tymRoleTitle: "Kdo co vidí",
+  tymRole: [
+    { lbl: "Hráč", text: "Své vlastní vyhodnocení, vždy. Nic dalšího." },
+    {
+      lbl: "Klubový kouč",
+      text: "Profil svého týmu a ta vyplnění, která mu hráči sdíleli. Cizí týmy ne.",
+    },
+    { lbl: "Náš interní kouč", text: "Z týmové větve nic." },
+    {
+      lbl: "Master",
+      text: "Název týmu a jeho profil. Žádné jednotlivé vyplnění, ani sdílené.",
+    },
+  ],
+  tymNote:
+    "Klubový kouč tenhle manuál nevidí a nepotřebuje ho. Rozhraní má zúžené " +
+    "na jedinou věc: vystavit odkaz pro hráče a přečíst si profil týmu.",
+
   praktickeBloky: [
     {
       title: "Než pozvánku pošleš",
@@ -602,7 +687,8 @@ const SK: ManualTexty = {
   title: "Manuál pre koučov",
   lede:
     "Deväť diagnostík v troch rodinách. Ku každej je tu, komu ju zadať, " +
-    "čo v človeku sleduje a čo nájdeš v jej vyhodnotení.",
+    "čo v človeku sleduje a čo nájdeš v jej vyhodnotení. Na konci tímová " +
+    "vetva pre celé kluby.",
   obsah: "Obsah",
   pdf: "Stiahnuť ako PDF",
   tvrzeni: "tvrdení",
@@ -649,7 +735,15 @@ const SK: ManualTexty = {
         "tlakom obracia proti sebe.",
     },
     {
-      kicker: "Kapitola 6",
+      kicker: "Kapitola 6 · Tímy a kluby",
+      title: "Players Survey",
+      standfirst:
+        "Vetva pre celé tímy. Hráč vyplní dotazník a svoje vyhodnotenie vidí len " +
+        "on; kouč dostane profil celého mužstva. Je to jediné miesto v aplikácii, " +
+        "kde výsledok uvidí aj ten, kto test vypĺňal.",
+    },
+    {
+      kicker: "Kapitola 7",
       title: "Praktické poznámky",
       standfirst: "Drobnosti, ktoré sa oplatí vedieť skôr, než na ne narazíš u klienta.",
     },
@@ -933,6 +1027,77 @@ const SK: ManualTexty = {
     "Archetyp nie je hodnotenie. Žiadny z dvanástich nie je lepší. Vyhodnotenie preto " +
     "nehovorí, ktorý mať, ale čo s tým, ktorý klient má, a čo ho stojí ten, ktorý mu chýba.",
 
+  tymBloky: [
+    {
+      lbl: "Čo to je",
+      text:
+        "Players Survey je Performance Diagnostic ELITE 200 v športovej variante " +
+        "pod iným názvom. Voči hráčovi ani klubovému koučovi sa slovo diagnostika " +
+        "nepoužíva; hovorí sa o dotazníku a o profile tímu.",
+    },
+    {
+      lbl: "Kto tím zakladá",
+      text:
+        "Tím zakladá master a priradí ho konkrétnemu externému koučovi. Ten potom " +
+        "v rámci svojho tímu vystavuje odkazy pre hráčov, nič viac. Na ostatné " +
+        "testy sa nedostane, kým mu master nepovolí plný prístup.",
+    },
+    {
+      lbl: "Štítky namiesto mien",
+      text:
+        "Označenie hráčov si volí kouč sám. Môže to byť meno, môže to byť " +
+        "Player 1. Hráč si pred odoslaním môže štítok nechať, alebo napísať svoje " +
+        "meno. Nás v oboch prípadoch nezaujíma, kto za štítkom je.",
+    },
+    {
+      lbl: "Voľba hráča",
+      text:
+        "Pred odoslaním si hráč vyberie, či chce vyhodnotenie zdieľať s koučom. " +
+        "Keď nechce, kouč uvidí len to, že je odovzdané. Odpovede sa do profilu " +
+        "tímu aj do noriem započítajú tak či tak, anonymne.",
+    },
+    {
+      lbl: "Čo dostane hráč",
+      text:
+        "Vlastné vyhodnotenie hneď po odoslaní, na stiahnutie v PDF. Je to jediné " +
+        "miesto v aplikácii, kde vypĺňajúci vidí svoj výsledok.",
+    },
+    {
+      lbl: "Čo dostane kouč",
+      text:
+        "Profil tímu na šesť až osem strán: zhrnutie, sedem oblastí s výkladom, " +
+        "štrukturálne nálezy, plán práce na dvanásť týždňov, otázky do rozhovorov " +
+        "a mantinely použitia. Jednotlivých hráčov v ňom nenájde.",
+    },
+    {
+      lbl: "Jazyky",
+      text: "Len čeština a angličtina. Slovenčina sa v tejto vetve neponúka.",
+    },
+    {
+      lbl: "Malý tím",
+      text:
+        "Pod piatimi odovzdanými dotazníkmi sa profil blíži profilu jednotlivca " +
+        "a dá sa z neho usudzovať na konkrétnych hráčov. Report na to kouča sám " +
+        "upozorní a povie, ako s tým zaobchádzať.",
+    },
+  ],
+  tymRoleTitle: "Kto čo vidí",
+  tymRole: [
+    { lbl: "Hráč", text: "Svoje vlastné vyhodnotenie, vždy. Nič ďalšie." },
+    {
+      lbl: "Klubový kouč",
+      text: "Profil svojho tímu a tie vyplnenia, ktoré mu hráči zdieľali. Cudzie tímy nie.",
+    },
+    { lbl: "Náš interný kouč", text: "Z tímovej vetvy nič." },
+    {
+      lbl: "Master",
+      text: "Názov tímu a jeho profil. Žiadne jednotlivé vyplnenie, ani zdieľané.",
+    },
+  ],
+  tymNote:
+    "Klubový kouč tento manuál nevidí a nepotrebuje ho. Rozhranie má zúžené " +
+    "na jedinú vec: vystaviť odkaz pre hráča a prečítať si profil tímu.",
+
   praktickeBloky: [
     {
       title: "Než pozvánku pošleš",
@@ -1107,7 +1272,8 @@ const EN: ManualTexty = {
   title: "Coach handbook",
   lede:
     "Nine diagnostics in three families. For each one: who to send it to, " +
-    "what it looks at in a person, and what you will find in its evaluation.",
+    "what it looks at in a person, and what you will find in its evaluation. " +
+    "At the end, the team branch for whole clubs.",
   obsah: "Contents",
   pdf: "Download as PDF",
   tvrzeni: "statements",
@@ -1155,7 +1321,15 @@ const EN: ManualTexty = {
         "they come across, and where they turn against themselves under pressure.",
     },
     {
-      kicker: "Chapter 6",
+      kicker: "Chapter 6 · Teams and clubs",
+      title: "Players Survey",
+      standfirst:
+        "A branch for whole squads. The player completes the survey and only they " +
+        "see their own results; the coach gets a profile of the whole team. It is " +
+        "the only place in the application where the respondent sees a result.",
+    },
+    {
+      kicker: "Chapter 7",
       title: "Practical notes",
       standfirst: "Small things worth knowing before you run into them with a client.",
     },
@@ -1440,6 +1614,80 @@ const EN: ManualTexty = {
     "An archetype is not a grade. None of the twelve is better. The evaluation therefore " +
     "does not say which one to have, but what to do with the one the client has, and what " +
     "the missing one is costing them.",
+
+  tymBloky: [
+    {
+      lbl: "What it is",
+      text:
+        "Players Survey is Performance Diagnostic ELITE 200, sport variant, under " +
+        "a different name. The word diagnostic is never used towards a player or " +
+        "a club coach; we speak of a survey and of a team profile.",
+    },
+    {
+      lbl: "Who creates the team",
+      text:
+        "The master creates the team and assigns it to a particular external coach. " +
+        "That coach then issues player links within their own team, and nothing " +
+        "else. Other tests stay out of reach until the master grants full access.",
+    },
+    {
+      lbl: "Labels instead of names",
+      text:
+        "The coach chooses how players are labelled. It can be a name, it can be " +
+        "Player 1. Before submitting, a player may keep the label or write their " +
+        "own name instead. Either way we do not need to know who is behind it.",
+    },
+    {
+      lbl: "The player's choice",
+      text:
+        "Before submitting, the player chooses whether to share their results with " +
+        "the coach. If they decline, the coach sees only that the survey is in. " +
+        "The answers count towards the team profile and the norms either way, " +
+        "anonymously.",
+    },
+    {
+      lbl: "What the player gets",
+      text:
+        "Their own results immediately after submitting, downloadable as a PDF. " +
+        "It is the only place in the application where a respondent sees their " +
+        "own result.",
+    },
+    {
+      lbl: "What the coach gets",
+      text:
+        "A six to eight page team profile: a summary, the seven areas with " +
+        "interpretation, structural findings, a twelve-week plan, questions for " +
+        "individual conversations and boundaries of use. No individual players.",
+    },
+    {
+      lbl: "Languages",
+      text: "Czech and English only. Slovak is not offered in this branch.",
+    },
+    {
+      lbl: "Small squads",
+      text:
+        "Below five completed surveys the profile comes close to an individual " +
+        "profile and can be read back to particular players. The report says so " +
+        "to the coach and explains how to handle it.",
+    },
+  ],
+  tymRoleTitle: "Who sees what",
+  tymRole: [
+    { lbl: "Player", text: "Their own results, always. Nothing else." },
+    {
+      lbl: "Club coach",
+      text: "Their own team's profile and the results players chose to share. No other teams.",
+    },
+    { lbl: "Our internal coach", text: "Nothing from the team branch." },
+    {
+      lbl: "Master",
+      text: "The team name and its profile. No individual results, not even shared ones.",
+    },
+  ],
+  tymNote:
+    "The club coach does not see this handbook and does not need it. Their " +
+    "interface is narrowed to one thing: issue a player link and read the team " +
+    "profile.",
 
   praktickeBloky: [
     {

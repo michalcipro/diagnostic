@@ -196,8 +196,20 @@ export function ManualView({ lang, onPdf }: { lang: Lang; onPdf?: () => void }) 
         <Poznamka text={t.archNote} />
       </Kapitola>
 
-      {/* ---------------- 6. Praktické poznámky ---------------- */}
+      {/* ---------------- 6. Týmy a kluby ---------------- */}
       <Kapitola k={kap[5]}>
+        <div className="space-y-7">
+          <Odrazky polozky={t.tymBloky} />
+          <div>
+            <Nadpisek>{t.tymRoleTitle}</Nadpisek>
+            <Odrazky polozky={t.tymRole} />
+          </div>
+        </div>
+        <Poznamka text={t.tymNote} />
+      </Kapitola>
+
+      {/* ---------------- 7. Praktické poznámky ---------------- */}
+      <Kapitola k={kap[6]}>
         <div className="space-y-7">
           {t.praktickeBloky.map((b) => (
             <div key={b.title}>

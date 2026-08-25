@@ -587,20 +587,37 @@ function retezce(uzel, cesta = "") {
 // Shody, které jsou v pořádku: názvy produktu a slova, která se ve dvou
 // jazycích píšou stejně. Cokoli mimo tenhle seznam znamená zapomenutý překlad.
 const MANUAL_SHODNE = new Set([
-  // název produktu
-  "kapitoly[2].title", "rodiny[0].nazev",
+  // názvy produktu a rolí
+  "kapitoly[2].title", "kapitoly[5].title", "rodiny[0].nazev", "tymRole[3].lbl",
   // slova, která čeština a slovenština píšou stejně
   "obsah", "popiskyKaret.rozsah", "popiskyKaret.jazyky",
   "kapitoly[0].kicker", "kapitoly[1].kicker", "kapitoly[3].kicker",
-  "kapitoly[4].title", "kapitoly[5].kicker", "kapitoly[5].title",
+  "kapitoly[4].title", "kapitoly[6].kicker", "kapitoly[6].title",
   "postup[0].lbl", "postup[1].lbl", "ch1Bloky[2].lbl",
   "rodinyHlavicka[0]", "rodiny[2].nazev", "eliteEval[2].lbl",
-  "archetypyHlavicka[1]", "archEval[4].lbl", "praktickeBloky[0].title",
-  "praktickeBloky[2].polozky[0].lbl", "prehledHlavicka[0]", "prehledHlavicka[1]",
+  "archetypyHlavicka[1]", "archEval[4].lbl",
+  "tymBloky[6].lbl", "tymRole[0].lbl", "tymRole[1].lbl",
+  "praktickeBloky[0].title", "praktickeBloky[2].polozky[0].lbl",
+  "prehledHlavicka[0]", "prehledHlavicka[1]",
   // stejná i v angličtině
   "prostredi.sport",
 ])
 const manualCs = retezce(M.MANUAL.cs)
+
+// Mrtvá položka v seznamu je horší než chybějící: tiše propustí text, který
+// se přeložit zapomnělo. Indexy se navíc posouvají, kdykoli do manuálu
+// přibude kapitola nebo odrážka, takže se to stane snadno.
+{
+  const shodneKdekoli = new Set()
+  for (const jazyk of ["sk", "en"]) {
+    const jine = Object.fromEntries(retezce(M.MANUAL[jazyk]))
+    for (const [cesta, cs] of manualCs) {
+      if (jine[cesta] === cs && cs.trim() !== "") shodneKdekoli.add(cesta)
+    }
+  }
+  const mrtve = [...MANUAL_SHODNE].filter((c) => !shodneKdekoli.has(c))
+  rekni(!mrtve.length, `seznam povolených shod v manuálu je aktuální${mrtve.length ? ` (mrtvé: ${mrtve.join(", ")})` : ""}`)
+}
 for (const jazyk of ["sk", "en"]) {
   const jine = Object.fromEntries(retezce(M.MANUAL[jazyk]))
   const shodne = []

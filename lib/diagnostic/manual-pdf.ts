@@ -399,8 +399,17 @@ export function buildManualPdf(lang: Lang): Blob {
   for (const p of t.archSport) odrazka(s, p)
   poznamka(s, t.archNote)
 
-  // ---- 6. praktické poznámky ----
+  // ---- 6. týmy a kluby ----
   kapitola(s, t.kapitoly[5].kicker, t.kapitoly[5].title, t.kapitoly[5].standfirst)
+  for (const b of t.tymBloky) odrazka(s, b)
+  s.mezera(4)
+  popisek(s, t.tymRoleTitle)
+  for (const rl of t.tymRole) odrazka(s, rl)
+  s.mezera(3)
+  poznamka(s, t.tymNote)
+
+  // ---- 7. praktické poznámky ----
+  kapitola(s, t.kapitoly[6].kicker, t.kapitoly[6].title, t.kapitoly[6].standfirst)
   for (const b of t.praktickeBloky) {
     s.mezera(3)
     popisek(s, b.title)

@@ -531,6 +531,69 @@ dotáhnou dokument a teprve pak ověří větev), vlastník pozvánky se bere z 
 a nedá se podvrhnout, výmaz vyplnění bere s sebou i anonymní kopii ve vzorku,
 zakládat kouče smí pouze master a druhý master tudy vzniknout nemůže.
 
+## Doplněk: týmová větev (Team / Club)
+
+Týmová větev je jediné místo v aplikaci, kde vyhodnocení vidí i vyplňující.
+Kvůli tomu má vlastní pravidla a stojí za to je sepsat celé, protože slib
+daný hráči je tady součástí produktu, ne jen formulace v souhlasu.
+
+**Jak to funguje.** Tým zakládá master a přiřadí ho konkrétnímu externímu
+účtu; `createTeam` vyžaduje mastera a odmítne přiřadit tým našemu internímu
+kouči. Klubový kouč, tedy externí účet bez plného přístupu, pak v rámci
+svého týmu vystavuje odkazy pod štítky, které si volí sám. Může to být jméno,
+může to být Player 1. Obecnou pozvánku na jiný test vystavit nemůže,
+`createInvite` ho odmítne podle `jeKlubovy()`. Hráč vyplní Players Survey
+a na konci si vybere, jestli chce své vyhodnocení sdílet s koučem. Ať vybere
+cokoli, jeho odpovědi anonymně vstoupí do týmového profilu i do normativního
+vzorku.
+
+**Co kdo vidí.**
+
+| | vyplnění hráče | týmový profil | ostatní týmy |
+|---|---|---|---|
+| hráč | své, vždy | ne | ne |
+| klubový kouč | jen sdílená | ano, svého týmu | ne |
+| náš interní kouč | ne | ne | ne |
+| master | ne | ano | ano |
+
+Master tedy vidí, že tým existuje, jak se jmenuje a jaký má profil, a nevidí
+jediné konkrétní vyplnění. Do větví externích koučů nevidí nikdo od nás; to
+platí i tady a nebylo to změkčeno.
+
+**Kde je slib doopravdy zaručený.** Nesdílené vyplnění se odfiltruje
+v `sdileno()` v `convex/eliteDiagnostic.ts` a filtr je ve všech třech
+koncových bodech, kterými se kouč k vyplněním dostane, tedy `listForCoach`,
+`getForCoach` i `removeForCoach`. Vlastník pozvánky na tom nic nemění: ani
+kouč, který odkaz vytvořil, nesdílené vyplnění neuvidí.
+
+**Kde slib zaručený není a proč to říkáme nahlas.** Kouč na soupisce vidí
+u každého štítku, jestli hráč sdílení povolil; `listPlayers` to vrací jako
+`sdileno`. Není to únik, je to důsledek toho, že odkazy rozesílá on a mapování
+štítek na člověka drží on. Skrývat to by nepomohlo: kdo nic nesdílel, byl by
+poznat stejně, jen by o tom nevěděl. Text souhlasu proto slibuje přesně to, co
+platí, a nic navíc: „Kouč uvidí, že jsi dotazník vyplnil, ale neuvidí tvoje
+odpovědi ani vyhodnocení. Tvoje odpovědi se anonymně započítají do profilu
+celého týmu tak jako tak.“ Hráč se tedy rozhoduje se znalostí věci.
+
+**Malý tým.** Pod pěti odevzdanými dotazníky se profil blíží profilu
+jednotlivce a dá se z něj usuzovat na konkrétní hráče. Report to hlásí
+nahlas a říká, jak s tím zacházet. Není to technické opatření, je to jediné
+poctivé řešení, protože skrýt profil úplně by službu znehodnotilo.
+
+**Co se cestou opravilo.** Do týmového profilu vstupovalo i vyplnění, které
+neprošlo kontrolou spolehlivosti. Takové skóre neměří to, co měřit mělo, ale
+do průměru i do rozptylu mluvilo stejnou vahou jako poctivé vyplnění a umělo
+vyrobit zlomovou linii, která v týmu není. Vyřazuje se v `tymovyProfil`,
+takže pravidlo platí pro každého, kdo profil počítá, a rozdíl mezi
+odevzdanými a započtenými report pojmenuje.
+
+**Ověřeno bez nálezu:** cizí tým přes uhodnuté ID (`teamReport` si dotáhne
+tým a teprve pak ověří vlastnictví, `createPlayerInvite` a `listPlayers`
+stejně), klubový kouč nevystaví pozvánku mimo Players Survey ani mimo svůj
+tým, `createTeam`, `setTeamActive` a `listTeams` smí jen master, a zápis do
+`normSamples` v `submitWithInvite` předchází větvení podle `teamId`, takže
+odhlášení ze sdílení normativní vzorek neochudí.
+
 ## Závěr
 
 Aplikace je na svoji velikost postavená nadprůměrně obezřetně: autorizace je

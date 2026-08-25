@@ -1,4 +1,4 @@
-// Kontrola hotového PDF týmového reportu.
+// Kontrola hotových PDF: týmového reportu a manuálu pro kouče.
 //
 // Sazba se nedá ohlídat typovou kontrolou. Text může přetéct, dva prvky se
 // mohou překrýt, oddíl může zmizet za okrajem a překlad se pozná až v ruce.
@@ -6,7 +6,7 @@
 // se na to, co by kouči vadilo: chybí oddíl, je to nečitelně dlouhé, nebo se
 // do textu dostala výplň typu undefined.
 //
-// Spouští se `node scripts/test-pdf-tymu.cjs`.
+// Spouští se `node scripts/test-pdf.cjs`.
 
 const fs = require("fs")
 const os = require("os")
@@ -37,6 +37,8 @@ export { tymovyProfil } from "../lib/tym/agregace"
 export { buildTymPdf } from "../lib/tym/pdf"
 export { RAMEC } from "../lib/tym/ramec"
 export { TYM } from "../lib/tym/obsah"
+export { buildManualPdf } from "../lib/diagnostic/manual-pdf"
+export { MANUAL } from "../lib/diagnostic/manual"
 `,
 )
 let M
@@ -158,6 +160,51 @@ async function zkontroluj(profil, lang, rozsah) {
   rekni(vse.length > 12000, `${profil.nazev} ${lang}: report je opravdu podrobný (${vse.length} znaků)`)
 }
 
+/**
+ * Manuál pro kouče. Hlídá se, že v PDF opravdu jsou všechny kapitoly: obsah
+ * se generuje ze stejného pole, takže chybějící vykreslení kapitoly by se
+ * v obsahu neprojevilo a v dokumentu by prostě nebyla.
+ */
+async function zkontrolujManual(lang) {
+  const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs")
+  const blob = M.buildManualPdf(lang)
+  const doc = await getDocument({
+    data: new Uint8Array(await blob.arrayBuffer()),
+    useSystemFonts: true,
+  }).promise
+  const strany = []
+  for (let i = 1; i <= doc.numPages; i++) {
+    const stranka = await doc.getPage(i)
+    strany.push((await stranka.getTextContent()).items.map((x) => x.str).join(" "))
+  }
+  const vse = strany.join("\n")
+  const bezMezer = vse.replace(/\s+/g, "").toLowerCase()
+
+  const t = M.MANUAL[lang]
+  const chybejici = t.kapitoly
+    .map((k) => k.title)
+    .filter((n) => !bezMezer.includes(n.replace(/\s+/g, "").toLowerCase()))
+  rekni(
+    !chybejici.length,
+    `manuál ${lang}: všech ${t.kapitoly.length} kapitol je v PDF${chybejici.length ? ` (chybí ${chybejici.join(", ")})` : ""}`,
+  )
+
+  // Týmová kapitola se kontroluje zvlášť: vykresluje se jinými poli než
+  // ostatní a chybějící řádek v sazbě by kapitolu nechal prázdnou.
+  const tymove = [t.tymRoleTitle, ...t.tymRole.map((x) => x.lbl), ...t.tymBloky.map((x) => x.lbl)]
+  const chybiTym = tymove.filter((n) => !bezMezer.includes(n.replace(/\s+/g, "").toLowerCase()))
+  rekni(
+    !chybiTym.length,
+    `manuál ${lang}: týmová kapitola je celá${chybiTym.length ? ` (chybí ${chybiTym.join(", ")})` : ""}`,
+  )
+
+  const nalezenaVypln = VYPLN.filter(([vzor]) => vzor.test(vse)).map(([, popis]) => popis)
+  rekni(!nalezenaVypln.length, `manuál ${lang}: v textu není výplň${nalezenaVypln.length ? ` (${nalezenaVypln.join(", ")})` : ""}`)
+
+  const prazdne = strany.map((x, i) => [i + 1, x.trim().length]).filter(([, d]) => d < 200)
+  rekni(!prazdne.length, `manuál ${lang}: žádná strana není poloprázdná${prazdne.length ? ` (strany ${prazdne.map(([i]) => i).join(", ")})` : ""}`)
+}
+
 ;(async () => {
   console.log("– PDF týmového reportu –")
   const slozeni = (p) =>
@@ -169,6 +216,8 @@ async function zkontroluj(profil, lang, rozsah) {
   for (const lang of ["cs", "en"]) await zkontroluj(BEZNY, lang, [6, 8])
   console.log("\n– patologický případ: tým rozdělený na dvě poloviny –")
   for (const lang of ["cs", "en"]) await zkontroluj(ROZBITY, lang, [6, 9])
-  console.log(chyb === 0 ? "\nPDF týmového reportu sedí" : `\nNALEZENO CHYB: ${chyb}`)
+  console.log("\n– manuál pro kouče –")
+  for (const lang of ["cs", "sk", "en"]) await zkontrolujManual(lang)
+  console.log(chyb === 0 ? "\nPDF sedí" : `\nNALEZENO CHYB: ${chyb}`)
   process.exit(chyb === 0 ? 0 : 1)
 })()
