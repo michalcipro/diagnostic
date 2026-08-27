@@ -571,6 +571,23 @@ nevidí dál. Souhlas hráče na to sedí bez úprav, protože slibuje sdílení
 s koučem jeho týmu, a tím je v tu chvíli on. Cizího mastera dosadit nejde,
 jen sebe; jinak by se dala práva rozdávat mimo vědomí dotčeného účtu.
 
+**Hotová diagnostika dopočítaná do týmu.** Hráči někdy vyplnili dřív, jako
+naši klienti, a tým vzniká až potom. Posílat jim dotazník znovu je nesmysl,
+takže `addExistingToTeam` hotové vyplnění do souhrnu dopočítá. Smí to jen
+master, jen s vyplněními ze své větve (kontroluje `filtrViditelnosti`) a jen
+s elite200; kratší verze nemá jednadvacet částí a profil by tiše zkreslila.
+Vyplnění, které už patří jinému týmu, se nepřebírá – rozpadl by se profil,
+který už někdo četl.
+
+Co se tím **neotevře**, je podstatnější než co se otevře. Klient souhlasil
+s prací s námi, ne s cizím klubem, takže se klubový kouč k jeho vyhodnocení
+dostat nesmí. Není to řešené zvláštní podmínkou, ale stavbou: soupiska se
+v `listPlayers` skládá z pozvánek a dopočítané vyplnění žádnou nemá, takže se
+na ni nedostane. `listForCoach` a `getForCoach` ho klubovému kouči nevrátí
+taky, protože vlastníkem zůstává náš kouč – vlastník se při dopočítání
+záměrně nepřepisuje. Mění se jediné pole, `teamId`. Volba sdílení se nesahá
+také záměrně: dosadit ji by znamenalo tvrdit za klienta něco, co neřekl.
+
 **Výměna kouče u založeného týmu** (`setTeamCoach`) jde jen do prvního
 odevzdaného dotazníku. Potom už za sdílením stojí souhlas, který hráč dal
 konkrétnímu kouči, a vyměnit ho pod rukou by z toho souhlasu udělalo prázdné
@@ -609,8 +626,9 @@ odevzdanými a započtenými report pojmenuje.
 **Ověřeno bez nálezu:** cizí tým přes uhodnuté ID (`teamReport` si dotáhne
 tým a teprve pak ověří vlastnictví, `createPlayerInvite` a `listPlayers`
 stejně), klubový kouč nevystaví pozvánku mimo Players Survey ani mimo svůj
-tým, `createTeam`, `setTeamCoach`, `setTeamActive` a `listTeams` smí jen
-master, a zápis do
+tým, `createTeam`, `setTeamCoach`, `setTeamActive`, `listTeams`,
+`listPridatelne`, `listDopocitane`, `addExistingToTeam` a `removeFromTeam`
+smí jen master, a zápis do
 `normSamples` v `submitWithInvite` předchází větvení podle `teamId`, takže
 odhlášení ze sdílení normativní vzorek neochudí.
 

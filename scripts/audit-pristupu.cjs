@@ -86,6 +86,10 @@ const POUZE_MASTER = [
   "eliteDiagnostic.externalUsage",
   "teams.createTeam",
   "teams.setTeamCoach",
+  "teams.listPridatelne",
+  "teams.listDopocitane",
+  "teams.addExistingToTeam",
+  "teams.removeFromTeam",
   "teams.setTeamActive",
   "teams.listTeams",
 ]

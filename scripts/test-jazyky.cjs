@@ -596,7 +596,7 @@ const MANUAL_SHODNE = new Set([
   "postup[0].lbl", "postup[1].lbl", "ch1Bloky[2].lbl",
   "rodinyHlavicka[0]", "rodiny[2].nazev", "eliteEval[2].lbl",
   "archetypyHlavicka[1]", "archEval[4].lbl",
-  "tymBloky[6].lbl", "tymRole[0].lbl", "tymRole[1].lbl",
+  "tymBloky[7].lbl", "tymRole[0].lbl", "tymRole[1].lbl",
   "praktickeBloky[0].title", "praktickeBloky[2].polozky[0].lbl",
   "prehledHlavicka[0]", "prehledHlavicka[1]",
   // stejná i v angličtině

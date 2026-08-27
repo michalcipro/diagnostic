@@ -3,16 +3,21 @@
 import { useCallback, useEffect, useState } from "react"
 import { TymReport } from "@/components/tym/report"
 import {
+  addExistingToTeam,
   chybaText,
   createPlayerInvite,
   createTeam,
+  listDopocitane,
   listPlayers,
+  listPridatelne,
   listTeams,
   mojeTymy,
+  removeFromTeam,
   setTeamActive,
   setTeamCoach,
   teamReport,
   type CoachRow,
+  type Kandidat,
   type MujTym,
   type PlayerRow,
   type TeamReport,
@@ -62,6 +67,7 @@ export function TymyMaster({
   const [chyba, setChyba] = useState<string | null>(null)
   const [otevreny, setOtevreny] = useState<string | null>(null)
   const [soupiska, setSoupiska] = useState<string | null>(null)
+  const [slozeni, setSlozeni] = useState<string | null>(null)
   const [formular, setFormular] = useState(false)
   const [nazev, setNazev] = useState("")
   const [coachId, setCoachId] = useState("")
@@ -120,6 +126,20 @@ export function TymyMaster({
 
   if (otevreny) {
     return <ReportTymu sessionToken={sessionToken} teamId={otevreny} lang={lang} zpet={() => setOtevreny(null)} />
+  }
+
+  const skladany = tymy?.find((t) => t.id === slozeni)
+  if (skladany) {
+    return (
+      <SlozeniTymu
+        sessionToken={sessionToken}
+        tym={skladany}
+        zpet={() => {
+          setSlozeni(null)
+          void nacti()
+        }}
+      />
+    )
   }
 
   const vedenyMnou = tymy?.find((t) => t.id === soupiska)
@@ -305,6 +325,13 @@ export function TymyMaster({
                     Soupiska
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={() => setSlozeni(t.id)}
+                  className="rounded-full border border-[var(--wm-border)] px-4 py-1.5 text-[12.5px] font-semibold text-[var(--wm-text-2)]"
+                >
+                  Přidat z hotových
+                </button>
                 <button
                   type="button"
                   onClick={async () => {
@@ -556,6 +583,171 @@ export function TymKouce({ sessionToken, lang }: { sessionToken: string; lang: T
         </div>
       )}
       <SoupiskaTymu key={tym.id} sessionToken={sessionToken} tym={tym} lang={lang} />
+    </div>
+  )
+}
+
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Složení týmu z hotových diagnostik.
+ *
+ * Běžná cesta je pozvánka. Tahle obrazovka řeší druhý případ: hráči vyplnili
+ * dřív, jako naši klienti, a tým vzniká až teď. Posílat jim dotazník znovu
+ * nedává smysl, tak se hotové vyplnění do souhrnu dopočítá.
+ *
+ * Na soupisku se takový hráč nedostane a klubový kouč se k jeho vyhodnocení
+ * nedostane taky. Do profilu týmu ale vstoupí, což je celé, oč jde.
+ */
+function SlozeniTymu({
+  sessionToken,
+  tym,
+  zpet,
+}: {
+  sessionToken: string
+  tym: TeamRow
+  zpet: () => void
+}) {
+  const [vTymu, setVTymu] = useState<Kandidat[] | null>(null)
+  const [nabidka, setNabidka] = useState<Kandidat[] | null>(null)
+  const [hledat, setHledat] = useState("")
+  const [chyba, setChyba] = useState<string | null>(null)
+  const [pracuje, setPracuje] = useState<string | null>(null)
+
+  const nacti = useCallback(async () => {
+    try {
+      const [a, b] = await Promise.all([
+        listDopocitane(sessionToken, tym.id),
+        listPridatelne(sessionToken),
+      ])
+      setVTymu(a)
+      setNabidka(b)
+    } catch (e) {
+      setChyba(chybaText(e, "Seznam se nepodařilo načíst."))
+    }
+  }, [sessionToken, tym.id])
+
+  useEffect(() => {
+    void nacti()
+  }, [nacti])
+
+  const uprav = async (co: () => Promise<void>, id: string) => {
+    setPracuje(id)
+    setChyba(null)
+    try {
+      await co()
+      await nacti()
+    } catch (e) {
+      setChyba(chybaText(e, "Nepodařilo se to."))
+    } finally {
+      setPracuje(null)
+    }
+  }
+
+  // Hledá se v obojím: ve jméně i v roli, protože u hráčů bývá v roli sport
+  // a úroveň, a podle toho se v dlouhém seznamu orientuje líp než podle data.
+  const dotaz = hledat.trim().toLowerCase()
+  const nalezene = (nabidka ?? []).filter(
+    (k) =>
+      !dotaz ||
+      k.jmeno.toLowerCase().includes(dotaz) ||
+      (k.role ?? "").toLowerCase().includes(dotaz),
+  )
+
+  return (
+    <div className="max-w-[62rem]">
+      <button type="button" onClick={zpet} className="mb-5 text-[13px] font-semibold text-[var(--wm-text-2)]">
+        ← Zpět na týmy
+      </button>
+      {chyba && <Chyba text={chyba} />}
+
+      <h2 className="text-[22px] font-bold tracking-tight">{tym.nazev}</h2>
+      <p className="mt-1 max-w-[72ch] text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
+        Kdo diagnostiku vyplnil dřív, nemusí ji vyplňovat znovu. Přidej jeho hotové vyplnění sem
+        a započítá se do profilu týmu. Na soupisku se nedostane a kouč klubu jeho vyhodnocení
+        neuvidí; klient souhlasil s prací s námi, ne s cizím klubem.
+      </p>
+
+      <h3 className="mt-7 text-[15px] font-bold tracking-tight">
+        V týmu z hotových diagnostik
+        {vTymu && vTymu.length > 0 && (
+          <span className="ml-2 font-normal text-[var(--wm-text-3)]">{vTymu.length}</span>
+        )}
+      </h3>
+      {vTymu === null ? (
+        <p className="mt-2 text-[14px] text-[var(--wm-text-3)]">Načítám…</p>
+      ) : vTymu.length === 0 ? (
+        <p className="mt-2 text-[14px] text-[var(--wm-text-2)]">Zatím nikdo.</p>
+      ) : (
+        <div className="diag-card mt-3 overflow-hidden">
+          {vTymu.map((k) => (
+            <div
+              key={k.id}
+              className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--wm-border-light)] px-5 py-3 last:border-b-0"
+            >
+              <div className="min-w-0">
+                <p className="text-[14.5px] font-semibold">{k.jmeno}</p>
+                <p className="mt-0.5 text-[12.5px] text-[var(--wm-text-3)]">
+                  {[k.role, `vyplněno ${k.datum}`].filter(Boolean).join(" · ")}
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={pracuje === k.id}
+                onClick={() => void uprav(() => removeFromTeam(sessionToken, tym.id, k.id), k.id)}
+                className="rounded-full border border-[var(--wm-border)] px-3.5 py-1.5 text-[12.5px] font-semibold text-[var(--wm-text-2)] disabled:opacity-50"
+              >
+                {pracuje === k.id ? "Vyjímám…" : "Vyjmout"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <h3 className="mt-8 text-[15px] font-bold tracking-tight">Hotové diagnostiky</h3>
+      <p className="mt-1 max-w-[72ch] text-[13px] leading-relaxed text-[var(--wm-text-2)]">
+        Nabízí se ELITE 200 z naší větve, které zatím nepatří žádnému týmu. Kratší verze tady
+        nenajdeš: profil týmu z nich spočítat nejde, protože nemají jednadvacet částí.
+      </p>
+      <input
+        className="diag-input mt-3 w-full max-w-[24rem]"
+        value={hledat}
+        onChange={(e) => setHledat(e.target.value)}
+        placeholder="Hledat podle jména nebo role"
+      />
+
+      {nabidka === null ? (
+        <p className="mt-3 text-[14px] text-[var(--wm-text-3)]">Načítám…</p>
+      ) : nalezene.length === 0 ? (
+        <p className="mt-3 text-[14px] text-[var(--wm-text-2)]">
+          {nabidka.length === 0 ? "Žádná volná hotová diagnostika." : "Nic takového tu není."}
+        </p>
+      ) : (
+        <div className="diag-card mt-3 overflow-hidden">
+          {nalezene.map((k) => (
+            <div
+              key={k.id}
+              className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--wm-border-light)] px-5 py-3 last:border-b-0"
+            >
+              <div className="min-w-0">
+                <p className="text-[14.5px] font-semibold">{k.jmeno}</p>
+                <p className="mt-0.5 text-[12.5px] text-[var(--wm-text-3)]">
+                  {[k.role, `vyplněno ${k.datum}`].filter(Boolean).join(" · ")}
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={pracuje === k.id}
+                onClick={() => void uprav(() => addExistingToTeam(sessionToken, tym.id, k.id), k.id)}
+                className="diag-press rounded-full bg-[var(--wm-brand)] px-4 py-1.5 text-[12.5px] font-semibold text-[var(--wm-brand-fg)] disabled:opacity-50"
+              >
+                {pracuje === k.id ? "Přidávám…" : "Přidat do týmu"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

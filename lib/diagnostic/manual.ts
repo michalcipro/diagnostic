@@ -458,6 +458,14 @@ const CS: ManualTexty = {
         "se nedostane, dokud mu master nepovolí plný přístup.",
     },
     {
+      lbl: "Kdo už vyplnil dřív",
+      text:
+        "Hráč, který diagnostiku vyplnil jako náš klient, ji nevyplňuje znovu. " +
+        "Master jeho hotové vyplnění do týmu dopočítá a započítá se do profilu. " +
+        "Na soupisku se nedostane a kouč klubu jeho vyhodnocení neuvidí: klient " +
+        "souhlasil s prací s námi, ne s cizím klubem.",
+    },
+    {
       lbl: "Štítky místo jmen",
       text:
         "Označení hráčů si volí kouč sám. Může to být jméno, může to být Player 1. " +
@@ -1047,6 +1055,14 @@ const SK: ManualTexty = {
         "Tím zakladá master a priradí ho konkrétnemu externému koučovi. Ten potom " +
         "v rámci svojho tímu vystavuje odkazy pre hráčov, nič viac. Na ostatné " +
         "testy sa nedostane, kým mu master nepovolí plný prístup.",
+    },
+    {
+      lbl: "Kto už vyplnil skôr",
+      text:
+        "Hráč, ktorý diagnostiku vyplnil ako náš klient, ju nevypĺňa znova. " +
+        "Master jeho hotové vyplnenie do tímu dopočíta a započíta sa do profilu. " +
+        "Na súpisku sa nedostane a kouč klubu jeho vyhodnotenie neuvidí: klient " +
+        "súhlasil s prácou s nami, nie s cudzím klubom.",
     },
     {
       lbl: "Štítky namiesto mien",
@@ -1641,6 +1657,14 @@ const EN: ManualTexty = {
         "The master creates the team and assigns it to a particular external coach. " +
         "That coach then issues player links within their own team, and nothing " +
         "else. Other tests stay out of reach until the master grants full access.",
+    },
+    {
+      lbl: "Players who completed it earlier",
+      text:
+        "A player who took the diagnostic as our own client does not take it again. " +
+        "The master adds their finished result to the team and it counts towards the " +
+        "profile. It never reaches the roster and the club coach never sees it: the " +
+        "client agreed to work with us, not with an outside club.",
     },
     {
       lbl: "Labels instead of names",

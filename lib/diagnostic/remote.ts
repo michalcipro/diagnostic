@@ -516,6 +516,20 @@ const mojeTymyRef = makeFunctionReference<"query">("teams:mojeTymy")
 const createPlayerInviteRef = makeFunctionReference<"mutation">("teams:createPlayerInvite")
 const listPlayersRef = makeFunctionReference<"query">("teams:listPlayers")
 const teamReportRef = makeFunctionReference<"query">("teams:teamReport")
+const listPridatelneRef = makeFunctionReference<"query">("teams:listPridatelne")
+const listDopocitaneRef = makeFunctionReference<"query">("teams:listDopocitane")
+const addExistingToTeamRef = makeFunctionReference<"mutation">("teams:addExistingToTeam")
+const removeFromTeamRef = makeFunctionReference<"mutation">("teams:removeFromTeam")
+
+/** Hotová diagnostika, kterou jde dopočítat do týmu. */
+export interface Kandidat {
+  id: string
+  jmeno: string
+  role?: string
+  testId: string
+  datum: string
+  createdAt: number
+}
 
 /** Tým v přehledu mastera. */
 export interface TeamRow {
@@ -632,6 +646,46 @@ export async function listTeams(sessionToken: string): Promise<TeamRow[]> {
   const c = client()
   if (!c) throw new Error("not-configured")
   return (await c.query(listTeamsRef, { sessionToken })) as TeamRow[]
+}
+
+export async function listPridatelne(sessionToken: string): Promise<Kandidat[]> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(listPridatelneRef, { sessionToken })) as Kandidat[]
+}
+
+export async function listDopocitane(sessionToken: string, teamId: string): Promise<Kandidat[]> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(listDopocitaneRef, { sessionToken, teamId })) as Kandidat[]
+}
+
+export async function addExistingToTeam(
+  sessionToken: string,
+  teamId: string,
+  resultId: string,
+): Promise<void> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  try {
+    await c.mutation(addExistingToTeamRef, { sessionToken, teamId, resultId })
+  } catch (e) {
+    throw new Error(chybaText(e, "Vyplnění se nepodařilo přidat do týmu."))
+  }
+}
+
+export async function removeFromTeam(
+  sessionToken: string,
+  teamId: string,
+  resultId: string,
+): Promise<void> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  try {
+    await c.mutation(removeFromTeamRef, { sessionToken, teamId, resultId })
+  } catch (e) {
+    throw new Error(chybaText(e, "Vyplnění se nepodařilo z týmu vyjmout."))
+  }
 }
 
 export async function mojeTymy(sessionToken: string): Promise<MujTym[]> {

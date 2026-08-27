@@ -270,6 +270,78 @@ rekni(
 )
 
 // ---------------------------------------------------------------------------
+// Hotová diagnostika dopočítaná do týmu
+// ---------------------------------------------------------------------------
+//
+// Hráči někdy diagnostiku vyplnili dřív, jako naši klienti, a tým vzniká až
+// potom. Hotové vyplnění se proto dá do souhrnu týmu dopočítat. Hlídá se u toho
+// trojí: dělá to jen master, jen s vyplněními ze své větve, a jen s elite200.
+//
+// Nejdůležitější ale je, co se tím NEotevře. Klient souhlasil s prací s námi,
+// ne s cizím klubem. Do souhrnu vstoupí, na soupisku ne – a protože soupiska
+// stojí na pozvánkách a tohle žádnou nemá, není to potřeba nikde vypínat.
+
+console.log("\n– hotová diagnostika dopočítaná do týmu –")
+
+/** convex/teams.ts: addExistingToTeam */
+const smiDopocitat = (me, vyplneni) => {
+  vyzadujMastera(me)
+  if (!filtrViditelnosti(me)(vyplneni.coachId)) throw new Error("cizí větev")
+  if (vyplneni.model !== "elite200") throw new Error("jen elite200")
+  if (vyplneni.teamId !== undefined) throw new Error("už patří týmu")
+  return { ...vyplneni, teamId: "T3" }
+}
+
+const NAS_KLIENT = { id: "d-nas", coachId: "K", model: "elite200", teamId: undefined }
+const KRATKY = { id: "d-kratky", coachId: "K", model: "elite100", teamId: undefined }
+const CIZI = { id: "d-cizi", coachId: "E1", model: "elite200", teamId: undefined }
+const UZ_V_TYMU = { id: "d-zabrany", coachId: "K", model: "elite200", teamId: "T1" }
+
+rekni(smiDopocitat(KOUCI.M, NAS_KLIENT).teamId === "T3", "vyplnění z naší větve jde do týmu dopočítat")
+rekni(hodi(() => smiDopocitat(KOUCI.M, KRATKY)), "elite100 se dopočítat nedá, nemá jednadvacet částí")
+rekni(hodi(() => smiDopocitat(KOUCI.M, CIZI)), "vyplnění externího kouče master do týmu nepřetáhne")
+rekni(hodi(() => smiDopocitat(KOUCI.M, UZ_V_TYMU)), "hráče jinému týmu vzít nejde")
+rekni(hodi(() => smiDopocitat(KOUCI.K, NAS_KLIENT)), "náš kouč dopočítávat nesmí")
+rekni(hodi(() => smiDopocitat(KOUCI.E1, NAS_KLIENT)), "klubový kouč si naše klienty do týmu nenatáhne")
+
+/**
+ * convex/teams.ts: listPlayers staví soupisku z pozvánek.
+ *
+ * Dopočítané vyplnění žádnou pozvánku nemá, takže se na soupisku nedostane.
+ * Tím je zaručeno, že se k němu klubový kouč nedostane ani jako vlastník týmu.
+ */
+const soupiska = (pozvanky) => pozvanky.map((p) => p.resultId)
+const POZVANKY_T3 = [{ resultId: "t-sdili" }]
+rekni(!soupiska(POZVANKY_T3).includes("d-nas"), "dopočítané vyplnění není na soupisce")
+
+/**
+ * convex/teams.ts: pocty a teamReport
+ *
+ * Do „odevzdáno z rozeslaných" se dopočítaní musí připočíst na obou stranách.
+ * Jinak by tým složený jen z hotových diagnostik hlásil „odevzdáno deset
+ * z nuly rozeslaných".
+ */
+const pocty = (pozvanky, vTymu) => {
+  const zPozvanek = new Set(pozvanky.filter((p) => p.resultId).map((p) => p.resultId))
+  const dopocitanych = vTymu.filter((id) => !zPozvanek.has(id)).length
+  return {
+    pozvano: pozvanky.length + dopocitanych,
+    odevzdano: pozvanky.filter((p) => p.usedAt !== undefined).length + dopocitanych,
+  }
+}
+
+const bezPozvanek = pocty([], ["d-1", "d-2", "d-3"])
+rekni(
+  bezPozvanek.pozvano === 3 && bezPozvanek.odevzdano === 3,
+  "tým jen z hotových diagnostik hlásí tři ze tří",
+)
+const smisene = pocty([{ resultId: "t-sdili", usedAt: 1 }, { usedAt: undefined }], ["t-sdili", "d-1"])
+rekni(
+  smisene.pozvano === 3 && smisene.odevzdano === 2,
+  "u smíšeného týmu se dopočítaní přičtou, pozvánka bez odevzdání ne",
+)
+
+// ---------------------------------------------------------------------------
 // Klubový kouč: jen týmové odkazy a jen Players Survey
 // ---------------------------------------------------------------------------
 //

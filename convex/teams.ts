@@ -2,7 +2,13 @@ import { ConvexError, v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import type { QueryCtx } from "./_generated/server"
 import type { Id } from "./_generated/dataModel"
-import { requireCoach, requireCoachProZapis, vyzadujMastera, zaznamenejPristup } from "./sessions"
+import {
+  filtrViditelnosti,
+  requireCoach,
+  requireCoachProZapis,
+  vyzadujMastera,
+  zaznamenejPristup,
+} from "./sessions"
 import { MEZ, PLATNOST_POZVANKY_DNI, delka } from "./eliteDiagnostic"
 import { makeToken } from "./nahoda"
 import { evaluate } from "../lib/diagnostic/scoring"
@@ -192,16 +198,37 @@ export const listTeams = query({
   },
 })
 
-/** Kolik štítků je rozeslaných a kolik jich má odevzdáno. */
+/**
+ * Kolik štítků je rozeslaných a kolik jich má odevzdáno.
+ *
+ * Do obou čísel se počítají i vyplnění dopočítaná z hotových diagnostik. Ta
+ * pozvánku nemají, ale v profilu týmu jsou, takže by bez nich hlavička hlásila
+ * „odevzdáno 0 z 0" u týmu, který má profil z deseti lidí.
+ */
 async function pocty(ctx: QueryCtx, teamId: Id<"teams">): Promise<{ pozvano: number; odevzdano: number }> {
   const pozvanky = await ctx.db
     .query("invitations")
     .withIndex("by_team", (q) => q.eq("teamId", teamId))
     .collect()
+  const dopocitane = await pocetDopocitanych(ctx, teamId, pozvanky)
   return {
-    pozvano: pozvanky.length,
-    odevzdano: pozvanky.filter((p) => p.usedAt !== undefined).length,
+    pozvano: pozvanky.length + dopocitane,
+    odevzdano: pozvanky.filter((p) => p.usedAt !== undefined).length + dopocitane,
   }
+}
+
+/** Kolik vyplnění v týmu nevzniklo z pozvánky, ale dopočítáním. */
+async function pocetDopocitanych(
+  ctx: QueryCtx,
+  teamId: Id<"teams">,
+  pozvanky: { resultId?: Id<"eliteDiagnosticResults"> }[],
+): Promise<number> {
+  const zPozvanek = new Set(pozvanky.filter((p) => p.resultId).map((p) => String(p.resultId)))
+  const vyplneni = await ctx.db
+    .query("eliteDiagnosticResults")
+    .withIndex("by_team", (q) => q.eq("teamId", teamId))
+    .collect()
+  return vyplneni.filter((d) => !zPozvanek.has(String(d._id))).length
 }
 
 /** Týmy, které vede přihlášený kouč. */
@@ -271,6 +298,192 @@ export const createPlayerInvite = mutation({
     })
     await zaznamenejPristup(ctx, me._id, "vytvoreni-pozvanky")
     return { token }
+  },
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Hotová diagnostika, kterou chceme dopočítat do týmu
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Běžná cesta je pozvánka: kouč vystaví odkaz, hráč vyplní, vyplnění se rovnou
+// váže na tým. Někdy ale hráči diagnostiku vyplnili dřív, jako naši klienti,
+// a tým vzniká až potom. Přeposílat jim dotazník znovu je nesmysl, takže se
+// hotové vyplnění dá do týmu dopočítat.
+//
+// Co to znamená a co ne:
+//
+//   – Do souhrnu týmu vyplnění vstoupí. To je celé, oč tu jde.
+//   – Na soupisku se nedostane. Soupiska se skládá z pozvánek a tohle žádnou
+//     nemá; klubový kouč se tak k vyhodnocení našeho klienta nedostane, což
+//     je správně: klient souhlasil s prací s námi, ne s cizím klubem.
+//   – Dělá to jen master a jen s vyplněními ze své větve. Kouč klubu by si
+//     jinak mohl do týmu natáhnout cizí klienty.
+//   – Musí to být elite200, protože z něj se počítá sedm oblastí i jednadvacet
+//     částí. Kratší verze by profil tiše zkreslila.
+
+/** Vyplnění, které jde dopočítat do týmu. */
+const kandidatValidator = v.object({
+  id: v.id("eliteDiagnosticResults"),
+  jmeno: v.string(),
+  role: v.optional(v.string()),
+  testId: v.string(),
+  datum: v.string(),
+  createdAt: v.number(),
+})
+
+/**
+ * Hotová vyplnění, která se dají dopočítat do týmu.
+ *
+ * Nabízí se jen to, co je v naší větvi, je z elite200 a zatím k žádnému týmu
+ * nepatří. Cizí tým se nepřebírá: kdyby šlo hráče stáhnout jinému týmu,
+ * rozpadl by se profil, který už někdo četl.
+ */
+export const listPridatelne = query({
+  args: { sessionToken: v.string() },
+  returns: v.array(kandidatValidator),
+  handler: async (ctx, args) => {
+    const me = await requireCoach(ctx, args.sessionToken)
+    vyzadujMastera(me)
+    const vidi = await filtrViditelnosti(ctx, me)
+
+    const vsechna = await ctx.db
+      .query("eliteDiagnosticResults")
+      .withIndex("by_created")
+      .order("desc")
+      .take(500)
+
+    return vsechna
+      .filter((d) => d.teamId === undefined && d.model === "elite200" && vidi(d.coachId))
+      .map((d) => ({
+        id: d._id,
+        jmeno: d.person.name,
+        role: d.person.role,
+        testId: d.testId,
+        datum: d.person.fillDate,
+        createdAt: d.createdAt,
+      }))
+  },
+})
+
+/**
+ * Kdo je v týmu dopočítaný, tedy bez pozvánky.
+ *
+ * Master to potřebuje vidět, aby poznal, z čeho se profil skládá, a mohl
+ * někoho zase vyjmout. Klubovému kouči se nevrací nic: k našim klientům
+ * v profilu se dostat nemá, a proto se ani neobjeví na soupisce.
+ */
+export const listDopocitane = query({
+  args: { sessionToken: v.string(), teamId: v.id("teams") },
+  returns: v.array(kandidatValidator),
+  handler: async (ctx, args) => {
+    const me = await requireCoach(ctx, args.sessionToken)
+    vyzadujMastera(me)
+    const vidi = await filtrViditelnosti(ctx, me)
+
+    const pozvanky = await ctx.db
+      .query("invitations")
+      .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
+      .collect()
+    const zPozvanek = new Set(pozvanky.filter((p) => p.resultId).map((p) => String(p.resultId)))
+
+    const vyplneni = await ctx.db
+      .query("eliteDiagnosticResults")
+      .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
+      .collect()
+
+    return vyplneni
+      .filter((d) => !zPozvanek.has(String(d._id)) && vidi(d.coachId))
+      .sort((a, b) => a.createdAt - b.createdAt)
+      .map((d) => ({
+        id: d._id,
+        jmeno: d.person.name,
+        role: d.person.role,
+        testId: d.testId,
+        datum: d.person.fillDate,
+        createdAt: d.createdAt,
+      }))
+  },
+})
+
+/**
+ * Dopočítá hotové vyplnění do týmu.
+ *
+ * Mění se jediné pole: `teamId`. Vlastník ani volba sdílení se nesahá – kdyby
+ * se přepsal vlastník, ztratil by k vyplnění přístup kouč, který klienta vede,
+ * a kdyby se dosadilo sdílení, tvrdili bychom za klienta něco, co neřekl.
+ */
+export const addExistingToTeam = mutation({
+  args: {
+    sessionToken: v.string(),
+    teamId: v.id("teams"),
+    resultId: v.id("eliteDiagnosticResults"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const me = await requireCoachProZapis(ctx, args.sessionToken)
+    vyzadujMastera(me)
+
+    const tym = await ctx.db.get(args.teamId)
+    if (!tym) throw new ConvexError("Takový tým neexistuje.")
+
+    const vyplneni = await ctx.db.get(args.resultId)
+    if (!vyplneni) throw new ConvexError("Takové vyplnění neexistuje.")
+
+    const vidi = await filtrViditelnosti(ctx, me)
+    if (!vidi(vyplneni.coachId)) {
+      throw new ConvexError("Tohle vyplnění do tvé větve nepatří.")
+    }
+    if (vyplneni.model !== "elite200") {
+      throw new ConvexError("Do týmu jde dopočítat jen vyplnění ELITE 200; kratší verze profil zkreslí.")
+    }
+    if (vyplneni.teamId !== undefined) {
+      if (String(vyplneni.teamId) === String(args.teamId)) return null
+      throw new ConvexError("Tohle vyplnění už patří jinému týmu. Nejdřív ho z něj vyjmi.")
+    }
+
+    await ctx.db.patch(args.resultId, { teamId: args.teamId })
+    await zaznamenejPristup(ctx, me._id, "pridani-do-tymu", args.resultId)
+    return null
+  },
+})
+
+/**
+ * Vyjme dopočítané vyplnění z týmu.
+ *
+ * Jen ta, která do týmu přišla dopočítáním. Hráče, který vyplňoval na pozvánku,
+ * z týmu vyjmout nejde: vyplňoval ho jako člen týmu a vytáhnout ho zpátky by
+ * znamenalo přepsat, co se stalo.
+ */
+export const removeFromTeam = mutation({
+  args: {
+    sessionToken: v.string(),
+    teamId: v.id("teams"),
+    resultId: v.id("eliteDiagnosticResults"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const me = await requireCoachProZapis(ctx, args.sessionToken)
+    vyzadujMastera(me)
+
+    const vyplneni = await ctx.db.get(args.resultId)
+    if (!vyplneni) return null
+    if (String(vyplneni.teamId) !== String(args.teamId)) {
+      throw new ConvexError("Tohle vyplnění k tomuhle týmu nepatří.")
+    }
+
+    const vidi = await filtrViditelnosti(ctx, me)
+    if (!vidi(vyplneni.coachId)) throw new ConvexError("Tohle vyplnění do tvé větve nepatří.")
+
+    const zPozvanky = await ctx.db
+      .query("invitations")
+      .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
+      .collect()
+    if (zPozvanky.some((p) => String(p.resultId) === String(args.resultId))) {
+      throw new ConvexError("Tenhle hráč vyplňoval na pozvánku pro tým, z týmu ho vyjmout nelze.")
+    }
+
+    await ctx.db.patch(args.resultId, { teamId: undefined })
+    return null
   },
 })
 
@@ -443,6 +656,11 @@ export const teamReport = query({
       .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
       .collect()
 
-    return tymovyProfil(tym.nazev, pozvanky.length, vyplneni.length, vysledky)
+    // Dopočítaní hráči pozvánku nemají, ale odevzdáno za ně je. Bez nich by
+    // report hlásil „odevzdáno deset z nuly rozeslaných".
+    const zPozvanek = new Set(pozvanky.filter((p) => p.resultId).map((p) => String(p.resultId)))
+    const dopocitanych = vyplneni.filter((d) => !zPozvanek.has(String(d._id))).length
+
+    return tymovyProfil(tym.nazev, pozvanky.length + dopocitanych, vyplneni.length, vysledky)
   },
 })

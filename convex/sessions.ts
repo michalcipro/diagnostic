@@ -123,6 +123,7 @@ export async function zaznamenejPristup(
     | "export-vzorku"
     | "smazani-vysledku"
     | "vytvoreni-pozvanky"
+    | "pridani-do-tymu"
     | "vytvoreni-deniku"
     | "otevreni-deniku"
     | "zmena-sdileni-deniku"

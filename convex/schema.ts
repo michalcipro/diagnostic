@@ -232,6 +232,7 @@ export default defineSchema({
       v.literal("export-vzorku"),
       v.literal("smazani-vysledku"),
       v.literal("vytvoreni-pozvanky"),
+      v.literal("pridani-do-tymu"),
       v.literal("vytvoreni-deniku"),
       v.literal("otevreni-deniku"),
       v.literal("zmena-sdileni-deniku"),
