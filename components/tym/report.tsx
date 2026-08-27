@@ -572,7 +572,7 @@ function OblastRadek({
 
       <Popisek>{r.popiskyVykladu.stav}</Popisek>
       <p className="text-[14px] leading-relaxed text-[var(--wm-text-2)]">
-        {vyklad.uroven[urovenKlic(o.prumer)]}
+        {vyklad.uroven[urovenKlic(o.uroven)]}
       </p>
       <p className="mt-2 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
         {vyklad.tvar[tvarKlic(o)]}

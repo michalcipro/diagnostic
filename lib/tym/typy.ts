@@ -1,4 +1,5 @@
 import type { BandKey, DimensionId } from "../diagnostic/types"
+import type { UrovenTymu } from "./prahy"
 
 // Týmový profil: co se dá říct o skupině, když známe profily jednotlivců.
 //
@@ -48,6 +49,15 @@ export interface OblastProfil {
   /** kolik hráčů spadlo do kterého pásma */
   pasma: Record<BandKey, number>
   /**
+   * Úroveň oblasti v týmu, spočítaná z rozdělení kádru po pásmech testu.
+   *
+   * Jediné místo, které o úrovni rozhoduje. Report, mapa, plán i seznamy opor
+   * a priorit čtou tohle pole, takže si nemají jak odporovat. Dřív měl každý
+   * kus reportu vlastní prahy na průměru a oblast s číslem 63 se v jednom
+   * místě jmenovala průměrnou a jinde vysokou.
+   */
+  uroven: UrovenTymu
+  /**
    * Zlomová linie: tým se v téhle oblasti dělí na dvě skupiny s mezerou mezi
    * nimi. Pod tlakem se právě tady mužstvo rozpadne na ty, kdo si poradí,
    * a ty, kdo ne.
@@ -84,9 +94,17 @@ export interface CastProfil {
   smodch: number
   min: number
   max: number
+  /** kolik hráčů spadlo do kterého pásma téhle části */
+  pasma: Record<BandKey, number>
   /**
-   * Část je nízko, nebo se v ní tým výrazně rozchází. Počítá se tady, aby
-   * prahy zůstaly na serveru; klient dostane hotový závěr.
+   * Část je slabá, nebo se v ní tým rozchází. Počítá se tady, aby prahy
+   * zůstaly na serveru; klient dostane hotový závěr.
+   *
+   * Nestačí nízký průměr. Hlásí se, když je v rozvojové prioritě aspoň
+   * čtvrtina kádru, nebo když se hráči v téhle jedné věci rozcházejí natolik,
+   * že průměr o skupině nic neříká. Dřív stačilo, aby průměr klesl pod
+   * hranici silného pásma, takže se vlaječka objevila skoro u všeho a přestala
+   * něco znamenat.
    */
   riziko: boolean
 }

@@ -1,5 +1,6 @@
 import type { DimensionId } from "../diagnostic/types"
 import type { TymLang } from "./obsah"
+import type { UrovenTymu } from "./prahy"
 
 // Jazyk mapy týmu.
 //
@@ -84,10 +85,20 @@ export const CASTI: Record<TymLang, Record<string, string>> = {
 }
 
 /** Slovní popis úrovně. Hranice sedí na pásma vysvětlená v reportu. */
-export function slovoUrovne(u: number, lang: TymLang): string {
-  const cs = u < 55 ? "potřebuje práci" : u < 65 ? "průměrné" : u < 75 ? "silné" : "špičkové"
-  const en = u < 55 ? "needs work" : u < 65 ? "average" : u < 75 ? "strong" : "elite"
-  return lang === "cs" ? cs : en
+export function slovoUrovne(u: UrovenTymu, lang: TymLang): string {
+  const cs: Record<UrovenTymu, string> = {
+    "potrebuje-praci": "potřebuje práci",
+    prumerne: "průměrné",
+    silne: "silné",
+    spicka: "špičkové",
+  }
+  const en: Record<UrovenTymu, string> = {
+    "potrebuje-praci": "needs work",
+    prumerne: "average",
+    silne: "strong",
+    spicka: "elite",
+  }
+  return lang === "cs" ? cs[u] : en[u]
 }
 
 /**
@@ -231,14 +242,17 @@ const CS: MapaTexty = {
     "Je to poloha na škále, kterou používáme u všech týmů, takže se dá porovnávat mezi " +
     "sezonami i mezi mužstvy.",
   pasma: [
-    { rozsah: "Pod 55", popis: "Potřebuje práci. Brzdí to i ostatní oblasti." },
-    { rozsah: "55 až 65", popis: "Průměr. V klidu drží, pod tlakem ne." },
-    { rozsah: "65 až 75", popis: "Silné. Dá se na tom stavět." },
-    { rozsah: "Nad 75", popis: "Špičkové. Konkurenční výhoda." },
+    { rozsah: "Pod 31", popis: "Rozvojová priorita. Chybí základ, na kterém se dá stavět." },
+    { rozsah: "31 až 61", popis: "Stabilizace. V klidu to drží, pod tlakem ne." },
+    { rozsah: "61 až 82", popis: "Silné. Dá se na tom stavět." },
+    { rozsah: "Nad 82", popis: "Špičkové. Konkurenční výhoda." },
   ],
   cislaPoznamka:
-    "Vedle čísla je vždycky ještě druhá informace: jestli jsou na tom hráči podobně, " +
-    "nebo úplně jinak. To druhé rozhoduje o tom, co s tím jde dělat, a proto je všude vidět.",
+    "Tohle jsou pásma testu a platí pro jednoho hráče. Slovo u oblasti se ale nečte " +
+    "z průměru: oblast se jmenuje silnou tehdy, když je v silném pásmu aspoň polovina " +
+    "kádru a zároveň skoro nikdo nepropadá. Průměr sám totiž umí zakrýt, že půlka týmu " +
+    "je dole. Vedle čísla je proto vždycky ještě druhá informace: jestli jsou na tom " +
+    "hráči podobně, nebo úplně jinak.",
 
   trhlinyKicker: "To, co by v průměru zapadlo",
   trhlinyTitul: "Kde se problém schoval",
@@ -303,15 +317,18 @@ const EN: MapaTexty = {
     "It is a position on a scale we use with every squad, so it can be compared across " +
     "seasons and across teams.",
   pasma: [
-    { rozsah: "Below 55", popis: "Needs work. It holds the other areas back too." },
-    { rozsah: "55 to 65", popis: "Average. Holds when calm, not under pressure." },
-    { rozsah: "65 to 75", popis: "Strong. Something to build on." },
-    { rozsah: "Above 75", popis: "Elite. A competitive advantage." },
+    { rozsah: "Below 31", popis: "Development priority. The base to build on is missing." },
+    { rozsah: "31 to 61", popis: "Stabilisation. Holds when calm, not under pressure." },
+    { rozsah: "61 to 82", popis: "Strong. Something to build on." },
+    { rozsah: "Above 82", popis: "Elite. A competitive advantage." },
   ],
   cislaPoznamka:
-    "Next to the number there is always a second piece of information: whether players are " +
-    "in a similar place or somewhere else entirely. That second one decides what can be done " +
-    "about it, which is why it is visible everywhere.",
+    "These are the bands of the test and they describe one player. The word next to an area " +
+    "is not read off the average, though: an area counts as strong when at least half the " +
+    "squad sits in the strong band and almost nobody is falling behind. An average on its own " +
+    "can hide that half the team is down there. That is why the number always comes with a " +
+    "second piece of information: whether players are in a similar place or somewhere else " +
+    "entirely.",
 
   trhlinyKicker: "What an average would swallow",
   trhlinyTitul: "Where the problem hid",

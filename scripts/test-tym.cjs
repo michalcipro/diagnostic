@@ -40,7 +40,10 @@ export { tymovyProfil } from "../lib/tym/agregace"
 export { TYM } from "../lib/tym/obsah"
 export { VYKLAD } from "../lib/tym/vyklad"
 export { RAMEC } from "../lib/tym/ramec"
-export { sestavPlan, sestavShrnuti } from "../lib/tym/plan"
+export { sestavPlan, sestavShrnuti, urovenKlic } from "../lib/tym/plan"
+export { PASMO_OBLASTI, PASMO_CASTI, urovenTymu } from "../lib/tym/prahy"
+export { slovoUrovne } from "../lib/tym/slova"
+export { MAPA_ROZSAH } from "../lib/tym/mapa-geometrie"
 `,
 )
 let M
@@ -101,9 +104,122 @@ const profil = (hraci) =>
 
 const kody = (p) => p.nalezy.map((n) => n.kod)
 
-console.log("– rozpoznávání vzorců –")
 
 const opakuj = (n, f) => Array.from({ length: n }, f)
+
+// ---------------------------------------------------------------------------
+// Prahy proti skutečnému testu
+// ---------------------------------------------------------------------------
+//
+// Tohle je nejdůležitější kontrola v souboru. Týmové vyhodnocení stálo dlouho
+// na vymyšlených číslech: oblast s hodnotou 63 se v jednom místě jmenovala
+// průměrnou, jinde dostala výklad pro střední úroveň a v nálezech se počítala
+// jako vysoká. Prahy se teď berou z pásem testu, a aby se nemohly rozejít,
+// ověřují se proti té struktuře, ze které je počítá skórování.
+
+console.log("\n– prahy odpovídají pásmům testu –")
+
+{
+  const pct = (raw, lo, hi) => Math.round(((raw - lo) / (hi - lo)) * 1000) / 10
+  const hranice = (pasma, lo, hi) => {
+    const najdi = (band) => pasma.find((b) => b.band === band)
+    return {
+      priorita: pct(najdi("priority").max, lo, hi),
+      silne: pct(najdi("strong").min, lo, hi),
+      spicka: pct(najdi("elite").min, lo, hi),
+    }
+  }
+
+  // Rozsahy hrubého skóre: oblast má 24 položek, část 8, škála je 1 až 5.
+  const oblast = hranice(S200.scoring.dimensionBands, 24, 120)
+  const cast = hranice(S200.scoring.facetBands, 8, 40)
+  const sedi = (a, b) => Math.abs(a - b) < 0.15
+
+  rekni(
+    sedi(M.PASMO_OBLASTI.priorita, oblast.priorita) &&
+      sedi(M.PASMO_OBLASTI.silne, oblast.silne) &&
+      sedi(M.PASMO_OBLASTI.spicka, oblast.spicka),
+    `hranice oblastí sedí s testem (${oblast.priorita} / ${oblast.silne} / ${oblast.spicka})`,
+  )
+  rekni(
+    sedi(M.PASMO_CASTI.priorita, cast.priorita) &&
+      sedi(M.PASMO_CASTI.silne, cast.silne) &&
+      sedi(M.PASMO_CASTI.spicka, cast.spicka),
+    `hranice částí sedí s testem (${cast.priorita} / ${cast.silne} / ${cast.spicka})`,
+  )
+  rekni(
+    M.MAPA_ROZSAH.xDel === M.PASMO_OBLASTI.silne,
+    "dělicí čára v mapě leží na hranici silného pásma, ne na odhadu",
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Úroveň se čte z rozdělení kádru, ne z průměru
+// ---------------------------------------------------------------------------
+
+console.log("\n– úroveň týmu –")
+
+{
+  const u = (priority, stabilization, strong, elite) =>
+    M.urovenTymu({ priority, stabilization, strong, elite })
+
+  rekni(u(0, 0, 6, 4) === "spicka", "kádr celý v silném pásmu je špička")
+  rekni(u(0, 4, 6, 0) === "silne", "šest z deseti silných a nikdo dole je silná oblast")
+  rekni(u(1, 3, 6, 0) === "silne", "jeden propadlík z deseti silnou oblast ještě nezruší")
+  rekni(u(2, 2, 6, 0) === "potrebuje-praci", "dva propadlíci z deseti už ano, i když je šest silných")
+  rekni(u(0, 5, 5, 0) === "prumerne", "půl na půl je průměr, ne opora")
+  rekni(u(0, 8, 2, 0) === "potrebuje-praci", "když je pod prahem osm z deseti, je to práce")
+  rekni(u(0, 3, 7, 0) === "silne", "sedm z deseti silných je silná oblast, špička ještě ne")
+
+  // Přesně tohle byl důvod k přepsání: dva týmy se stejným průměrem, které se
+  // chovají úplně jinak. Průměr je oba pošle doprostřed, rozdělení ne.
+  rekni(
+    u(0, 5, 5, 0) === "prumerne" && u(3, 0, 4, 3) === "potrebuje-praci",
+    "stejný průměr, jiné rozdělení, jiný závěr",
+  )
+}
+
+{
+  // Slovo, výklad i seznamy musí vycházet z téhož pole. Dřív měl každý kus
+  // reportu vlastní práh a o téže oblasti tvrdily každý něco jiného.
+  const p = profil([...opakuj(8, () => hrac(4)), ...opakuj(2, () => hrac(1))])
+  rekni(
+    p.oblasti.every((o) => M.slovoUrovne(o.uroven, "cs").length > 0),
+    "každá oblast má slovo úrovně",
+  )
+  rekni(
+    p.priority.every((id) => p.oblasti.find((o) => o.id === id).uroven === "potrebuje-praci"),
+    "v prioritách je jen to, co je opravdu slabé",
+  )
+  rekni(
+    p.opory.every((id) => {
+      const o = p.oblasti.find((x) => x.id === id)
+      return (o.uroven === "silne" || o.uroven === "spicka") && !o.rozkol && !o.rozptyl
+    }),
+    "v oporách je jen to, co je silné a zároveň se v tom tým nerozchází",
+  )
+  rekni(p.opory.every((id) => !p.priority.includes(id)), "žádná oblast není zároveň oporou i prioritou")
+}
+
+{
+  // Vlaječka u části se dřív objevila u všeho, co mělo průměr pod 62, tedy pod
+  // spodní hranicí silného pásma. V reportu jich pak svítila většina a přestaly
+  // něco znamenat. Teď se hlásí jen tam, kde jsou opravdu slabí hráči.
+  const silny = profil(opakuj(10, () => hrac(4)))
+  rekni(
+    silny.casti.every((c) => !c.riziko),
+    "u silného vyrovnaného týmu nesvítí ani jedna vlaječka",
+  )
+  const sPropadem = profil([...opakuj(7, () => hrac(4)), ...opakuj(3, () => hrac(4, { B3: 1 }))])
+  const b3 = sPropadem.casti.find((c) => c.id === "B3")
+  rekni(b3 !== undefined && b3.riziko, "tři propadlíci v jedné části vlaječku rozsvítí")
+  rekni(
+    sPropadem.casti.filter((c) => c.riziko).length <= 2,
+    "a rozsvítí ji jenom u té části, o kterou jde",
+  )
+}
+
+console.log("\n– rozpoznávání vzorců –")
 
 {
   const p = profil(opakuj(12, () => hrac(4)))

@@ -177,7 +177,7 @@ for (const o of p.oblasti) {
   const stitek = o.rozkol ? "  [dělí se]" : o.rozptyl ? "  [někdo vyčnívá]" : ""
   console.log(
     `   ${o.id}  ${kratky.padEnd(36)} ${String(Math.round(o.prumer)).padStart(3)}  ` +
-      `${M.slovoUrovne(o.prumer, JAZYK).padEnd(16)} ${M.shodaKratce(o.smodch, JAZYK)}${stitek}`,
+      `${M.slovoUrovne(o.uroven, JAZYK).padEnd(16)} ${M.shodaKratce(o.smodch, JAZYK)}${stitek}`,
   )
 }
 console.log()

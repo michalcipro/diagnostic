@@ -568,18 +568,28 @@ export const listPlayers = query({
 // Do souhrnu vstupují všechna odevzdaná vyplnění včetně těch, u kterých hráč
 // odmítl sdílení s koučem. Hráč o tom před odesláním ví.
 
+const pasmaValidator = v.object({
+  priority: v.number(),
+  stabilization: v.number(),
+  strong: v.number(),
+  elite: v.number(),
+})
+
+const urovenValidator = v.union(
+  v.literal("spicka"),
+  v.literal("silne"),
+  v.literal("prumerne"),
+  v.literal("potrebuje-praci"),
+)
+
 const oblastProfilValidator = v.object({
   id: v.string(),
   prumer: v.number(),
   smodch: v.number(),
   min: v.number(),
   max: v.number(),
-  pasma: v.object({
-    priority: v.number(),
-    stabilization: v.number(),
-    strong: v.number(),
-    elite: v.number(),
-  }),
+  pasma: pasmaValidator,
+  uroven: urovenValidator,
   rozkol: v.boolean(),
   rozptyl: v.boolean(),
   plosna: v.boolean(),
@@ -592,6 +602,7 @@ const castProfilValidator = v.object({
   smodch: v.number(),
   min: v.number(),
   max: v.number(),
+  pasma: pasmaValidator,
   riziko: v.boolean(),
 })
 

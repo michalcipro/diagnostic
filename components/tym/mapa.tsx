@@ -152,7 +152,7 @@ export function MapaTymu({ data, lang }: { data: TeamReport; lang: TymLang }) {
                       {nazev(o.id)}
                     </span>
                     <span className="mt-1 block text-[12.5px] leading-snug text-[var(--wm-text-2)]">
-                      {slovoUrovne(o.prumer, lang)}, {shodaKratce(o.smodch, lang)}
+                      {slovoUrovne(o.uroven, lang)}, {shodaKratce(o.smodch, lang)}
                     </span>
                   </span>
                   <span className="flex flex-col items-end gap-1.5">
@@ -457,7 +457,7 @@ function Plocha({
       className="block h-auto w-full"
       role="img"
       aria-label={`${t.titul}. ${oblasti
-        .map((o) => `${nazev(o.id)}: ${slovoUrovne(o.prumer, lang)}, ${shodaKratce(o.smodch, lang)}`)
+        .map((o) => `${nazev(o.id)}: ${slovoUrovne(o.uroven, lang)}, ${shodaKratce(o.smodch, lang)}`)
         .join(". ")}`}
     >
       <rect

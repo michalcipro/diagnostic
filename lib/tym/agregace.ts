@@ -1,5 +1,6 @@
 import type { BandKey, DimensionId, DiagnosticResult } from "../diagnostic/types"
 import type { CastProfil, Nalez, NalezKod, OblastProfil, Sila, TymovyProfil } from "./typy"
+import { PASMO_CASTI, jeSilna, jeSlaba, podily, urovenTymu } from "./prahy"
 
 // Z profilů jednotlivců udělá profil skupiny.
 //
@@ -20,8 +21,15 @@ const MALO_DAT_POD = 5
 /** Nad tímhle rozptylem je oblast nevyrovnaná, i když mezera není zřetelná. */
 const VYSOKY_ROZPTYL = 18
 
-/** Pod touhle úrovní část oblasti brzdí i to, co kolem ní funguje. */
-const CAST_NIZKO = 62
+/**
+ * Kolik kádru musí být v části v rozvojové prioritě, aby to byl nález.
+ *
+ * Dřív se hlásila každá část s průměrem pod 62, jenže 62 je zrovna spodní
+ * hranice silného pásma testu: vlaječku dostalo skoro všechno a přestala něco
+ * znamenat. Čtvrtina kádru v nejnižším pásmu je naopak tvrdý fakt o lidech,
+ * ne o průměru.
+ */
+const CAST_PODIL_PRIORIT = 0.25
 
 /** Nad tímhle rozptylem se v části tým rozchází natolik, že průměr neplatí. */
 const CAST_ROZCHOD = 18
@@ -73,7 +81,7 @@ function oblastProfil(id: DimensionId, vysledky: DiagnosticResult[]): OblastProf
   for (const d of skore) pasma[d.band]++
 
   const smodch = smerodatnaOdchylka(hodnoty)
-  const podilSlabych = (pasma.priority + pasma.stabilization) / skore.length
+  const p = podily(pasma)
   // Zlomová linie a velký rozptyl se hlásí zvlášť. Dřív stačil k obojímu
   // rozptyl, takže jediný člověk daleko od zbytku vypadal jako dvě skupiny
   // s mezerou mezi sebou. Kouč by pak hledal dvě party tam, kde je jeden
@@ -86,11 +94,14 @@ function oblastProfil(id: DimensionId, vysledky: DiagnosticResult[]): OblastProf
     min: Math.min(...hodnoty),
     max: Math.max(...hodnoty),
     pasma,
+    // Úroveň se čte z toho, kolik hráčů je v kterém pásmu testu, ne z průměru.
+    // Průměr je jedno číslo za skupinu a umí zakrýt, že půlka kádru propadá.
+    uroven: urovenTymu(pasma),
     rozkol,
     rozptyl: !rozkol && smodch >= VYSOKY_ROZPTYL,
-    // Plošná slabina: skoro nikdo nad stabilizací a zároveň malý rozptyl.
+    // Plošná slabina: skoro nikdo v silném pásmu a zároveň malý rozptyl.
     // To není součet problémů jednotlivců, to je věc kultury a vedení.
-    plosna: podilSlabych >= 0.75 && smodch < 12,
+    plosna: p.podPrahem >= 0.75 && smodch < 12,
   }
 }
 
@@ -112,19 +123,30 @@ function fazeta(id: string, vysledky: DiagnosticResult[]): number | null {
  */
 function castiProfil(vysledky: DiagnosticResult[]): CastProfil[] {
   const poradi: string[] = []
-  const podle = new Map<string, { oblast: DimensionId; hodnoty: number[] }>()
+  const prazdna = (): Record<BandKey, number> => ({
+    priority: 0,
+    stabilization: 0,
+    strong: 0,
+    elite: 0,
+  })
+  const podle = new Map<
+    string,
+    { oblast: DimensionId; hodnoty: number[]; pasma: Record<BandKey, number> }
+  >()
   for (const r of vysledky) {
     for (const f of r.facets ?? []) {
       if (!f.reported) continue
       if (!podle.has(f.id)) {
-        podle.set(f.id, { oblast: f.dimension, hodnoty: [] })
+        podle.set(f.id, { oblast: f.dimension, hodnoty: [], pasma: prazdna() })
         poradi.push(f.id)
       }
-      podle.get(f.id)!.hodnoty.push(f.percent)
+      const zaznam = podle.get(f.id)!
+      zaznam.hodnoty.push(f.percent)
+      zaznam.pasma[f.band]++
     }
   }
   return poradi.map((id) => {
-    const { oblast, hodnoty } = podle.get(id)!
+    const { oblast, hodnoty, pasma } = podle.get(id)!
     const p = prumer(hodnoty)
     const sd = smerodatnaOdchylka(hodnoty)
     return {
@@ -134,7 +156,8 @@ function castiProfil(vysledky: DiagnosticResult[]): CastProfil[] {
       smodch: sd,
       min: Math.min(...hodnoty),
       max: Math.max(...hodnoty),
-      riziko: p < CAST_NIZKO || sd >= CAST_ROZCHOD,
+      pasma,
+      riziko: podily(pasma).priority >= CAST_PODIL_PRIORIT || sd >= CAST_ROZCHOD,
     }
   })
 }
@@ -156,42 +179,57 @@ function fazetaRozptyl(id: string, vysledky: DiagnosticResult[]): number {
  * bezpečí v komunikaci je šatna, která se pod tlakem nedokáže přeskupit,
  * protože to nikdo nezačne. Právě tyhle dvojice se hledají tady.
  */
-function najdiNalezy(o: Map<DimensionId, OblastProfil>, vysledky: DiagnosticResult[]): Nalez[] {
+function najdiNalezy(
+  o: Map<DimensionId, OblastProfil>,
+  casti: CastProfil[],
+  vysledky: DiagnosticResult[],
+): Nalez[] {
   const out: Nalez[] = []
   const pridej = (kod: NalezKod, sila: Sila, oblasti: DimensionId[]) =>
     out.push({ kod, sila, oblasti })
 
-  const uroven = (id: DimensionId) => o.get(id)?.prumer ?? null
-  const nizka = (id: DimensionId, prah = 50) => {
-    const v = uroven(id)
-    return v !== null && v < prah
+  // Prahy nálezů se čtou ze stejné úrovně jako všechno ostatní v reportu.
+  // Dřív tu stála vlastní čísla (nízká pod 50, vysoká nad 65) a odporovala
+  // slovům, kterými report tytéž oblasti popisoval o stránku dřív.
+  const nizka = (id: DimensionId) => {
+    const x = o.get(id)
+    return x !== undefined && jeSlaba(x.uroven)
   }
-  const vysoka = (id: DimensionId, prah = 65) => {
-    const v = uroven(id)
-    return v !== null && v > prah
+  const vysoka = (id: DimensionId) => {
+    const x = o.get(id)
+    return x !== undefined && jeSilna(x.uroven)
   }
 
-  const g1 = fazeta("G1", vysledky) // komunikace a psychologické bezpečí
+  /**
+   * Slabá část. Stejné pravidlo jako u vlaječky v mřížce, aby nález a mřížka
+   * neříkaly každý něco jiného: buď je v nejnižším pásmu aspoň čtvrtina kádru,
+   * nebo je průměr části pod hranicí silného pásma a někdo v prioritě je.
+   */
+  const slabaCast = (id: string) => {
+    const c = casti.find((x) => x.id === id)
+    if (!c) return false
+    const p = podily(c.pasma)
+    return p.priority >= CAST_PODIL_PRIORIT || (c.prumer < PASMO_CASTI.silne && p.priority > 0)
+  }
+
   const g2rozptyl = fazetaRozptyl("G2", vysledky) // hranice a asertivita
-  const g3 = fazeta("G3", vysledky) // sociální opora
-  const f2 = fazeta("F2", vysledky) // spánek a regenerace
-  const a3 = fazeta("A3", vysledky) // sebehodnota nezávislá na výsledku
-  const b3 = fazeta("B3", vysledky) // vztah k sobě po chybě
 
   // Sebejistá, ale tichá šatna. Navenek silný tým, který se v posledních
   // minutách nepřeskupí, protože nepříjemnou věc nikdo neřekne nahlas.
-  if (vysoka("B") && g1 !== null && g1 < 50) {
+  // G1 = komunikace a psychologické bezpečí.
+  if (vysoka("B") && slabaCast("G1")) {
     pridej("sebejista-ticha-satna", "vysoka", ["B", "G"])
   }
 
   // Vysoké nároky a odolnost bez regenerace. Vydrží všechno, a pak spadne
   // z útesu v půlce sezony. Je to předvídatelné na měsíce dopředu.
-  if ((vysoka("E") || vysoka("F", 60)) && f2 !== null && f2 < 45) {
+  // F2 = spánek a regenerace.
+  if ((vysoka("E") || vysoka("F")) && slabaCast("F2")) {
     pridej("trajektorie-vyhoreni", "vysoka", ["E", "F"])
   }
 
   // Sebehodnota visí na výsledku. Nálada skupiny pak kopíruje formu.
-  if (a3 !== null && a3 < 45) pridej("nalada-podle-vysledku", "vysoka", ["A"])
+  if (slabaCast("A3")) pridej("nalada-podle-vysledku", "vysoka", ["A"])
 
   // Velký rozptyl v hranicích: pár lidí nese náklad za všechny a vyhoří dřív.
   if (g2rozptyl >= VYSOKY_ROZPTYL) pridej("par-nese-naklad", "stredni", ["G"])
@@ -207,14 +245,14 @@ function najdiNalezy(o: Map<DimensionId, OblastProfil>, vysledky: DiagnosticResu
   if (nizka("C") && nizka("D")) pridej("pozornost-mizi-pod-tlakem", "vysoka", ["C", "D"])
 
   // Tvrdost k sobě po chybě. Zvenčí vypadá jako nasazení, uvnitř brzdí návrat
-  // do hry a nakazí i ostatní.
-  if (b3 !== null && b3 < 45) pridej("tvrdi-na-sebe", "stredni", ["B"])
+  // do hry a nakazí i ostatní. B3 = vztah k sobě po chybě.
+  if (slabaCast("B3")) pridej("tvrdi-na-sebe", "stredni", ["B"])
 
-  // Chybí opora v okolí.
-  if (g3 !== null && g3 < 45) pridej("bez-opory", "stredni", ["G"])
+  // Chybí opora v okolí. G3 = sociální opora.
+  if (slabaCast("G3")) pridej("bez-opory", "stredni", ["G"])
 
   // Nejasná identita a motivace.
-  if (nizka("A", 45)) pridej("krehka-identita", "stredni", ["A"])
+  if (nizka("A")) pridej("krehka-identita", "stredni", ["A"])
 
   // Vyrovnaný základ. Hlásí se jen tehdy, když se nenašlo nic jiného: tým,
   // který má sebejistou a přitom tichou kabinu, vyrovnaný není, i když mu
@@ -224,9 +262,7 @@ function najdiNalezy(o: Map<DimensionId, OblastProfil>, vysledky: DiagnosticResu
   if (
     !out.length &&
     vsechny.length === OBLASTI.length &&
-    vsechny.every(
-      (x) => x.pasma.priority / Math.max(1, soucet(x.pasma)) < 0.2 && !x.rozkol && !x.rozptyl,
-    )
+    vsechny.every((x) => !jeSlaba(x.uroven) && !x.rozkol && !x.rozptyl)
   ) {
     pridej("vyrovnany-zaklad", "stredni", [])
   }
@@ -250,8 +286,10 @@ function najdiTrhliny(
 ): { oblast: DimensionId; cast: string }[] {
   const out: { oblast: DimensionId; cast: string }[] = []
   for (const o of oblasti) {
-    if (o.rozkol || o.rozptyl || o.plosna) continue
-    if (o.prumer < CAST_NIZKO || o.smodch >= CAST_ROZCHOD) continue
+    // Hlásí se jen tam, kde oblast vypadá klidně. Rozdělenou ani slabou oblast
+    // report pojmenuje sám a trenér se na ni dívá tak jako tak.
+    if (o.rozkol || o.rozptyl || o.plosna || jeSlaba(o.uroven)) continue
+    if (o.smodch >= CAST_ROZCHOD) continue
     const spatne = casti
       .filter(
         (c) =>
@@ -290,9 +328,6 @@ export function tymovyProfil(
   const mapa = new Map(oblasti.map((x) => [x.id, x]))
   const casti = castiProfil(vysledky)
 
-  const podilSilnych = (x: OblastProfil) => (x.pasma.strong + x.pasma.elite) / Math.max(1, soucet(x.pasma))
-  const podilSlabych = (x: OblastProfil) => x.pasma.priority / Math.max(1, soucet(x.pasma))
-
   return {
     nazev,
     pozvano,
@@ -301,21 +336,26 @@ export function tymovyProfil(
     oblasti,
     casti,
     trhliny: najdiTrhliny(oblasti, casti),
-    // Opora je oblast, na kterou se dá spolehnout: většina týmu ji má silnou
+    // Opora je oblast, na kterou se dá spolehnout: úroveň v ní je silná
     // a zároveň se v ní tým nerozchází. Vysoký průměr s velkým rozptylem
-    // oporou není, protože pod tlakem se rozpadne.
+    // oporou není, protože pod tlakem se rozpadne, a rozdělená oblast už
+    // vůbec ne, i kdyby jí vyšel hezký průměr.
     opory: oblasti
-      .filter((x) => podilSilnych(x) >= 0.6 && x.smodch < 14)
+      .filter((x) => jeSilna(x.uroven) && !x.rozkol && !x.rozptyl)
       .sort((a, b) => b.prumer - a.prumer)
       .slice(0, 3)
       .map((x) => x.id),
+    // Priorita je oblast, kde je práce nejpotřebnější. Bere se ze stejné
+    // úrovně, kterou report vypisuje u oblasti slovy, takže se nemůže stát,
+    // že by v seznamu priorit stálo něco, co je o stránku dál pojmenované
+    // jako silné.
     priority: oblasti
-      .filter((x) => podilSlabych(x) >= 0.35 || x.prumer < 45)
+      .filter((x) => jeSlaba(x.uroven))
       .sort((a, b) => a.prumer - b.prumer)
       .slice(0, 3)
       .map((x) => x.id),
     zlomy: oblasti.filter((x) => x.rozkol).map((x) => x.id),
-    nalezy: najdiNalezy(mapa, vysledky),
+    nalezy: najdiNalezy(mapa, casti, vysledky),
     maloDat: vysledky.length < MALO_DAT_POD,
   }
 }

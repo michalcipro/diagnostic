@@ -582,6 +582,8 @@ export interface TeamReport {
     min: number
     max: number
     pasma: { priority: number; stabilization: number; strong: number; elite: number }
+    /** úroveň oblasti v týmu; počítá ji server z rozdělení kádru po pásmech */
+    uroven: "spicka" | "silne" | "prumerne" | "potrebuje-praci"
     rozkol: boolean
     rozptyl: boolean
     plosna: boolean
@@ -593,6 +595,7 @@ export interface TeamReport {
     smodch: number
     min: number
     max: number
+    pasma: { priority: number; stabilization: number; strong: number; elite: number }
     riziko: boolean
   }[]
   trhliny: { oblast: string; cast: string }[]

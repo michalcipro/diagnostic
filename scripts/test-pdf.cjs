@@ -341,12 +341,16 @@ async function zkontrolujManual(lang) {
     ` oblastí pod 65: ${p.oblasti.filter((o) => o.prumer < 65).length}`
   console.log(`  ${BEZNY.nazev}: ${slozeni(BEZNY)}`)
   console.log(`  ${ROZBITY.nazev}: ${slozeni(ROZBITY)}`)
-  // Rozsah povyrostl, když do reportu přibyla mapa týmu, vysvětlení čísel,
-  // skryté trhliny a mřížka jednadvaceti částí. Je to obsah navíc, ne nafouknutí;
-  // podrobný rozbor oblastí naopak o grafiku přišel, protože ji nese mapa.
-  for (const lang of ["cs", "en"]) await zkontroluj(BEZNY, lang, [8, 10])
+  // Rozsah povyrostl dvakrát. Poprvé, když do reportu přibyla mapa týmu,
+  // vysvětlení čísel, skryté trhliny a mřížka jednadvaceti částí. Podruhé,
+  // když se úroveň oblasti přestala číst z průměru a začala se číst z toho,
+  // kolik hráčů je v kterém pásmu testu: přísnější posouzení pošle do plánu
+  // a do rozhovorů víc oblastí, protože jich víc opravdu potřebuje práci.
+  // Je to obsah navíc, ne nafouknutí – kontrola poloprázdných stran níž hlídá,
+  // že se strany nepřidávají jen tak.
+  for (const lang of ["cs", "en"]) await zkontroluj(BEZNY, lang, [8, 12])
   console.log("\n– patologický případ: tým rozdělený na dvě poloviny –")
-  for (const lang of ["cs", "en"]) await zkontroluj(ROZBITY, lang, [8, 11])
+  for (const lang of ["cs", "en"]) await zkontroluj(ROZBITY, lang, [8, 14])
   console.log("\n– mřížka částí, měřeno přímo –")
   zkontrolujMrizku()
   console.log("\n– manuál pro kouče –")

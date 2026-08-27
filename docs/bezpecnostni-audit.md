@@ -616,6 +616,20 @@ jednotlivce a dá se z něj usuzovat na konkrétní hráče. Report to hlásí
 nahlas a říká, jak s tím zacházet. Není to technické opatření, je to jediné
 poctivé řešení, protože skrýt profil úplně by službu znehodnotilo.
 
+**Prahy vyhodnocení proti pásmům testu.** Týmový profil dlouho stál na číslech,
+která nikde nebyla odvozená: úroveň se četla z průměru oblasti a každý kus
+reportu měl vlastní hranice. Oblast s hodnotou 63 se v jednom místě jmenovala
+průměrnou, jinde dostala výklad pro střední úroveň a v nálezech se počítala
+jako vysoká. Prahy jsou teď na jednom místě (`lib/tym/prahy.ts`) a berou se
+z pásem elite200; že sedí, ověřuje `scripts/test-tym.cjs` proti té struktuře,
+ze které je počítá skórování, takže se nemohou tiše rozejít.
+
+Úroveň oblasti se navíc přestala číst z průměru a čte se z toho, kolik hráčů
+je v kterém pásmu. Průměr je jedno číslo za skupinu a umí zakrýt, že polovina
+kádru propadá; test přitom měří jednotlivce. Není to jen kosmetika: oblast
+s vysokým průměrem a dvěma hráči v rozvojové prioritě se dřív dostala mezi
+opory, tedy mezi to, o co se kouč má opřít, když je zle.
+
 **Co se cestou opravilo.** Do týmového profilu vstupovalo i vyplnění, které
 neprošlo kontrolou spolehlivosti. Takové skóre neměří to, co měřit mělo, ale
 do průměru i do rozptylu mluvilo stejnou vahou jako poctivé vyplnění a umělo

@@ -493,6 +493,16 @@ const CS: ManualTexty = {
         "a mantinely použití. Jednotlivé hráče v něm nenajde.",
     },
     {
+      lbl: "Jak se pozná silná oblast",
+      text:
+        "Ne podle průměru. Oblast se jmenuje silnou tehdy, když je v silném pásmu " +
+        "testu aspoň šest hráčů z deseti a zároveň skoro nikdo nepropadá. Průměr " +
+        "sám umí zakrýt, že půlka kádru je dole, takže se oblast s hezkým číslem " +
+        "a dvěma propadlíky v reportu jmenuje prací, ne oporou. Někdy pak vyjde, " +
+        "že oblast s nižším číslem je silnější než ta s vyšším; je to tím, že " +
+        "v té první je celý tým pohromadě.",
+    },
+    {
       lbl: "Jazyky",
       text: "Jen čeština a angličtina. Slovenština se v téhle větvi nenabízí.",
     },
@@ -1090,6 +1100,16 @@ const SK: ManualTexty = {
         "Profil tímu na šesť až osem strán: zhrnutie, sedem oblastí s výkladom, " +
         "štrukturálne nálezy, plán práce na dvanásť týždňov, otázky do rozhovorov " +
         "a mantinely použitia. Jednotlivých hráčov v ňom nenájde.",
+    },
+    {
+      lbl: "Ako sa pozná silná oblasť",
+      text:
+        "Nie podľa priemeru. Oblasť sa volá silnou vtedy, keď je v silnom pásme " +
+        "testu aspoň šesť hráčov z desiatich a zároveň takmer nikto neprepadá. " +
+        "Priemer sám vie zakryť, že polovica kádra je dole, takže sa oblasť s pekným " +
+        "číslom a dvoma prepadlíkmi v reporte volá prácou, nie oporou. Niekedy potom " +
+        "vyjde, že oblasť s nižším číslom je silnejšia než tá s vyšším; je to tým, " +
+        "že v tej prvej je celý tím pokope.",
     },
     {
       lbl: "Jazyky",
@@ -1694,6 +1714,16 @@ const EN: ManualTexty = {
         "A six to eight page team profile: a summary, the seven areas with " +
         "interpretation, structural findings, a twelve-week plan, questions for " +
         "individual conversations and boundaries of use. No individual players.",
+    },
+    {
+      lbl: "How a strong area is recognised",
+      text:
+        "Not by the average. An area counts as strong when at least six players in ten " +
+        "sit in the strong band of the test and almost nobody is falling behind. An " +
+        "average on its own can hide that half the squad is down there, so an area with " +
+        "a handsome number and two players in development priority is named as work, not " +
+        "as something to lean on. Sometimes an area with a lower number turns out to be " +
+        "the stronger one; that is because in that one the whole squad is together.",
     },
     {
       lbl: "Languages",

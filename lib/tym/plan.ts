@@ -1,6 +1,7 @@
 import type { DimensionId } from "../diagnostic/types"
 import { TYM, type TymLang } from "./obsah"
 import { RAMEC } from "./ramec"
+import { jeSilna, type UrovenTymu } from "./prahy"
 import { VYKLAD, type TvarKlic, type UrovenKlic } from "./vyklad"
 
 // Z profilu se odvodí shrnutí a plán práce.
@@ -17,6 +18,7 @@ export interface OblastProCteni {
   min: number
   max: number
   pasma: { priority: number; stabilization: number; strong: number; elite: number }
+  uroven: UrovenTymu
   rozkol: boolean
   rozptyl: boolean
   plosna: boolean
@@ -30,6 +32,7 @@ export interface CastProCteni {
   smodch: number
   min: number
   max: number
+  pasma: { priority: number; stabilization: number; strong: number; elite: number }
   riziko: boolean
 }
 
@@ -48,12 +51,16 @@ export interface ProfilProCteni {
 }
 
 /**
- * Pásmo úrovně. Hranice jsou schválně široké: rozdíl mezi 61 a 64 procenty
- * nic neznamená a report by o něm neměl psát jinak.
+ * Který výklad úrovně se má vytisknout.
+ *
+ * Výklady jsou tři, úrovně týmu čtyři, protože silné a špičkové se čtou stejně:
+ * v obou případech je to opora, jen v druhém případě s větší rezervou. Bere se
+ * hotová úroveň z profilu, ne průměr. Dřív tu stály vlastní hranice na průměru
+ * a odporovaly slovům, kterými report tutéž oblast popisoval o odstavec výš.
  */
-export function urovenKlic(prumer: number): UrovenKlic {
-  if (prumer < 50) return "nizka"
-  if (prumer < 70) return "stredni"
+export function urovenKlic(u: UrovenTymu): UrovenKlic {
+  if (u === "potrebuje-praci") return "nizka"
+  if (u === "prumerne") return "stredni"
   return "vysoka"
 }
 
@@ -194,16 +201,26 @@ export function oblastiSPraci(profil: ProfilProCteni, vPlanu: Set<string>): Set<
 }
 
 /**
- * Oblast, u které má smysl předepisovat práci: je nízko, nebo se v ní tým
- * rozchází. Vyrovnaná oblast na dobré úrovni intervenci nepotřebuje a report
- * by ji neměl vymýšlet.
+ * Oblast, u které má smysl předepisovat práci: není silná, nebo se v ní tým
+ * rozchází. Silná vyrovnaná oblast intervenci nepotřebuje a report by ji
+ * neměl vymýšlet.
+ *
+ * Úroveň se bere z profilu, ne z průměru. Práh na průměru tady dřív poslal do
+ * plánu oblast, kterou report o dvě stránky dřív popisoval jako silnou.
  */
 export function potrebujePraci(o: OblastProCteni): boolean {
-  return o.plosna || o.rozkol || o.rozptyl || o.prumer < 65
+  return o.plosna || o.rozkol || o.rozptyl || !jeSilna(o.uroven)
 }
 
-/** Kolik oblastí nabídne otázky do rozhovoru. Víc než čtyři nikdo neodpracuje. */
-const NEJVIC_OTAZEK = 4
+/**
+ * Kolik oblastí nabídne otázky do rozhovoru.
+ *
+ * Tři, ne čtyři. Přísnější posuzování úrovně poslalo do téhle sekce víc
+ * oblastí a report tím povyrostl, jenže vyjmenovat čtyři místa k prošetření
+ * není soustředění pozornosti, to je její rozptýlení. Kouč odpracuje tři
+ * rozhovory; u čtyř začne vybírat sám a vybere to nejsnazší.
+ */
+const NEJVIC_OTAZEK = 3
 
 /** Oblasti, ke kterým se nabízejí otázky do individuálního rozhovoru. */
 export function oblastiKOtazkam(profil: ProfilProCteni): string[] {
@@ -235,7 +252,7 @@ export function sestavShrnuti(profil: ProfilProCteni, lang: TymLang): Shrnuti {
 
   const drzi = profil.opory.slice(0, NEJVIC_VE_SHRNUTI).map((id) => {
     const o = podleId.get(id)
-    const u = o ? VYKLAD[lang][id as DimensionId].uroven[urovenKlic(o.prumer)] : ""
+    const u = o ? VYKLAD[lang][id as DimensionId].uroven[urovenKlic(o.uroven)] : ""
     return `${nazev(id)}. ${u}`
   })
 
@@ -254,7 +271,7 @@ export function sestavShrnuti(profil: ProfilProCteni, lang: TymLang): Shrnuti {
     if (!o) return nazev(id)
     const v = VYKLAD[lang][id as DimensionId]
     const tvar = tvarKlic(o)
-    const doplnek = tvar === "vyrovnana" ? v.uroven[urovenKlic(o.prumer)] : v.tvar[tvar]
+    const doplnek = tvar === "vyrovnana" ? v.uroven[urovenKlic(o.uroven)] : v.tvar[tvar]
     return `${nazev(id)}. ${doplnek}`
   })
 

@@ -698,7 +698,7 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
     s.doc.text(nazevOblasti(id), OKRAJ.levy, zaklad)
     s.pismo(8.4, false, BARVA.slaba)
     s.doc.text(
-      `${Math.round(o.prumer)} · ${slovoUrovne(o.prumer, lang)}, ${shodaKratce(o.smodch, lang)}`,
+      `${Math.round(o.prumer)} · ${slovoUrovne(o.uroven, lang)}, ${shodaKratce(o.smodch, lang)}`,
       PRAVY_KRAJ,
       zaklad,
       { align: "right" },
@@ -723,7 +723,7 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
     s.mezera(2.6)
 
     popisek(s, r.popiskyVykladu.stav)
-    s.text(vy.uroven[urovenKlic(o.prumer)], { velikost: 9, barva: BARVA.text2, radek: 4.3 })
+    s.text(vy.uroven[urovenKlic(o.uroven)], { velikost: 9, barva: BARVA.text2, radek: 4.3 })
     s.mezera(1.8)
     s.text(vy.tvar[tvarKlic(o)], { velikost: 9, barva: BARVA.text2, radek: 4.3 })
     s.mezera(2.6)

@@ -1,3 +1,5 @@
+import { PASMO_OBLASTI } from "./prahy"
+
 // Rozvržení mapy týmu.
 //
 // Mapa se kreslí dvakrát: interaktivně na obrazovce a staticky do PDF. Kdyby
@@ -5,13 +7,20 @@
 // by v ruce držel jiný obrázek, než viděl na monitoru. Proto je výpočet tady
 // a obě sazby z něj berou podíly, ne pixely.
 
-/** Výřez mapy a dělicí linie mezi kvadranty. */
+/**
+ * Výřez mapy a dělicí linie mezi kvadranty.
+ *
+ * Svislá dělicí čára není odhad: je to spodní hranice silného pásma testu.
+ * Bere se z prahy.ts, aby se nemohla rozejít se slovy, kterými report tytéž
+ * oblasti popisuje. Dřív tady stálo 65 a mapa tak kreslila hranici jinde, než
+ * kde ji měl test.
+ */
 export const MAPA_ROZSAH = {
   /** vodorovně: úroveň oblasti; pod 50 a nad 82 se v praxi průměry nepohybují */
   xMin: 50,
   xMax: 82,
-  /** hranice mezi „spíš slabé" a „spíš silné" */
-  xDel: 65,
+  /** hranice silného pásma testu */
+  xDel: PASMO_OBLASTI.silne,
   /** svisle: jak moc se hráči liší; 0 nahoře, největší rozdíly dole */
   yMax: 28,
   /** hranice mezi „hráči na tom jsou podobně" a „hodně se liší" */
