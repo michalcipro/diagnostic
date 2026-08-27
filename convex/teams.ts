@@ -50,9 +50,19 @@ const tymVerejny = v.object({
   createdAt: v.number(),
   pozvano: v.number(),
   odevzdano: v.number(),
+  /** vede ho přihlášený master sám, takže u něj má práva kouče */
+  veduJa: v.boolean(),
 })
 
-/** Založení týmu. Vede ho vždy externí kouč, klub je cizí organizace. */
+/**
+ * Založení týmu.
+ *
+ * Obvykle ho vede externí kouč: klub je cizí organizace a jeho hráči nejsou
+ * naši klienti. Master ale smí dosadit sám sebe, protože některé týmy vedeme
+ * my. V tu chvíli je u toho týmu v roli kouče se vším, co k tomu patří:
+ * vystavuje odkazy a vidí do sdílených vyhodnocení. Cizího mastera dosadit
+ * nejde, jen sebe.
+ */
 export const createTeam = mutation({
   args: {
     sessionToken: v.string(),
@@ -72,8 +82,8 @@ export const createTeam = mutation({
 
     const kouc = await ctx.db.get(args.coachId)
     if (!kouc) throw new ConvexError("Takový kouč neexistuje.")
-    if (kouc.role !== "external") {
-      throw new ConvexError("Tým může vést pouze externí kouč.")
+    if (String(args.coachId) !== String(me._id) && kouc.role !== "external") {
+      throw new ConvexError("Tým může vést externí kouč, nebo ty sám.")
     }
 
     const id = await ctx.db.insert("teams", {
@@ -84,6 +94,55 @@ export const createTeam = mutation({
       createdAt: Date.now(),
     })
     return { id }
+  },
+})
+
+/**
+ * Změna kouče u už založeného týmu.
+ *
+ * Jde jen do prvního odevzdaného dotazníku. Hráč před odesláním souhlasí
+ * s tím, že do jeho vyhodnocení uvidí kouč jeho týmu; vyměnit toho kouče až
+ * potom by z toho souhlasu udělalo prázdné slovo. Do té doby je to jen oprava
+ * překlepu při zakládání, protože zatím není co ukázat.
+ */
+export const setTeamCoach = mutation({
+  args: { sessionToken: v.string(), teamId: v.id("teams"), coachId: v.id("coaches") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const me = await requireCoachProZapis(ctx, args.sessionToken)
+    vyzadujMastera(me)
+
+    const tym = await ctx.db.get(args.teamId)
+    if (!tym) throw new ConvexError("Takový tým neexistuje.")
+
+    const kouc = await ctx.db.get(args.coachId)
+    if (!kouc) throw new ConvexError("Takový kouč neexistuje.")
+    if (String(args.coachId) !== String(me._id) && kouc.role !== "external") {
+      throw new ConvexError("Tým může vést externí kouč, nebo ty sám.")
+    }
+
+    if (String(tym.coachId) === String(args.coachId)) return null
+
+    const { odevzdano } = await pocty(ctx, args.teamId)
+    if (odevzdano > 0) {
+      throw new ConvexError(
+        "Kouče jde změnit jen do prvního odevzdaného dotazníku. Hráči už sdílení potvrdili tomuhle kouči.",
+      )
+    }
+
+    await ctx.db.patch(args.teamId, { coachId: args.coachId })
+
+    // Rozeslané odkazy si nesou vlastníka, a ten se propíše do odevzdaného
+    // vyplnění. Kdyby zůstal starý kouč, viděl by do výsledků týmu, který už
+    // nevede, a nový kouč by je naopak neotevřel. Odevzdáno zatím nic není,
+    // takže se dají všechny přepsat.
+    const pozvanky = await ctx.db
+      .query("invitations")
+      .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
+      .collect()
+    for (const p of pozvanky) await ctx.db.patch(p._id, { coachId: args.coachId })
+
+    return null
   },
 })
 
@@ -109,7 +168,8 @@ export const listTeams = query({
   args: { sessionToken: v.string() },
   returns: v.array(tymVerejny),
   handler: async (ctx, args) => {
-    vyzadujMastera(await requireCoach(ctx, args.sessionToken))
+    const me = await requireCoach(ctx, args.sessionToken)
+    vyzadujMastera(me)
     const tymy = await ctx.db.query("teams").withIndex("by_created").order("desc").collect()
     const jmena = new Map<string, string>()
     for (const c of await ctx.db.query("coaches").collect()) jmena.set(String(c._id), c.name)
@@ -124,6 +184,7 @@ export const listTeams = query({
         active: t.active,
         note: t.note,
         createdAt: t.createdAt,
+        veduJa: String(t.coachId) === String(me._id),
         ...(await pocty(ctx, t._id)),
       })
     }

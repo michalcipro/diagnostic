@@ -214,6 +214,8 @@ export async function revokeInvite(sessionToken: string, id: string): Promise<vo
 export type CoachRole = "master" | "coach" | "external"
 
 export interface CoachIdentity {
+  /** vlastní id; podle něj rozhraní pozná tým, který přihlášený vede sám */
+  id: string
   name: string
   email: string
   role: CoachRole
@@ -226,7 +228,6 @@ export interface CoachIdentity {
 }
 
 export interface CoachRow extends CoachIdentity {
-  id: string
   phone?: string
   /** interní poznámka mastera, například smluvní podmínky */
   note?: string
@@ -509,6 +510,7 @@ export async function pristupovyLog(sessionToken: string): Promise<PristupZaznam
 
 const createTeamRef = makeFunctionReference<"mutation">("teams:createTeam")
 const setTeamActiveRef = makeFunctionReference<"mutation">("teams:setTeamActive")
+const setTeamCoachRef = makeFunctionReference<"mutation">("teams:setTeamCoach")
 const listTeamsRef = makeFunctionReference<"query">("teams:listTeams")
 const mojeTymyRef = makeFunctionReference<"query">("teams:mojeTymy")
 const createPlayerInviteRef = makeFunctionReference<"mutation">("teams:createPlayerInvite")
@@ -526,6 +528,8 @@ export interface TeamRow {
   createdAt: number
   pozvano: number
   odevzdano: number
+  /** vede ho přihlášený master sám, takže u něj má práva kouče */
+  veduJa: boolean
 }
 
 /** Tým očima kouče, který ho vede. */
@@ -608,6 +612,20 @@ export async function setTeamActive(
   const c = client()
   if (!c) throw new Error("not-configured")
   await c.mutation(setTeamActiveRef, { sessionToken, teamId, active })
+}
+
+export async function setTeamCoach(
+  sessionToken: string,
+  teamId: string,
+  coachId: string,
+): Promise<void> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  try {
+    await c.mutation(setTeamCoachRef, { sessionToken, teamId, coachId })
+  } catch (e) {
+    throw new Error(chybaText(e, "Kouče se nepodařilo změnit."))
+  }
 }
 
 export async function listTeams(sessionToken: string): Promise<TeamRow[]> {

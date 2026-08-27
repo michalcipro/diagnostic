@@ -10,6 +10,7 @@ import {
   listTeams,
   mojeTymy,
   setTeamActive,
+  setTeamCoach,
   teamReport,
   type CoachRow,
   type MujTym,
@@ -22,10 +23,15 @@ import { NAZEV_TYMOVEHO_TESTU } from "@/lib/diagnostic/nazvy"
 
 // Správa týmů.
 //
-// Dvě strany téže věci. Master zakládá týmy, přiřazuje k nim externí kouče
-// a čte souhrnné profily; do vyplnění jednotlivých hráčů nevidí, takže tady
-// žádné jméno hráče nenajdeš. Klubový kouč spravuje soupisku, rozesílá odkazy
-// a vidí vyhodnocení těch hráčů, kteří mu je zpřístupnili.
+// Dvě strany téže věci. Master zakládá týmy, přiřazuje k nim kouče a čte
+// souhrnné profily; do vyplnění hráčů v cizích týmech nevidí. Kouč spravuje
+// soupisku, rozesílá odkazy a vidí vyhodnocení těch hráčů, kteří mu je
+// zpřístupnili.
+//
+// Ty dvě role se můžou potkat v jednom účtu: master smí u týmu dosadit sám
+// sebe jako kouče, protože některé týmy vedeme my. U takového týmu má práva
+// kouče včetně soupisky – ne proto, že je master, ale proto, že je jeho kouč.
+// Souhlas hráče na to sedí: hráč souhlasí se sdílením s koučem svého týmu.
 
 const odkazHrace = (token: string) =>
   typeof window === "undefined" ? "" : `${window.location.origin}/t/${token}`
@@ -42,16 +48,20 @@ function datum(ms: number): string {
 export function TymyMaster({
   sessionToken,
   kouci,
+  jaId,
   lang,
 }: {
   sessionToken: string
-  /** účty, ze kterých jde vybrat vedoucího týmu; tým vede vždy externí kouč */
+  /** účty, ze kterých jde vybrat vedoucího týmu: externí kouči a já sám */
   kouci: CoachRow[]
+  /** id přihlášeného mastera, aby šlo dosadit sebe jako kouče týmu */
+  jaId: string
   lang: TymLang
 }) {
   const [tymy, setTymy] = useState<TeamRow[] | null>(null)
   const [chyba, setChyba] = useState<string | null>(null)
   const [otevreny, setOtevreny] = useState<string | null>(null)
+  const [soupiska, setSoupiska] = useState<string | null>(null)
   const [formular, setFormular] = useState(false)
   const [nazev, setNazev] = useState("")
   const [coachId, setCoachId] = useState("")
@@ -70,7 +80,26 @@ export function TymyMaster({
     void nacti()
   }, [nacti])
 
-  const externi = kouci.filter((c) => c.role === "external" && c.active)
+  // Já stojím v nabídce první: „vedu si to sám" je běžnější volba než hledat
+  // konkrétního externího kouče, a bez ní se tým nedal založit, dokud žádný
+  // externí účet neexistoval.
+  const ja = kouci.find((c) => c.id === jaId)
+  const naVyber: { id: string; popis: string }[] = [
+    ...(jaId ? [{ id: jaId, popis: ja ? `Já – ${ja.name}` : "Já (master)" }] : []),
+    ...kouci
+      .filter((c) => c.role === "external" && c.active)
+      .map((c) => ({ id: c.id, popis: `${c.name} · ${c.email}` })),
+  ]
+
+  /**
+   * Nabídka pro jeden tým. Současný kouč v ní musí být vždycky, i když je jeho
+   * účet mezitím vypnutý: jinak by se v poli ukázal někdo jiný a nechtěné
+   * kliknutí by tým převedlo.
+   */
+  const vyberProTym = (t: TeamRow) =>
+    naVyber.some((c) => c.id === t.coachId)
+      ? naVyber
+      : [{ id: t.coachId, popis: `${t.coachName} (neaktivní účet)` }, ...naVyber]
 
   const zaloz = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -93,16 +122,33 @@ export function TymyMaster({
     return <ReportTymu sessionToken={sessionToken} teamId={otevreny} lang={lang} zpet={() => setOtevreny(null)} />
   }
 
+  const vedenyMnou = tymy?.find((t) => t.id === soupiska)
+  if (vedenyMnou) {
+    return (
+      <div className="max-w-[62rem]">
+        <SoupiskaTymu
+          sessionToken={sessionToken}
+          tym={vedenyMnou}
+          lang={lang}
+          zpet={() => {
+            setSoupiska(null)
+            void nacti()
+          }}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-[62rem]">
       {chyba && <Chyba text={chyba} />}
 
-      {externi.length === 0 ? (
+      {naVyber.length === 0 ? (
         <div className="diag-card p-6">
-          <h2 className="text-[16px] font-bold tracking-tight">Nejdřív externí kouč</h2>
+          <h2 className="text-[16px] font-bold tracking-tight">Není koho postavit do čela</h2>
           <p className="mt-2 max-w-[68ch] text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
-            Tým vede vždy externí kouč: klub je cizí organizace a jeho hráči nejsou naši klienti.
-            Založ ho v záložce Kouči a vrať se sem.
+            Načti stránku znovu, ať se tvůj účet dotáhne. Pak půjde tým vést buď tobě, nebo
+            externímu kouči, kterého založíš v záložce Kouči.
           </p>
         </div>
       ) : !formular ? (
@@ -110,7 +156,7 @@ export function TymyMaster({
           type="button"
           onClick={() => {
             setFormular(true)
-            setCoachId(externi[0].id)
+            setCoachId(naVyber[0].id)
           }}
           className="diag-press mb-5 rounded-full bg-[var(--wm-brand)] px-5 py-2 text-[13px] font-semibold text-[var(--wm-brand-fg)]"
         >
@@ -120,8 +166,10 @@ export function TymyMaster({
         <form onSubmit={zaloz} className="diag-card mb-6 p-6">
           <h2 className="text-[16px] font-semibold">Nový tým</h2>
           <p className="mt-1 max-w-[68ch] text-[13px] leading-relaxed text-[var(--wm-text-2)]">
-            Kouč pak hráčům rozešle odkazy pod označením, které si sám zvolí. Do vyplnění
-            jednotlivých hráčů neuvidíš ani ty; z týmu uvidíš název, počty a souhrnný profil.
+            Kouč pak hráčům rozešle odkazy pod označením, které si sám zvolí. U týmu, který vede
+            někdo jiný, uvidíš název, počty a souhrnný profil, do vyplnění jednotlivých hráčů ne.
+            Když jako kouče dosadíš sebe, vedeš tým ty: rozesíláš odkazy a vidíš do vyhodnocení
+            těch hráčů, kteří sdílení povolili.
           </p>
 
           <label className="mt-4 block">
@@ -138,9 +186,9 @@ export function TymyMaster({
           <label className="mt-3 block">
             <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">Kouč týmu</span>
             <select className="diag-input w-full" value={coachId} onChange={(e) => setCoachId(e.target.value)}>
-              {externi.map((c) => (
+              {naVyber.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name} · {c.email}
+                  {c.popis}
                 </option>
               ))}
             </select>
@@ -194,8 +242,39 @@ export function TymyMaster({
                     )}
                   </h3>
                   <p className="mt-0.5 text-[13px] text-[var(--wm-text-2)]">
-                    {t.coachName} · založen {datum(t.createdAt)}
+                    {t.veduJa ? "vedu já" : t.coachName} · založen {datum(t.createdAt)}
                   </p>
+                  {/* Kouč jde vyměnit jen do prvního odevzdaného dotazníku: potom
+                      už je za sdílením souhlas hráče, který platil tomuhle kouči. */}
+                  {t.odevzdano === 0 ? (
+                    <label className="mt-2 flex flex-wrap items-center gap-2 text-[12.5px] text-[var(--wm-text-3)]">
+                      Kouč týmu
+                      <select
+                        className="diag-input py-1 text-[12.5px]"
+                        value={t.coachId}
+                        onChange={async (e) => {
+                          try {
+                            await setTeamCoach(sessionToken, t.id, e.target.value)
+                            await nacti()
+                          } catch (err) {
+                            setChyba(chybaText(err, "Kouče se nepodařilo změnit."))
+                          }
+                        }}
+                      >
+                        {vyberProTym(t).map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.popis}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : (
+                    !t.veduJa && (
+                      <p className="mt-1 text-[12px] text-[var(--wm-text-3)]">
+                        Kouče už měnit nelze, hráči odevzdávají.
+                      </p>
+                    )
+                  )}
                   {t.note && <p className="mt-2 text-[13px] text-[var(--wm-text-3)]">{t.note}</p>}
                 </div>
                 <div className="text-right">
@@ -217,6 +296,15 @@ export function TymyMaster({
                 >
                   Profil týmu
                 </button>
+                {t.veduJa && (
+                  <button
+                    type="button"
+                    onClick={() => setSoupiska(t.id)}
+                    className="rounded-full border border-[var(--wm-border)] px-4 py-1.5 text-[12.5px] font-semibold text-[var(--wm-text-2)]"
+                  >
+                    Soupiska
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={async () => {
@@ -240,9 +328,33 @@ export function TymyMaster({
 // Klubový kouč
 // ---------------------------------------------------------------------------
 
-export function TymKouce({ sessionToken, lang }: { sessionToken: string; lang: TymLang }) {
-  const [tymy, setTymy] = useState<MujTym[] | null>(null)
-  const [vybrany, setVybrany] = useState<string | null>(null)
+/** Tým tak, jak ho potřebuje soupiska. Master i kouč ho mají v jiném tvaru. */
+interface TymProSoupisku {
+  id: string
+  nazev: string
+  active: boolean
+  pozvano: number
+  odevzdano: number
+}
+
+/**
+ * Soupiska jednoho týmu: přidání hráče, odkazy a stav odevzdání.
+ *
+ * Stojí zvlášť, protože ji potřebují dvě různé obrazovky: klubový kouč u svých
+ * týmů a master u týmu, který vede sám. Kdyby existovala dvakrát, rozejde se.
+ */
+function SoupiskaTymu({
+  sessionToken,
+  tym,
+  lang,
+  zpet,
+}: {
+  sessionToken: string
+  tym: TymProSoupisku
+  lang: TymLang
+  /** když je zadané, nabídne se návrat na seznam týmů */
+  zpet?: () => void
+}) {
   const [hraci, setHraci] = useState<PlayerRow[] | null>(null)
   const [chyba, setChyba] = useState<string | null>(null)
   const [stitek, setStitek] = useState("")
@@ -251,54 +363,34 @@ export function TymKouce({ sessionToken, lang }: { sessionToken: string; lang: T
   const [poslednOdkaz, setPosledniOdkaz] = useState<string | null>(null)
   const [zobrazReport, setZobrazReport] = useState(false)
 
-  useEffect(() => {
-    mojeTymy(sessionToken)
-      .then((t) => {
-        setTymy(t)
-        if (t.length && !vybrany) setVybrany(t[0].id)
-      })
-      .catch((e) => setChyba(chybaText(e, "Týmy se nepodařilo načíst.")))
-    // vybrany schválně mimo závislosti: první tým se volí jen při načtení
-  }, [sessionToken]) // eslint-disable-line react-hooks/exhaustive-deps
-
   const nactiHrace = useCallback(async () => {
-    if (!vybrany) return
     try {
-      setHraci(await listPlayers(sessionToken, vybrany))
+      setHraci(await listPlayers(sessionToken, tym.id))
     } catch (e) {
       setChyba(chybaText(e, "Soupisku se nepodařilo načíst."))
     }
-  }, [sessionToken, vybrany])
+  }, [sessionToken, tym.id])
 
   useEffect(() => {
     void nactiHrace()
   }, [nactiHrace])
 
-  if (chyba) return <Chyba text={chyba} />
-  if (tymy === null) return <p className="text-[14px] text-[var(--wm-text-3)]">Načítám…</p>
-  if (!tymy.length) {
+  if (zobrazReport) {
     return (
-      <div className="diag-card p-6">
-        <h2 className="text-[16px] font-bold tracking-tight">Zatím nevedeš žádný tým</h2>
-        <p className="mt-2 max-w-[68ch] text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
-          Tým ti musí založit správce. Jakmile ho budeš mít, rozešleš hráčům odkazy.
-        </p>
-      </div>
+      <ReportTymu sessionToken={sessionToken} teamId={tym.id} lang={lang} zpet={() => setZobrazReport(false)} />
     )
   }
 
-  const tym = tymy.find((t) => t.id === vybrany)
-
-  if (zobrazReport && vybrany) {
-    return <ReportTymu sessionToken={sessionToken} teamId={vybrany} lang={lang} zpet={() => setZobrazReport(false)} />
-  }
+  // Počty se berou ze soupisky, ne z týmu v nadřazeném seznamu. Ten se načetl
+  // jednou; po vystavení odkazu by v hlavičce zůstalo staré číslo.
+  const pozvano = hraci?.length ?? tym.pozvano
+  const odevzdano = hraci ? hraci.filter((h) => h.odevzdanoAt).length : tym.odevzdano
 
   const pridej = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!vybrany) return
     setPridava(true)
     try {
-      const { token } = await createPlayerInvite(sessionToken, vybrany, stitek, jazyk)
+      const { token } = await createPlayerInvite(sessionToken, tym.id, stitek, jazyk)
       setPosledniOdkaz(odkazHrace(token))
       setStitek("")
       await nactiHrace()
@@ -310,28 +402,25 @@ export function TymKouce({ sessionToken, lang }: { sessionToken: string; lang: T
   }
 
   return (
-    <div className="max-w-[62rem]">
-      {tymy.length > 1 && (
-        <div className="diag-segment mb-5">
-          {tymy.map((t) => (
-            <button key={t.id} type="button" data-active={t.id === vybrany} onClick={() => setVybrany(t.id)}>
-              {t.nazev}
-            </button>
-          ))}
-        </div>
+    <>
+      {chyba && <Chyba text={chyba} />}
+      {zpet && (
+        <button type="button" onClick={zpet} className="mb-5 text-[13px] font-semibold text-[var(--wm-text-2)]">
+          ← Zpět na týmy
+        </button>
       )}
 
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-[22px] font-bold tracking-tight">{tym?.nazev}</h2>
+          <h2 className="text-[22px] font-bold tracking-tight">{tym.nazev}</h2>
           <p className="mt-1 text-[13.5px] text-[var(--wm-text-2)]">
-            Odevzdáno {tym?.odevzdano} z {tym?.pozvano} rozeslaných.
+            Odevzdáno {odevzdano} z {pozvano} rozeslaných.
           </p>
         </div>
         <button
           type="button"
           onClick={() => setZobrazReport(true)}
-          disabled={!tym?.odevzdano}
+          disabled={!odevzdano}
           className="diag-press rounded-full bg-[var(--wm-brand)] px-5 py-2 text-[13px] font-semibold text-[var(--wm-brand-fg)] disabled:opacity-40"
         >
           Profil týmu
@@ -364,7 +453,7 @@ export function TymKouce({ sessionToken, lang }: { sessionToken: string; lang: T
           </select>
           <button
             type="submit"
-            disabled={pridava || !tym?.active}
+            disabled={pridava || !tym.active}
             className="diag-press rounded-full bg-[var(--wm-brand)] px-5 py-2 text-[13px] font-semibold text-[var(--wm-brand-fg)] disabled:opacity-50"
           >
             {pridava ? "Vystavuji…" : "Vystavit odkaz"}
@@ -421,6 +510,52 @@ export function TymKouce({ sessionToken, lang }: { sessionToken: string; lang: T
           ))}
         </div>
       )}
+    </>
+  )
+}
+
+export function TymKouce({ sessionToken, lang }: { sessionToken: string; lang: TymLang }) {
+  const [tymy, setTymy] = useState<MujTym[] | null>(null)
+  const [vybrany, setVybrany] = useState<string | null>(null)
+  const [chyba, setChyba] = useState<string | null>(null)
+
+  useEffect(() => {
+    mojeTymy(sessionToken)
+      .then((t) => {
+        setTymy(t)
+        if (t.length && !vybrany) setVybrany(t[0].id)
+      })
+      .catch((e) => setChyba(chybaText(e, "Týmy se nepodařilo načíst.")))
+    // vybrany schválně mimo závislosti: první tým se volí jen při načtení
+  }, [sessionToken]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (chyba) return <Chyba text={chyba} />
+  if (tymy === null) return <p className="text-[14px] text-[var(--wm-text-3)]">Načítám…</p>
+  if (!tymy.length) {
+    return (
+      <div className="diag-card p-6">
+        <h2 className="text-[16px] font-bold tracking-tight">Zatím nevedeš žádný tým</h2>
+        <p className="mt-2 max-w-[68ch] text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">
+          Tým ti musí založit správce. Jakmile ho budeš mít, rozešleš hráčům odkazy.
+        </p>
+      </div>
+    )
+  }
+
+  const tym = tymy.find((t) => t.id === vybrany) ?? tymy[0]
+
+  return (
+    <div className="max-w-[62rem]">
+      {tymy.length > 1 && (
+        <div className="diag-segment mb-5">
+          {tymy.map((t) => (
+            <button key={t.id} type="button" data-active={t.id === tym.id} onClick={() => setVybrany(t.id)}>
+              {t.nazev}
+            </button>
+          ))}
+        </div>
+      )}
+      <SoupiskaTymu key={tym.id} sessionToken={sessionToken} tym={tym} lang={lang} />
     </div>
   )
 }

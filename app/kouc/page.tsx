@@ -172,6 +172,10 @@ export default function CoachPage() {
       if (kdoJsem?.pouzeTymy) setTab("tymy")
       setMeInfo(
         kdoJsem ?? {
+          // Nouzová varianta pro případ, že by se whoAmI hned po přihlášení
+          // nedovolalo. Bez id se v přehledu týmů nenabídne volba „vedu já";
+          // všechno ostatní funguje.
+          id: "",
           name: res.name,
           email,
           role: res.role as CoachIdentity["role"],
@@ -589,6 +593,7 @@ export default function CoachPage() {
           <TymyMaster
             sessionToken={session}
             kouci={coaches ?? []}
+            jaId={meInfo.id}
             lang={lang === "en" ? "en" : "cs"}
           />
         </div>

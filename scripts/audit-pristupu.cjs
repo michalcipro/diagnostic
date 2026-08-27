@@ -85,6 +85,7 @@ const POUZE_MASTER = [
   "eliteDiagnostic.normExport",
   "eliteDiagnostic.externalUsage",
   "teams.createTeam",
+  "teams.setTeamCoach",
   "teams.setTeamActive",
   "teams.listTeams",
 ]

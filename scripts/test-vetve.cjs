@@ -200,6 +200,76 @@ const doSouhrnu = TYMOVA.filter((d) => d.teamId === "T1").length
 rekni(doSouhrnu === 2, "do souhrnu týmu jde i vyplnění, které hráč nesdílel")
 
 // ---------------------------------------------------------------------------
+// Týmová větev: tým, který vede master sám
+// ---------------------------------------------------------------------------
+//
+// Master smí u týmu dosadit sám sebe jako kouče, protože některé týmy vedeme
+// my. Tím se ale nemění pravidlo, jen role: k vyhodnocení se dostane jako kouč
+// toho týmu, ne jako master. Souhlas hráče na to sedí – hráč souhlasí se
+// sdílením s koučem svého týmu, a tím je v tu chvíli on.
+//
+// Co se změnit nesmí: odmítnuté sdílení platí i proti němu, a do cizích týmů
+// nevidí ani nadále.
+
+console.log("\n– týmová větev: tým vede master sám –")
+
+const TYMOVA_MASTERA = [
+  { id: "tm-sdili", coachId: "M", teamId: "T2", sdilet: true },
+  { id: "tm-nesdili", coachId: "M", teamId: "T2", sdilet: false },
+]
+
+const getZTymuMastera = (me, id) => {
+  const d = TYMOVA_MASTERA.find((x) => x.id === id)
+  if (!d) return null
+  return filtrViditelnosti(me)(d.coachId) && sdileno(d) ? d.id : null
+}
+
+rekni(getZTymuMastera(KOUCI.M, "tm-sdili") === "tm-sdili", "u vlastního týmu master sdílené vyhodnocení dostane")
+rekni(getZTymuMastera(KOUCI.M, "tm-nesdili") === null, "odmítnuté sdílení platí i proti masterovi")
+rekni(getProKouce(KOUCI.M, "t-sdili") === null, "do cizího týmu master pořád nevidí")
+rekni(getZTymuMastera(KOUCI.E1, "tm-sdili") === null, "externí kouč do týmu mastera nevidí")
+
+/**
+ * convex/teams.ts: createTeam a setTeamCoach
+ *
+ * Do čela týmu smí externí kouč, nebo master sám sebe. Nikdo jiný: náš interní
+ * kouč do týmové větve nepatří a cizího mastera dosadit nejde.
+ */
+const smiVest = (me, kouc) => {
+  vyzadujMastera(me)
+  if (kouc.id === me.id) return true
+  if (kouc.role !== "external") throw new Error("Tým může vést externí kouč, nebo ty sám.")
+  return true
+}
+
+rekni(smiVest(KOUCI.M, KOUCI.E1) === true, "do čela týmu smí externí kouč")
+rekni(smiVest(KOUCI.M, KOUCI.M) === true, "master smí dosadit sám sebe")
+rekni(hodi(() => smiVest(KOUCI.M, KOUCI.K)), "náš interní kouč tým vést nemůže")
+rekni(hodi(() => smiVest(KOUCI.E1, KOUCI.E1)), "externí kouč si tým sám nepřiřadí")
+
+/**
+ * convex/teams.ts: setTeamCoach
+ *
+ * Kouče lze měnit jen do prvního odevzdaného dotazníku. Potom už za sdílením
+ * stojí souhlas hráče, který platil konkrétnímu kouči; vyměnit ho pod rukou by
+ * z toho souhlasu udělalo prázdné slovo.
+ */
+const zmenKouce = (me, tym, kouc) => {
+  smiVest(me, kouc)
+  if (tym.odevzdano > 0) throw new Error("Kouče jde změnit jen do prvního odevzdaného dotazníku.")
+  return { ...tym, coachId: kouc.id }
+}
+
+rekni(
+  zmenKouce(KOUCI.M, { coachId: "E1", odevzdano: 0 }, KOUCI.M).coachId === "M",
+  "dokud nikdo neodevzdal, jde tým převzít",
+)
+rekni(
+  hodi(() => zmenKouce(KOUCI.M, { coachId: "E1", odevzdano: 1 }, KOUCI.M)),
+  "po prvním odevzdání se kouč vyměnit nedá",
+)
+
+// ---------------------------------------------------------------------------
 // Klubový kouč: jen týmové odkazy a jen Players Survey
 // ---------------------------------------------------------------------------
 //

@@ -505,8 +505,14 @@ const CS: ManualTexty = {
     },
     { lbl: "Náš interní kouč", text: "Z týmové větve nic." },
     {
-      lbl: "Master",
+      lbl: "Master u cizího týmu",
       text: "Název týmu a jeho profil. Žádné jednotlivé vyplnění, ani sdílené.",
+    },
+    {
+      lbl: "Master u vlastního týmu",
+      text:
+        "Když si master dosadí jako kouče sám sebe, vede tým on: rozesílá odkazy " +
+        "a vidí ta vyplnění, která mu hráči sdíleli. Nesdílená ne, ani tady.",
     },
   ],
   tymNote:
@@ -1090,8 +1096,14 @@ const SK: ManualTexty = {
     },
     { lbl: "Náš interný kouč", text: "Z tímovej vetvy nič." },
     {
-      lbl: "Master",
+      lbl: "Master pri cudzom tíme",
       text: "Názov tímu a jeho profil. Žiadne jednotlivé vyplnenie, ani zdieľané.",
+    },
+    {
+      lbl: "Master pri vlastnom tíme",
+      text:
+        "Keď si master dosadí ako kouča sám seba, tím vedie on: rozposiela odkazy " +
+        "a vidí tie vyplnenia, ktoré mu hráči zdieľali. Nezdieľané nie, ani tu.",
     },
   ],
   tymNote:
@@ -1680,8 +1692,15 @@ const EN: ManualTexty = {
     },
     { lbl: "Our internal coach", text: "Nothing from the team branch." },
     {
-      lbl: "Master",
+      lbl: "Master, someone else's team",
       text: "The team name and its profile. No individual results, not even shared ones.",
+    },
+    {
+      lbl: "Master, own team",
+      text:
+        "When a master puts themselves in as the coach, they run the team: they send " +
+        "out the links and see the results players shared with them. Never the ones " +
+        "players kept private.",
     },
   ],
   tymNote:

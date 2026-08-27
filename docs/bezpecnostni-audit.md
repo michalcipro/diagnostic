@@ -538,8 +538,9 @@ Kvůli tomu má vlastní pravidla a stojí za to je sepsat celé, protože slib
 daný hráči je tady součástí produktu, ne jen formulace v souhlasu.
 
 **Jak to funguje.** Tým zakládá master a přiřadí ho konkrétnímu externímu
-účtu; `createTeam` vyžaduje mastera a odmítne přiřadit tým našemu internímu
-kouči. Klubový kouč, tedy externí účet bez plného přístupu, pak v rámci
+účtu, nebo sám sobě; `createTeam` vyžaduje mastera a odmítne přiřadit tým
+našemu internímu kouči i cizímu masterovi. Klubový kouč, tedy externí účet
+bez plného přístupu, pak v rámci
 svého týmu vystavuje odkazy pod štítky, které si volí sám. Může to být jméno,
 může to být Player 1. Obecnou pozvánku na jiný test vystavit nemůže,
 `createInvite` ho odmítne podle `jeKlubovy()`. Hráč vyplní Players Survey
@@ -552,13 +553,31 @@ vzorku.
 | | vyplnění hráče | týmový profil | ostatní týmy |
 |---|---|---|---|
 | hráč | své, vždy | ne | ne |
-| klubový kouč | jen sdílená | ano, svého týmu | ne |
+| klubový kouč | jen sdílená, svého týmu | ano, svého týmu | ne |
 | náš interní kouč | ne | ne | ne |
-| master | ne | ano | ano |
+| master u cizího týmu | ne | ano | ano |
+| master u týmu, který vede sám | jen sdílená | ano | ano |
 
-Master tedy vidí, že tým existuje, jak se jmenuje a jaký má profil, a nevidí
-jediné konkrétní vyplnění. Do větví externích koučů nevidí nikdo od nás; to
-platí i tady a nebylo to změkčeno.
+U týmu, který vede někdo jiný, tedy master vidí, že tým existuje, jak se
+jmenuje a jaký má profil, a nevidí jediné konkrétní vyplnění. Do větví
+externích koučů nevidí nikdo od nás; to platí i tady a nebylo to změkčeno.
+
+**Master jako kouč vlastního týmu.** Některé týmy vedeme my, ne klub, a pak
+by bylo nesmyslné, aby si na ně vlastník aplikace musel zakládat druhý účet.
+Master proto smí u týmu dosadit sám sebe. Tím se nemění pravidlo, jen role:
+k vyhodnocením se dostane jako kouč toho týmu, ne jako master, a platí na něj
+všechno, co na kouče. Odmítnuté sdílení platí i proti němu a do cizích týmů
+nevidí dál. Souhlas hráče na to sedí bez úprav, protože slibuje sdílení
+s koučem jeho týmu, a tím je v tu chvíli on. Cizího mastera dosadit nejde,
+jen sebe; jinak by se dala práva rozdávat mimo vědomí dotčeného účtu.
+
+**Výměna kouče u založeného týmu** (`setTeamCoach`) jde jen do prvního
+odevzdaného dotazníku. Potom už za sdílením stojí souhlas, který hráč dal
+konkrétnímu kouči, a vyměnit ho pod rukou by z toho souhlasu udělalo prázdné
+slovo. Do té doby je to prostá oprava překlepu ze zakládání, protože není co
+ukázat. Při výměně se přepíše vlastník i u rozeslaných odkazů: nese se do
+odevzdaného vyplnění, takže bez toho by starý kouč viděl do týmu, který už
+nevede, a nový by výsledky naopak neotevřel.
 
 **Kde je slib doopravdy zaručený.** Nesdílené vyplnění se odfiltruje
 v `sdileno()` v `convex/eliteDiagnostic.ts` a filtr je ve všech třech
@@ -590,7 +609,8 @@ odevzdanými a započtenými report pojmenuje.
 **Ověřeno bez nálezu:** cizí tým přes uhodnuté ID (`teamReport` si dotáhne
 tým a teprve pak ověří vlastnictví, `createPlayerInvite` a `listPlayers`
 stejně), klubový kouč nevystaví pozvánku mimo Players Survey ani mimo svůj
-tým, `createTeam`, `setTeamActive` a `listTeams` smí jen master, a zápis do
+tým, `createTeam`, `setTeamCoach`, `setTeamActive` a `listTeams` smí jen
+master, a zápis do
 `normSamples` v `submitWithInvite` předchází větvení podle `teamId`, takže
 odhlášení ze sdílení normativní vzorek neochudí.
 

@@ -588,7 +588,7 @@ function retezce(uzel, cesta = "") {
 // jazycích píšou stejně. Cokoli mimo tenhle seznam znamená zapomenutý překlad.
 const MANUAL_SHODNE = new Set([
   // názvy produktu a rolí
-  "kapitoly[2].title", "kapitoly[5].title", "rodiny[0].nazev", "tymRole[3].lbl",
+  "kapitoly[2].title", "kapitoly[5].title", "rodiny[0].nazev",
   // slova, která čeština a slovenština píšou stejně
   "obsah", "popiskyKaret.rozsah", "popiskyKaret.jazyky",
   "kapitoly[0].kicker", "kapitoly[1].kicker", "kapitoly[3].kicker",

@@ -189,6 +189,8 @@ export const me = query({
   args: { sessionToken: v.string() },
   returns: v.union(
     v.object({
+      /** vlastní id; rozhraní podle něj pozná tým, který přihlášený vede sám */
+      id: v.id("coaches"),
       name: v.string(),
       email: v.string(),
       role: v.union(v.literal("master"), v.literal("coach"), v.literal("external")),
@@ -200,6 +202,7 @@ export const me = query({
     try {
       const coach = await requireCoach(ctx, args.sessionToken)
       return {
+        id: coach._id,
         name: coach.name,
         email: coach.email,
         role: coach.role,
