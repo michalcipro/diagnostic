@@ -948,6 +948,159 @@ def sestav() -> tuple[dict, str]:
     return data, "\n".join(md)
 
 
+# ---------------------------------------------------------------------------
+# Data pro aplikaci
+#
+# Prohlížeč sportovce dostane jen texty pod neprůhlednými čísly. Z čísla se
+# nedá poznat škála ani směr: pořadí je zamíchané pevným semínkem. Klíč
+# (škála, obrácené položky, klíč vinět, očekávané odpovědi kontrol) jde do
+# lib/elitepro/klic.ts, který smí importovat jen server.
+#
+# Semínko se nesmí měnit. Jakmile začne sběr dat, čísla položek musí zůstat
+# stejná; změna banky znamená novou verzi, ne přečíslování.
+# ---------------------------------------------------------------------------
+
+SEMINKO = 20260925
+KOREN = ZDE.parent.parent.parent
+OCEKAVANO = {
+    "spíš nesouhlasím": [2],
+    "úplně souhlasím": [5],
+    "často": [4],
+    "zřídka nebo téměř nikdy": [1, 2],
+    "nesouhlas": [1, 2],
+}
+
+
+def data_pro_aplikaci(data: dict) -> tuple[dict, str]:
+    import random
+
+    nahoda = random.Random(SEMINKO)
+    likert = []
+    for sk in data["skaly"]:
+        for p in sk["polozky"]:
+            likert.append(("skala", sk, p))
+    for k in data["kontrolni"]:
+        likert.append(("kontrola", None, k))
+    poradi = list(range(len(likert)))
+    nahoda.shuffle(poradi)
+    cislo = {i: n + 1 for n, i in enumerate(poradi)}
+
+    klient_polozky = {}
+    banka_id = {}
+    skaly_klic = {sk["kod"]: {"polozky": [], "obracene": []} for sk in data["skaly"]}
+    kontrolni_klic = []
+    for i, (druh, sk, p) in enumerate(likert):
+        pid = cislo[i]
+        banka_id[pid] = p["id"]
+        if druh == "skala":
+            klient_polozky[str(pid)] = {"t": p["text"], "f": sk["format"], "r": sk["ramec"]}
+            skaly_klic[sk["kod"]]["polozky"].append(pid)
+            if p["smer"] == "-":
+                skaly_klic[sk["kod"]]["obracene"].append(pid)
+        else:
+            klient_polozky[str(pid)] = {"t": p["text"], "f": p["format"], "r": "rys"}
+            kontrolni_klic.append({
+                "id": pid,
+                "druh": "instruovana" if p["druh"] == "instruovaná" else "nepravdepodobna",
+                "format": p["format"],
+                "ocekavano": OCEKAVANO[p["ocekavano"]],
+            })
+
+    vin_poradi = list(range(len(data["vinety"])))
+    nahoda.shuffle(vin_poradi)
+    klient_vinety = {}
+    vinety_klic = []
+    for n, i in enumerate(vin_poradi):
+        vin = data["vinety"][i]
+        vid = n + 1
+        reakce = list(vin["reakce"])
+        nahoda.shuffle(reakce)
+        radky = []
+        klic = []
+        for k, r in enumerate(reakce, 1):
+            rid = 1000 + vid * 10 + k
+            banka_id[rid] = r["id"]
+            radky.append([rid, r["text"]])
+            klic.append({"id": rid, "klic": r["klic"]})
+        klient_vinety[str(vid)] = {"s": vin["situace"], "r": radky}
+        vinety_klic.append({"id": vid, "skupina": vin["skupina"], "reakce": klic})
+
+    for sk in skaly_klic.values():
+        sk["polozky"].sort()
+        sk["obracene"].sort()
+    kontrolni_klic.sort(key=lambda k: k["id"])
+    vinety_klic.sort(key=lambda v: v["id"])
+
+    klient = {
+        "verze": data["verze"],
+        "otazkaVinet": data["otazkaVinet"],
+        "polozky": dict(sorted(klient_polozky.items(), key=lambda kv: int(kv[0]))),
+        "vinety": klient_vinety,
+    }
+
+    skaly_ts = [
+        {
+            "kod": sk["kod"],
+            "nazev": sk["nazev"],
+            "format": sk["format"],
+            "ramec": sk["ramec"],
+            **skaly_klic[sk["kod"]],
+        }
+        for sk in data["skaly"]
+    ]
+    j = lambda x: json.dumps(x, ensure_ascii=False)
+    ts = "\n".join([
+        "// Klíč ELITE Pro. GENEROVÁNO z docs/novy-test/banka/sestav.py, ručně needitovat.",
+        "//",
+        "// Jen pro server. Kdo zná škály, obrácené položky a očekávané odpovědi",
+        "// kontrol, projde kontrolami platnosti, jak se mu zachce. Stránka",
+        "// s dotazníkem sem nesmí sáhnout; hlídá to scripts/audit-balicku.cjs.",
+        "",
+        f"export const VERZE_BANKY = {j(data['verze'])}",
+        "",
+        "export type Format = \"P\" | \"C\"",
+        "export type Ramec = \"rys\" | \"4t\"",
+        "export type KlicReakce = \"++\" | \"+\" | \"-\" | \"--\"",
+        "",
+        "export interface SkalaKlic {",
+        "  kod: string",
+        "  nazev: string",
+        "  format: Format",
+        "  ramec: Ramec",
+        "  /** čísla položek v dotazníku */",
+        "  polozky: number[]",
+        "  /** podmnožina polozky, které se před součtem obracejí (6 − x) */",
+        "  obracene: number[]",
+        "}",
+        "",
+        "export interface VinetaKlic {",
+        "  id: number",
+        "  skupina: string",
+        "  /** klíč je hypotéza pro posuzovatele, ne ověřený klíč */",
+        "  reakce: { id: number; klic: KlicReakce }[]",
+        "}",
+        "",
+        "export interface KontrolaKlic {",
+        "  id: number",
+        "  druh: \"instruovana\" | \"nepravdepodobna\"",
+        "  format: Format",
+        "  /** odpovědi, které kontrolou projdou */",
+        "  ocekavano: number[]",
+        "}",
+        "",
+        f"export const SKALY: SkalaKlic[] = {j(skaly_ts)}",
+        "",
+        f"export const VINETY: VinetaKlic[] = {j(vinety_klic)}",
+        "",
+        f"export const KONTROLNI: KontrolaKlic[] = {j(kontrolni_klic)}",
+        "",
+        "/** číslo v dotazníku → označení v bance (docs/novy-test/banka/banka-cs.md) */",
+        f"export const BANKA_ID: Record<number, string> = {j({str(k): v for k, v in sorted(banka_id.items())})}",
+        "",
+    ])
+    return klient, ts
+
+
 if __name__ == "__main__":
     chyby = kontrola()
     for c in chyby:
@@ -957,4 +1110,9 @@ if __name__ == "__main__":
     data, md = sestav()
     (ZDE / "banka-cs.json").write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (ZDE / "banka-cs.md").write_text(md, encoding="utf-8")
+    klient, ts = data_pro_aplikaci(data)
+    cil = KOREN / "lib" / "elitepro"
+    (cil / "data").mkdir(parents=True, exist_ok=True)
+    (cil / "data" / "dotaznik-cs.json").write_text(json.dumps(klient, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    (cil / "klic.ts").write_text(ts, encoding="utf-8")
     print(f"OK: {sum(len(s['polozky']) for s in data['skaly'])} položek, {len(data['vinety'])} vinět")

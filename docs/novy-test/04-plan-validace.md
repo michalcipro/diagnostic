@@ -56,13 +56,20 @@ sportovní praxí, 3 trenéři s praxí na úrovni reprezentace nebo profesioná
 soutěže, 1 odborník se zkušeností s dospívajícími (třeba někdo z odborníků,
 na které odkazujete klienty), 1 psychometrik. Nikdo z nich nepíše položky.
 
-**Pilot 1: kdo co vyplní.** Banka má 432 položek sebeposouzení v pěti
-doménách. Každý respondent dostane náhodně tři domény z pěti (průměrně 260
-položek, 37 minut), 6 vinět z 36 (4 minuty) a kontext (2 minuty), celkem do
-45 minut. Každou doménu tak vyplní zhruba 360 lidí, každou dvojici domén
-zhruba 180, každou vinětu kolem 100. U vinět to stačí na vyřazení
-nesrozumitelných a těch, kde se odpovědi neliší; empirický klíč se stanoví
-až v pilotu 2 na dvanácti vybraných.
+**Pilot 1: kdo co vyplní.** Banka má 432 položek sebeposouzení ve 36
+škálách. Každý respondent dostane z každé škály náhodnou polovinu kandidátů
+(216 položek, 31 minut), 5 kontrolních položek, 6 vinět z 36, dvě z každé
+skupiny (4 minuty), kontext, spánek a dobrovolné otázky na duševní pohodu,
+celkem kolem 40 minut. Forma se odvozuje z tokenu pozvánky
+(`lib/elitepro/forma.ts`), takže ji server při odeslání umí ověřit.
+
+Proti původnímu návrhu (tři domény z pěti) má tohle dvě výhody: každý
+respondent pokrývá všech 36 škál, takže korelace mezi škálami se počítají
+z celého vzorku, a délka je u všech stejná. Každou položku vyplní zhruba
+polovina respondentů, každou dvojici položek čtvrtina; při 600 lidech je to
+kolem 150 na dvojici. Viněty vyplní každou kolem 100 lidí; to stačí na
+vyřazení nesrozumitelných a těch, kde se odpovědi neliší, empirický klíč se
+stanoví až v pilotu 2 na dvanácti vybraných.
 
 **Pilot 2: kdo co vyplní.** Hotové jádro (35,5 minuty), Mini-IPIP (2,5 minuty) a jeden ze dvou bloků
 srovnávacích nástrojů (`03-kotvy-a-licence.md`). Kdo přijde na retest, dostane druhý blok.

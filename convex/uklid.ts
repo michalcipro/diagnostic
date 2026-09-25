@@ -75,6 +75,11 @@ export const probehni = internalMutation({
         .withIndex("by_result", (q) => q.eq("resultId", d._id))
         .collect()
       for (const h of hodnoceni) await ctx.db.delete(h._id)
+      const doporuceni = await ctx.db
+        .query("doporuceniOdbornika")
+        .withIndex("by_result", (q) => q.eq("resultId", d._id))
+        .collect()
+      for (const x of doporuceni) await ctx.db.delete(x._id)
       await ctx.db.delete(d._id)
       vysledky++
     }

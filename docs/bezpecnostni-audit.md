@@ -670,6 +670,24 @@ pseudonymy vznikají zamícháním, ne podle pořadí v databázi.
 **Výmaz.** `removeForCoach` i úklid po lhůtě mažou hodnocení spolu
 s vyplněním; hodnocení tak nepřežije výsledek, ke kterému patří.
 
+## Doplněk: ELITE Pro, pilotní verze
+
+**Klíč.** Škály, obrácené položky, klíč vinět a očekávané odpovědi kontrol
+jsou v `lib/elitepro/klic.ts`, generovaném z banky. Prohlížeč dostane jen
+texty pod zamíchanými čísly (`lib/elitepro/data/dotaznik-cs.json`). Že na
+klíč, sestavení formy ani kontrolu odeslání nedosáhne stránka s dotazníkem,
+hlídá `audit-balicku.cjs`; že data pro prohlížeč klíč neobsahují,
+`test-elitepro.cjs`.
+
+**Forma.** Které položky sportovec dostane, se odvozuje z tokenu pozvánky.
+Server ji při odeslání přepočítá a odmítne cokoli mimo ni i mimo povolený
+rozsah; do databáze jde jen to, co prošlo položku po položce.
+
+**Duševní pohoda.** Odpovědi na čtyři otázky PHQ-4 server použije k výpočtu
+jednoho příznaku a zahodí; neukládají se ani ve výsledku, ani v anonymním
+vzorku. Příznak vidí kouč, který vyplnění smí otevřít, a nikdy klubový kouč
+(`convex/pohoda.ts`). Maže se spolu s vyplněním.
+
 ## Závěr
 
 Aplikace je na svoji velikost postavená nadprůměrně obezřetně: autorizace je

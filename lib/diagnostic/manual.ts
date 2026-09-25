@@ -100,7 +100,7 @@ export interface ManualTexty {
   prehledHlavicka: [string, string, string]
   prostredi: { sport: string; byznys: string }
 
-  testy: Record<Exclude<TestId, "vzorce-sport">, ManualTest>
+  testy: Record<Exclude<TestId, "vzorce-sport" | "elitepro-sport">, ManualTest>
 }
 
 const CS: ManualTexty = {

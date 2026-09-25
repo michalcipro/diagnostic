@@ -225,6 +225,18 @@ export default defineSchema({
     .index("by_result", ["resultId"])
     .index("by_coach", ["coachId"]),
 
+  // Doporučení kontaktu na odborníka z otázek na duševní pohodu (ELITE Pro).
+  //
+  // Záznam vzniká, jen když odpovědi překročí hranici. Samotné odpovědi ani
+  // body se neukládají nikde: kouč má dostat signál k rozhovoru, ne čísla,
+  // na jejichž výklad není vyškolený. Klubový kouč záznam nevidí vůbec.
+  doporuceniOdbornika: defineTable({
+    resultId: v.id("eliteDiagnosticResults"),
+    createdAt: v.number(),
+    /** kdy kouč zaznamenal, že kontakt nabídl */
+    kontaktNabidnut: v.optional(v.number()),
+  }).index("by_result", ["resultId"]),
+
   // Neúspěšná přihlášení. Bez stropu by šlo hesla zkoušet ve smyčce: Convex
   // vystavuje auth:login na veřejném API a PBKDF2 útok jen zpomalí.
   loginAttempts: defineTable({

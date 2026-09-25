@@ -9,12 +9,14 @@ import { ExternalPanel } from "@/components/diagnostic/external-panel"
 import { CoachPlannerPanel } from "@/components/planner/coach-planner-panel"
 import { ReportView } from "@/components/diagnostic/report-view"
 import { HodnoceniTrenera } from "@/components/diagnostic/hodnoceni-trenera"
+import { EliteProDetail } from "@/components/elitepro/detail"
 import { HODNOCENI_TEXTY, hodnotiSe } from "@/lib/diagnostic/hodnoceni-trenera"
 import { VzorceReport } from "@/components/vzorce/report"
 import { ArchetypyReport } from "@/components/archetypy/report"
 import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
 import { JAZYKY } from "@/lib/diagnostic/lang"
 import { jeArchetypy, jeVzorce } from "@/lib/diagnostic/structure"
+import { jeElitePro } from "@/lib/diagnostic/test-id"
 import { testMeta } from "@/lib/diagnostic/test-meta"
 import {
   addCoach,
@@ -337,7 +339,7 @@ export default function CoachPage() {
     e.preventDefault()
     setCreating(true)
     try {
-      const token = await createInvite(session, fTest, fLang, fName.trim())
+      const token = await createInvite(session, fTest, jeElitePro(fTest) ? "cs" : fLang, fName.trim())
       setNewLink(inviteUrl(token))
       setCopied(false)
       setFName("")
@@ -419,6 +421,8 @@ export default function CoachPage() {
           >
             ← {t.coachBack}
           </button>
+          {/* Pilotní ELITE Pro nemá vyhodnocení, takže ani jazyk, tisk a PDF. */}
+          {!jeElitePro(detail.testId) && (
           <div className="flex items-center gap-2">
             <LangToggle lang={detailLang} onChange={setDetailLang} />
             <button
@@ -436,8 +440,11 @@ export default function CoachPage() {
               {t.pdfButton}
             </button>
           </div>
+          )}
         </div>
-        {jeArchetypy(detail.testId) ? (
+        {jeElitePro(detail.testId) ? (
+          <EliteProDetail sessionToken={session} detail={detail} />
+        ) : jeArchetypy(detail.testId) ? (
           <ArchetypyReport
             testId={detail.testId}
             person={detail.person}
@@ -832,7 +839,13 @@ export default function CoachPage() {
                 </label>
                 <label className="block">
                   <span className="mb-1.5 block text-[13px] font-medium text-[var(--wm-text-2)]">{t.inviteLang}</span>
-                  <select className="diag-input" value={fLang} onChange={(e) => setFLang(e.target.value as Lang)}>
+                  {/* ELITE Pro má zatím jen českou banku otázek. */}
+                  <select
+                    className="diag-input"
+                    value={jeElitePro(fTest) ? "cs" : fLang}
+                    disabled={jeElitePro(fTest)}
+                    onChange={(e) => setFLang(e.target.value as Lang)}
+                  >
                     <option value="cs">Čeština</option>
                     <option value="sk">Slovenčina</option>
                     <option value="en">English</option>

@@ -111,6 +111,8 @@ export interface Invite {
   clientName?: string
   /** název týmu; jen u týmové pozvánky. Podle něj dotazník pozná větev. */
   tym?: string
+  /** jen ELITE Pro: položky a viněty, které tahle pozvánka dostane */
+  forma?: { polozky: number[]; vinety: number[] }
 }
 
 /** Pozvánka v přehledu kouče. */
@@ -784,5 +786,57 @@ export async function exportValidace(sessionToken: string): Promise<unknown[]> {
     return (await c.mutation(exportValidaceRef, { sessionToken })) as unknown[]
   } catch (e) {
     throw new Error(chybaText(e, "Podklad se nepodařilo stáhnout."))
+  }
+}
+
+// ── ELITE Pro ──────────────────────────────────────────────────────
+
+const doporuceniRef = makeFunctionReference<"query">("pohoda:doporuceni")
+const zaznamenejKontaktRef = makeFunctionReference<"mutation">("pohoda:zaznamenejKontakt")
+
+export interface StavDoporuceni {
+  doporuceno: boolean
+  kontaktNabidnut?: number
+}
+
+/**
+ * Odešle ELITE Pro. Odpovědi mají víc druhů a rozsahů než ostatní testy,
+ * proto se neposílají přes StoredSession; server je kontroluje podle formy.
+ */
+export async function odesliElitePro(
+  token: string,
+  person: PersonInfo,
+  odpovedi: Record<number, number>,
+  durationSec: number | undefined,
+): Promise<boolean> {
+  const c = client()
+  if (!c) return false
+  try {
+    await c.mutation(submitRef, {
+      token,
+      person,
+      answers: JSON.stringify(odpovedi),
+      durationSec,
+    })
+    return true
+  } catch (err) {
+    console.error("[elitepro] odeslání do Convexu selhalo", err)
+    return false
+  }
+}
+
+export async function doporuceniOdbornika(sessionToken: string, resultId: string): Promise<StavDoporuceni> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(doporuceniRef, { sessionToken, resultId })) as StavDoporuceni
+}
+
+export async function zaznamenejKontakt(sessionToken: string, resultId: string): Promise<StavDoporuceni> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  try {
+    return (await c.mutation(zaznamenejKontaktRef, { sessionToken, resultId })) as StavDoporuceni
+  } catch (e) {
+    throw new Error(chybaText(e, "Záznam se nepodařilo uložit."))
   }
 }

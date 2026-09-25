@@ -80,6 +80,11 @@ export const BAND_DESCRIPTIONS: Record<Lang, Record<BandKey, string>> = {
 }
 
 export const TEST_NAMES: Record<TestId, Record<Lang, string>> = {
+  "elitepro-sport": {
+    cs: "ELITE Pro · pilotní verze",
+    en: "ELITE Pro · pilot version",
+    sk: "ELITE Pro · pilotná verzia",
+  },
   "elite200-sport": {
     cs: "Performance Diagnostic ELITE 200™",
     en: "Performance Diagnostic ELITE 200™",

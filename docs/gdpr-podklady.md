@@ -31,6 +31,7 @@ kategorii osobních údajů (údaje o zdraví). Z toho plyne, že:
 | `normSamples` | pásmo narození, rod, role, odpovědi, čtvrtletí pořízení, párovací klíč | zatím bez omezení |
 | `invitations` | jméno klienta, poznámka kouče, token | zatím bez omezení |
 | `hodnoceniTrenera` | hodnocení sportovce trenérem (10 položek 1 až 7), délka vedení, četnost pozorování | stejně jako vyplnění, maže se s ním |
+| `doporuceniOdbornika` | jen příznak „doporučeno nabídnout kontakt na odborníka“ a datum nabídky; odpovědi na duševní pohodu (PHQ-4) se neukládají vůbec | stejně jako vyplnění, maže se s ním |
 | `coaches` | jméno, e-mail, telefon, poznámka, otisk hesla | po dobu spolupráce |
 | `coachSessions` | token relace | 7 dní od posledního použití |
 | `loginAttempts` | e-mail a počet neúspěchů | do úspěšného přihlášení |

@@ -82,6 +82,8 @@ const NACITACE: Record<TestId, () => Promise<ItemsFile>> = {
       (await import("../archetypy/data/polozky-sport-sk.json")).default,
       (await import("../archetypy/data/polozky-sport-en.json")).default,
     ),
+  // ELITE Pro má vlastní dotazník (components/elitepro) a sem nepatří.
+  "elitepro-sport": async () => ({}),
 }
 
 export interface Item {

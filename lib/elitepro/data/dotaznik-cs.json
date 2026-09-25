@@ -1,0 +1,2974 @@
+{
+ "verze": "cs-0.1",
+ "otazkaVinet": "Jak pravděpodobně bys to {udělal|udělala}?",
+ "polozky": {
+  "1": {
+   "t": "Když jde o hodně, těžko se soustředím na pokyny trenéra.",
+   "f": "P",
+   "r": "rys"
+  },
+  "2": {
+   "t": "Ráno se mi těžko vstává na trénink.",
+   "f": "P",
+   "r": "4t"
+  },
+  "3": {
+   "t": "Nejvíc mě těší porazit soupeře, o kterém se říká, že je lepší.",
+   "f": "P",
+   "r": "rys"
+  },
+  "4": {
+   "t": "Nároky na sebe mám nízké.",
+   "f": "P",
+   "r": "rys"
+  },
+  "5": {
+   "t": "Po nepříjemné události se rychle vzpamatuji.",
+   "f": "P",
+   "r": "rys"
+  },
+  "6": {
+   "t": "Své myšlenky v soutěži vědomě usměrňuji.",
+   "f": "C",
+   "r": "rys"
+  },
+  "7": {
+   "t": "Bojím se chyb, protože by ukázaly moji slabost.",
+   "f": "P",
+   "r": "rys"
+  },
+  "8": {
+   "t": "Po soutěži si dopřeji skutečný odpočinek.",
+   "f": "C",
+   "r": "4t"
+  },
+  "9": {
+   "t": "V představách mi naskakují spíš chyby než správné provedení.",
+   "f": "C",
+   "r": "rys"
+  },
+  "10": {
+   "t": "Náročného soupeře vnímám jako výzvu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "11": {
+   "t": "Úspěchy mi poslední dobou unikají.",
+   "f": "P",
+   "r": "4t"
+  },
+  "12": {
+   "t": "Vyhrávám každou soutěž, do které nastoupím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "13": {
+   "t": "Pokyny během soutěže přecházím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "14": {
+   "t": "Zátěž zvládám bez velkých výkyvů nálady.",
+   "f": "P",
+   "r": "rys"
+  },
+  "15": {
+   "t": "Nesouhlas je v týmu lepší si nechat pro sebe.",
+   "f": "P",
+   "r": "rys"
+  },
+  "16": {
+   "t": "Na spolupráci s trenérem mi záleží.",
+   "f": "P",
+   "r": "rys"
+  },
+  "17": {
+   "t": "Sport mi bere víc sil, než mi dává.",
+   "f": "P",
+   "r": "4t"
+  },
+  "18": {
+   "t": "V soutěži cítím, že trenér stojí za mnou.",
+   "f": "P",
+   "r": "rys"
+  },
+  "19": {
+   "t": "Věřím si i po sérii neúspěchů.",
+   "f": "P",
+   "r": "rys"
+  },
+  "20": {
+   "t": "Bojím se, že po špatném výkonu o mě trenér ztratí zájem.",
+   "f": "P",
+   "r": "rys"
+  },
+  "21": {
+   "t": "V soutěži sleduji hlavně sebe, výkony ostatních málo.",
+   "f": "P",
+   "r": "rys"
+  },
+  "22": {
+   "t": "Svoje problémy si před trenérem nechávám.",
+   "f": "P",
+   "r": "rys"
+  },
+  "23": {
+   "t": "V soutěži sleduji hlavně vlastní úkoly, skóre až potom.",
+   "f": "P",
+   "r": "rys"
+  },
+  "24": {
+   "t": "Trocha strachu před soutěží mi dodá ostrost.",
+   "f": "P",
+   "r": "rys"
+  },
+  "25": {
+   "t": "Na trenéra se můžu spolehnout i v těžkých chvílích.",
+   "f": "P",
+   "r": "rys"
+  },
+  "26": {
+   "t": "Nový pokyn zkouším hned v příštím tréninku.",
+   "f": "P",
+   "r": "rys"
+  },
+  "27": {
+   "t": "Po chybě cítím k sobě porozumění.",
+   "f": "P",
+   "r": "rys"
+  },
+  "28": {
+   "t": "Dobrý výkon mě žene k ještě lepšímu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "29": {
+   "t": "Po soutěži si rozeberu klíčové situace.",
+   "f": "C",
+   "r": "rys"
+  },
+  "30": {
+   "t": "Na trénink se těším i bez pobízení.",
+   "f": "P",
+   "r": "rys"
+  },
+  "31": {
+   "t": "Po večerní soutěži se mi dobře usíná.",
+   "f": "C",
+   "r": "4t"
+  },
+  "32": {
+   "t": "Chybu v soutěži beru jako informaci pro další trénink.",
+   "f": "P",
+   "r": "rys"
+  },
+  "33": {
+   "t": "Po chybě myslím na to, co se stalo, místo na to, co přijde.",
+   "f": "C",
+   "r": "rys"
+  },
+  "34": {
+   "t": "V soutěži si v duchu nadávám.",
+   "f": "C",
+   "r": "rys"
+  },
+  "35": {
+   "t": "Od sebe čekám víc než většina sportovců.",
+   "f": "P",
+   "r": "rys"
+  },
+  "36": {
+   "t": "Do soutěže jdu hlavně s myšlenkou na očekávání trenéra a rodiny.",
+   "f": "P",
+   "r": "rys"
+  },
+  "37": {
+   "t": "U této položky zvol „spíš nesouhlasím“.",
+   "f": "P",
+   "r": "rys"
+  },
+  "38": {
+   "t": "V nepříjemných podmínkách podávám stabilní výkon.",
+   "f": "P",
+   "r": "rys"
+  },
+  "39": {
+   "t": "V soutěži mi stačí, když výkon projde.",
+   "f": "P",
+   "r": "rys"
+  },
+  "40": {
+   "t": "Po prohře myslím jen na to, co bylo špatně.",
+   "f": "C",
+   "r": "rys"
+  },
+  "41": {
+   "t": "Špatný výkon v soutěži mi pokazí náladu na celý týden.",
+   "f": "P",
+   "r": "rys"
+  },
+  "42": {
+   "t": "Když postup přestane fungovat, hledám jiný.",
+   "f": "C",
+   "r": "rys"
+  },
+  "43": {
+   "t": "V rozhodujícím okamžiku myslím na výsledek místo na akci.",
+   "f": "P",
+   "r": "rys"
+  },
+  "44": {
+   "t": "Pochybuji o svém talentu.",
+   "f": "P",
+   "r": "4t"
+  },
+  "45": {
+   "t": "Po prohře dělám, že je všechno v pořádku.",
+   "f": "C",
+   "r": "rys"
+  },
+  "46": {
+   "t": "Během soutěže myslím víc na chyby, kterým se chci vyhnout, než na úspěch.",
+   "f": "P",
+   "r": "rys"
+  },
+  "47": {
+   "t": "Na soutěže nastupuji s únavou.",
+   "f": "P",
+   "r": "4t"
+  },
+  "48": {
+   "t": "Do soutěže jdu bez plánu, co chci předvést.",
+   "f": "C",
+   "r": "rys"
+  },
+  "49": {
+   "t": "Dlouhodobé cíle si rozkládám na menší kroky.",
+   "f": "C",
+   "r": "rys"
+  },
+  "50": {
+   "t": "Snadné cíle mi vyhovují víc než náročné.",
+   "f": "P",
+   "r": "rys"
+  },
+  "51": {
+   "t": "Po prohře hledáme řešení společně.",
+   "f": "P",
+   "r": "rys"
+  },
+  "52": {
+   "t": "V soutěži nechávám emoce projevit, když mi to pomáhá.",
+   "f": "C",
+   "r": "rys"
+  },
+  "53": {
+   "t": "Po náročném tréninku se do dalšího dne zotavím.",
+   "f": "C",
+   "r": "4t"
+  },
+  "54": {
+   "t": "Pokyny trenéra si v napjatých chvílích pamatuji přesně.",
+   "f": "P",
+   "r": "rys"
+  },
+  "55": {
+   "t": "O problémech mlčím, dokud nejsou velké.",
+   "f": "P",
+   "r": "rys"
+  },
+  "56": {
+   "t": "Stresující události mě rozhodí jen nakrátko.",
+   "f": "P",
+   "r": "rys"
+  },
+  "57": {
+   "t": "Sport je pro mě pořád důležitý.",
+   "f": "P",
+   "r": "4t"
+  },
+  "58": {
+   "t": "Víc možností v akci mě spíš zdrží, než aby pomohlo.",
+   "f": "P",
+   "r": "rys"
+  },
+  "59": {
+   "t": "Občas přemýšlím, jestli má sport pro mě ještě smysl.",
+   "f": "P",
+   "r": "rys"
+  },
+  "60": {
+   "t": "Když docházejí síly, povzbuzuji se v duchu.",
+   "f": "C",
+   "r": "rys"
+  },
+  "61": {
+   "t": "Bolest před trenérem tajím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "62": {
+   "t": "Ostatní poznají, jak se cítím.",
+   "f": "C",
+   "r": "rys"
+  },
+  "63": {
+   "t": "Každou noc spím přes čtrnáct hodin.",
+   "f": "C",
+   "r": "rys"
+  },
+  "64": {
+   "t": "Cítím, že tréninky přinášejí výsledky.",
+   "f": "P",
+   "r": "4t"
+  },
+  "65": {
+   "t": "Před důležitou soutěží myslím na to, jak by moje prohra vypadala očima druhých.",
+   "f": "P",
+   "r": "rys"
+  },
+  "66": {
+   "t": "Před velkou soutěží cítím, že na ni mám.",
+   "f": "P",
+   "r": "rys"
+  },
+  "67": {
+   "t": "Cíle ve sportu jsou moje vlastní.",
+   "f": "P",
+   "r": "rys"
+  },
+  "68": {
+   "t": "V těžkém období k sobě přistupuji laskavě.",
+   "f": "P",
+   "r": "rys"
+  },
+  "69": {
+   "t": "V tréninku si vnitřní řečí připomínám, na co se soustředím.",
+   "f": "C",
+   "r": "rys"
+  },
+  "70": {
+   "t": "Pod tlakem přenechám rozhodnutí raději jiným.",
+   "f": "P",
+   "r": "rys"
+  },
+  "71": {
+   "t": "Ve sportu mám pocit marnosti.",
+   "f": "P",
+   "r": "4t"
+  },
+  "72": {
+   "t": "Co si o mé kariéře myslí druzí, mě v rozhodování ovlivňuje málo.",
+   "f": "P",
+   "r": "rys"
+  },
+  "73": {
+   "t": "Rozbor vlastního výkonu po soutěži přeskakuji.",
+   "f": "P",
+   "r": "rys"
+  },
+  "74": {
+   "t": "Škola, práce nebo cestování mi berou čas na odpočinek.",
+   "f": "C",
+   "r": "4t"
+  },
+  "75": {
+   "t": "Na své nedostatky se zlobím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "76": {
+   "t": "Pod tlakem věřím prvnímu nápadu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "77": {
+   "t": "Po soutěži řeknu, co se podle mě nepovedlo.",
+   "f": "P",
+   "r": "rys"
+  },
+  "78": {
+   "t": "Napětí před soutěží mi pomáhá podat lepší výkon.",
+   "f": "P",
+   "r": "rys"
+  },
+  "79": {
+   "t": "Před důležitou soutěží špatně jím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "80": {
+   "t": "Do tréninku chodím ze setrvačnosti.",
+   "f": "P",
+   "r": "4t"
+  },
+  "81": {
+   "t": "Před důležitou soutěží cítím, že moje schopnosti stačí na to, co přijde.",
+   "f": "P",
+   "r": "rys"
+  },
+  "82": {
+   "t": "Mám jasnou představu o vysoké úrovni, na které chci soutěžit.",
+   "f": "P",
+   "r": "rys"
+  },
+  "83": {
+   "t": "Práce v tréninku mi přijde bez výsledku.",
+   "f": "P",
+   "r": "4t"
+  },
+  "84": {
+   "t": "Důležitá soutěž mi připadá jako zkouška, ve které můžu hodně ztratit.",
+   "f": "P",
+   "r": "rys"
+  },
+  "85": {
+   "t": "Pod tlakem se hýbu stejně plynule jako v tréninku.",
+   "f": "P",
+   "r": "rys"
+  },
+  "86": {
+   "t": "Po chybě ještě během soutěže rozebírám, co tělo udělalo špatně.",
+   "f": "P",
+   "r": "rys"
+  },
+  "87": {
+   "t": "Dny před důležitou soutěží myslím na možnou prohru.",
+   "f": "P",
+   "r": "rys"
+  },
+  "88": {
+   "t": "Rodiče nebo trenér ode mě čekají dokonalost.",
+   "f": "P",
+   "r": "rys"
+  },
+  "89": {
+   "t": "Přípravu v představách vynechám, protože mi přijde zbytečná.",
+   "f": "C",
+   "r": "rys"
+  },
+  "90": {
+   "t": "Ve sportu dosahuji věcí, které jsou pro mě důležité.",
+   "f": "P",
+   "r": "4t"
+  },
+  "91": {
+   "t": "Když se něco zlepší, mám radost bez ohledu na výsledek.",
+   "f": "P",
+   "r": "rys"
+  },
+  "92": {
+   "t": "Sportuji hlavně kvůli tomu, co ode mě čekají druzí.",
+   "f": "P",
+   "r": "rys"
+  },
+  "93": {
+   "t": "Některé věci se u nás radši neříkají.",
+   "f": "P",
+   "r": "rys"
+  },
+  "94": {
+   "t": "O pomoc si v týmu říkám bez obav.",
+   "f": "P",
+   "r": "rys"
+  },
+  "95": {
+   "t": "Úspěšně se cítím, když jsem lepší než ostatní.",
+   "f": "P",
+   "r": "rys"
+  },
+  "96": {
+   "t": "Pořadí mezi ostatními je pro mě vedlejší.",
+   "f": "P",
+   "r": "rys"
+  },
+  "97": {
+   "t": "V rozhodujících chvílích se spoléhám na natrénovaný pohyb bez přemýšlení.",
+   "f": "P",
+   "r": "rys"
+  },
+  "98": {
+   "t": "Před startem je moje tělo uvolněné.",
+   "f": "P",
+   "r": "rys"
+  },
+  "99": {
+   "t": "V týmu se dá přiznat chyba bez trestu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "100": {
+   "t": "Mám strach, že pod tlakem všechno pokazím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "101": {
+   "t": "V soutěži mi dřív docházejí síly.",
+   "f": "P",
+   "r": "4t"
+  },
+  "102": {
+   "t": "V soutěži si říkám krátké pokyny, které mě vedou.",
+   "f": "C",
+   "r": "rys"
+  },
+  "103": {
+   "t": "Každý v týmu jede hlavně za svým.",
+   "f": "P",
+   "r": "rys"
+  },
+  "104": {
+   "t": "Bojím se, že neúspěchem zklamu rodinu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "105": {
+   "t": "Když se ve sportu daří špatně, cítím se špatně ve všem.",
+   "f": "P",
+   "r": "rys"
+  },
+  "106": {
+   "t": "V důležitých chvílích se bojím udělat špatné rozhodnutí.",
+   "f": "P",
+   "r": "rys"
+  },
+  "107": {
+   "t": "V těžkých chvílích mluvím k sobě hůř než ke komukoli jinému.",
+   "f": "C",
+   "r": "rys"
+  },
+  "108": {
+   "t": "Když si výkon představuji, obraz je rozmazaný a utíká mi.",
+   "f": "C",
+   "r": "rys"
+  },
+  "109": {
+   "t": "Své cíle si zapisuji.",
+   "f": "C",
+   "r": "rys"
+  },
+  "110": {
+   "t": "V soutěži mě nejvíc baví samotný zápas nebo závod.",
+   "f": "P",
+   "r": "rys"
+  },
+  "111": {
+   "t": "V soutěži mám pocit, že trenér stojí proti mně.",
+   "f": "P",
+   "r": "rys"
+  },
+  "112": {
+   "t": "Nervozitu před startem nechám, ať si dělá, co chce.",
+   "f": "C",
+   "r": "rys"
+  },
+  "113": {
+   "t": "Emoce si nechávám pro sebe.",
+   "f": "C",
+   "r": "rys"
+  },
+  "114": {
+   "t": "V týmu můžu zkusit něco nového i s rizikem chyby.",
+   "f": "P",
+   "r": "rys"
+  },
+  "115": {
+   "t": "Vidím, že se ve sportu posouvám.",
+   "f": "P",
+   "r": "4t"
+  },
+  "116": {
+   "t": "Když mě něco rozhodí, změním to, jak o tom přemýšlím.",
+   "f": "C",
+   "r": "rys"
+  },
+  "117": {
+   "t": "Po neúspěšné sezoně se rychle zvednu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "118": {
+   "t": "V náročném tréninku vidím smysl, i když je nepříjemný.",
+   "f": "P",
+   "r": "rys"
+  },
+  "119": {
+   "t": "Za cíle týmu cítíme společnou odpovědnost.",
+   "f": "P",
+   "r": "rys"
+  },
+  "120": {
+   "t": "Radost po úspěchu držím na uzdě.",
+   "f": "C",
+   "r": "rys"
+  },
+  "121": {
+   "t": "Každý týden soutěžím na jiném kontinentu.",
+   "f": "C",
+   "r": "rys"
+  },
+  "122": {
+   "t": "Chci ve sportu pokračovat co nejdéle.",
+   "f": "P",
+   "r": "4t"
+  },
+  "123": {
+   "t": "Při představě, že skončím, mám pocit viny.",
+   "f": "P",
+   "r": "rys"
+  },
+  "124": {
+   "t": "Svou hodnotu jako člověka oddělím od výsledků v soutěži.",
+   "f": "P",
+   "r": "rys"
+  },
+  "125": {
+   "t": "Myšlenky v soutěži nechávám běžet, jak chtějí.",
+   "f": "C",
+   "r": "rys"
+  },
+  "126": {
+   "t": "Mám dost času na odpočinek mezi tréninky.",
+   "f": "C",
+   "r": "4t"
+  },
+  "127": {
+   "t": "Večer dlouho ležím a nemohu usnout.",
+   "f": "C",
+   "r": "4t"
+  },
+  "128": {
+   "t": "Po chybném rozhodnutí o něm přemýšlím ještě dlouho během soutěže.",
+   "f": "P",
+   "r": "rys"
+  },
+  "129": {
+   "t": "Po sporném rozhodnutí rozhodčího mi trvá dlouho, než se vrátím do hry.",
+   "f": "C",
+   "r": "rys"
+  },
+  "130": {
+   "t": "Po soutěži mě výsledky ostatních zajímají jen málo.",
+   "f": "P",
+   "r": "rys"
+  },
+  "131": {
+   "t": "Na své cíle během sezony zapomínám.",
+   "f": "C",
+   "r": "rys"
+  },
+  "132": {
+   "t": "Na poradě po soutěži se dá mluvit otevřeně.",
+   "f": "P",
+   "r": "rys"
+  },
+  "133": {
+   "t": "U této položky zvol „úplně souhlasím“.",
+   "f": "P",
+   "r": "rys"
+  },
+  "134": {
+   "t": "Sport je pro mě hlavně povinnost.",
+   "f": "P",
+   "r": "rys"
+  },
+  "135": {
+   "t": "Pod tlakem se mi myšlenky rozutečou.",
+   "f": "P",
+   "r": "rys"
+  },
+  "136": {
+   "t": "I prohraná soutěž může být úspěch, pokud se v ní zlepšuji.",
+   "f": "P",
+   "r": "rys"
+  },
+  "137": {
+   "t": "Nová dovednost mě přestane bavit, jakmile je těžká.",
+   "f": "P",
+   "r": "rys"
+  },
+  "138": {
+   "t": "Těžké období mě rozhodí na dlouho.",
+   "f": "P",
+   "r": "rys"
+  },
+  "139": {
+   "t": "V noci se budím a těžko znovu usínám.",
+   "f": "C",
+   "r": "4t"
+  },
+  "140": {
+   "t": "S trenérem táhneme za jeden provaz.",
+   "f": "P",
+   "r": "rys"
+  },
+  "141": {
+   "t": "Novou dovednost si nejdřív přehraji v hlavě.",
+   "f": "C",
+   "r": "rys"
+  },
+  "142": {
+   "t": "Do tréninku jdu s energií.",
+   "f": "P",
+   "r": "4t"
+  },
+  "143": {
+   "t": "Před soutěží se umím záměrně zklidnit.",
+   "f": "C",
+   "r": "rys"
+  },
+  "144": {
+   "t": "Do soutěže jdu bez mentální přípravy.",
+   "f": "C",
+   "r": "rys"
+  },
+  "145": {
+   "t": "Myšlenky na výsledek mě před soutěží zaměstnávají víc, než chci.",
+   "f": "P",
+   "r": "rys"
+  },
+  "146": {
+   "t": "Po soutěži hodnotím hlavně, jak se povedly věci, na kterých pracuji.",
+   "f": "P",
+   "r": "rys"
+  },
+  "147": {
+   "t": "Po večerní soutěži usínám až dlouho po půlnoci.",
+   "f": "C",
+   "r": "4t"
+  },
+  "148": {
+   "t": "Většina mých myšlenek se točí kolem sportu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "149": {
+   "t": "Po chybě se sebou zacházím tvrdě.",
+   "f": "P",
+   "r": "rys"
+  },
+  "150": {
+   "t": "Na výsledcích mi záleží.",
+   "f": "P",
+   "r": "4t"
+  },
+  "151": {
+   "t": "Mám dost energie na trénink i na život mimo sport.",
+   "f": "P",
+   "r": "4t"
+  },
+  "152": {
+   "t": "Chyby před publikem mě trápí jen chvíli.",
+   "f": "P",
+   "r": "rys"
+  },
+  "153": {
+   "t": "Spolupráce s trenérem je pro mě spíš povinnost.",
+   "f": "P",
+   "r": "rys"
+  },
+  "154": {
+   "t": "V soutěži sportuji pro sebe, bez ohledu na očekávání okolí.",
+   "f": "P",
+   "r": "rys"
+  },
+  "155": {
+   "t": "Chybu v soutěži vnímám jako něco, co zažívají i ostatní.",
+   "f": "P",
+   "r": "rys"
+  },
+  "156": {
+   "t": "Vztek v soutěži polykám.",
+   "f": "C",
+   "r": "rys"
+  },
+  "157": {
+   "t": "Chodím spát v podobnou hodinu.",
+   "f": "C",
+   "r": "4t"
+  },
+  "158": {
+   "t": "Nesouhlas si nechám pro sebe.",
+   "f": "P",
+   "r": "rys"
+  },
+  "159": {
+   "t": "Mám pocit, že stojím na místě.",
+   "f": "P",
+   "r": "4t"
+  },
+  "160": {
+   "t": "V týmu táhneme za jeden provaz.",
+   "f": "P",
+   "r": "rys"
+  },
+  "161": {
+   "t": "Před soutěží mi chybí chuť bojovat.",
+   "f": "P",
+   "r": "4t"
+  },
+  "162": {
+   "t": "Sport dělám hlavně proto, že mě baví.",
+   "f": "P",
+   "r": "rys"
+  },
+  "163": {
+   "t": "Na soutěže se těším kvůli pocitu z vlastního výkonu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "164": {
+   "t": "Vlastní pokrok sleduji jen zřídka.",
+   "f": "P",
+   "r": "rys"
+  },
+  "165": {
+   "t": "Na každou soutěž si určím konkrétní cíle pro vlastní výkon.",
+   "f": "C",
+   "r": "rys"
+  },
+  "166": {
+   "t": "Vinu nebo stud kvůli vynechanému tréninku zažívám zřídka.",
+   "f": "P",
+   "r": "rys"
+  },
+  "167": {
+   "t": "Před startem cítím napětí ve svalech.",
+   "f": "P",
+   "r": "rys"
+  },
+  "168": {
+   "t": "Je mi jedno, jak mi to jde.",
+   "f": "P",
+   "r": "4t"
+  },
+  "169": {
+   "t": "Po soutěži cítím spíš úlevu, že je konec, než radost ze hry.",
+   "f": "P",
+   "r": "rys"
+  },
+  "170": {
+   "t": "Po velké prohře mi trvá dny až týdny, než se srovnám.",
+   "f": "P",
+   "r": "rys"
+  },
+  "171": {
+   "t": "Když selžu, bojím se, že se ztrapním před ostatními.",
+   "f": "P",
+   "r": "rys"
+  },
+  "172": {
+   "t": "I pod velkým tlakem vnímám jen to, co mám udělat.",
+   "f": "P",
+   "r": "rys"
+  },
+  "173": {
+   "t": "V soutěži mě žene hlavně touha být před ostatními.",
+   "f": "P",
+   "r": "rys"
+  },
+  "174": {
+   "t": "Přemýšlím o konci se sportem.",
+   "f": "P",
+   "r": "4t"
+  },
+  "175": {
+   "t": "Během přestávek v soutěži upravuji svou úroveň energie.",
+   "f": "C",
+   "r": "rys"
+  },
+  "176": {
+   "t": "Osobně znám všechny sportovce na světě.",
+   "f": "P",
+   "r": "rys"
+  },
+  "177": {
+   "t": "Kritika od trenéra mi ukazuje, co zlepšit.",
+   "f": "P",
+   "r": "rys"
+  },
+  "178": {
+   "t": "Obavy z důležité soutěže mi vydrží i několik dní.",
+   "f": "P",
+   "r": "rys"
+  },
+  "179": {
+   "t": "Úspěch pro mě znamená podat svůj nejlepší možný výkon.",
+   "f": "P",
+   "r": "rys"
+  },
+  "180": {
+   "t": "Myšlenky na sport mě pronásledují i ve volnu.",
+   "f": "C",
+   "r": "4t"
+  },
+  "181": {
+   "t": "Kritiku od trenéra beru věcně.",
+   "f": "P",
+   "r": "rys"
+  },
+  "182": {
+   "t": "Bojím se, že po neúspěchu mi lidé přestanou věřit.",
+   "f": "P",
+   "r": "rys"
+  },
+  "183": {
+   "t": "Při nepříznivém skóre to vzdávám.",
+   "f": "P",
+   "r": "rys"
+  },
+  "184": {
+   "t": "Po těžké prohře se druhý den vracím do pohody.",
+   "f": "P",
+   "r": "rys"
+  },
+  "185": {
+   "t": "Mám rutinu, která mě dostane do ideálního naladění.",
+   "f": "C",
+   "r": "rys"
+  },
+  "186": {
+   "t": "Pod tlakem zůstávají moje pohyby volné.",
+   "f": "P",
+   "r": "rys"
+  },
+  "187": {
+   "t": "Pod tlakem podávám výkon, na který mám.",
+   "f": "P",
+   "r": "rys"
+  },
+  "188": {
+   "t": "Po tréninku vyhodnotím, co se povedlo a co zlepšit.",
+   "f": "C",
+   "r": "rys"
+  },
+  "189": {
+   "t": "Většina mých přátel je ze sportu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "190": {
+   "t": "V rozhodujících momentech chci mít výsledek ve svých rukou.",
+   "f": "P",
+   "r": "rys"
+  },
+  "191": {
+   "t": "V soutěži nechávám pohyb plynout.",
+   "f": "P",
+   "r": "rys"
+  },
+  "192": {
+   "t": "Důležitou soutěž beru jako příležitost ukázat, co umím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "193": {
+   "t": "Se svými slabinami mám trpělivost.",
+   "f": "P",
+   "r": "rys"
+  },
+  "194": {
+   "t": "Usínám do půl hodiny.",
+   "f": "C",
+   "r": "4t"
+  },
+  "195": {
+   "t": "Když cítím napětí, bojím se, že mi svazuje pohyb.",
+   "f": "P",
+   "r": "rys"
+  },
+  "196": {
+   "t": "Dobrý výkon s několika chybami mě těší.",
+   "f": "P",
+   "r": "rys"
+  },
+  "197": {
+   "t": "Na nepříjemných věcech ulpím a točím se v nich.",
+   "f": "C",
+   "r": "rys"
+  },
+  "198": {
+   "t": "V těžké chvíli si připomenu, co mám pod kontrolou.",
+   "f": "C",
+   "r": "rys"
+  },
+  "199": {
+   "t": "Před startem si říkám věty, které mě nabudí.",
+   "f": "C",
+   "r": "rys"
+  },
+  "200": {
+   "t": "Chci ve svém sportu dosáhnout maxima svých možností.",
+   "f": "P",
+   "r": "rys"
+  },
+  "201": {
+   "t": "Nepříznivé skóre beru jako úkol, který jde řešit.",
+   "f": "C",
+   "r": "rys"
+  },
+  "202": {
+   "t": "V důležitých chvílích se rozhoduji rychle a jistě.",
+   "f": "P",
+   "r": "rys"
+  },
+  "203": {
+   "t": "Když jde o hodně, snažím se pohyb vědomě řídit.",
+   "f": "P",
+   "r": "rys"
+  },
+  "204": {
+   "t": "Pod tlakem mi pozornost utíká od úkolu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "205": {
+   "t": "Po náročném období se rychle vrátím do normálu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "206": {
+   "t": "Dobrý trénink poznám podle toho, že jsem nejlepší ze skupiny.",
+   "f": "P",
+   "r": "rys"
+  },
+  "207": {
+   "t": "O tom, jak k výkonu dojít, se v týmu shodneme.",
+   "f": "P",
+   "r": "rys"
+  },
+  "208": {
+   "t": "Ke svým rozhodnutím ze soutěže se vracím jen při rozboru.",
+   "f": "P",
+   "r": "rys"
+  },
+  "209": {
+   "t": "Na soutěž se těším bez starostí o výsledek.",
+   "f": "P",
+   "r": "rys"
+  },
+  "210": {
+   "t": "Chyba mi v hlavě zůstane několik dalších akcí.",
+   "f": "C",
+   "r": "rys"
+  },
+  "211": {
+   "t": "Během soutěže mám v hlavě jeden až dva jasné úkoly.",
+   "f": "C",
+   "r": "rys"
+  },
+  "212": {
+   "t": "Emoce potlačuji, i když mě to stojí sílu.",
+   "f": "C",
+   "r": "rys"
+  },
+  "213": {
+   "t": "V tréninku si dávám laťku výš, než je nutné.",
+   "f": "P",
+   "r": "rys"
+  },
+  "214": {
+   "t": "Noc před důležitou soutěží špatně spím kvůli napětí.",
+   "f": "P",
+   "r": "rys"
+  },
+  "215": {
+   "t": "Náročné změny v životě zvládám jen velmi těžko.",
+   "f": "P",
+   "r": "rys"
+  },
+  "216": {
+   "t": "Těžké chvíle vydržím lépe než většina soupeřů.",
+   "f": "P",
+   "r": "rys"
+  },
+  "217": {
+   "t": "Během soutěže se mi vracejí obavy z chyby.",
+   "f": "P",
+   "r": "rys"
+  },
+  "218": {
+   "t": "Při potížích v tréninku polevím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "219": {
+   "t": "Mluvím k sobě podobně jako dobrý trenér.",
+   "f": "C",
+   "r": "rys"
+  },
+  "220": {
+   "t": "Trénink mě většinou nudí.",
+   "f": "P",
+   "r": "rys"
+  },
+  "221": {
+   "t": "Rychlý tep a sevřený žaludek beru jako špatné znamení.",
+   "f": "P",
+   "r": "rys"
+  },
+  "222": {
+   "t": "Pod tlakem rozhodnutí příliš zvažuji a pak jednám pozdě.",
+   "f": "P",
+   "r": "rys"
+  },
+  "223": {
+   "t": "Když se něco nepovede, hledám, co se z toho dá naučit.",
+   "f": "C",
+   "r": "rys"
+  },
+  "224": {
+   "t": "Před soutěží myslím hlavně na to, co udělám, obavy nechávám stranou.",
+   "f": "P",
+   "r": "rys"
+  },
+  "225": {
+   "t": "Techniky na uvolnění vynechávám.",
+   "f": "C",
+   "r": "rys"
+  },
+  "226": {
+   "t": "V soutěži se hádáme, místo abychom si pomohli.",
+   "f": "P",
+   "r": "rys"
+  },
+  "227": {
+   "t": "Po chybě v soutěži cítím od týmu odsudek.",
+   "f": "P",
+   "r": "rys"
+  },
+  "228": {
+   "t": "Po chybě v soutěži se odsuzuji.",
+   "f": "P",
+   "r": "rys"
+  },
+  "229": {
+   "t": "Tlak v rozhodujících chvílích mě vybičuje k lepšímu výkonu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "230": {
+   "t": "Rozbor soutěže s trenérem odkládám.",
+   "f": "P",
+   "r": "rys"
+  },
+  "231": {
+   "t": "Zlepšování je pro mě vedlejší.",
+   "f": "P",
+   "r": "rys"
+  },
+  "232": {
+   "t": "Myšlenky na prohru mě před startem ruší jen zřídka.",
+   "f": "P",
+   "r": "rys"
+  },
+  "233": {
+   "t": "Po soutěži přejdu k dalšímu bez rozboru.",
+   "f": "C",
+   "r": "rys"
+  },
+  "234": {
+   "t": "Noc před soutěží spím dobře.",
+   "f": "C",
+   "r": "4t"
+  },
+  "235": {
+   "t": "Trénuji bez konkrétního cíle.",
+   "f": "C",
+   "r": "rys"
+  },
+  "236": {
+   "t": "Pohyb, který umím nazpaměť, pod tlakem kontroluji krok po kroku.",
+   "f": "P",
+   "r": "rys"
+  },
+  "237": {
+   "t": "Přes den mě přepadá ospalost.",
+   "f": "C",
+   "r": "4t"
+  },
+  "238": {
+   "t": "Ráno se cítím odpočatě.",
+   "f": "C",
+   "r": "4t"
+  },
+  "239": {
+   "t": "Po chybě se k sobě chovám jako k dobrému příteli.",
+   "f": "P",
+   "r": "rys"
+  },
+  "240": {
+   "t": "Nepříznivý průběh soutěže vidím jako konec.",
+   "f": "C",
+   "r": "rys"
+  },
+  "241": {
+   "t": "Pod tlakem se mi rozpadá pohyb, který jinak běží automaticky.",
+   "f": "P",
+   "r": "rys"
+  },
+  "242": {
+   "t": "Když jde o hodně, chci mít soutěž co nejdřív za sebou.",
+   "f": "P",
+   "r": "rys"
+  },
+  "243": {
+   "t": "S trenérem si rozumíme.",
+   "f": "P",
+   "r": "rys"
+  },
+  "244": {
+   "t": "Po nepovedeném úseku začnu další s čistou hlavou.",
+   "f": "C",
+   "r": "rys"
+  },
+  "245": {
+   "t": "Nervozita před startem mi výkon kazí.",
+   "f": "P",
+   "r": "rys"
+  },
+  "246": {
+   "t": "Bez sportu si sebe představit neumím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "247": {
+   "t": "Po špatné soutěži cítím hlavně vinu vůči druhým.",
+   "f": "P",
+   "r": "rys"
+  },
+  "248": {
+   "t": "Poznám, jaké naladění potřebuji pro nejlepší výkon.",
+   "f": "C",
+   "r": "rys"
+  },
+  "249": {
+   "t": "Motýlky v břiše před soutěží beru jako dobré znamení.",
+   "f": "P",
+   "r": "rys"
+  },
+  "250": {
+   "t": "Svou hodnotu měřím i jinak než počtem chyb.",
+   "f": "P",
+   "r": "rys"
+  },
+  "251": {
+   "t": "I po sérii chyb umím začít znovu od další akce.",
+   "f": "C",
+   "r": "rys"
+  },
+  "252": {
+   "t": "O zpětnou vazbu si říkám z vlastní iniciativy.",
+   "f": "P",
+   "r": "rys"
+  },
+  "253": {
+   "t": "Po soutěži s trenérem otevřeně rozebereme, co se stalo.",
+   "f": "P",
+   "r": "rys"
+  },
+  "254": {
+   "t": "Často přemýšlím o tom, jak se hýbu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "255": {
+   "t": "Nepříjemnou situaci vidím jen jedním způsobem.",
+   "f": "C",
+   "r": "rys"
+  },
+  "256": {
+   "t": "Kdyby přišlo dlouhé zranění, mám se o co mimo sport opřít.",
+   "f": "P",
+   "r": "rys"
+  },
+  "257": {
+   "t": "Před důležitou soutěží jím a spím jako obvykle.",
+   "f": "P",
+   "r": "rys"
+  },
+  "258": {
+   "t": "Moje výkony mi přijdou pod úrovní, na kterou mám.",
+   "f": "P",
+   "r": "4t"
+  },
+  "259": {
+   "t": "Úspěšně se cítím, když se naučím něco nového.",
+   "f": "P",
+   "r": "rys"
+  },
+  "260": {
+   "t": "Když se mi něco nelíbí, hledám pohled, který mi pomůže.",
+   "f": "C",
+   "r": "rys"
+  },
+  "261": {
+   "t": "Před velkou soutěží pochybuji, že to zvládnu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "262": {
+   "t": "Když je nervozity moc, vím, co s tím udělat.",
+   "f": "C",
+   "r": "rys"
+  },
+  "263": {
+   "t": "Když se v soutěži daří špatně, mluvím k sobě vlídně.",
+   "f": "P",
+   "r": "rys"
+  },
+  "264": {
+   "t": "Při představách vnímám i pocity v těle, nejen obraz.",
+   "f": "C",
+   "r": "rys"
+  },
+  "265": {
+   "t": "Trénink pro mě končí odchodem ze sportoviště.",
+   "f": "C",
+   "r": "rys"
+  },
+  "266": {
+   "t": "V rozhodujících chvílích slyším jen to, co potřebuji.",
+   "f": "P",
+   "r": "rys"
+  },
+  "267": {
+   "t": "Mám pocit, že dělám víc a přináší to méně.",
+   "f": "P",
+   "r": "4t"
+  },
+  "268": {
+   "t": "V rozhodující chvíli mi chybí jistota, co zvolit.",
+   "f": "P",
+   "r": "rys"
+  },
+  "269": {
+   "t": "Když vynechám trénink, stydím se.",
+   "f": "P",
+   "r": "rys"
+  },
+  "270": {
+   "t": "V nepříjemných podmínkách podávám výrazně horší výkon.",
+   "f": "P",
+   "r": "rys"
+  },
+  "271": {
+   "t": "Kritiku od trenéra beru jako důkaz, že nestačím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "272": {
+   "t": "Po soutěži se v hlavě dlouho vracím ke svým rozhodnutím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "273": {
+   "t": "Nesouhlas s trenérem se u nás dá říct nahlas.",
+   "f": "P",
+   "r": "rys"
+  },
+  "274": {
+   "t": "Když mě něco trápí, skrývám to před ostatními.",
+   "f": "C",
+   "r": "rys"
+  },
+  "275": {
+   "t": "Když s něčím nesouhlasím, řeknu to přímo.",
+   "f": "P",
+   "r": "rys"
+  },
+  "276": {
+   "t": "Když s pokynem nesouhlasím, zeptám se proč a pak ho zkusím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "277": {
+   "t": "Po soutěži hodnotím jen výsledek.",
+   "f": "C",
+   "r": "rys"
+  },
+  "278": {
+   "t": "Mám připravená slova, která mi pomáhají v těžkých chvílích.",
+   "f": "C",
+   "r": "rys"
+  },
+  "279": {
+   "t": "Zátěž zvládám bez vyčerpání.",
+   "f": "P",
+   "r": "4t"
+  },
+  "280": {
+   "t": "Sport je nejdůležitější část mého života.",
+   "f": "P",
+   "r": "rys"
+  },
+  "281": {
+   "t": "Trenérovi řeknu i nepříjemnou věc.",
+   "f": "P",
+   "r": "rys"
+  },
+  "282": {
+   "t": "V soutěžích se cítím horší než dřív.",
+   "f": "P",
+   "r": "4t"
+  },
+  "283": {
+   "t": "Na důležité soutěže se těším jako na šanci.",
+   "f": "P",
+   "r": "rys"
+  },
+  "284": {
+   "t": "Kdo jsem, stojí hlavně na sportu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "285": {
+   "t": "Po prohře se opírám i o věci mimo sport.",
+   "f": "P",
+   "r": "rys"
+  },
+  "286": {
+   "t": "Při důležité soutěži mi v hlavě běží víc věcí najednou.",
+   "f": "P",
+   "r": "rys"
+  },
+  "287": {
+   "t": "Nervozitu před ostatními zakrývám.",
+   "f": "C",
+   "r": "rys"
+  },
+  "288": {
+   "t": "V těžkých chvílích soutěže držíme při sobě.",
+   "f": "P",
+   "r": "rys"
+  },
+  "289": {
+   "t": "Bojím se, že v soutěži podám slabý výkon.",
+   "f": "P",
+   "r": "rys"
+  },
+  "290": {
+   "t": "Po rozhodnutí se hned soustředím na další akci.",
+   "f": "P",
+   "r": "rys"
+  },
+  "291": {
+   "t": "Ze svých výkonů v soutěži mám dobrý pocit.",
+   "f": "P",
+   "r": "4t"
+  },
+  "292": {
+   "t": "Před startem si představím první akce.",
+   "f": "C",
+   "r": "rys"
+  },
+  "293": {
+   "t": "Po chybě se hned soustředím na další akci.",
+   "f": "C",
+   "r": "rys"
+  },
+  "294": {
+   "t": "Hlavní důvod, proč sportuji, jsou peníze, výhody nebo postavení.",
+   "f": "P",
+   "r": "rys"
+  },
+  "295": {
+   "t": "Po soutěži porovnávám výkon se svými cíli.",
+   "f": "C",
+   "r": "rys"
+  },
+  "296": {
+   "t": "Po stresující události se dlouho vzpamatovávám.",
+   "f": "P",
+   "r": "rys"
+  },
+  "297": {
+   "t": "Srovnávám se s ostatními i v tréninku.",
+   "f": "P",
+   "r": "rys"
+  },
+  "298": {
+   "t": "Vím, proč dělám každé cvičení v tréninku.",
+   "f": "C",
+   "r": "rys"
+  },
+  "299": {
+   "t": "Po soutěži mě nejdřív zajímá moje pořadí mezi ostatními.",
+   "f": "P",
+   "r": "rys"
+  },
+  "300": {
+   "t": "Během soutěže mě obavy nechávají na pokoji.",
+   "f": "P",
+   "r": "rys"
+  },
+  "301": {
+   "t": "Když mě někdo sleduje, víc hlídám, jak se hýbu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "302": {
+   "t": "Cíle týmu jsou pro některé vedlejší.",
+   "f": "P",
+   "r": "rys"
+  },
+  "303": {
+   "t": "Za celý život mě nikdy nic nebolelo.",
+   "f": "P",
+   "r": "rys"
+  },
+  "304": {
+   "t": "O tom, jak se cítím, dokážu mluvit.",
+   "f": "P",
+   "r": "rys"
+  },
+  "305": {
+   "t": "Blízcí mě mají rádi stejně po výhře i po prohře.",
+   "f": "P",
+   "r": "rys"
+  },
+  "306": {
+   "t": "Každý v týmu ví, co je jeho úkol.",
+   "f": "P",
+   "r": "rys"
+  },
+  "307": {
+   "t": "V napjatém momentu mi napětí dodá energii.",
+   "f": "P",
+   "r": "rys"
+  },
+  "308": {
+   "t": "Během soutěže mě rozhodí publikum nebo dění kolem.",
+   "f": "P",
+   "r": "rys"
+  },
+  "309": {
+   "t": "Pod tlakem se mi třesou ruce nebo nohy.",
+   "f": "P",
+   "r": "rys"
+  },
+  "310": {
+   "t": "Umím všechny sporty na olympijské úrovni.",
+   "f": "P",
+   "r": "rys"
+  },
+  "311": {
+   "t": "Před soutěží se mi v hlavě honí, co všechno se může pokazit.",
+   "f": "P",
+   "r": "rys"
+  },
+  "312": {
+   "t": "Mám krátký rituál, kterým se po chybě vrátím do hry.",
+   "f": "C",
+   "r": "rys"
+  },
+  "313": {
+   "t": "Všichni v týmu chceme stejný výsledek.",
+   "f": "P",
+   "r": "rys"
+  },
+  "314": {
+   "t": "Na sportu mi přestává záležet.",
+   "f": "P",
+   "r": "4t"
+  },
+  "315": {
+   "t": "V představách si zkouším obtížné situace ze soutěže.",
+   "f": "C",
+   "r": "rys"
+  },
+  "316": {
+   "t": "Cíle si nastavuji náročné, ale dosažitelné.",
+   "f": "C",
+   "r": "rys"
+  },
+  "317": {
+   "t": "Probouzím se bez potíží.",
+   "f": "C",
+   "r": "4t"
+  },
+  "318": {
+   "t": "Když mě něco trápí, svěřím se někomu z týmu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "319": {
+   "t": "Po rozrušující situaci se umím rychle uklidnit.",
+   "f": "C",
+   "r": "rys"
+  },
+  "320": {
+   "t": "Kromě sportu mám další oblast, ve které se cítím dobře.",
+   "f": "P",
+   "r": "rys"
+  },
+  "321": {
+   "t": "V soutěži chci podat výkon, který splní moje vysoké nároky.",
+   "f": "P",
+   "r": "rys"
+  },
+  "322": {
+   "t": "Mimo trénink si hledám informace, jak se zlepšit.",
+   "f": "C",
+   "r": "rys"
+  },
+  "323": {
+   "t": "Trénink mě vyčerpává víc, než stačím dobrat.",
+   "f": "P",
+   "r": "4t"
+  },
+  "324": {
+   "t": "Když mě soutěž rozhodí, trvá dlouho, než se srovnám.",
+   "f": "C",
+   "r": "rys"
+  },
+  "325": {
+   "t": "V rozhodujících chvílích cítím, jak mi tuhne tělo.",
+   "f": "P",
+   "r": "rys"
+  },
+  "326": {
+   "t": "Soutěže mě přestávají bavit.",
+   "f": "P",
+   "r": "4t"
+  },
+  "327": {
+   "t": "V rozhodujících chvílích mě napětí brzdí.",
+   "f": "P",
+   "r": "rys"
+  },
+  "328": {
+   "t": "Po prohře hledáme viníka mezi sebou.",
+   "f": "P",
+   "r": "rys"
+  },
+  "329": {
+   "t": "Ke zklidnění používám dech.",
+   "f": "C",
+   "r": "rys"
+  },
+  "330": {
+   "t": "O bolesti nebo zranění dám vědět hned.",
+   "f": "P",
+   "r": "rys"
+  },
+  "331": {
+   "t": "Spím v noci bez probouzení.",
+   "f": "C",
+   "r": "4t"
+  },
+  "332": {
+   "t": "Dobrý trénink poznám podle toho, že jsem dnes lepší než včera.",
+   "f": "P",
+   "r": "rys"
+  },
+  "333": {
+   "t": "S trenérem se míjíme.",
+   "f": "P",
+   "r": "rys"
+  },
+  "334": {
+   "t": "Cítím psychickou únavu ze sportu.",
+   "f": "P",
+   "r": "4t"
+  },
+  "335": {
+   "t": "V představách si přehrávám, jak zvládám tlak.",
+   "f": "C",
+   "r": "rys"
+  },
+  "336": {
+   "t": "O problémech mluvím včas.",
+   "f": "P",
+   "r": "rys"
+  },
+  "337": {
+   "t": "U této položky zvol „často“.",
+   "f": "C",
+   "r": "rys"
+  },
+  "338": {
+   "t": "Spím aspoň osm hodin.",
+   "f": "C",
+   "r": "4t"
+  },
+  "339": {
+   "t": "Cítím se odpočatě.",
+   "f": "C",
+   "r": "4t"
+  },
+  "340": {
+   "t": "Rychlejší tep před startem mě nabudí.",
+   "f": "P",
+   "r": "rys"
+  },
+  "341": {
+   "t": "Spokojím se jen s výkonem na hranici svých možností.",
+   "f": "P",
+   "r": "rys"
+  },
+  "342": {
+   "t": "V napjaté chvíli zapomenu, co jsme si domluvili.",
+   "f": "P",
+   "r": "rys"
+  },
+  "343": {
+   "t": "Když selžu, cítím se v tom osamoceně.",
+   "f": "P",
+   "r": "rys"
+  },
+  "344": {
+   "t": "Mám čas na přátele a rodinu.",
+   "f": "C",
+   "r": "4t"
+  },
+  "345": {
+   "t": "Tlak velkých soutěží mě láká.",
+   "f": "P",
+   "r": "rys"
+  },
+  "346": {
+   "t": "Po chybě si řeknu větu, která mě vrátí do hry.",
+   "f": "C",
+   "r": "rys"
+  },
+  "347": {
+   "t": "Za chybu se u nás platí posměchem nebo trestem.",
+   "f": "P",
+   "r": "rys"
+  },
+  "348": {
+   "t": "Na soutěže nastupuji s energií.",
+   "f": "P",
+   "r": "4t"
+  },
+  "349": {
+   "t": "Selhání pro mě znamená, že si mě lidé budou vážit méně.",
+   "f": "P",
+   "r": "rys"
+  },
+  "350": {
+   "t": "V soutěži své emoce schovávám za kamennou tvář.",
+   "f": "C",
+   "r": "rys"
+  },
+  "351": {
+   "t": "V důležité soutěži mi myšlenka na ostudu přijde na mysl zřídka.",
+   "f": "P",
+   "r": "rys"
+  },
+  "352": {
+   "t": "Mezi soutěžemi mi chybí čas na zotavení.",
+   "f": "C",
+   "r": "4t"
+  },
+  "353": {
+   "t": "Kritiku beru osobně.",
+   "f": "P",
+   "r": "rys"
+  },
+  "354": {
+   "t": "Výkon s chybami považuji za neúspěch.",
+   "f": "P",
+   "r": "rys"
+  },
+  "355": {
+   "t": "V týmu se berou vážně názory všech.",
+   "f": "P",
+   "r": "rys"
+  },
+  "356": {
+   "t": "Z chyb v soutěži si odnesu konkrétní úkol do tréninku.",
+   "f": "C",
+   "r": "rys"
+  },
+  "357": {
+   "t": "Zpětnou vazbu přijímám i od spoluhráčů a kolegů.",
+   "f": "P",
+   "r": "rys"
+  },
+  "358": {
+   "t": "Mimo sport dělám věci, které mě nabíjejí.",
+   "f": "C",
+   "r": "4t"
+  },
+  "359": {
+   "t": "Když mě něco rozhodí, zbytek soutěže je horší.",
+   "f": "C",
+   "r": "rys"
+  },
+  "360": {
+   "t": "Po chybě v soutěži mám strach, co si o mně pomyslí diváci.",
+   "f": "P",
+   "r": "rys"
+  },
+  "361": {
+   "t": "Když jde o hodně, věřím, že si poradím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "362": {
+   "t": "Před soutěží si v představách přehrávám svůj výkon.",
+   "f": "C",
+   "r": "rys"
+  },
+  "363": {
+   "t": "Z jednoho tréninku jdu do dalšího bez odpočinku.",
+   "f": "C",
+   "r": "4t"
+  },
+  "364": {
+   "t": "Trénuji každý den dvacet hodin.",
+   "f": "C",
+   "r": "rys"
+  },
+  "365": {
+   "t": "Ke sportu mě vede jen vlastní chuť.",
+   "f": "P",
+   "r": "rys"
+  },
+  "366": {
+   "t": "V důležitých chvílích myslím na to, co si o mně myslí ostatní.",
+   "f": "P",
+   "r": "rys"
+  },
+  "367": {
+   "t": "Výkon držím i v nepříznivých podmínkách.",
+   "f": "P",
+   "r": "rys"
+  },
+  "368": {
+   "t": "Před soutěží se mi zrychluje dech i tep víc, než potřebuji.",
+   "f": "P",
+   "r": "rys"
+  },
+  "369": {
+   "t": "Po chybě v soutěži mě spoluhráči podrží.",
+   "f": "P",
+   "r": "rys"
+  },
+  "370": {
+   "t": "Po konfliktu v týmu se brzy srovnám.",
+   "f": "P",
+   "r": "rys"
+  },
+  "371": {
+   "t": "Jak se zlepšuji, zjistím až od trenéra.",
+   "f": "C",
+   "r": "rys"
+  },
+  "372": {
+   "t": "Výhra je pro mě důležitá hlavně kvůli tomu, jak mě pak vidí okolí.",
+   "f": "P",
+   "r": "rys"
+  },
+  "373": {
+   "t": "Nejvíc mě těší, když zvládnu dovednost, na které dlouho pracuji.",
+   "f": "P",
+   "r": "rys"
+  },
+  "374": {
+   "t": "Po prohře si připomenu, že chyby dělá každý sportovec.",
+   "f": "P",
+   "r": "rys"
+  },
+  "375": {
+   "t": "Stačí mi průměrný výkon.",
+   "f": "P",
+   "r": "rys"
+  },
+  "376": {
+   "t": "Když mě něco trápí, řeknu to nahlas.",
+   "f": "C",
+   "r": "rys"
+  },
+  "377": {
+   "t": "Představy mi pomáhají naladit se na výkon.",
+   "f": "C",
+   "r": "rys"
+  },
+  "378": {
+   "t": "Když se mi něco nepovede, dopřeji si trochu péče.",
+   "f": "P",
+   "r": "rys"
+  },
+  "379": {
+   "t": "Když potřebuji víc energie, umím se nabudit.",
+   "f": "C",
+   "r": "rys"
+  },
+  "380": {
+   "t": "Trenérovi věřím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "381": {
+   "t": "Myšlenky na to, co už se stalo, v soutěži rychle pustím.",
+   "f": "C",
+   "r": "rys"
+  },
+  "382": {
+   "t": "V rozhodujících momentech se mi dobře dýchá.",
+   "f": "P",
+   "r": "rys"
+  },
+  "383": {
+   "t": "Po chybě si v hlavě přehraji správné provedení.",
+   "f": "C",
+   "r": "rys"
+  },
+  "384": {
+   "t": "Když mě rozhodí rozhodčí, rychle se vrátím k úkolu.",
+   "f": "C",
+   "r": "rys"
+  },
+  "385": {
+   "t": "Po soutěži chci vědět, co mám dělat jinak.",
+   "f": "P",
+   "r": "rys"
+  },
+  "386": {
+   "t": "Sport mi přijde méně důležitý než dřív.",
+   "f": "P",
+   "r": "4t"
+  },
+  "387": {
+   "t": "Čím víc jde o výsledek, tím víc se soustředím na úkol.",
+   "f": "P",
+   "r": "rys"
+  },
+  "388": {
+   "t": "Když udělám chybu, cítím se jako horší člověk.",
+   "f": "P",
+   "r": "rys"
+  },
+  "389": {
+   "t": "Při rozcvičce přemýšlím, co když to dnes nepůjde.",
+   "f": "P",
+   "r": "rys"
+  },
+  "390": {
+   "t": "Když cítím vztek, zkusím situaci pojmenovat jinak.",
+   "f": "C",
+   "r": "rys"
+  },
+  "391": {
+   "t": "Za chybu v soutěži se trestám ještě dlouho po ní.",
+   "f": "P",
+   "r": "rys"
+  },
+  "392": {
+   "t": "Srovnávání s ostatními mě v tréninku nechává v klidu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "393": {
+   "t": "Je pro mě důležité, aby ostatní viděli, že patřím mezi nejlepší.",
+   "f": "P",
+   "r": "rys"
+  },
+  "394": {
+   "t": "Sportem si hlavně dokazuji, že za něco stojím.",
+   "f": "P",
+   "r": "rys"
+  },
+  "395": {
+   "t": "Na nepříjemnou situaci se zkusím podívat z jiného úhlu.",
+   "f": "C",
+   "r": "rys"
+  },
+  "396": {
+   "t": "Sleduji svůj pokrok v konkrétních dovednostech.",
+   "f": "C",
+   "r": "rys"
+  },
+  "397": {
+   "t": "Pokyny během soutěže přijímám i v napjaté chvíli.",
+   "f": "P",
+   "r": "rys"
+  },
+  "398": {
+   "t": "Rušivý moment odložím a pokračuji naplno.",
+   "f": "C",
+   "r": "rys"
+  },
+  "399": {
+   "t": "Mezi soutěžemi se stihnu fyzicky i psychicky dobít.",
+   "f": "C",
+   "r": "4t"
+  },
+  "400": {
+   "t": "V soutěži řeknu spoluhráčům nebo trenérovi, co potřebuji.",
+   "f": "P",
+   "r": "rys"
+  },
+  "401": {
+   "t": "Co si o mé prohře myslí ostatní, řeším málo.",
+   "f": "P",
+   "r": "rys"
+  },
+  "402": {
+   "t": "Napětí v těle před soutěží je pro mě palivo.",
+   "f": "P",
+   "r": "rys"
+  },
+  "403": {
+   "t": "Silný soupeř ve mně vyvolá hlavně obavu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "404": {
+   "t": "V soutěži se mi energie vymkne z rukou.",
+   "f": "C",
+   "r": "rys"
+  },
+  "405": {
+   "t": "Soustředění vydržím do konce soutěže.",
+   "f": "P",
+   "r": "rys"
+  },
+  "406": {
+   "t": "Když trenér něco vysvětlí, zapracuji to rychle.",
+   "f": "P",
+   "r": "rys"
+  },
+  "407": {
+   "t": "O technice přemýšlím v tréninku, v soutěži ji nechám být.",
+   "f": "P",
+   "r": "rys"
+  },
+  "408": {
+   "t": "Procházím videa nebo data ze svých výkonů.",
+   "f": "C",
+   "r": "rys"
+  },
+  "409": {
+   "t": "Nervozita před startem mi říká, že se tělo chystá na výkon.",
+   "f": "P",
+   "r": "rys"
+  },
+  "410": {
+   "t": "Mám důležité zájmy a vztahy mimo sport.",
+   "f": "P",
+   "r": "rys"
+  },
+  "411": {
+   "t": "Sport odpovídá tomu, kdo jsem a co je pro mě důležité.",
+   "f": "P",
+   "r": "rys"
+  },
+  "412": {
+   "t": "V soutěži si pomáháme, i když to nikdo nevidí.",
+   "f": "P",
+   "r": "rys"
+  },
+  "413": {
+   "t": "Když se něco pokazí, ztrácím víru v sebe.",
+   "f": "P",
+   "r": "rys"
+  },
+  "414": {
+   "t": "Po prohře hledám, co bylo dobré.",
+   "f": "C",
+   "r": "rys"
+  },
+  "415": {
+   "t": "Za chybu pod tlakem se stydím víc než za cokoli jiného.",
+   "f": "P",
+   "r": "rys"
+  },
+  "416": {
+   "t": "Mám chvíle, kdy na sport vůbec nemyslím.",
+   "f": "C",
+   "r": "4t"
+  },
+  "417": {
+   "t": "Na soutěže se těším.",
+   "f": "P",
+   "r": "4t"
+  },
+  "418": {
+   "t": "Po zranění nebo nemoci se psychicky vracím rychle.",
+   "f": "P",
+   "r": "rys"
+  },
+  "419": {
+   "t": "Cítím velkou fyzickou únavu.",
+   "f": "P",
+   "r": "4t"
+  },
+  "420": {
+   "t": "V důležitých chvílích přemýšlím o technice víc než v tréninku.",
+   "f": "P",
+   "r": "rys"
+  },
+  "421": {
+   "t": "Cíle upravuji podle toho, jak se vyvíjí sezona.",
+   "f": "C",
+   "r": "rys"
+  },
+  "422": {
+   "t": "V soutěži si troufnu riskovat, tým za mnou stojí.",
+   "f": "P",
+   "r": "rys"
+  },
+  "423": {
+   "t": "Jedna chyba mi dokáže zkazit dojem z jinak dobrého výkonu.",
+   "f": "P",
+   "r": "rys"
+  },
+  "424": {
+   "t": "I bez odměn a uznání by mě sport táhl.",
+   "f": "P",
+   "r": "rys"
+  },
+  "425": {
+   "t": "Když zaváhám v jedné akci, váhám i v dalších.",
+   "f": "P",
+   "r": "rys"
+  },
+  "426": {
+   "t": "Stanovuji si náročné standardy.",
+   "f": "P",
+   "r": "rys"
+  },
+  "427": {
+   "t": "Úspěch cítím, když ostatní chybují víc než já.",
+   "f": "P",
+   "r": "rys"
+  },
+  "428": {
+   "t": "Po chybě si v duchu říkám, jak to kazím.",
+   "f": "C",
+   "r": "rys"
+  },
+  "429": {
+   "t": "Emoce dávám najevo přiměřeně situaci.",
+   "f": "C",
+   "r": "rys"
+  },
+  "430": {
+   "t": "Obtíže mě v cestě za cílem spíš zocelí.",
+   "f": "P",
+   "r": "rys"
+  },
+  "431": {
+   "t": "Pod tlakem začnu hlídat, jak přesně provádím pohyb.",
+   "f": "P",
+   "r": "rys"
+  },
+  "432": {
+   "t": "Po tréninku mi chybí energie na cokoli dalšího.",
+   "f": "P",
+   "r": "4t"
+  },
+  "433": {
+   "t": "Výsledky mi přijdou lhostejné.",
+   "f": "P",
+   "r": "4t"
+  },
+  "434": {
+   "t": "V soutěži se bojím říct, co potřebuji.",
+   "f": "P",
+   "r": "rys"
+  },
+  "435": {
+   "t": "Trenér mě zná a ví, co potřebuji.",
+   "f": "P",
+   "r": "rys"
+  },
+  "436": {
+   "t": "Když jde do tuhého, přidám.",
+   "f": "P",
+   "r": "rys"
+  },
+  "437": {
+   "t": "Když mě vyruší publikum, vrátím pozornost během pár vteřin.",
+   "f": "C",
+   "r": "rys"
+  },
+  "438": {
+   "t": "Před důležitou soutěží mám sevřený žaludek.",
+   "f": "P",
+   "r": "rys"
+  },
+  "439": {
+   "t": "Na čem pracuji, určuje jen trenér.",
+   "f": "C",
+   "r": "rys"
+  },
+  "440": {
+   "t": "Pokyny od trenéra si upravuji podle sebe.",
+   "f": "P",
+   "r": "rys"
+  },
+  "441": {
+   "t": "Před soutěží se mi potí dlaně.",
+   "f": "P",
+   "r": "rys"
+  },
+  "442": {
+   "t": "Před tréninkem si stanovím, co chci zlepšit.",
+   "f": "C",
+   "r": "rys"
+  }
+ },
+ "vinety": {
+  "1": {
+   "s": "Zranění tě vyřadí na šest týdnů těsně před vrcholem sezony.",
+   "r": [
+    [
+     1011,
+     "Stahuji se od týmu."
+    ],
+    [
+     1012,
+     "Myslím hlavně na to, co mi uteče."
+    ],
+    [
+     1013,
+     "Využiji čas na práci, na kterou jindy nemám prostor."
+    ],
+    [
+     1014,
+     "Se zdravotníky a trenérem si udělám plán návratu."
+    ]
+   ]
+  },
+  "2": {
+   "s": "Tvoje chyba rozhodla o prohře týmu nebo o ztrátě medaile.",
+   "r": [
+    [
+     1021,
+     "Dovolím si smutek a pak se vrátím k tréninku."
+    ],
+    [
+     1022,
+     "Dny si ji vyčítám."
+    ],
+    [
+     1023,
+     "Uznám ji a řeknu, co si z ní beru."
+    ],
+    [
+     1024,
+     "Vyhýbám se ostatním."
+    ]
+   ]
+  },
+  "3": {
+   "s": "Na začátku důležité soutěže chybuješ a slyšíš, jak publikum reaguje.",
+   "r": [
+    [
+     1031,
+     "Myslím na to, co si o mně lidé myslí."
+    ],
+    [
+     1032,
+     "Nadechnu se a zopakuji svou rutinu."
+    ],
+    [
+     1033,
+     "Zaměřím pozornost na svůj další úkol."
+    ],
+    [
+     1034,
+     "Další akci zvolím co nejjistěji."
+    ]
+   ]
+  },
+  "4": {
+   "s": "V tréninku podáváš dlouhodobě dobré výkony, ale v soutěži se ti opakovaně nedaří.",
+   "r": [
+    [
+     1041,
+     "Do tréninku přidám situace, které soutěž napodobují."
+    ],
+    [
+     1042,
+     "Před soutěžemi se snažím na to nemyslet."
+    ],
+    [
+     1043,
+     "S trenérem hledám, čím se soutěž liší od tréninku."
+    ],
+    [
+     1044,
+     "Začnu pochybovat, jestli na to mám."
+    ]
+   ]
+  },
+  "5": {
+   "s": "Cítíš bolest, o které trenér neví, a blíží se důležitá soutěž.",
+   "r": [
+    [
+     1051,
+     "Řeknu to až po soutěži."
+    ],
+    [
+     1052,
+     "Mlčím, ať nepřijdu o místo."
+    ],
+    [
+     1053,
+     "Hned to řeknu trenérovi a zdravotníkovi."
+    ],
+    [
+     1054,
+     "Zeptám se fyzioterapeuta, co s tím."
+    ]
+   ]
+  },
+  "6": {
+   "s": "Tři chyby za sebou. Cítíš, že se ti soutěž vymyká.",
+   "r": [
+    [
+     1061,
+     "Myslím na to, že dnes je všechno špatně."
+    ],
+    [
+     1062,
+     "Použiji svůj rituál pro restart."
+    ],
+    [
+     1063,
+     "Zrychlím, ať se to rychle zlomí."
+    ],
+    [
+     1064,
+     "Zjednoduším si úkol na něco, co určitě zvládnu."
+    ]
+   ]
+  },
+  "7": {
+   "s": "Po první polovině soutěže prohráváš a víš, že máš na víc.",
+   "r": [
+    [
+     1071,
+     "Připomenu si, co funguje, a začnu od další akce."
+    ],
+    [
+     1072,
+     "Začnu riskovat všechno najednou."
+    ],
+    [
+     1073,
+     "S trenérem si stanovím jeden až dva konkrétní úkoly na zbytek."
+    ],
+    [
+     1074,
+     "Rezignuji, dnes to není můj den."
+    ]
+   ]
+  },
+  "8": {
+   "s": "Soupeř nebo někdo z okolí tě před startem slovně provokuje.",
+   "r": [
+    [
+     1081,
+     "Vrátím se ke své přípravě."
+    ],
+    [
+     1082,
+     "Celou soutěž chci tomu člověku něco dokázat."
+    ],
+    [
+     1083,
+     "Odpovím stejně."
+    ],
+    [
+     1084,
+     "Zlost využiji jako energii, ale dál sleduji svůj plán."
+    ]
+   ]
+  },
+  "9": {
+   "s": "Soupeř je výrazně výš v žebříčku a všichni čekají, že prohraješ.",
+   "r": [
+    [
+     1091,
+     "Držím se vlastního plánu, jméno soupeře nechám stranou."
+    ],
+    [
+     1092,
+     "Nemám co ztratit a jdu do toho naplno."
+    ],
+    [
+     1093,
+     "Soustředím se hlavně na to, ať prohra není vysoká."
+    ],
+    [
+     1094,
+     "Už před začátkem se smiřuji s porážkou."
+    ]
+   ]
+  },
+  "10": {
+   "s": "Po prohrané soutěži si na sociálních sítích přečteš ostrou kritiku svého výkonu.",
+   "r": [
+    [
+     1101,
+     "Výkon rozeberu s trenérem a zbytek pustím."
+    ],
+    [
+     1102,
+     "Čtu komentáře dál a dál."
+    ],
+    [
+     1103,
+     "Odpovídám na komentáře."
+    ],
+    [
+     1104,
+     "Kritiku od lidí mimo tým pouštím z hlavy."
+    ]
+   ]
+  },
+  "11": {
+   "s": "Někdo z týmu ti svěří, že má psychické potíže, a nechce, aby to někdo další věděl.",
+   "r": [
+    [
+     1111,
+     "Řeknu to hned celému týmu."
+    ],
+    [
+     1112,
+     "Řeknu mu, ať to nepřehání."
+    ],
+    [
+     1113,
+     "Vyslechnu ho a doporučím mu obrátit se na odborníka."
+    ],
+    [
+     1114,
+     "Zeptám se, jak mu můžu pomoct."
+    ]
+   ]
+  },
+  "12": {
+   "s": "Před důležitou soutěží zjistíš, že se na tebe přijdou podívat skauti nebo reprezentační trenér.",
+   "r": [
+    [
+     1121,
+     "Beru to jako šanci a těším se na to."
+    ],
+    [
+     1122,
+     "Připravím se stejně jako na každou jinou soutěž."
+    ],
+    [
+     1123,
+     "Snažím se předvést něco výjimečného."
+    ],
+    [
+     1124,
+     "Celou dobu myslím na to, co vidí."
+    ]
+   ]
+  },
+  "13": {
+   "s": "Trenér ti dá zpětnou vazbu, se kterou nesouhlasíš.",
+   "r": [
+    [
+     1131,
+     "Hned se ohradím a odejdu."
+    ],
+    [
+     1132,
+     "Kývnu a dál to neřeším."
+    ],
+    [
+     1133,
+     "Poprosím o konkrétní příklad."
+    ],
+    [
+     1134,
+     "Poslechnu si ji a pak řeknu, jak to vidím já."
+    ]
+   ]
+  },
+  "14": {
+   "s": "Jde o rozhodující pokus. Minule ti ve stejné situaci nevyšel.",
+   "r": [
+    [
+     1141,
+     "Pohyb provádím opatrněji než obvykle."
+    ],
+    [
+     1142,
+     "Myslím na minulý nezdar."
+    ],
+    [
+     1143,
+     "Představím si, jak ho provádím správně."
+    ],
+    [
+     1144,
+     "Projdu svou rutinu stejně jako v tréninku."
+    ]
+   ]
+  },
+  "15": {
+   "s": "Po špatném výkonu tě trenér na příští soutěž nenominuje nebo posadí na lavičku.",
+   "r": [
+    [
+     1151,
+     "Zeptám se, co konkrétně mám zlepšit."
+    ],
+    [
+     1152,
+     "Beru to jako motivaci a pracuji dál."
+    ],
+    [
+     1153,
+     "Stěžuji si ostatním."
+    ],
+    [
+     1154,
+     "Trénuji s menší chutí."
+    ]
+   ]
+  },
+  "16": {
+   "s": "Nový člen týmu se drží stranou a ostatní ho přehlížejí.",
+   "r": [
+    [
+     1161,
+     "Zeptám se ho, jak se mu v týmu daří."
+    ],
+    [
+     1162,
+     "Zapojím ho do rozhovoru nebo cvičení."
+    ],
+    [
+     1163,
+     "Přidám se k ostatním."
+    ],
+    [
+     1164,
+     "Nechám to na trenérovi."
+    ]
+   ]
+  },
+  "17": {
+   "s": "V závěru zbývá jedna rozhodující akce a trenér se tě zeptá, jestli ji chceš vzít na sebe.",
+   "r": [
+    [
+     1171,
+     "Vezmu ji."
+    ],
+    [
+     1172,
+     "Vezmu ji, i když cítím nervozitu, a soustředím se na rutinu."
+    ],
+    [
+     1173,
+     "Přenechám ji někomu, komu to dnes jde lépe."
+    ],
+    [
+     1174,
+     "Dělám, že otázku neslyším."
+    ]
+   ]
+  },
+  "18": {
+   "s": "Po soutěži tě novinář nebo rodič tlačí ke kritice spoluhráče nebo trenéra.",
+   "r": [
+    [
+     1181,
+     "Veřejně obviním ostatní."
+    ],
+    [
+     1182,
+     "Mluvím o vlastním výkonu a ostatní nechám stranou."
+    ],
+    [
+     1183,
+     "Řeknu, co si o ostatních opravdu myslím."
+    ],
+    [
+     1184,
+     "Slušně odmítnu a téma převedu."
+    ]
+   ]
+  },
+  "19": {
+   "s": "Během soutěže potřebuješ od trenéra jinou informaci, než kterou ti dává.",
+   "r": [
+    [
+     1191,
+     "Krátce a jasně řeknu, co potřebuji."
+    ],
+    [
+     1192,
+     "Nic neřeknu a improvizuji."
+    ],
+    [
+     1193,
+     "Rozčílím se na něj."
+    ],
+    [
+     1194,
+     "Po soutěži se domluvím, jak si příště předávat informace."
+    ]
+   ]
+  },
+  "20": {
+   "s": "V tréninku ti opakovaně nejde nová dovednost a ostatní ji už umí.",
+   "r": [
+    [
+     1201,
+     "Trénuji ji navíc mimo trénink."
+    ],
+    [
+     1202,
+     "Požádám trenéra o jiný způsob vysvětlení."
+    ],
+    [
+     1203,
+     "Vzdám to a vrátím se k tomu, co umím."
+    ],
+    [
+     1204,
+     "Začnu si myslet, že na to nemám."
+    ]
+   ]
+  },
+  "21": {
+   "s": "Uděláš chybu, soupeř ji okamžitě potrestá a ještě tě provokuje.",
+   "r": [
+    [
+     1211,
+     "Chci mu to hned vrátit."
+    ],
+    [
+     1212,
+     "Krátce se nadechnu a řeknu si pokyn."
+    ],
+    [
+     1213,
+     "Vrátím se k plánu na další akci."
+    ],
+    [
+     1214,
+     "Ztratím hlavu."
+    ]
+   ]
+  },
+  "22": {
+   "s": "V kabině nebo ve skupině vznikne ostrý spor mezi dvěma lidmi.",
+   "r": [
+    [
+     1221,
+     "Nechám to být, mě se to netýká."
+    ],
+    [
+     1222,
+     "Přidám se na jednu stranu."
+    ],
+    [
+     1223,
+     "Upozorním na to kapitána nebo trenéra."
+    ],
+    [
+     1224,
+     "Navrhnu, ať si to vyříkají v klidu."
+    ]
+   ]
+  },
+  "23": {
+   "s": "Vedeš, soupeř začíná dotahovat a ty cítíš, jak ti tuhne tělo.",
+   "r": [
+    [
+     1231,
+     "Uvolním ramena, nadechnu se a vrátím se k úkolu."
+    ],
+    [
+     1232,
+     "Pořád kontroluji skóre a počítám, kolik zbývá."
+    ],
+    [
+     1233,
+     "Stáhnu se a jdu na jistotu."
+    ],
+    [
+     1234,
+     "Vrátím se k tomu, co fungovalo na začátku."
+    ]
+   ]
+  },
+  "24": {
+   "s": "V úvodu soutěže uděláš hrubou chybu, která stojí bod nebo čas.",
+   "r": [
+    [
+     1241,
+     "Krátce si ji pojmenuji a pustím ji."
+    ],
+    [
+     1242,
+     "Po zbytek soutěže se snažím chybu vynahradit za každou cenu."
+    ],
+    [
+     1243,
+     "Řeknu si svůj pokyn a soustředím se na další akci."
+    ],
+    [
+     1244,
+     "V hlavě si ji přehrávám dál."
+    ]
+   ]
+  },
+  "25": {
+   "s": "Po prohře je v týmu ticho a nikdo nechce mluvit o tom, co se stalo.",
+   "r": [
+    [
+     1251,
+     "Začnu hledat, kdo to zavinil."
+    ],
+    [
+     1252,
+     "Navrhnu krátký rozbor, co udělat jinak."
+    ],
+    [
+     1253,
+     "Mlčím taky."
+    ],
+    [
+     1254,
+     "Začnu tím, co se nepovedlo mně."
+    ]
+   ]
+  },
+  "26": {
+   "s": "Na poslední chvíli se změní podmínky: čas startu, místo nebo počasí.",
+   "r": [
+    [
+     1261,
+     "Beru to jako věc, kterou mají všichni stejně."
+    ],
+    [
+     1262,
+     "Rozčiluje mě to a myslím na to i během soutěže."
+    ],
+    [
+     1263,
+     "Začnu pochybovat o celé přípravě."
+    ],
+    [
+     1264,
+     "Upravím rozcvičení a soustředím se na to, co mám v moci."
+    ]
+   ]
+  },
+  "27": {
+   "s": "Trenér ti dává pokyn, který podle tebe v soutěži nefunguje.",
+   "r": [
+    [
+     1271,
+     "Po soutěži mu řeknu, co vidím, a zeptám se na jeho důvody."
+    ],
+    [
+     1272,
+     "Pokyn potichu ignoruji."
+    ],
+    [
+     1273,
+     "Pokyn splním a nic neřeknu."
+    ],
+    [
+     1274,
+     "V přestávce se krátce zeptám, jestli můžu zkusit jinou variantu."
+    ]
+   ]
+  },
+  "28": {
+   "s": "Nesouhlasíš s rolí, kterou ti trenér přidělil.",
+   "r": [
+    [
+     1281,
+     "Stěžuji si ostatním."
+    ],
+    [
+     1282,
+     "Požádám ho o rozhovor mezi čtyřma očima."
+    ],
+    [
+     1283,
+     "Mlčím a roli plním bez chuti."
+    ],
+    [
+     1284,
+     "Zeptám se, co musím zlepšit pro jinou roli."
+    ]
+   ]
+  },
+  "29": {
+   "s": "Uděláš chybu a trenér na tebe před ostatními křičí.",
+   "r": [
+    [
+     1291,
+     "Vezmu si z toho věcnou informaci a pokračuji."
+    ],
+    [
+     1292,
+     "Stáhnu se a riskuji co nejméně."
+    ],
+    [
+     1293,
+     "Promluvím si s ním po soutěži."
+    ],
+    [
+     1294,
+     "Odmlouvám."
+    ]
+   ]
+  },
+  "30": {
+   "s": "Máš za sebou těžké týdny mimo sport (škola, rodina, vztah) a projevuje se to v tréninku.",
+   "r": [
+    [
+     1301,
+     "Trénuji ještě víc, ať to nikdo nepozná."
+    ],
+    [
+     1302,
+     "Trenérovi řeknu, že teď procházím těžším obdobím."
+    ],
+    [
+     1303,
+     "Svěřím se někomu blízkému z týmu."
+    ],
+    [
+     1304,
+     "Nic neříkám a doufám, že to přejde."
+    ]
+   ]
+  },
+  "31": {
+   "s": "Těsně před klíčovou akcí rozhodne rozhodčí podle tebe nespravedlivě.",
+   "r": [
+    [
+     1311,
+     "Krátce si řeknu svůj klíčový pokyn a pokračuji."
+    ],
+    [
+     1312,
+     "V hlavě si to přehrávám ještě během akce."
+    ],
+    [
+     1313,
+     "Hádám se s rozhodčím."
+    ],
+    [
+     1314,
+     "Nechám to být a soustředím se na další akci."
+    ]
+   ]
+  },
+  "32": {
+   "s": "V rozhodující chvíli máš dvě možnosti: jistou volbu s malým účinkem, nebo odvážnější, která může rozhodnout. Na rozhodnutí máš vteřinu.",
+   "r": [
+    [
+     1321,
+     "Věřím prvnímu instinktu a jdu do toho."
+    ],
+    [
+     1322,
+     "Zaváhám tak dlouho, že šance zmizí."
+    ],
+    [
+     1323,
+     "Zvolím tu, kterou máme natrénovanou pro tuhle situaci."
+    ],
+    [
+     1324,
+     "Vyberu jistou volbu, ať nemůžu nic pokazit."
+    ]
+   ]
+  },
+  "33": {
+   "s": "Trenér ti před soutěží řekne, že dnes dostaneš roli, která je pro tebe nová.",
+   "r": [
+    [
+     1331,
+     "Zeptám se, co přesně ode mě trenér v té roli čeká."
+    ],
+    [
+     1332,
+     "Beru to jako příležitost ukázat se."
+    ],
+    [
+     1333,
+     "Zvolím co nejopatrnější výkon, ať nic nezkazím."
+    ],
+    [
+     1334,
+     "Celou dobu přemýšlím, proč to trenér udělal."
+    ]
+   ]
+  },
+  "34": {
+   "s": "Spoluhráč nebo tréninkový partner opakovaně chybuje a kazí ti tím výkon.",
+   "r": [
+    [
+     1341,
+     "Řeknu mu věcně, co potřebuji."
+    ],
+    [
+     1342,
+     "Řeknu to trenérovi, ať to řeší on."
+    ],
+    [
+     1343,
+     "Zeptám se ho, jestli mu můžu nějak pomoct."
+    ],
+    [
+     1344,
+     "Před ostatními ho okřiknu."
+    ]
+   ]
+  },
+  "35": {
+   "s": "Po vítězné soutěži ti trenér ukáže video, na kterém opakovaně děláš stejnou chybu.",
+   "r": [
+    [
+     1351,
+     "Chybu vezmu jako úkol do dalšího tréninku."
+    ],
+    [
+     1352,
+     "Vadí mi, že to řeší zrovna po výhře."
+    ],
+    [
+     1353,
+     "Poděkuji a zeptám se, jak na ni."
+    ],
+    [
+     1354,
+     "Považuji to za zbytečné, vždyť se vyhrálo."
+    ]
+   ]
+  },
+  "36": {
+   "s": "Je rozhodující moment soutěže a výsledek závisí na tvé další akci. Dívají se lidé, na jejichž názoru ti záleží.",
+   "r": [
+    [
+     1361,
+     "Soustředím se na první krok své rutiny."
+    ],
+    [
+     1362,
+     "Zhluboka se nadechnu a jdu do toho naplno."
+    ],
+    [
+     1363,
+     "Hlídám každý detail pohybu."
+    ],
+    [
+     1364,
+     "Myslím na to, co bude, když to nevyjde."
+    ]
+   ]
+  }
+ }
+}

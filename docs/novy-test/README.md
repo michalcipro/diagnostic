@@ -35,7 +35,10 @@ data: plán počítá s hodnocením při vyplnění a znovu na konci sezony.
 
 ## Co je další krok
 
-1. kontrola duševní pohody do stávajícího ELITE 200 (dá se postavit hned),
+1. **pilotní verze v aplikaci hotová** (test „ELITE Pro · pilotní verze“,
+   jen česky): polovina kandidátů z každé škály, 6 vinět, kontext, spánek
+   a dobrovolné otázky na duševní pohodu s doporučením odborníka; kouč vidí
+   kontext, spánek a doporučení, vyhodnocení z pilotu se nepočítá,
 2. najít psychometrika na volné noze,
 3. banka položek (fáze 1): **česká verze hotová** v [`banka/`](banka/banka-cs.md)
    (432 položek, 36 vinět, 10 kontrolních); zbývá slovenská a anglická

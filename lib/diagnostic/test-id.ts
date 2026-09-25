@@ -1,6 +1,7 @@
 import type { TestId, TestModel, Variant } from "./types"
 import type { Varianta as VariantaVzorcu } from "../vzorce/types"
 import type { Varianta as VariantaArchetypu } from "../archetypy/types"
+import { VELIKOST_FORMY } from "../elitepro/spolecne"
 
 // Rozpoznání testu podle jeho id a počty položek.
 //
@@ -25,6 +26,7 @@ export const TEST_IDS: TestId[] = [
   "vzorce-sport-tym",
   "archetypy",
   "archetypy-sport",
+  "elitepro-sport",
 ]
 
 export function jeVzorce(testId: string): boolean {
@@ -33,6 +35,11 @@ export function jeVzorce(testId: string): boolean {
 
 export function jeArchetypy(testId: string): boolean {
   return testId.startsWith("archetypy")
+}
+
+/** ELITE Pro: nový test s vlastním dotazníkem, formou a pohledem kouče. */
+export function jeElitePro(testId: string): boolean {
+  return testId.startsWith("elitepro")
 }
 
 export function variantaArchetypu(testId: string): VariantaArchetypu {
@@ -69,4 +76,6 @@ export const POCET_POLOZEK: Record<TestId, number> = {
   "vzorce-sport-tym": 110,
   archetypy: 96,
   "archetypy-sport": 96,
+  // Pilotní forma, ne celá banka: každý dostane jen část položek.
+  "elitepro-sport": VELIKOST_FORMY,
 }

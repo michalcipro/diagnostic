@@ -1,7 +1,11 @@
 import { ConvexError, v } from "convex/values"
 import { mutation, query } from "./_generated/server"
+import type { MutationCtx } from "./_generated/server"
+import type { Doc } from "./_generated/dataModel"
 import { kryptoBajty, makeToken } from "./nahoda"
 import { vyhodnoceniHrace } from "./vyhodnoceniHrace"
+import { sestavFormu } from "../lib/elitepro/forma"
+import { ChybaOdeslani, zpracujOdpovedi } from "../lib/elitepro/odeslani"
 import {
   filtrViditelnosti,
   jeKlubovy,
@@ -39,6 +43,7 @@ const TEST_IDS = new Set([
   "vzorce-sport-tym",
   "archetypy",
   "archetypy-sport",
+  "elitepro-sport",
 ])
 
 /**
@@ -198,6 +203,11 @@ export const createInvite = mutation({
     if (!TEST_IDS.has(args.testId)) {
       throw new ConvexError(`Neznámý testId: ${args.testId}`)
     }
+    // ELITE Pro má zatím jen českou banku. Jinak by se v cizím jazyce otevřel
+    // český dotazník, a přesně to už jednou skončilo reklamací.
+    if (args.testId.startsWith("elitepro") && args.lang !== "cs") {
+      throw new ConvexError("ELITE Pro je zatím jen v češtině.")
+    }
     delka(args.clientName, MEZ.jmeno, "Jméno klienta")
     delka(args.note, MEZ.poznamka, "Poznámka")
     const token = makeToken()
@@ -237,6 +247,8 @@ export const getInvite = query({
     clientName: v.optional(v.string()),
     /** název týmu; jen u týmové pozvánky, jinak chybí */
     tym: v.optional(v.string()),
+    /** jen ELITE Pro: které položky a viněty tahle pozvánka dostane */
+    forma: v.optional(v.object({ polozky: v.array(v.number()), vinety: v.array(v.number()) })),
   }),
   handler: async (ctx, args) => {
     const inv = await ctx.db
@@ -261,6 +273,9 @@ export const getInvite = query({
       lang: inv.lang,
       clientName: inv.clientName,
       tym: tym?.nazev,
+      // Forma se odvozuje z tokenu, takže ji server při odeslání přepočítá
+      // a nemusí věřit tomu, co pošle prohlížeč.
+      forma: inv.testId.startsWith("elitepro") ? sestavFormu(inv.token) : undefined,
     }
   },
 })
@@ -326,6 +341,80 @@ export const revokeInvite = mutation({
  * Odeslání dotazníku proti pozvánce. Vrací jen potvrzení – respondent
  * záměrně nedostává žádné výsledky ani odkaz na ně.
  */
+/**
+ * Odeslání ELITE Pro.
+ *
+ * Vlastní větev, protože test má jinou stavbu: forma podle tokenu, několik
+ * druhů otázek s různým rozsahem a otázky na duševní pohodu, které se
+ * neukládají. Z nich zůstane jen záznam doporučení, a jen když vyjde.
+ */
+async function odesliElitePro(
+  ctx: MutationCtx,
+  inv: Doc<"invitations">,
+  person: Doc<"eliteDiagnosticResults">["person"],
+  answersJson: string,
+  durationSecVstup: number | undefined,
+): Promise<{ ok: boolean }> {
+  let parsed: Record<string, unknown>
+  try {
+    parsed = JSON.parse(answersJson) as Record<string, unknown>
+  } catch {
+    throw new ConvexError("answers není validní JSON")
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new ConvexError("answers není validní JSON")
+  }
+  let z
+  try {
+    z = zpracujOdpovedi(sestavFormu(inv.token), parsed)
+  } catch (e) {
+    if (e instanceof ChybaOdeslani) throw new ConvexError(e.message)
+    throw e
+  }
+  const answers = JSON.stringify(z.ciste)
+  const now = Date.now()
+  const durationSec =
+    typeof durationSecVstup === "number" && durationSecVstup > 0 && durationSecVstup < 86400
+      ? Math.round(durationSecVstup)
+      : undefined
+  const klic = vymazovyKlic()
+  const resultId = await ctx.db.insert("eliteDiagnosticResults", {
+    testId: inv.testId,
+    model: "elitepro",
+    variant: "sport",
+    lang: inv.lang,
+    person,
+    answers,
+    answeredCount: z.answeredCount,
+    complete: z.complete,
+    durationSec,
+    coachId: inv.coachId,
+    vymazovyKlic: klic,
+    createdAt: now,
+  })
+  // Pilotní data jsou hlavní smysl téhle verze, proto i sem anonymní kopie.
+  // Bez odpovědí na duševní pohodu: ty z odeslání nevyšly.
+  await ctx.db.insert("normSamples", {
+    testId: inv.testId,
+    model: "elitepro",
+    variant: "sport",
+    lang: inv.lang,
+    ageBand: ageBand(person.birthDate),
+    gender: person.gender,
+    role: shortRole(person.role),
+    answers,
+    answeredCount: z.answeredCount,
+    complete: z.complete,
+    durationSec,
+    collectedMonth: collectedMonth(now),
+    collectedQuarter: collectedQuarter(now),
+    vymazovyKlic: klic,
+  })
+  if (z.doporuceni) await ctx.db.insert("doporuceniOdbornika", { resultId, createdAt: now })
+  await ctx.db.patch(inv._id, { usedAt: now, resultId })
+  return { ok: true }
+}
+
 export const submitWithInvite = mutation({
   args: {
     token: v.string(),
@@ -363,6 +452,10 @@ export const submitWithInvite = mutation({
     // Meze délky dřív než cokoli dalšího: co se sem dostane, to se ukládá.
     zkontrolujOsobu(args.person)
     delka(args.answers, MEZ.odpovedi, "Odpovědi")
+
+    if (inv.testId.startsWith("elitepro")) {
+      return await odesliElitePro(ctx, inv, args.person, args.answers, args.durationSec)
+    }
 
     // Vzorce ani archetypy nemají variantu v tom smyslu jako ELITE (sport
     // nebo business), takže se pro ně doplní zástupná hodnota podle testu.
@@ -710,6 +803,11 @@ export const removeForCoach = mutation({
       .withIndex("by_result", (q) => q.eq("resultId", args.id))
       .collect()
     for (const h of hodnoceni) await ctx.db.delete(h._id)
+    const doporuceni = await ctx.db
+      .query("doporuceniOdbornika")
+      .withIndex("by_result", (q) => q.eq("resultId", args.id))
+      .collect()
+    for (const d of doporuceni) await ctx.db.delete(d._id)
 
     await zaznamenejPristup(ctx, me._id, "smazani-vysledku", doc._id)
     await ctx.db.delete(args.id)

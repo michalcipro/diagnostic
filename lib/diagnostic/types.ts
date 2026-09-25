@@ -32,6 +32,8 @@ export type TestId =
   | "vzorce-sport-tym"
   | "archetypy"
   | "archetypy-sport"
+  /** nový test ve vývoji; zatím pilotní verze, jen česky */
+  | "elitepro-sport"
 
 /**
  * Rod respondenta. Řídí gramatické tvary v českém vyhodnocení – žena nesmí

@@ -44,6 +44,9 @@ const ZAKAZANE = {
   "lib/archetypy/content.ts": "výklad archetypů",
   "lib/archetypy/scoring.ts": "výpočet archetypů",
   "lib/archetypy/kombinace.ts": "výklad kombinací archetypů",
+  "lib/elitepro/klic.ts": "klíč ELITE Pro: škály, obrácené položky, klíč vinět, očekávané odpovědi kontrol",
+  "lib/elitepro/forma.ts": "sestavení formy, sahá do klíče",
+  "lib/elitepro/odeslani.ts": "kontrola odeslání a výpočet doporučení odborníka",
 }
 
 const PRIPONY = [".ts", ".tsx", ".json", "/index.ts", "/index.tsx"]
@@ -128,6 +131,7 @@ if (fs.existsSync(esbuild)) {
 export { getStructure } from "../lib/diagnostic/structure"
 export { POCET_POLOZEK as VZORCE } from "../lib/vzorce/structure"
 export { POCET_POLOZEK as ARCHETYPY } from "../lib/archetypy/structure"
+export { sestavFormu, reakceFormy } from "../lib/elitepro/forma"
 `,
   )
   let M
@@ -146,6 +150,10 @@ export { POCET_POLOZEK as ARCHETYPY } from "../lib/archetypy/structure"
     let skutecne
     if (id.startsWith("vzorce")) skutecne = M.VZORCE
     else if (id.startsWith("archetypy")) skutecne = M.ARCHETYPY
+    else if (id.startsWith("elitepro")) {
+      const f = M.sestavFormu("kontrola")
+      skutecne = f.polozky.length + M.reakceFormy(f).length
+    }
     else skutecne = M.getStructure(id.startsWith("elite200") ? "elite200" : "elite100").itemCount
     if (opsano !== skutecne) rozdily.push(`${id}: uvedeno ${opsano}, klíč má ${skutecne}`)
   }
