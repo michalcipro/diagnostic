@@ -8,6 +8,8 @@ import { CoachCard } from "@/components/diagnostic/coach-card"
 import { ExternalPanel } from "@/components/diagnostic/external-panel"
 import { CoachPlannerPanel } from "@/components/planner/coach-planner-panel"
 import { ReportView } from "@/components/diagnostic/report-view"
+import { HodnoceniTrenera } from "@/components/diagnostic/hodnoceni-trenera"
+import { HODNOCENI_TEXTY, hodnotiSe } from "@/lib/diagnostic/hodnoceni-trenera"
 import { VzorceReport } from "@/components/vzorce/report"
 import { ArchetypyReport } from "@/components/archetypy/report"
 import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
@@ -24,6 +26,7 @@ import {
   pristupovyLog,
   type PristupZaznam,
   createInvite,
+  exportValidace,
   listCoaches,
   login as doLogin,
   logout as doLogout,
@@ -107,6 +110,7 @@ export default function CoachPage() {
   const [pristupy, setPristupy] = useState<PristupZaznam[] | null>(null)
   const [norms, setNorms] = useState<NormStats | null>(null)
   const [exporting, setExporting] = useState(false)
+  const [exportujiValidaci, setExportujiValidaci] = useState(false)
   const [invites, setInvites] = useState<InviteRow[] | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [fTest, setFTest] = useState<TestId>("elite200-sport")
@@ -274,6 +278,25 @@ export default function CoachPage() {
     }
   }
 
+  /** Stáhne odpovědi spárované s hodnocením trenérů, pseudonymizované. */
+  const stahniValidaci = async () => {
+    setExportujiValidaci(true)
+    try {
+      const data = await exportValidace(session)
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `elite-hodnoceni-treneru-${new Date().toISOString().slice(0, 10)}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setError(chybaText(e, "Export se nepodařil."))
+    } finally {
+      setExportujiValidaci(false)
+    }
+  }
+
   const submitCoach = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -438,6 +461,9 @@ export default function CoachPage() {
             lang={detailLang}
             durationSec={detail.durationSec}
           />
+        )}
+        {hodnotiSe(detail.testId) && (
+          <HodnoceniTrenera sessionToken={session} resultId={detail.id} lang={detailLang} />
         )}
       </div>
     )
@@ -629,6 +655,8 @@ export default function CoachPage() {
           lang={lang}
           exporting={exporting}
           onExport={() => void exportNorms()}
+          exportujiValidaci={exportujiValidaci}
+          onExportValidace={() => void stahniValidaci()}
         />
       )}
 
@@ -1000,12 +1028,17 @@ function NormsPanel({
   lang,
   exporting,
   onExport,
+  exportujiValidaci,
+  onExportValidace,
 }: {
   stats: NormStats | null
   lang: Lang
   exporting: boolean
   onExport: () => void
+  exportujiValidaci: boolean
+  onExportValidace: () => void
 }) {
+  const th = HODNOCENI_TEXTY[lang]
   const t = UI[lang]
   if (stats === null) {
     return <p className="mb-8 text-[14px] text-[var(--wm-text-3)]">{t.loading}</p>
@@ -1050,6 +1083,23 @@ function NormsPanel({
         <p className="mt-5 rounded-xl bg-[var(--wm-surface-2)] p-4 text-[13px] leading-relaxed text-[var(--wm-text-2)]">
           {t.normsPrivacy}
         </p>
+      </div>
+
+      <div className="diag-card mt-4 p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-[17px] font-bold tracking-tight">{th.exportTitul}</h2>
+            <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--wm-text-2)]">{th.exportPopis}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onExportValidace}
+            disabled={exportujiValidaci}
+            className="diag-press inline-flex h-9 shrink-0 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-40"
+          >
+            {exportujiValidaci ? th.exportPripravuji : th.exportTlacitko}
+          </button>
+        </div>
       </div>
     </div>
   )

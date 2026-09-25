@@ -92,6 +92,7 @@ const POUZE_MASTER = [
   "teams.removeFromTeam",
   "teams.setTeamActive",
   "teams.listTeams",
+  "hodnoceni.exportValidace",
 ]
 
 /** Funkce, u kterých se během průchodu potvrdilo, že mastera vyžadují. */

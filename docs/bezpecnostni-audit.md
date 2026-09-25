@@ -646,6 +646,30 @@ smí jen master, a zápis do
 `normSamples` v `submitWithInvite` předchází větvení podle `teamId`, takže
 odhlášení ze sdílení normativní vzorek neochudí.
 
+## Doplněk: hodnocení trenéra
+
+Kouč u sportovních vyplnění hodnotí sportovce v deseti položkách (výkon
+v důležitých momentech, návrat po chybě, stálost a další). Slouží jako
+kritérium pro ověření validity diagnostiky, ne jako výstup pro kohokoli
+(`convex/hodnoceni.ts`, `lib/diagnostic/hodnoceni-trenera.ts`).
+
+**Přístup.** Ohodnotit i číst hodnocení lze jen u vyplnění, které kouč smí
+otevřít: stejný `filtrViditelnosti` a `sdileno()` jako u `getForCoach`.
+Neexistující i cizí vyplnění vrací stejnou chybu, takže se přes hodnocení
+nedá zjistit, co v databázi je, ani obejít hráčovo odmítnutí sdílení
+v týmové větvi. Kouč vidí jen vlastní hodnocení, ne hodnocení jiných koučů.
+
+**Export.** `exportValidace` smí jen master (hlídá `audit-pristupu.cjs`),
+zapisuje se do přístupového logu jako „export-validace“ a obsahuje jen
+vyplnění z viditelné větve. Anonymizace stojí mimo Convex
+(`lib/diagnostic/validace-export.ts`), aby se dala testovat bez backendu:
+`scripts/test-hodnoceni.cjs` ověřuje, že v exportu není jméno, datum
+narození ani ID, že čas je zkrácený na čtvrtletí, role na 120 znaků a že
+pseudonymy vznikají zamícháním, ne podle pořadí v databázi.
+
+**Výmaz.** `removeForCoach` i úklid po lhůtě mažou hodnocení spolu
+s vyplněním; hodnocení tak nepřežije výsledek, ke kterému patří.
+
 ## Závěr
 
 Aplikace je na svoji velikost postavená nadprůměrně obezřetně: autorizace je

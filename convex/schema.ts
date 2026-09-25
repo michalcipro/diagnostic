@@ -208,6 +208,23 @@ export default defineSchema({
     .index("by_coach", ["coachId"])
     .index("by_team", ["teamId"]),
 
+  // Hodnocení sportovce trenérem.
+  //
+  // Kritérium pro ověření validity testů, ne součást diagnostiky. Sportovec
+  // ho nevidí. Hodnocení se váže na konkrétní vyplnění, protože se s ním
+  // v analýze páruje; smaže se spolu s ním.
+  hodnoceniTrenera: defineTable({
+    resultId: v.id("eliteDiagnosticResults"),
+    coachId: v.id("coaches"),
+    /** hodnota chybí u položky „nemohu posoudit" */
+    hodnoty: v.array(v.object({ id: v.string(), hodnota: v.optional(v.number()) })),
+    delkaVedeni: v.string(),
+    castostPozorovani: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_result", ["resultId"])
+    .index("by_coach", ["coachId"]),
+
   // Neúspěšná přihlášení. Bez stropu by šlo hesla zkoušet ve smyčce: Convex
   // vystavuje auth:login na veřejném API a PBKDF2 útok jen zpomalí.
   loginAttempts: defineTable({
@@ -233,6 +250,7 @@ export default defineSchema({
       v.literal("smazani-vysledku"),
       v.literal("vytvoreni-pozvanky"),
       v.literal("pridani-do-tymu"),
+      v.literal("export-validace"),
       v.literal("vytvoreni-deniku"),
       v.literal("otevreni-deniku"),
       v.literal("zmena-sdileni-deniku"),

@@ -30,6 +30,7 @@ kategorii osobních údajů (údaje o zdraví). Z toho plyne, že:
 | `eliteDiagnosticResults` | jméno, datum narození, role, rod, odpovědi, doba vyplňování | zatím bez omezení |
 | `normSamples` | pásmo narození, rod, role, odpovědi, čtvrtletí pořízení, párovací klíč | zatím bez omezení |
 | `invitations` | jméno klienta, poznámka kouče, token | zatím bez omezení |
+| `hodnoceniTrenera` | hodnocení sportovce trenérem (10 položek 1 až 7), délka vedení, četnost pozorování | stejně jako vyplnění, maže se s ním |
 | `coaches` | jméno, e-mail, telefon, poznámka, otisk hesla | po dobu spolupráce |
 | `coachSessions` | token relace | 7 dní od posledního použití |
 | `loginAttempts` | e-mail a počet neúspěchů | do úspěšného přihlášení |
@@ -68,6 +69,13 @@ kategorie údajů to zjednodušuje argumentaci.
 - Hesla jsou hashovaná (PBKDF2, 210 000 iterací), přihlašování má strop na
   počet pokusů.
 - Odkazy na dotazník mají neuhodnutelný token a platnost 30 dní.
+- Hodnocení trenéra vidí jen kouč, který ho zadal; sportovec ho nevidí a do
+  jeho vyhodnocení se nepromítá. Smazání vyplnění i úklid po lhůtě mažou
+  i jeho hodnocení. Podklad pro ověření validity stahuje jen master, bez jmen,
+  data narození a identifikátorů, s pseudonymem platným v jednom souboru
+  a s čtvrtletím místo data; stažení se zapisuje do přístupového logu.
+  Hodnocení je osobní údaj o sportovci (názor třetí osoby) a do informace
+  o zpracování patří: účel „ověření kvality diagnostiky“.
 
 ## Co zbývá dodělat
 

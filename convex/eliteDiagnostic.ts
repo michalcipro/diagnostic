@@ -174,7 +174,7 @@ function vymazovyKlic(): string {
  * jestli k němu kouč smí, a kdyby to obešel vlastník pozvánky, byla by ta volba
  * na oko. Do souhrnu týmu záznam vstupuje dál, o čemž hráč ví.
  */
-function sdileno(d: { sdilet?: boolean }): boolean {
+export function sdileno(d: { sdilet?: boolean }): boolean {
   return d.sdilet !== false
 }
 
@@ -703,6 +703,14 @@ export const removeForCoach = mutation({
         vzorekSmazan = true
       }
     }
+    // Hodnocení trenéra se váže na tohle vyplnění a bez něj nemá smysl.
+    // Právo na výmaz se musí vztahovat i na něj: je to údaj o témže člověku.
+    const hodnoceni = await ctx.db
+      .query("hodnoceniTrenera")
+      .withIndex("by_result", (q) => q.eq("resultId", args.id))
+      .collect()
+    for (const h of hodnoceni) await ctx.db.delete(h._id)
+
     await zaznamenejPristup(ctx, me._id, "smazani-vysledku", doc._id)
     await ctx.db.delete(args.id)
     return { ok: true, vzorekSmazan }

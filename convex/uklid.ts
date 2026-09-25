@@ -69,6 +69,12 @@ export const probehni = internalMutation({
           vzorky++
         }
       }
+      // Hodnocení trenéra se váže na výsledek a odchází spolu s ním.
+      const hodnoceni = await ctx.db
+        .query("hodnoceniTrenera")
+        .withIndex("by_result", (q) => q.eq("resultId", d._id))
+        .collect()
+      for (const h of hodnoceni) await ctx.db.delete(h._id)
       await ctx.db.delete(d._id)
       vysledky++
     }

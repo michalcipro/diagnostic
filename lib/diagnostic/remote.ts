@@ -728,3 +728,61 @@ export async function teamReport(
   if (!c) throw new Error("not-configured")
   return (await c.query(teamReportRef, { sessionToken, teamId })) as TeamReport | null
 }
+
+// ── Hodnocení trenéra ──────────────────────────────────────────────
+
+const ohodnotRef = makeFunctionReference<"mutation">("hodnoceni:ohodnot")
+const mojeHodnoceniRef = makeFunctionReference<"query">("hodnoceni:mojeHodnoceni")
+const exportValidaceRef = makeFunctionReference<"mutation">("hodnoceni:exportValidace")
+
+export interface HodnoceniZaznam {
+  id: string
+  hodnoty: { id: string; hodnota?: number }[]
+  delkaVedeni: string
+  castostPozorovani: string
+  createdAt: number
+}
+
+/** Uloží hodnocení sportovce. Do 14 dní od posledního ho přepíše. */
+export async function ohodnot(
+  sessionToken: string,
+  resultId: string,
+  hodnoty: { id: string; hodnota?: number }[],
+  delkaVedeni: string,
+  castostPozorovani: string,
+): Promise<{ id: string; prepsano: boolean }> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  try {
+    return (await c.mutation(ohodnotRef, {
+      sessionToken,
+      resultId,
+      hodnoty,
+      delkaVedeni,
+      castostPozorovani,
+    })) as { id: string; prepsano: boolean }
+  } catch (e) {
+    throw new Error(chybaText(e, "Hodnocení se nepodařilo uložit."))
+  }
+}
+
+/** Vlastní hodnocení u jednoho vyplnění, nejnovější první. */
+export async function mojeHodnoceni(
+  sessionToken: string,
+  resultId: string,
+): Promise<HodnoceniZaznam[]> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  return (await c.query(mojeHodnoceniRef, { sessionToken, resultId })) as HodnoceniZaznam[]
+}
+
+/** Anonymní podklad pro ověření validity. Jen pro mastera. */
+export async function exportValidace(sessionToken: string): Promise<unknown[]> {
+  const c = client()
+  if (!c) throw new Error("not-configured")
+  try {
+    return (await c.mutation(exportValidaceRef, { sessionToken })) as unknown[]
+  } catch (e) {
+    throw new Error(chybaText(e, "Podklad se nepodařilo stáhnout."))
+  }
+}
