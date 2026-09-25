@@ -9,6 +9,7 @@ z rozhodnutí vyplývá, a podklady, se kterými se dá začít pracovat.
 | [`01-specifikace.md`](01-specifikace.md) | zamýšlené použití, populace, časový rozpočet, formáty, definice všech škál, rozpočet položek, indexy | autory položek, experty pro obsahovou validitu |
 | [`02-screening.md`](02-screening.md) | kontrola duševní pohody: 4 otázky, doporučení odborníka, kdo co vidí | kouče, právníka |
 | [`03-kotvy-a-licence.md`](03-kotvy-a-licence.md) | o co se opíráme bez žádostí: volně uvolněné nástroje, vlastní kritéria, co tím získáme a ztratíme | vás, psychometrika |
+| [`banka/banka-cs.md`](banka/banka-cs.md) | česká banka položek k posouzení; zdroj je `banka/sestav.py`, data `banka/banka-cs.json` | posuzovatele, aplikaci |
 | [`04-plan-validace.md`](04-plan-validace.md) | plán sběru dat a analýzy bez akademického partnera, harmonogram, rozhodovací kritéria | psychometrika |
 
 ## Rozhodnutí
@@ -36,5 +37,6 @@ data: plán počítá s hodnocením při vyplnění a znovu na konci sezony.
 
 1. kontrola duševní pohody do stávajícího ELITE 200 (dá se postavit hned),
 2. najít psychometrika na volné noze,
-3. banka položek (fáze 1): zhruba 470 kandidátů ve třech jazycích podle
-   specifikace; hotovou banku posoudí posuzovatelé z vaší sítě.
+3. banka položek (fáze 1): **česká verze hotová** v [`banka/`](banka/banka-cs.md)
+   (432 položek, 36 vinět, 10 kontrolních); zbývá slovenská a anglická
+   verze a posouzení obsahu.

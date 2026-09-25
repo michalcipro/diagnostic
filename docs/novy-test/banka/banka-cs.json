@@ -1,0 +1,3932 @@
+{
+  "verze": "cs-0.1",
+  "skaly": [
+    {
+      "kod": "MO.1",
+      "nazev": "autonomní motivace",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "MO.1-01",
+          "text": "Sport dělám hlavně proto, že mě baví.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.1-02",
+          "text": "Cíle ve sportu jsou moje vlastní.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.1-03",
+          "text": "Sport odpovídá tomu, kdo jsem a co je pro mě důležité.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.1-04",
+          "text": "Na trénink se těším i bez pobízení.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.1-05",
+          "text": "I bez odměn a uznání by mě sport táhl.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.1-06",
+          "text": "V náročném tréninku vidím smysl, i když je nepříjemný.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.1-07",
+          "text": "V soutěži mě nejvíc baví samotný zápas nebo závod.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.1-08",
+          "text": "Na soutěže se těším kvůli pocitu z vlastního výkonu.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.1-09",
+          "text": "Sport je pro mě hlavně povinnost.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.1-10",
+          "text": "Trénink mě většinou nudí.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.1-11",
+          "text": "Občas přemýšlím, jestli má sport pro mě ještě smysl.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.1-12",
+          "text": "Po soutěži cítím spíš úlevu, že je konec, než radost ze hry.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "MO.2",
+      "nazev": "kontrolovaná motivace",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "MO.2-01",
+          "text": "Sportuji hlavně kvůli tomu, co ode mě čekají druzí.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.2-02",
+          "text": "Při představě, že skončím, mám pocit viny.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.2-03",
+          "text": "Když vynechám trénink, stydím se.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.2-04",
+          "text": "Sportem si hlavně dokazuji, že za něco stojím.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.2-05",
+          "text": "Hlavní důvod, proč sportuji, jsou peníze, výhody nebo postavení.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.2-06",
+          "text": "Do soutěže jdu hlavně s myšlenkou na očekávání trenéra a rodiny.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.2-07",
+          "text": "Po špatné soutěži cítím hlavně vinu vůči druhým.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.2-08",
+          "text": "Výhra je pro mě důležitá hlavně kvůli tomu, jak mě pak vidí okolí.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.2-09",
+          "text": "Ke sportu mě vede jen vlastní chuť.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.2-10",
+          "text": "Co si o mé kariéře myslí druzí, mě v rozhodování ovlivňuje málo.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.2-11",
+          "text": "Vinu nebo stud kvůli vynechanému tréninku zažívám zřídka.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.2-12",
+          "text": "V soutěži sportuji pro sebe, bez ohledu na očekávání okolí.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "MO.3",
+      "nazev": "úkolová orientace",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "MO.3-01",
+          "text": "Úspěšně se cítím, když se naučím něco nového.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.3-02",
+          "text": "Nejvíc mě těší, když zvládnu dovednost, na které dlouho pracuji.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.3-03",
+          "text": "Dobrý trénink poznám podle toho, že jsem dnes lepší než včera.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.3-04",
+          "text": "Úspěch pro mě znamená podat svůj nejlepší možný výkon.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.3-05",
+          "text": "Po soutěži hodnotím hlavně, jak se povedly věci, na kterých pracuji.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.3-06",
+          "text": "I prohraná soutěž může být úspěch, pokud se v ní zlepšuji.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.3-07",
+          "text": "V soutěži sleduji hlavně vlastní úkoly, skóre až potom.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.3-08",
+          "text": "Když se něco zlepší, mám radost bez ohledu na výsledek.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.3-09",
+          "text": "Zlepšování je pro mě vedlejší.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.3-10",
+          "text": "Nová dovednost mě přestane bavit, jakmile je těžká.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.3-11",
+          "text": "Rozbor vlastního výkonu po soutěži přeskakuji.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "MO.3-12",
+          "text": "Vlastní pokrok sleduji jen zřídka.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "MO.4",
+      "nazev": "egová orientace",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "MO.4-01",
+          "text": "Úspěšně se cítím, když jsem lepší než ostatní.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.4-02",
+          "text": "Nejvíc mě těší porazit soupeře, o kterém se říká, že je lepší.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.4-03",
+          "text": "Dobrý trénink poznám podle toho, že jsem nejlepší ze skupiny.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.4-04",
+          "text": "Je pro mě důležité, aby ostatní viděli, že patřím mezi nejlepší.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.4-05",
+          "text": "Po soutěži mě nejdřív zajímá moje pořadí mezi ostatními.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.4-06",
+          "text": "V soutěži mě žene hlavně touha být před ostatními.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.4-07",
+          "text": "Úspěch cítím, když ostatní chybují víc než já.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.4-08",
+          "text": "Srovnávám se s ostatními i v tréninku.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.4-09",
+          "text": "Pořadí mezi ostatními je pro mě vedlejší.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.4-10",
+          "text": "Srovnávání s ostatními mě v tréninku nechává v klidu.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.4-11",
+          "text": "Po soutěži mě výsledky ostatních zajímají jen málo.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "MO.4-12",
+          "text": "V soutěži sleduji hlavně sebe, výkony ostatních málo.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "MO.5",
+      "nazev": "výlučnost sportovní identity",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "MO.5-01",
+          "text": "Kdo jsem, stojí hlavně na sportu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.5-02",
+          "text": "Většina mých myšlenek se točí kolem sportu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.5-03",
+          "text": "Bez sportu si sebe představit neumím.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.5-04",
+          "text": "Většina mých přátel je ze sportu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.5-05",
+          "text": "Špatný výkon v soutěži mi pokazí náladu na celý týden.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "MO.5-06",
+          "text": "Když se ve sportu daří špatně, cítím se špatně ve všem.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.5-07",
+          "text": "Sport je nejdůležitější část mého života.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "MO.5-08",
+          "text": "Po prohře se opírám i o věci mimo sport.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "MO.5-09",
+          "text": "Mám důležité zájmy a vztahy mimo sport.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.5-10",
+          "text": "Kromě sportu mám další oblast, ve které se cítím dobře.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.5-11",
+          "text": "Kdyby přišlo dlouhé zranění, mám se o co mimo sport opřít.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "MO.5-12",
+          "text": "Svou hodnotu jako člověka oddělím od výsledků v soutěži.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "TL.1",
+      "nazev": "tělesné napětí",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "TL.1-01",
+          "text": "Před důležitou soutěží mám sevřený žaludek.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.1-02",
+          "text": "Před startem cítím napětí ve svalech.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.1-03",
+          "text": "Před soutěží se mi zrychluje dech i tep víc, než potřebuji.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.1-04",
+          "text": "Pod tlakem se mi třesou ruce nebo nohy.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.1-05",
+          "text": "Před důležitou soutěží špatně jím.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.1-06",
+          "text": "V rozhodujících chvílích cítím, jak mi tuhne tělo.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.1-07",
+          "text": "Před soutěží se mi potí dlaně.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.1-08",
+          "text": "Noc před důležitou soutěží špatně spím kvůli napětí.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.1-09",
+          "text": "Před startem je moje tělo uvolněné.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.1-10",
+          "text": "V rozhodujících momentech se mi dobře dýchá.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.1-11",
+          "text": "Před důležitou soutěží jím a spím jako obvykle.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "TL.1-12",
+          "text": "Pod tlakem zůstávají moje pohyby volné.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "TL.2",
+      "nazev": "starosti",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "TL.2-01",
+          "text": "Před soutěží se mi v hlavě honí, co všechno se může pokazit.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.2-02",
+          "text": "Bojím se, že v soutěži podám slabý výkon.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.2-03",
+          "text": "Dny před důležitou soutěží myslím na možnou prohru.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.2-04",
+          "text": "Během soutěže se mi vracejí obavy z chyby.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.2-05",
+          "text": "Mám strach, že pod tlakem všechno pokazím.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.2-06",
+          "text": "Myšlenky na výsledek mě před soutěží zaměstnávají víc, než chci.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.2-07",
+          "text": "Při rozcvičce přemýšlím, co když to dnes nepůjde.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.2-08",
+          "text": "Obavy z důležité soutěže mi vydrží i několik dní.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.2-09",
+          "text": "Před soutěží myslím hlavně na to, co udělám, obavy nechávám stranou.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "TL.2-10",
+          "text": "Na soutěž se těším bez starostí o výsledek.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "TL.2-11",
+          "text": "Během soutěže mě obavy nechávají na pokoji.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.2-12",
+          "text": "Myšlenky na prohru mě před startem ruší jen zřídka.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "TL.3",
+      "nazev": "narušení soustředění",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "TL.3-01",
+          "text": "Pod tlakem mi pozornost utíká od úkolu.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.3-02",
+          "text": "V důležitých chvílích myslím na to, co si o mně myslí ostatní.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.3-03",
+          "text": "Když jde o hodně, těžko se soustředím na pokyny trenéra.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.3-04",
+          "text": "Během soutěže mě rozhodí publikum nebo dění kolem.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.3-05",
+          "text": "V napjaté chvíli zapomenu, co jsme si domluvili.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.3-06",
+          "text": "Pod tlakem se mi myšlenky rozutečou.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.3-07",
+          "text": "V rozhodujícím okamžiku myslím na výsledek místo na akci.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.3-08",
+          "text": "Při důležité soutěži mi v hlavě běží víc věcí najednou.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.3-09",
+          "text": "I pod velkým tlakem vnímám jen to, co mám udělat.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.3-10",
+          "text": "V rozhodujících chvílích slyším jen to, co potřebuji.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.3-11",
+          "text": "Pokyny trenéra si v napjatých chvílích pamatuji přesně.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.3-12",
+          "text": "Čím víc jde o výsledek, tím víc se soustředím na úkol.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "TL.4",
+      "nazev": "výklad napětí",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "TL.4-01",
+          "text": "Napětí před soutěží mi pomáhá podat lepší výkon.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.4-02",
+          "text": "Nervozita před startem mi říká, že se tělo chystá na výkon.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.4-03",
+          "text": "Rychlejší tep před startem mě nabudí.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.4-04",
+          "text": "Trocha strachu před soutěží mi dodá ostrost.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.4-05",
+          "text": "V napjatém momentu mi napětí dodá energii.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.4-06",
+          "text": "Motýlky v břiše před soutěží beru jako dobré znamení.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.4-07",
+          "text": "Tlak v rozhodujících chvílích mě vybičuje k lepšímu výkonu.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.4-08",
+          "text": "Napětí v těle před soutěží je pro mě palivo.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.4-09",
+          "text": "Nervozita před startem mi výkon kazí.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.4-10",
+          "text": "Když cítím napětí, bojím se, že mi svazuje pohyb.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "TL.4-11",
+          "text": "Rychlý tep a sevřený žaludek beru jako špatné znamení.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "TL.4-12",
+          "text": "V rozhodujících chvílích mě napětí brzdí.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "TL.5",
+      "nazev": "obava ze studu a zklamání",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "TL.5-01",
+          "text": "Když selžu, bojím se, že se ztrapním před ostatními.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.5-02",
+          "text": "Po chybě v soutěži mám strach, co si o mně pomyslí diváci.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.5-03",
+          "text": "Bojím se, že neúspěchem zklamu rodinu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.5-04",
+          "text": "Bojím se, že po špatném výkonu o mě trenér ztratí zájem.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.5-05",
+          "text": "Selhání pro mě znamená, že si mě lidé budou vážit méně.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.5-06",
+          "text": "Před důležitou soutěží myslím na to, jak by moje prohra vypadala očima druhých.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.5-07",
+          "text": "Za chybu pod tlakem se stydím víc než za cokoli jiného.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.5-08",
+          "text": "Bojím se, že po neúspěchu mi lidé přestanou věřit.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.5-09",
+          "text": "Blízcí mě mají rádi stejně po výhře i po prohře.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "TL.5-10",
+          "text": "Chyby před publikem mě trápí jen chvíli.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.5-11",
+          "text": "Co si o mé prohře myslí ostatní, řeším málo.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "TL.5-12",
+          "text": "V důležité soutěži mi myšlenka na ostudu přijde na mysl zřídka.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "TL.6",
+      "nazev": "přeřízení pohybu",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "TL.6-01",
+          "text": "Pod tlakem začnu hlídat, jak přesně provádím pohyb.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.6-02",
+          "text": "V důležitých chvílích přemýšlím o technice víc než v tréninku.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.6-03",
+          "text": "Když jde o hodně, snažím se pohyb vědomě řídit.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.6-04",
+          "text": "Po chybě ještě během soutěže rozebírám, co tělo udělalo špatně.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.6-05",
+          "text": "Pod tlakem se mi rozpadá pohyb, který jinak běží automaticky.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.6-06",
+          "text": "Když mě někdo sleduje, víc hlídám, jak se hýbu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.6-07",
+          "text": "Často přemýšlím o tom, jak se hýbu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.6-08",
+          "text": "Pohyb, který umím nazpaměť, pod tlakem kontroluji krok po kroku.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.6-09",
+          "text": "V soutěži nechávám pohyb plynout.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.6-10",
+          "text": "V rozhodujících chvílích se spoléhám na natrénovaný pohyb bez přemýšlení.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.6-11",
+          "text": "O technice přemýšlím v tréninku, v soutěži ji nechám být.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.6-12",
+          "text": "Pod tlakem se hýbu stejně plynule jako v tréninku.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "TL.7",
+      "nazev": "přeřízení rozhodování",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "TL.7-01",
+          "text": "Pod tlakem rozhodnutí příliš zvažuji a pak jednám pozdě.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.7-02",
+          "text": "V důležitých chvílích se bojím udělat špatné rozhodnutí.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.7-03",
+          "text": "Po soutěži se v hlavě dlouho vracím ke svým rozhodnutím.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.7-04",
+          "text": "Když zaváhám v jedné akci, váhám i v dalších.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.7-05",
+          "text": "V rozhodující chvíli mi chybí jistota, co zvolit.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.7-06",
+          "text": "Po chybném rozhodnutí o něm přemýšlím ještě dlouho během soutěže.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.7-07",
+          "text": "Víc možností v akci mě spíš zdrží, než aby pomohlo.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.7-08",
+          "text": "Pod tlakem přenechám rozhodnutí raději jiným.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.7-09",
+          "text": "V důležitých chvílích se rozhoduji rychle a jistě.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.7-10",
+          "text": "Po rozhodnutí se hned soustředím na další akci.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.7-11",
+          "text": "Pod tlakem věřím prvnímu nápadu.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.7-12",
+          "text": "Ke svým rozhodnutím ze soutěže se vracím jen při rozboru.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "TL.8",
+      "nazev": "perfekcionistické obavy",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "TL.8-01",
+          "text": "Když udělám chybu, cítím se jako horší člověk.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.8-02",
+          "text": "Bojím se chyb, protože by ukázaly moji slabost.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.8-03",
+          "text": "Rodiče nebo trenér ode mě čekají dokonalost.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.8-04",
+          "text": "Za chybu v soutěži se trestám ještě dlouho po ní.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.8-05",
+          "text": "Výkon s chybami považuji za neúspěch.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.8-06",
+          "text": "Kritiku od trenéra beru jako důkaz, že nestačím.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.8-07",
+          "text": "Během soutěže myslím víc na chyby, kterým se chci vyhnout, než na úspěch.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.8-08",
+          "text": "Jedna chyba mi dokáže zkazit dojem z jinak dobrého výkonu.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.8-09",
+          "text": "Chybu v soutěži beru jako informaci pro další trénink.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.8-10",
+          "text": "Dobrý výkon s několika chybami mě těší.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.8-11",
+          "text": "Kritiku od trenéra beru věcně.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "TL.8-12",
+          "text": "Svou hodnotu měřím i jinak než počtem chyb.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "TL.9",
+      "nazev": "výzva, nebo hrozba",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "TL.9-01",
+          "text": "Důležitou soutěž beru jako příležitost ukázat, co umím.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.9-02",
+          "text": "Před velkou soutěží cítím, že na ni mám.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.9-03",
+          "text": "Náročného soupeře vnímám jako výzvu.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.9-04",
+          "text": "Když jde o hodně, věřím, že si poradím.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.9-05",
+          "text": "Před důležitou soutěží cítím, že moje schopnosti stačí na to, co přijde.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.9-06",
+          "text": "Tlak velkých soutěží mě láká.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.9-07",
+          "text": "V rozhodujících momentech chci mít výsledek ve svých rukou.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "TL.9-08",
+          "text": "Na důležité soutěže se těším jako na šanci.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "TL.9-09",
+          "text": "Důležitá soutěž mi připadá jako zkouška, ve které můžu hodně ztratit.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "TL.9-10",
+          "text": "Před velkou soutěží pochybuji, že to zvládnu.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "TL.9-11",
+          "text": "Silný soupeř ve mně vyvolá hlavně obavu.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "TL.9-12",
+          "text": "Když jde o hodně, chci mít soutěž co nejdřív za sebou.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "DO.1",
+      "nazev": "práce s cíli",
+      "format": "C",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "DO.1-01",
+          "text": "Před tréninkem si stanovím, co chci zlepšit.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.1-02",
+          "text": "Na každou soutěž si určím konkrétní cíle pro vlastní výkon.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.1-03",
+          "text": "Své cíle si zapisuji.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.1-04",
+          "text": "Dlouhodobé cíle si rozkládám na menší kroky.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.1-05",
+          "text": "Po soutěži porovnávám výkon se svými cíli.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.1-06",
+          "text": "Cíle si nastavuji náročné, ale dosažitelné.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.1-07",
+          "text": "Během soutěže mám v hlavě jeden až dva jasné úkoly.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.1-08",
+          "text": "Cíle upravuji podle toho, jak se vyvíjí sezona.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.1-09",
+          "text": "Trénuji bez konkrétního cíle.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.1-10",
+          "text": "Do soutěže jdu bez plánu, co chci předvést.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.1-11",
+          "text": "Na své cíle během sezony zapomínám.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.1-12",
+          "text": "Po soutěži hodnotím jen výsledek.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "DO.2",
+      "nazev": "představivost",
+      "format": "C",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "DO.2-01",
+          "text": "Před soutěží si v představách přehrávám svůj výkon.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.2-02",
+          "text": "V představách si zkouším obtížné situace ze soutěže.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.2-03",
+          "text": "Při představách vnímám i pocity v těle, nejen obraz.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.2-04",
+          "text": "Novou dovednost si nejdřív přehraji v hlavě.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.2-05",
+          "text": "Před startem si představím první akce.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.2-06",
+          "text": "Po chybě si v hlavě přehraji správné provedení.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.2-07",
+          "text": "Představy mi pomáhají naladit se na výkon.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.2-08",
+          "text": "V představách si přehrávám, jak zvládám tlak.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.2-09",
+          "text": "Do soutěže jdu bez mentální přípravy.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.2-10",
+          "text": "Když si výkon představuji, obraz je rozmazaný a utíká mi.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.2-11",
+          "text": "V představách mi naskakují spíš chyby než správné provedení.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.2-12",
+          "text": "Přípravu v představách vynechám, protože mi přijde zbytečná.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "DO.3",
+      "nazev": "vnitřní řeč",
+      "format": "C",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "DO.3-01",
+          "text": "V soutěži si říkám krátké pokyny, které mě vedou.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.3-02",
+          "text": "Po chybě si řeknu větu, která mě vrátí do hry.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.3-03",
+          "text": "Když docházejí síly, povzbuzuji se v duchu.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.3-04",
+          "text": "Mám připravená slova, která mi pomáhají v těžkých chvílích.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.3-05",
+          "text": "V tréninku si vnitřní řečí připomínám, na co se soustředím.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.3-06",
+          "text": "Před startem si říkám věty, které mě nabudí.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.3-07",
+          "text": "Mluvím k sobě podobně jako dobrý trenér.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.3-08",
+          "text": "Své myšlenky v soutěži vědomě usměrňuji.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.3-09",
+          "text": "V soutěži si v duchu nadávám.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.3-10",
+          "text": "Po chybě si v duchu říkám, jak to kazím.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.3-11",
+          "text": "Myšlenky v soutěži nechávám běžet, jak chtějí.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.3-12",
+          "text": "V těžkých chvílích mluvím k sobě hůř než ke komukoli jinému.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "DO.4",
+      "nazev": "řízení aktivace",
+      "format": "C",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "DO.4-01",
+          "text": "Před soutěží se umím záměrně zklidnit.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.4-02",
+          "text": "Když potřebuji víc energie, umím se nabudit.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.4-03",
+          "text": "Ke zklidnění používám dech.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.4-04",
+          "text": "Mám rutinu, která mě dostane do ideálního naladění.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.4-05",
+          "text": "Když je nervozity moc, vím, co s tím udělat.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.4-06",
+          "text": "Během přestávek v soutěži upravuji svou úroveň energie.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.4-07",
+          "text": "Po rozrušující situaci se umím rychle uklidnit.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.4-08",
+          "text": "Poznám, jaké naladění potřebuji pro nejlepší výkon.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.4-09",
+          "text": "Nervozitu před startem nechám, ať si dělá, co chce.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.4-10",
+          "text": "V soutěži se mi energie vymkne z rukou.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.4-11",
+          "text": "Techniky na uvolnění vynechávám.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.4-12",
+          "text": "Když mě soutěž rozhodí, trvá dlouho, než se srovnám.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "DO.5",
+      "nazev": "návrat do přítomnosti",
+      "format": "C",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "DO.5-01",
+          "text": "Po chybě se hned soustředím na další akci.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.5-02",
+          "text": "Když mě rozhodí rozhodčí, rychle se vrátím k úkolu.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.5-03",
+          "text": "Rušivý moment odložím a pokračuji naplno.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.5-04",
+          "text": "Mám krátký rituál, kterým se po chybě vrátím do hry.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.5-05",
+          "text": "Po nepovedeném úseku začnu další s čistou hlavou.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.5-06",
+          "text": "Když mě vyruší publikum, vrátím pozornost během pár vteřin.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.5-07",
+          "text": "Myšlenky na to, co už se stalo, v soutěži rychle pustím.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.5-08",
+          "text": "I po sérii chyb umím začít znovu od další akce.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.5-09",
+          "text": "Chyba mi v hlavě zůstane několik dalších akcí.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.5-10",
+          "text": "Když mě něco rozhodí, zbytek soutěže je horší.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.5-11",
+          "text": "Po chybě myslím na to, co se stalo, místo na to, co přijde.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.5-12",
+          "text": "Po sporném rozhodnutí rozhodčího mi trvá dlouho, než se vrátím do hry.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "DO.6",
+      "nazev": "přerámování",
+      "format": "C",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "DO.6-01",
+          "text": "Když se něco nepovede, hledám, co se z toho dá naučit.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.6-02",
+          "text": "Na nepříjemnou situaci se zkusím podívat z jiného úhlu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.6-03",
+          "text": "Když mě něco rozhodí, změním to, jak o tom přemýšlím.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.6-04",
+          "text": "V těžké chvíli si připomenu, co mám pod kontrolou.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.6-05",
+          "text": "Nepříznivé skóre beru jako úkol, který jde řešit.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.6-06",
+          "text": "Když se mi něco nelíbí, hledám pohled, který mi pomůže.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.6-07",
+          "text": "Po prohře hledám, co bylo dobré.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.6-08",
+          "text": "Když cítím vztek, zkusím situaci pojmenovat jinak.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.6-09",
+          "text": "Na nepříjemných věcech ulpím a točím se v nich.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.6-10",
+          "text": "Nepříznivý průběh soutěže vidím jako konec.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.6-11",
+          "text": "Nepříjemnou situaci vidím jen jedním způsobem.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.6-12",
+          "text": "Po prohře myslím jen na to, co bylo špatně.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "DO.7",
+      "nazev": "potlačení",
+      "format": "C",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "DO.7-01",
+          "text": "Emoce si nechávám pro sebe.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.7-02",
+          "text": "Když mě něco trápí, skrývám to před ostatními.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.7-03",
+          "text": "V soutěži své emoce schovávám za kamennou tvář.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.7-04",
+          "text": "Po prohře dělám, že je všechno v pořádku.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.7-05",
+          "text": "Nervozitu před ostatními zakrývám.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.7-06",
+          "text": "Radost po úspěchu držím na uzdě.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.7-07",
+          "text": "Vztek v soutěži polykám.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.7-08",
+          "text": "Emoce potlačuji, i když mě to stojí sílu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.7-09",
+          "text": "Ostatní poznají, jak se cítím.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.7-10",
+          "text": "Emoce dávám najevo přiměřeně situaci.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.7-11",
+          "text": "Když mě něco trápí, řeknu to nahlas.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.7-12",
+          "text": "V soutěži nechávám emoce projevit, když mi to pomáhá.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "DO.8",
+      "nazev": "sebeřízené učení",
+      "format": "C",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "DO.8-01",
+          "text": "Po tréninku vyhodnotím, co se povedlo a co zlepšit.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.8-02",
+          "text": "Vím, proč dělám každé cvičení v tréninku.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.8-03",
+          "text": "Sleduji svůj pokrok v konkrétních dovednostech.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.8-04",
+          "text": "Když postup přestane fungovat, hledám jiný.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.8-05",
+          "text": "Po soutěži si rozeberu klíčové situace.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.8-06",
+          "text": "Procházím videa nebo data ze svých výkonů.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.8-07",
+          "text": "Mimo trénink si hledám informace, jak se zlepšit.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.8-08",
+          "text": "Z chyb v soutěži si odnesu konkrétní úkol do tréninku.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.8-09",
+          "text": "Trénink pro mě končí odchodem ze sportoviště.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.8-10",
+          "text": "Na čem pracuji, určuje jen trenér.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.8-11",
+          "text": "Jak se zlepšuji, zjistím až od trenéra.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.8-12",
+          "text": "Po soutěži přejdu k dalšímu bez rozboru.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "DO.9",
+      "nazev": "vysoké nároky",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "DO.9-01",
+          "text": "Stanovuji si náročné standardy.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.9-02",
+          "text": "Od sebe čekám víc než většina sportovců.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.9-03",
+          "text": "Chci ve svém sportu dosáhnout maxima svých možností.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.9-04",
+          "text": "Spokojím se jen s výkonem na hranici svých možností.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.9-05",
+          "text": "Mám jasnou představu o vysoké úrovni, na které chci soutěžit.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.9-06",
+          "text": "V tréninku si dávám laťku výš, než je nutné.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.9-07",
+          "text": "V soutěži chci podat výkon, který splní moje vysoké nároky.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.9-08",
+          "text": "Dobrý výkon mě žene k ještě lepšímu.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.9-09",
+          "text": "Stačí mi průměrný výkon.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.9-10",
+          "text": "Nároky na sebe mám nízké.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.9-11",
+          "text": "V soutěži mi stačí, když výkon projde.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.9-12",
+          "text": "Snadné cíle mi vyhovují víc než náročné.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "DO.10",
+      "nazev": "laskavost k sobě po chybě",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "DO.10-01",
+          "text": "Po chybě se k sobě chovám jako k dobrému příteli.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.10-02",
+          "text": "Když se v soutěži daří špatně, mluvím k sobě vlídně.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.10-03",
+          "text": "Po prohře si připomenu, že chyby dělá každý sportovec.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.10-04",
+          "text": "Se svými slabinami mám trpělivost.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.10-05",
+          "text": "Po chybě cítím k sobě porozumění.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.10-06",
+          "text": "Když se mi něco nepovede, dopřeji si trochu péče.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.10-07",
+          "text": "V těžkém období k sobě přistupuji laskavě.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "DO.10-08",
+          "text": "Chybu v soutěži vnímám jako něco, co zažívají i ostatní.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "DO.10-09",
+          "text": "Po chybě se sebou zacházím tvrdě.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "DO.10-10",
+          "text": "Na své nedostatky se zlobím.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.10-11",
+          "text": "Když selžu, cítím se v tom osamoceně.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "DO.10-12",
+          "text": "Po chybě v soutěži se odsuzuji.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "OD.1",
+      "nazev": "mentální odolnost",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "OD.1-01",
+          "text": "Výkon držím i v nepříznivých podmínkách.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.1-02",
+          "text": "Když jde do tuhého, přidám.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.1-03",
+          "text": "Obtíže mě v cestě za cílem spíš zocelí.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.1-04",
+          "text": "Pod tlakem podávám výkon, na který mám.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.1-05",
+          "text": "V nepříjemných podmínkách podávám stabilní výkon.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.1-06",
+          "text": "Věřím si i po sérii neúspěchů.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.1-07",
+          "text": "Soustředění vydržím do konce soutěže.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.1-08",
+          "text": "Těžké chvíle vydržím lépe než většina soupeřů.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.1-09",
+          "text": "Při nepříznivém skóre to vzdávám.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "OD.1-10",
+          "text": "Při potížích v tréninku polevím.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.1-11",
+          "text": "Když se něco pokazí, ztrácím víru v sebe.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.1-12",
+          "text": "V nepříjemných podmínkách podávám výrazně horší výkon.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "OD.2",
+      "nazev": "zotavení ze stresu",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "OD.2-01",
+          "text": "Po náročném období se rychle vrátím do normálu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.2-02",
+          "text": "Stresující události mě rozhodí jen nakrátko.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.2-03",
+          "text": "Po těžké prohře se druhý den vracím do pohody.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.2-04",
+          "text": "Po nepříjemné události se rychle vzpamatuji.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.2-05",
+          "text": "Zátěž zvládám bez velkých výkyvů nálady.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.2-06",
+          "text": "Po zranění nebo nemoci se psychicky vracím rychle.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.2-07",
+          "text": "Po neúspěšné sezoně se rychle zvednu.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.2-08",
+          "text": "Po konfliktu v týmu se brzy srovnám.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.2-09",
+          "text": "Po stresující události se dlouho vzpamatovávám.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.2-10",
+          "text": "Těžké období mě rozhodí na dlouho.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.2-11",
+          "text": "Po velké prohře mi trvá dny až týdny, než se srovnám.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "OD.2-12",
+          "text": "Náročné změny v životě zvládám jen velmi těžko.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "OD.3",
+      "nazev": "vyčerpání",
+      "format": "P",
+      "ramec": "4t",
+      "polozky": [
+        {
+          "id": "OD.3-01",
+          "text": "Trénink mě vyčerpává víc, než stačím dobrat.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.3-02",
+          "text": "Cítím velkou fyzickou únavu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.3-03",
+          "text": "Po tréninku mi chybí energie na cokoli dalšího.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.3-04",
+          "text": "Sport mi bere víc sil, než mi dává.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.3-05",
+          "text": "Na soutěže nastupuji s únavou.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.3-06",
+          "text": "Ráno se mi těžko vstává na trénink.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.3-07",
+          "text": "Cítím psychickou únavu ze sportu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.3-08",
+          "text": "V soutěži mi dřív docházejí síly.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.3-09",
+          "text": "Mám dost energie na trénink i na život mimo sport.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.3-10",
+          "text": "Do tréninku jdu s energií.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.3-11",
+          "text": "Na soutěže nastupuji s energií.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "OD.3-12",
+          "text": "Zátěž zvládám bez vyčerpání.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "OD.4",
+      "nazev": "pokles pocitu úspěchu",
+      "format": "P",
+      "ramec": "4t",
+      "polozky": [
+        {
+          "id": "OD.4-01",
+          "text": "Mám pocit, že stojím na místě.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.4-02",
+          "text": "Ve sportu mám pocit marnosti.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.4-03",
+          "text": "Moje výkony mi přijdou pod úrovní, na kterou mám.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.4-04",
+          "text": "Pochybuji o svém talentu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.4-05",
+          "text": "V soutěžích se cítím horší než dřív.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.4-06",
+          "text": "Úspěchy mi poslední dobou unikají.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.4-07",
+          "text": "Práce v tréninku mi přijde bez výsledku.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.4-08",
+          "text": "Mám pocit, že dělám víc a přináší to méně.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.4-09",
+          "text": "Vidím, že se ve sportu posouvám.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.4-10",
+          "text": "Ve sportu dosahuji věcí, které jsou pro mě důležité.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.4-11",
+          "text": "Ze svých výkonů v soutěži mám dobrý pocit.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "OD.4-12",
+          "text": "Cítím, že tréninky přinášejí výsledky.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "OD.5",
+      "nazev": "ztráta vztahu ke sportu",
+      "format": "P",
+      "ramec": "4t",
+      "polozky": [
+        {
+          "id": "OD.5-01",
+          "text": "Na sportu mi přestává záležet.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.5-02",
+          "text": "Je mi jedno, jak mi to jde.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.5-03",
+          "text": "Přemýšlím o konci se sportem.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.5-04",
+          "text": "Výsledky mi přijdou lhostejné.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.5-05",
+          "text": "Soutěže mě přestávají bavit.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.5-06",
+          "text": "Sport mi přijde méně důležitý než dřív.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.5-07",
+          "text": "Do tréninku chodím ze setrvačnosti.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.5-08",
+          "text": "Před soutěží mi chybí chuť bojovat.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.5-09",
+          "text": "Sport je pro mě pořád důležitý.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.5-10",
+          "text": "Na výsledcích mi záleží.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.5-11",
+          "text": "Na soutěže se těším.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "OD.5-12",
+          "text": "Chci ve sportu pokračovat co nejdéle.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "OD.6",
+      "nazev": "zotavení",
+      "format": "C",
+      "ramec": "4t",
+      "polozky": [
+        {
+          "id": "OD.6-01",
+          "text": "Mám dost času na odpočinek mezi tréninky.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.6-02",
+          "text": "Po náročném tréninku se do dalšího dne zotavím.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.6-03",
+          "text": "Mimo sport dělám věci, které mě nabíjejí.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.6-04",
+          "text": "Mám čas na přátele a rodinu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.6-05",
+          "text": "Po soutěži si dopřeji skutečný odpočinek.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.6-06",
+          "text": "Cítím se odpočatě.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.6-07",
+          "text": "Mezi soutěžemi se stihnu fyzicky i psychicky dobít.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.6-08",
+          "text": "Mám chvíle, kdy na sport vůbec nemyslím.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.6-09",
+          "text": "Z jednoho tréninku jdu do dalšího bez odpočinku.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.6-10",
+          "text": "Myšlenky na sport mě pronásledují i ve volnu.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.6-11",
+          "text": "Mezi soutěžemi mi chybí čas na zotavení.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "OD.6-12",
+          "text": "Škola, práce nebo cestování mi berou čas na odpočinek.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "OD.7",
+      "nazev": "spánek",
+      "format": "C",
+      "ramec": "4t",
+      "polozky": [
+        {
+          "id": "OD.7-01",
+          "text": "Usínám do půl hodiny.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.7-02",
+          "text": "Spím aspoň osm hodin.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.7-03",
+          "text": "Ráno se cítím odpočatě.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.7-04",
+          "text": "Spím v noci bez probouzení.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.7-05",
+          "text": "Noc před soutěží spím dobře.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.7-06",
+          "text": "Chodím spát v podobnou hodinu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.7-07",
+          "text": "Po večerní soutěži se mi dobře usíná.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "OD.7-08",
+          "text": "Probouzím se bez potíží.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "OD.7-09",
+          "text": "Večer dlouho ležím a nemohu usnout.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.7-10",
+          "text": "V noci se budím a těžko znovu usínám.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "OD.7-11",
+          "text": "Po večerní soutěži usínám až dlouho po půlnoci.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "OD.7-12",
+          "text": "Přes den mě přepadá ospalost.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "VZ.1",
+      "nazev": "vztah s trenérem",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "VZ.1-01",
+          "text": "Trenérovi věřím.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.1-02",
+          "text": "S trenérem si rozumíme.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.1-03",
+          "text": "Na trenéra se můžu spolehnout i v těžkých chvílích.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.1-04",
+          "text": "S trenérem táhneme za jeden provaz.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.1-05",
+          "text": "V soutěži cítím, že trenér stojí za mnou.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "VZ.1-06",
+          "text": "Na spolupráci s trenérem mi záleží.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.1-07",
+          "text": "Po soutěži s trenérem otevřeně rozebereme, co se stalo.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "VZ.1-08",
+          "text": "Trenér mě zná a ví, co potřebuji.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.1-09",
+          "text": "S trenérem se míjíme.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "VZ.1-10",
+          "text": "Svoje problémy si před trenérem nechávám.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "VZ.1-11",
+          "text": "V soutěži mám pocit, že trenér stojí proti mně.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "VZ.1-12",
+          "text": "Spolupráce s trenérem je pro mě spíš povinnost.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    },
+    {
+      "kod": "VZ.2",
+      "nazev": "koučovatelnost",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "VZ.2-01",
+          "text": "O zpětnou vazbu si říkám z vlastní iniciativy.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.2-02",
+          "text": "Kritika od trenéra mi ukazuje, co zlepšit.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.2-03",
+          "text": "Nový pokyn zkouším hned v příštím tréninku.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.2-04",
+          "text": "Když trenér něco vysvětlí, zapracuji to rychle.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.2-05",
+          "text": "Pokyny během soutěže přijímám i v napjaté chvíli.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "VZ.2-06",
+          "text": "Po soutěži chci vědět, co mám dělat jinak.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "VZ.2-07",
+          "text": "Zpětnou vazbu přijímám i od spoluhráčů a kolegů.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.2-08",
+          "text": "Když s pokynem nesouhlasím, zeptám se proč a pak ho zkusím.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.2-09",
+          "text": "Kritiku beru osobně.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "VZ.2-10",
+          "text": "Pokyny od trenéra si upravuji podle sebe.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "VZ.2-11",
+          "text": "Pokyny během soutěže přecházím.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "VZ.2-12",
+          "text": "Rozbor soutěže s trenérem odkládám.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "VZ.3",
+      "nazev": "otevřenost",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "VZ.3-01",
+          "text": "O problémech mluvím včas.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.3-02",
+          "text": "Když s něčím nesouhlasím, řeknu to přímo.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.3-03",
+          "text": "Trenérovi řeknu i nepříjemnou věc.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.3-04",
+          "text": "O bolesti nebo zranění dám vědět hned.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.3-05",
+          "text": "V soutěži řeknu spoluhráčům nebo trenérovi, co potřebuji.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "VZ.3-06",
+          "text": "Když mě něco trápí, svěřím se někomu z týmu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.3-07",
+          "text": "Po soutěži řeknu, co se podle mě nepovedlo.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "VZ.3-08",
+          "text": "O tom, jak se cítím, dokážu mluvit.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.3-09",
+          "text": "O problémech mlčím, dokud nejsou velké.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "VZ.3-10",
+          "text": "Nesouhlas si nechám pro sebe.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "VZ.3-11",
+          "text": "Bolest před trenérem tajím.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "VZ.3-12",
+          "text": "V soutěži se bojím říct, co potřebuji.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "VZ.4",
+      "nazev": "úkolová soudržnost",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "VZ.4-01",
+          "text": "V týmu táhneme za jeden provaz.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.4-02",
+          "text": "Všichni v týmu chceme stejný výsledek.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.4-03",
+          "text": "Za cíle týmu cítíme společnou odpovědnost.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.4-04",
+          "text": "V soutěži si pomáháme, i když to nikdo nevidí.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "VZ.4-05",
+          "text": "O tom, jak k výkonu dojít, se v týmu shodneme.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.4-06",
+          "text": "V těžkých chvílích soutěže držíme při sobě.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "VZ.4-07",
+          "text": "Každý v týmu ví, co je jeho úkol.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.4-08",
+          "text": "Po prohře hledáme řešení společně.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "VZ.4-09",
+          "text": "Každý v týmu jede hlavně za svým.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "VZ.4-10",
+          "text": "Cíle týmu jsou pro některé vedlejší.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "VZ.4-11",
+          "text": "V soutěži se hádáme, místo abychom si pomohli.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "VZ.4-12",
+          "text": "Po prohře hledáme viníka mezi sebou.",
+          "smer": "-",
+          "soutez": true
+        }
+      ]
+    },
+    {
+      "kod": "VZ.5",
+      "nazev": "psychologické bezpečí",
+      "format": "P",
+      "ramec": "rys",
+      "polozky": [
+        {
+          "id": "VZ.5-01",
+          "text": "V týmu se dá přiznat chyba bez trestu.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.5-02",
+          "text": "Nesouhlas s trenérem se u nás dá říct nahlas.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.5-03",
+          "text": "V týmu můžu zkusit něco nového i s rizikem chyby.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.5-04",
+          "text": "V soutěži si troufnu riskovat, tým za mnou stojí.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "VZ.5-05",
+          "text": "O pomoc si v týmu říkám bez obav.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.5-06",
+          "text": "Po chybě v soutěži mě spoluhráči podrží.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "VZ.5-07",
+          "text": "V týmu se berou vážně názory všech.",
+          "smer": "+",
+          "soutez": false
+        },
+        {
+          "id": "VZ.5-08",
+          "text": "Na poradě po soutěži se dá mluvit otevřeně.",
+          "smer": "+",
+          "soutez": true
+        },
+        {
+          "id": "VZ.5-09",
+          "text": "Za chybu se u nás platí posměchem nebo trestem.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "VZ.5-10",
+          "text": "Nesouhlas je v týmu lepší si nechat pro sebe.",
+          "smer": "-",
+          "soutez": false
+        },
+        {
+          "id": "VZ.5-11",
+          "text": "Po chybě v soutěži cítím od týmu odsudek.",
+          "smer": "-",
+          "soutez": true
+        },
+        {
+          "id": "VZ.5-12",
+          "text": "Některé věci se u nás radši neříkají.",
+          "smer": "-",
+          "soutez": false
+        }
+      ]
+    }
+  ],
+  "vinety": [
+    {
+      "id": "TL.V-01",
+      "skupina": "TL.V",
+      "situace": "Je rozhodující moment soutěže a výsledek závisí na tvé další akci. Dívají se lidé, na jejichž názoru ti záleží.",
+      "reakce": [
+        {
+          "id": "TL.V-01A",
+          "text": "Soustředím se na první krok své rutiny.",
+          "klic": "++"
+        },
+        {
+          "id": "TL.V-01B",
+          "text": "Myslím na to, co bude, když to nevyjde.",
+          "klic": "--"
+        },
+        {
+          "id": "TL.V-01C",
+          "text": "Hlídám každý detail pohybu.",
+          "klic": "-"
+        },
+        {
+          "id": "TL.V-01D",
+          "text": "Zhluboka se nadechnu a jdu do toho naplno.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "TL.V-02",
+      "skupina": "TL.V",
+      "situace": "Trenér ti před soutěží řekne, že dnes dostaneš roli, která je pro tebe nová.",
+      "reakce": [
+        {
+          "id": "TL.V-02A",
+          "text": "Zeptám se, co přesně ode mě trenér v té roli čeká.",
+          "klic": "++"
+        },
+        {
+          "id": "TL.V-02B",
+          "text": "Zvolím co nejopatrnější výkon, ať nic nezkazím.",
+          "klic": "-"
+        },
+        {
+          "id": "TL.V-02C",
+          "text": "Beru to jako příležitost ukázat se.",
+          "klic": "+"
+        },
+        {
+          "id": "TL.V-02D",
+          "text": "Celou dobu přemýšlím, proč to trenér udělal.",
+          "klic": "--"
+        }
+      ]
+    },
+    {
+      "id": "TL.V-03",
+      "skupina": "TL.V",
+      "situace": "Vedeš, soupeř začíná dotahovat a ty cítíš, jak ti tuhne tělo.",
+      "reakce": [
+        {
+          "id": "TL.V-03A",
+          "text": "Stáhnu se a jdu na jistotu.",
+          "klic": "-"
+        },
+        {
+          "id": "TL.V-03B",
+          "text": "Vrátím se k tomu, co fungovalo na začátku.",
+          "klic": "++"
+        },
+        {
+          "id": "TL.V-03C",
+          "text": "Pořád kontroluji skóre a počítám, kolik zbývá.",
+          "klic": "--"
+        },
+        {
+          "id": "TL.V-03D",
+          "text": "Uvolním ramena, nadechnu se a vrátím se k úkolu.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "TL.V-04",
+      "skupina": "TL.V",
+      "situace": "V rozhodující chvíli máš dvě možnosti: jistou volbu s malým účinkem, nebo odvážnější, která může rozhodnout. Na rozhodnutí máš vteřinu.",
+      "reakce": [
+        {
+          "id": "TL.V-04A",
+          "text": "Zvolím tu, kterou máme natrénovanou pro tuhle situaci.",
+          "klic": "++"
+        },
+        {
+          "id": "TL.V-04B",
+          "text": "Zaváhám tak dlouho, že šance zmizí.",
+          "klic": "--"
+        },
+        {
+          "id": "TL.V-04C",
+          "text": "Vyberu jistou volbu, ať nemůžu nic pokazit.",
+          "klic": "-"
+        },
+        {
+          "id": "TL.V-04D",
+          "text": "Věřím prvnímu instinktu a jdu do toho.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "TL.V-05",
+      "skupina": "TL.V",
+      "situace": "Těsně před klíčovou akcí rozhodne rozhodčí podle tebe nespravedlivě.",
+      "reakce": [
+        {
+          "id": "TL.V-05A",
+          "text": "Nechám to být a soustředím se na další akci.",
+          "klic": "++"
+        },
+        {
+          "id": "TL.V-05B",
+          "text": "Hádám se s rozhodčím.",
+          "klic": "--"
+        },
+        {
+          "id": "TL.V-05C",
+          "text": "V hlavě si to přehrávám ještě během akce.",
+          "klic": "-"
+        },
+        {
+          "id": "TL.V-05D",
+          "text": "Krátce si řeknu svůj klíčový pokyn a pokračuji.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "TL.V-06",
+      "skupina": "TL.V",
+      "situace": "Před důležitou soutěží zjistíš, že se na tebe přijdou podívat skauti nebo reprezentační trenér.",
+      "reakce": [
+        {
+          "id": "TL.V-06A",
+          "text": "Připravím se stejně jako na každou jinou soutěž.",
+          "klic": "++"
+        },
+        {
+          "id": "TL.V-06B",
+          "text": "Snažím se předvést něco výjimečného.",
+          "klic": "-"
+        },
+        {
+          "id": "TL.V-06C",
+          "text": "Celou dobu myslím na to, co vidí.",
+          "klic": "--"
+        },
+        {
+          "id": "TL.V-06D",
+          "text": "Beru to jako šanci a těším se na to.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "TL.V-07",
+      "skupina": "TL.V",
+      "situace": "Po první polovině soutěže prohráváš a víš, že máš na víc.",
+      "reakce": [
+        {
+          "id": "TL.V-07A",
+          "text": "S trenérem si stanovím jeden až dva konkrétní úkoly na zbytek.",
+          "klic": "++"
+        },
+        {
+          "id": "TL.V-07B",
+          "text": "Začnu riskovat všechno najednou.",
+          "klic": "-"
+        },
+        {
+          "id": "TL.V-07C",
+          "text": "Rezignuji, dnes to není můj den.",
+          "klic": "--"
+        },
+        {
+          "id": "TL.V-07D",
+          "text": "Připomenu si, co funguje, a začnu od další akce.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "TL.V-08",
+      "skupina": "TL.V",
+      "situace": "Jde o rozhodující pokus. Minule ti ve stejné situaci nevyšel.",
+      "reakce": [
+        {
+          "id": "TL.V-08A",
+          "text": "Myslím na minulý nezdar.",
+          "klic": "--"
+        },
+        {
+          "id": "TL.V-08B",
+          "text": "Projdu svou rutinu stejně jako v tréninku.",
+          "klic": "++"
+        },
+        {
+          "id": "TL.V-08C",
+          "text": "Pohyb provádím opatrněji než obvykle.",
+          "klic": "-"
+        },
+        {
+          "id": "TL.V-08D",
+          "text": "Představím si, jak ho provádím správně.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "TL.V-09",
+      "skupina": "TL.V",
+      "situace": "Soupeř nebo někdo z okolí tě před startem slovně provokuje.",
+      "reakce": [
+        {
+          "id": "TL.V-09A",
+          "text": "Vrátím se ke své přípravě.",
+          "klic": "++"
+        },
+        {
+          "id": "TL.V-09B",
+          "text": "Odpovím stejně.",
+          "klic": "--"
+        },
+        {
+          "id": "TL.V-09C",
+          "text": "Zlost využiji jako energii, ale dál sleduji svůj plán.",
+          "klic": "+"
+        },
+        {
+          "id": "TL.V-09D",
+          "text": "Celou soutěž chci tomu člověku něco dokázat.",
+          "klic": "-"
+        }
+      ]
+    },
+    {
+      "id": "TL.V-10",
+      "skupina": "TL.V",
+      "situace": "Na poslední chvíli se změní podmínky: čas startu, místo nebo počasí.",
+      "reakce": [
+        {
+          "id": "TL.V-10A",
+          "text": "Upravím rozcvičení a soustředím se na to, co mám v moci.",
+          "klic": "++"
+        },
+        {
+          "id": "TL.V-10B",
+          "text": "Rozčiluje mě to a myslím na to i během soutěže.",
+          "klic": "--"
+        },
+        {
+          "id": "TL.V-10C",
+          "text": "Beru to jako věc, kterou mají všichni stejně.",
+          "klic": "+"
+        },
+        {
+          "id": "TL.V-10D",
+          "text": "Začnu pochybovat o celé přípravě.",
+          "klic": "-"
+        }
+      ]
+    },
+    {
+      "id": "TL.V-11",
+      "skupina": "TL.V",
+      "situace": "V závěru zbývá jedna rozhodující akce a trenér se tě zeptá, jestli ji chceš vzít na sebe.",
+      "reakce": [
+        {
+          "id": "TL.V-11A",
+          "text": "Vezmu ji.",
+          "klic": "++"
+        },
+        {
+          "id": "TL.V-11B",
+          "text": "Přenechám ji někomu, komu to dnes jde lépe.",
+          "klic": "-"
+        },
+        {
+          "id": "TL.V-11C",
+          "text": "Vezmu ji, i když cítím nervozitu, a soustředím se na rutinu.",
+          "klic": "+"
+        },
+        {
+          "id": "TL.V-11D",
+          "text": "Dělám, že otázku neslyším.",
+          "klic": "--"
+        }
+      ]
+    },
+    {
+      "id": "TL.V-12",
+      "skupina": "TL.V",
+      "situace": "Soupeř je výrazně výš v žebříčku a všichni čekají, že prohraješ.",
+      "reakce": [
+        {
+          "id": "TL.V-12A",
+          "text": "Nemám co ztratit a jdu do toho naplno.",
+          "klic": "++"
+        },
+        {
+          "id": "TL.V-12B",
+          "text": "Soustředím se hlavně na to, ať prohra není vysoká.",
+          "klic": "-"
+        },
+        {
+          "id": "TL.V-12C",
+          "text": "Držím se vlastního plánu, jméno soupeře nechám stranou.",
+          "klic": "+"
+        },
+        {
+          "id": "TL.V-12D",
+          "text": "Už před začátkem se smiřuji s porážkou.",
+          "klic": "--"
+        }
+      ]
+    },
+    {
+      "id": "DO.V-01",
+      "skupina": "DO.V",
+      "situace": "V úvodu soutěže uděláš hrubou chybu, která stojí bod nebo čas.",
+      "reakce": [
+        {
+          "id": "DO.V-01A",
+          "text": "Řeknu si svůj pokyn a soustředím se na další akci.",
+          "klic": "++"
+        },
+        {
+          "id": "DO.V-01B",
+          "text": "Po zbytek soutěže se snažím chybu vynahradit za každou cenu.",
+          "klic": "-"
+        },
+        {
+          "id": "DO.V-01C",
+          "text": "V hlavě si ji přehrávám dál.",
+          "klic": "--"
+        },
+        {
+          "id": "DO.V-01D",
+          "text": "Krátce si ji pojmenuji a pustím ji.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "DO.V-02",
+      "skupina": "DO.V",
+      "situace": "Uděláš chybu a trenér na tebe před ostatními křičí.",
+      "reakce": [
+        {
+          "id": "DO.V-02A",
+          "text": "Vezmu si z toho věcnou informaci a pokračuji.",
+          "klic": "++"
+        },
+        {
+          "id": "DO.V-02B",
+          "text": "Stáhnu se a riskuji co nejméně.",
+          "klic": "-"
+        },
+        {
+          "id": "DO.V-02C",
+          "text": "Odmlouvám.",
+          "klic": "--"
+        },
+        {
+          "id": "DO.V-02D",
+          "text": "Promluvím si s ním po soutěži.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "DO.V-03",
+      "skupina": "DO.V",
+      "situace": "Tři chyby za sebou. Cítíš, že se ti soutěž vymyká.",
+      "reakce": [
+        {
+          "id": "DO.V-03A",
+          "text": "Zjednoduším si úkol na něco, co určitě zvládnu.",
+          "klic": "++"
+        },
+        {
+          "id": "DO.V-03B",
+          "text": "Myslím na to, že dnes je všechno špatně.",
+          "klic": "--"
+        },
+        {
+          "id": "DO.V-03C",
+          "text": "Použiji svůj rituál pro restart.",
+          "klic": "+"
+        },
+        {
+          "id": "DO.V-03D",
+          "text": "Zrychlím, ať se to rychle zlomí.",
+          "klic": "-"
+        }
+      ]
+    },
+    {
+      "id": "DO.V-04",
+      "skupina": "DO.V",
+      "situace": "Po prohrané soutěži si na sociálních sítích přečteš ostrou kritiku svého výkonu.",
+      "reakce": [
+        {
+          "id": "DO.V-04A",
+          "text": "Kritiku od lidí mimo tým pouštím z hlavy.",
+          "klic": "+"
+        },
+        {
+          "id": "DO.V-04B",
+          "text": "Čtu komentáře dál a dál.",
+          "klic": "--"
+        },
+        {
+          "id": "DO.V-04C",
+          "text": "Výkon rozeberu s trenérem a zbytek pustím.",
+          "klic": "++"
+        },
+        {
+          "id": "DO.V-04D",
+          "text": "Odpovídám na komentáře.",
+          "klic": "-"
+        }
+      ]
+    },
+    {
+      "id": "DO.V-05",
+      "skupina": "DO.V",
+      "situace": "Tvoje chyba rozhodla o prohře týmu nebo o ztrátě medaile.",
+      "reakce": [
+        {
+          "id": "DO.V-05A",
+          "text": "Uznám ji a řeknu, co si z ní beru.",
+          "klic": "++"
+        },
+        {
+          "id": "DO.V-05B",
+          "text": "Vyhýbám se ostatním.",
+          "klic": "-"
+        },
+        {
+          "id": "DO.V-05C",
+          "text": "Dny si ji vyčítám.",
+          "klic": "--"
+        },
+        {
+          "id": "DO.V-05D",
+          "text": "Dovolím si smutek a pak se vrátím k tréninku.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "DO.V-06",
+      "skupina": "DO.V",
+      "situace": "V tréninku ti opakovaně nejde nová dovednost a ostatní ji už umí.",
+      "reakce": [
+        {
+          "id": "DO.V-06A",
+          "text": "Požádám trenéra o jiný způsob vysvětlení.",
+          "klic": "++"
+        },
+        {
+          "id": "DO.V-06B",
+          "text": "Vzdám to a vrátím se k tomu, co umím.",
+          "klic": "--"
+        },
+        {
+          "id": "DO.V-06C",
+          "text": "Trénuji ji navíc mimo trénink.",
+          "klic": "+"
+        },
+        {
+          "id": "DO.V-06D",
+          "text": "Začnu si myslet, že na to nemám.",
+          "klic": "-"
+        }
+      ]
+    },
+    {
+      "id": "DO.V-07",
+      "skupina": "DO.V",
+      "situace": "Na začátku důležité soutěže chybuješ a slyšíš, jak publikum reaguje.",
+      "reakce": [
+        {
+          "id": "DO.V-07A",
+          "text": "Zaměřím pozornost na svůj další úkol.",
+          "klic": "++"
+        },
+        {
+          "id": "DO.V-07B",
+          "text": "Myslím na to, co si o mně lidé myslí.",
+          "klic": "--"
+        },
+        {
+          "id": "DO.V-07C",
+          "text": "Další akci zvolím co nejjistěji.",
+          "klic": "-"
+        },
+        {
+          "id": "DO.V-07D",
+          "text": "Nadechnu se a zopakuji svou rutinu.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "DO.V-08",
+      "skupina": "DO.V",
+      "situace": "Po špatném výkonu tě trenér na příští soutěž nenominuje nebo posadí na lavičku.",
+      "reakce": [
+        {
+          "id": "DO.V-08A",
+          "text": "Zeptám se, co konkrétně mám zlepšit.",
+          "klic": "++"
+        },
+        {
+          "id": "DO.V-08B",
+          "text": "Trénuji s menší chutí.",
+          "klic": "--"
+        },
+        {
+          "id": "DO.V-08C",
+          "text": "Beru to jako motivaci a pracuji dál.",
+          "klic": "+"
+        },
+        {
+          "id": "DO.V-08D",
+          "text": "Stěžuji si ostatním.",
+          "klic": "-"
+        }
+      ]
+    },
+    {
+      "id": "DO.V-09",
+      "skupina": "DO.V",
+      "situace": "Zranění tě vyřadí na šest týdnů těsně před vrcholem sezony.",
+      "reakce": [
+        {
+          "id": "DO.V-09A",
+          "text": "Se zdravotníky a trenérem si udělám plán návratu.",
+          "klic": "++"
+        },
+        {
+          "id": "DO.V-09B",
+          "text": "Myslím hlavně na to, co mi uteče.",
+          "klic": "-"
+        },
+        {
+          "id": "DO.V-09C",
+          "text": "Stahuji se od týmu.",
+          "klic": "--"
+        },
+        {
+          "id": "DO.V-09D",
+          "text": "Využiji čas na práci, na kterou jindy nemám prostor.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "DO.V-10",
+      "skupina": "DO.V",
+      "situace": "Uděláš chybu, soupeř ji okamžitě potrestá a ještě tě provokuje.",
+      "reakce": [
+        {
+          "id": "DO.V-10A",
+          "text": "Vrátím se k plánu na další akci.",
+          "klic": "++"
+        },
+        {
+          "id": "DO.V-10B",
+          "text": "Chci mu to hned vrátit.",
+          "klic": "-"
+        },
+        {
+          "id": "DO.V-10C",
+          "text": "Ztratím hlavu.",
+          "klic": "--"
+        },
+        {
+          "id": "DO.V-10D",
+          "text": "Krátce se nadechnu a řeknu si pokyn.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "DO.V-11",
+      "skupina": "DO.V",
+      "situace": "V tréninku podáváš dlouhodobě dobré výkony, ale v soutěži se ti opakovaně nedaří.",
+      "reakce": [
+        {
+          "id": "DO.V-11A",
+          "text": "S trenérem hledám, čím se soutěž liší od tréninku.",
+          "klic": "++"
+        },
+        {
+          "id": "DO.V-11B",
+          "text": "Začnu pochybovat, jestli na to mám.",
+          "klic": "--"
+        },
+        {
+          "id": "DO.V-11C",
+          "text": "Do tréninku přidám situace, které soutěž napodobují.",
+          "klic": "+"
+        },
+        {
+          "id": "DO.V-11D",
+          "text": "Před soutěžemi se snažím na to nemyslet.",
+          "klic": "-"
+        }
+      ]
+    },
+    {
+      "id": "DO.V-12",
+      "skupina": "DO.V",
+      "situace": "Po vítězné soutěži ti trenér ukáže video, na kterém opakovaně děláš stejnou chybu.",
+      "reakce": [
+        {
+          "id": "DO.V-12A",
+          "text": "Poděkuji a zeptám se, jak na ni.",
+          "klic": "++"
+        },
+        {
+          "id": "DO.V-12B",
+          "text": "Vadí mi, že to řeší zrovna po výhře.",
+          "klic": "-"
+        },
+        {
+          "id": "DO.V-12C",
+          "text": "Chybu vezmu jako úkol do dalšího tréninku.",
+          "klic": "+"
+        },
+        {
+          "id": "DO.V-12D",
+          "text": "Považuji to za zbytečné, vždyť se vyhrálo.",
+          "klic": "--"
+        }
+      ]
+    },
+    {
+      "id": "VZ.V-01",
+      "skupina": "VZ.V",
+      "situace": "Nesouhlasíš s rolí, kterou ti trenér přidělil.",
+      "reakce": [
+        {
+          "id": "VZ.V-01A",
+          "text": "Požádám ho o rozhovor mezi čtyřma očima.",
+          "klic": "++"
+        },
+        {
+          "id": "VZ.V-01B",
+          "text": "Mlčím a roli plním bez chuti.",
+          "klic": "-"
+        },
+        {
+          "id": "VZ.V-01C",
+          "text": "Stěžuji si ostatním.",
+          "klic": "--"
+        },
+        {
+          "id": "VZ.V-01D",
+          "text": "Zeptám se, co musím zlepšit pro jinou roli.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "VZ.V-02",
+      "skupina": "VZ.V",
+      "situace": "Spoluhráč nebo tréninkový partner opakovaně chybuje a kazí ti tím výkon.",
+      "reakce": [
+        {
+          "id": "VZ.V-02A",
+          "text": "Řeknu mu věcně, co potřebuji.",
+          "klic": "++"
+        },
+        {
+          "id": "VZ.V-02B",
+          "text": "Před ostatními ho okřiknu.",
+          "klic": "--"
+        },
+        {
+          "id": "VZ.V-02C",
+          "text": "Řeknu to trenérovi, ať to řeší on.",
+          "klic": "-"
+        },
+        {
+          "id": "VZ.V-02D",
+          "text": "Zeptám se ho, jestli mu můžu nějak pomoct.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "VZ.V-03",
+      "skupina": "VZ.V",
+      "situace": "Cítíš bolest, o které trenér neví, a blíží se důležitá soutěž.",
+      "reakce": [
+        {
+          "id": "VZ.V-03A",
+          "text": "Hned to řeknu trenérovi a zdravotníkovi.",
+          "klic": "++"
+        },
+        {
+          "id": "VZ.V-03B",
+          "text": "Mlčím, ať nepřijdu o místo.",
+          "klic": "--"
+        },
+        {
+          "id": "VZ.V-03C",
+          "text": "Řeknu to až po soutěži.",
+          "klic": "-"
+        },
+        {
+          "id": "VZ.V-03D",
+          "text": "Zeptám se fyzioterapeuta, co s tím.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "VZ.V-04",
+      "skupina": "VZ.V",
+      "situace": "V kabině nebo ve skupině vznikne ostrý spor mezi dvěma lidmi.",
+      "reakce": [
+        {
+          "id": "VZ.V-04A",
+          "text": "Navrhnu, ať si to vyříkají v klidu.",
+          "klic": "++"
+        },
+        {
+          "id": "VZ.V-04B",
+          "text": "Přidám se na jednu stranu.",
+          "klic": "-"
+        },
+        {
+          "id": "VZ.V-04C",
+          "text": "Nechám to být, mě se to netýká.",
+          "klic": "--"
+        },
+        {
+          "id": "VZ.V-04D",
+          "text": "Upozorním na to kapitána nebo trenéra.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "VZ.V-05",
+      "skupina": "VZ.V",
+      "situace": "Trenér ti dává pokyn, který podle tebe v soutěži nefunguje.",
+      "reakce": [
+        {
+          "id": "VZ.V-05A",
+          "text": "Po soutěži mu řeknu, co vidím, a zeptám se na jeho důvody.",
+          "klic": "++"
+        },
+        {
+          "id": "VZ.V-05B",
+          "text": "Pokyn potichu ignoruji.",
+          "klic": "--"
+        },
+        {
+          "id": "VZ.V-05C",
+          "text": "Pokyn splním a nic neřeknu.",
+          "klic": "-"
+        },
+        {
+          "id": "VZ.V-05D",
+          "text": "V přestávce se krátce zeptám, jestli můžu zkusit jinou variantu.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "VZ.V-06",
+      "skupina": "VZ.V",
+      "situace": "Máš za sebou těžké týdny mimo sport (škola, rodina, vztah) a projevuje se to v tréninku.",
+      "reakce": [
+        {
+          "id": "VZ.V-06A",
+          "text": "Trenérovi řeknu, že teď procházím těžším obdobím.",
+          "klic": "++"
+        },
+        {
+          "id": "VZ.V-06B",
+          "text": "Nic neříkám a doufám, že to přejde.",
+          "klic": "--"
+        },
+        {
+          "id": "VZ.V-06C",
+          "text": "Svěřím se někomu blízkému z týmu.",
+          "klic": "+"
+        },
+        {
+          "id": "VZ.V-06D",
+          "text": "Trénuji ještě víc, ať to nikdo nepozná.",
+          "klic": "-"
+        }
+      ]
+    },
+    {
+      "id": "VZ.V-07",
+      "skupina": "VZ.V",
+      "situace": "Po prohře je v týmu ticho a nikdo nechce mluvit o tom, co se stalo.",
+      "reakce": [
+        {
+          "id": "VZ.V-07A",
+          "text": "Navrhnu krátký rozbor, co udělat jinak.",
+          "klic": "++"
+        },
+        {
+          "id": "VZ.V-07B",
+          "text": "Mlčím taky.",
+          "klic": "-"
+        },
+        {
+          "id": "VZ.V-07C",
+          "text": "Začnu hledat, kdo to zavinil.",
+          "klic": "--"
+        },
+        {
+          "id": "VZ.V-07D",
+          "text": "Začnu tím, co se nepovedlo mně.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "VZ.V-08",
+      "skupina": "VZ.V",
+      "situace": "Trenér ti dá zpětnou vazbu, se kterou nesouhlasíš.",
+      "reakce": [
+        {
+          "id": "VZ.V-08A",
+          "text": "Poslechnu si ji a pak řeknu, jak to vidím já.",
+          "klic": "++"
+        },
+        {
+          "id": "VZ.V-08B",
+          "text": "Hned se ohradím a odejdu.",
+          "klic": "--"
+        },
+        {
+          "id": "VZ.V-08C",
+          "text": "Kývnu a dál to neřeším.",
+          "klic": "-"
+        },
+        {
+          "id": "VZ.V-08D",
+          "text": "Poprosím o konkrétní příklad.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "VZ.V-09",
+      "skupina": "VZ.V",
+      "situace": "Nový člen týmu se drží stranou a ostatní ho přehlížejí.",
+      "reakce": [
+        {
+          "id": "VZ.V-09A",
+          "text": "Zapojím ho do rozhovoru nebo cvičení.",
+          "klic": "++"
+        },
+        {
+          "id": "VZ.V-09B",
+          "text": "Nechám to na trenérovi.",
+          "klic": "-"
+        },
+        {
+          "id": "VZ.V-09C",
+          "text": "Přidám se k ostatním.",
+          "klic": "--"
+        },
+        {
+          "id": "VZ.V-09D",
+          "text": "Zeptám se ho, jak se mu v týmu daří.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "VZ.V-10",
+      "skupina": "VZ.V",
+      "situace": "Během soutěže potřebuješ od trenéra jinou informaci, než kterou ti dává.",
+      "reakce": [
+        {
+          "id": "VZ.V-10A",
+          "text": "Krátce a jasně řeknu, co potřebuji.",
+          "klic": "++"
+        },
+        {
+          "id": "VZ.V-10B",
+          "text": "Nic neřeknu a improvizuji.",
+          "klic": "-"
+        },
+        {
+          "id": "VZ.V-10C",
+          "text": "Rozčílím se na něj.",
+          "klic": "--"
+        },
+        {
+          "id": "VZ.V-10D",
+          "text": "Po soutěži se domluvím, jak si příště předávat informace.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "VZ.V-11",
+      "skupina": "VZ.V",
+      "situace": "Někdo z týmu ti svěří, že má psychické potíže, a nechce, aby to někdo další věděl.",
+      "reakce": [
+        {
+          "id": "VZ.V-11A",
+          "text": "Vyslechnu ho a doporučím mu obrátit se na odborníka.",
+          "klic": "++"
+        },
+        {
+          "id": "VZ.V-11B",
+          "text": "Řeknu to hned celému týmu.",
+          "klic": "--"
+        },
+        {
+          "id": "VZ.V-11C",
+          "text": "Řeknu mu, ať to nepřehání.",
+          "klic": "-"
+        },
+        {
+          "id": "VZ.V-11D",
+          "text": "Zeptám se, jak mu můžu pomoct.",
+          "klic": "+"
+        }
+      ]
+    },
+    {
+      "id": "VZ.V-12",
+      "skupina": "VZ.V",
+      "situace": "Po soutěži tě novinář nebo rodič tlačí ke kritice spoluhráče nebo trenéra.",
+      "reakce": [
+        {
+          "id": "VZ.V-12A",
+          "text": "Mluvím o vlastním výkonu a ostatní nechám stranou.",
+          "klic": "++"
+        },
+        {
+          "id": "VZ.V-12B",
+          "text": "Řeknu, co si o ostatních opravdu myslím.",
+          "klic": "-"
+        },
+        {
+          "id": "VZ.V-12C",
+          "text": "Veřejně obviním ostatní.",
+          "klic": "--"
+        },
+        {
+          "id": "VZ.V-12D",
+          "text": "Slušně odmítnu a téma převedu.",
+          "klic": "+"
+        }
+      ]
+    }
+  ],
+  "kontrolni": [
+    {
+      "id": "KV-01",
+      "druh": "instruovaná",
+      "text": "U této položky zvol „spíš nesouhlasím“.",
+      "format": "P",
+      "ocekavano": "spíš nesouhlasím"
+    },
+    {
+      "id": "KV-02",
+      "druh": "instruovaná",
+      "text": "U této položky zvol „úplně souhlasím“.",
+      "format": "P",
+      "ocekavano": "úplně souhlasím"
+    },
+    {
+      "id": "KV-03",
+      "druh": "instruovaná",
+      "text": "U této položky zvol „často“.",
+      "format": "C",
+      "ocekavano": "často"
+    },
+    {
+      "id": "KV-04",
+      "druh": "nepravděpodobná",
+      "text": "Každou noc spím přes čtrnáct hodin.",
+      "format": "C",
+      "ocekavano": "zřídka nebo téměř nikdy"
+    },
+    {
+      "id": "KV-05",
+      "druh": "nepravděpodobná",
+      "text": "Vyhrávám každou soutěž, do které nastoupím.",
+      "format": "P",
+      "ocekavano": "nesouhlas"
+    },
+    {
+      "id": "KV-06",
+      "druh": "nepravděpodobná",
+      "text": "Trénuji každý den dvacet hodin.",
+      "format": "C",
+      "ocekavano": "zřídka nebo téměř nikdy"
+    },
+    {
+      "id": "KV-07",
+      "druh": "nepravděpodobná",
+      "text": "Osobně znám všechny sportovce na světě.",
+      "format": "P",
+      "ocekavano": "nesouhlas"
+    },
+    {
+      "id": "KV-08",
+      "druh": "nepravděpodobná",
+      "text": "Za celý život mě nikdy nic nebolelo.",
+      "format": "P",
+      "ocekavano": "nesouhlas"
+    },
+    {
+      "id": "KV-09",
+      "druh": "nepravděpodobná",
+      "text": "Každý týden soutěžím na jiném kontinentu.",
+      "format": "C",
+      "ocekavano": "zřídka nebo téměř nikdy"
+    },
+    {
+      "id": "KV-10",
+      "druh": "nepravděpodobná",
+      "text": "Umím všechny sporty na olympijské úrovni.",
+      "format": "P",
+      "ocekavano": "nesouhlas"
+    }
+  ],
+  "otazkaVinet": "Jak pravděpodobně bys to {udělal|udělala}?"
+}
