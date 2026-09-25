@@ -247,7 +247,9 @@ komise.
 
 **Rozhodnuto (září 2026):** koučování a rozvoj; cesta C; bez akademického
 partnera; 14 až 40 let od výkonnostní úrovně po TOP 100 světa; nejvýš
-45 minut; screening ano. Co z toho plyne a podklady pro další práci jsou
+45 minut; screening ano. Upřesněno: nikoho nežádat o svolení, takže ke
+srovnání jen výslovně uvolněné nástroje, a u duševního zdraví vždy
+doporučit odborníka podle volby klienta. Co z toho plyne a podklady pro další práci jsou
 ve složce [`novy-test/`](novy-test/README.md).
 
 ## Co udělám hned po rozhodnutí

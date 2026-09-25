@@ -18,8 +18,8 @@ kouč s nimi pracuje v rozhovoru.
 a v zápatí reportu:
 
 - výběr, nominace, vyřazení z týmu, rozhodování o smlouvě nebo stipendiu,
-- diagnostika duševní poruchy (screening je oddělený a jde jen ke
-  zdravotníkovi, viz `02-screening.md`),
+- diagnostika duševní poruchy (kontrola duševní pohody jen signalizuje, že
+  je vhodné nabídnout kontakt na odborníka, viz `02-screening.md`),
 - srovnávání sportovců mezi sebou jako podklad pro personální rozhodnutí.
 
 Důvod není jen etický. Validita pro výběr se dokládá jinými důkazy
@@ -61,10 +61,10 @@ jako doklad validity. Vlastní normy pro ni nevzniknou, na to nebude dost lidí.
   čtrnáctiletý nemusí znát,
 - ověřená v kognitivních rozhovorech i se čtrnácti a patnáctiletými.
 
-**Souhlas.** Do 18 let souhlas zákonného zástupce a souhlas sportovce; od
-16 let zvlášť souhlas se screeningem. Konkrétní věkové hranice pro souhlas
-se zpracováním údajů posoudí právník (GDPR, zákon č. 110/2019 Sb.,
-zdravotní údaje ve screeningu).
+**Souhlas.** Do 18 let souhlas zákonného zástupce a souhlas sportovce;
+zvlášť souhlas s kontrolou duševní pohody (zdravotní údaje). Konkrétní
+věkové hranice pro souhlas se zpracováním údajů posoudí právník (GDPR,
+zákon č. 110/2019 Sb.).
 
 ## 3. Časový rozpočet
 
@@ -79,16 +79,17 @@ vešel do stropu.
 | situační úsudek | 12 vinět po 4 reakcích | 8 min při 40 s na vinětu |
 | chronotyp (volné a pracovní dny, časy spánku) | 6 otázek | 1,5 min |
 | kontrola spolehlivosti vyplnění | 5 položek | 0,5 min |
-| screening (jen 16+, dobrovolný) | 10 položek | 1,5 min |
-| **celkem** | | **36,5 min** |
+| kontrola duševní pohody (PHQ-4, dobrovolná) | 4 položky | 0,5 min |
+| **celkem** | | **35,5 min** |
 
 Tempo 7 položek za minutu je střízlivý předpoklad pro krátké položky
 s pěti body. Ověří se na skutečných časech z pilotu 1; kdyby medián překročil
 40 minut, krátí se nejdřív počet položek u škál s nejvyšší reliabilitou.
 
-**Vývojové verze.** Pilotní verze obsahují navíc kotvy. Aby se vešly do
-45 minut, každý respondent dostane jen část kotev (plánovaně chybějící data,
-viz `04-plan-validace.md`). Retest se spojuje s druhým blokem kotev.
+**Vývojové verze.** Pilotní verze obsahují navíc srovnávací nástroje (volně
+použitelné, viz `03-kotvy-a-licence.md`). Aby se vešly do 45 minut, každý
+respondent dostane jen část z nich (plánovaně chybějící data, viz
+`04-plan-validace.md`). Retest se spojuje s druhým blokem.
 
 ## 4. Formáty
 
@@ -100,8 +101,8 @@ viz `04-plan-validace.md`). Retest se spojuje s druhým blokem kotev.
 | **časy** | chronotyp | hodiny a minuty | výpočet středu spánku podle MCTQ, jak je popsaný v modulu Rytmus |
 
 **Časový rámec.** Rysové škály bez časového rámce („obvykle“). Stavové škály
-(vyčerpání, zotavení, spánek, screening) za posledních 4 týdnů, screening
-podle originálu. Rámec je vždy v instrukci bloku, ne v každé položce.
+(vyčerpání, zotavení, spánek) za posledních 4 týdnů, PHQ-4 podle
+originálu (poslední 2 týdny). Rámec je vždy v instrukci bloku, ne v každé položce.
 
 **Situační úsudek: rod.** Viněty jsou ve druhé osobě a v přítomném čase
 („Je poslední minuta, prohráváte o gól a míč máš ty.“). Otázka „jak
@@ -116,9 +117,14 @@ shodnou.
 ## 5. Škály
 
 36 škál v pěti doménách, v hotovém testu po 4 položkách. Každá škála má
-definici, vymezení vůči tomu, co není (pro diskriminační validitu), kotvu
+definici, vymezení vůči tomu, co není (pro diskriminační validitu), zdroj
 a rámec. **Definice jsou závazné:** položka, která měří něco jiného než
 definici, se vyřazuje, i když se statisticky chová dobře.
+
+**Sloupec zdroj konstruktu** říká, z jakého publikovaného výzkumu definice
+vychází. Myšlenky a definice nejsou chráněné autorským právem, formulace
+položek ano: z těchto nástrojů se proto nepřebírá ani jedna položka a nezadávají
+se. Co se ve vývoji skutečně zadává ke srovnání, je v `03-kotvy-a-licence.md`.
 
 Značení: `P` souhlas, `Č` četnost, `rys` bez časového rámce, `4t` posledních
 4 týdnů. Obrácené položky: v každé škále aspoň jedna ze čtyř, pokud to
@@ -126,7 +132,7 @@ obsah dovolí.
 
 ### Doména MO: Motivace a identita
 
-| kód | škála | definice | není | kotva | formát |
+| kód | škála | definice | není | zdroj konstruktu | formát |
 |---|---|---|---|---|---|
 | MO.1 | autonomní motivace | sport dělám, protože mě baví a protože jeho cíle považuji za svoje | spokojenost s výsledky; nadšení z konkrétní sezony | SMS-II: vnitřní, integrovaná, identifikovaná regulace | P, rys |
 | MO.2 | kontrolovaná motivace | sport dělám kvůli tlaku zvenku (odměny, očekávání druhých) nebo zevnitř (vina, stud, potřeba si něco dokazovat) | vysoké nároky na sebe (to je DO.9) | SMS-II: introjekovaná a vnější regulace | P, rys |
@@ -142,7 +148,7 @@ jako jeden bipolární rozměr.
 
 Jádro testu a místo, kde se test může nejvíc odlišit.
 
-| kód | škála | definice | není | kotva | formát |
+| kód | škála | definice | není | zdroj konstruktu | formát |
 |---|---|---|---|---|---|
 | TL.1 | tělesné napětí | před soutěží a v ní se ozývá tělo: svalové napětí, žaludek, dech, srdce | fyzická únava | SAS-2: somatická úzkost | P, rys |
 | TL.2 | starosti | před soutěží a v ní se opakovaně vracejí myšlenky, že to nedopadne | analytická příprava na soupeře | SAS-2: starosti | P, rys |
@@ -159,7 +165,7 @@ lidmi, vedení, které se ztrácí, penalta nebo obdobná situace jeden na jedno
 
 ### Doména DO: Dovednosti a seberegulace
 
-| kód | škála | definice | není | kotva | formát |
+| kód | škála | definice | není | zdroj konstruktu | formát |
 |---|---|---|---|---|---|
 | DO.1 | práce s cíli | stanovuji si konkrétní cíle na trénink i soutěž a vyhodnocuji je | ambice (MO.1, DO.9) | TOPS 2: cíle | Č, rys |
 | DO.2 | představivost | výkon si předem přehrávám v představách, včetně obtížných situací | denní snění | TOPS 2: představivost | Č, rys |
@@ -177,7 +183,7 @@ Viněty návratu po chybě (DO.V, 4 viněty): vlastní chyba s následkem
 
 ### Doména OD: Odolnost, zátěž a zotavení
 
-| kód | škála | definice | není | kotva | formát |
+| kód | škála | definice | není | zdroj konstruktu | formát |
 |---|---|---|---|---|---|
 | OD.1 | mentální odolnost | výkon a nasazení držím i v nepříznivých podmínkách a pod tlakem | fyzická zdatnost; sebevědomí | MTI | P, rys |
 | OD.2 | zotavení ze stresu | po náročném období se rychle vrátím do normálu | nepřítomnost stresu | BRS | P, rys |
@@ -189,7 +195,7 @@ Viněty návratu po chybě (DO.V, 4 viněty): vlastní chyba s následkem
 
 ### Doména VZ: Vztahy a tým
 
-| kód | škála | definice | není | kotva | formát |
+| kód | škála | definice | není | zdroj konstruktu | formát |
 |---|---|---|---|---|---|
 | VZ.1 | vztah s trenérem | s trenérem si věříme, jsme zavázaní spolupráci a doplňujeme se | spokojenost s výsledky | CART-Q | P, rys |
 | VZ.2 | koučovatelnost | zpětnou vazbu vyhledávám, přijímám a převádím do práce | poslušnost; souhlas se vším | vlastní konstrukt; kritérium hodnocení trenéra (koucovatelnost) | P, rys |
@@ -261,5 +267,6 @@ samostatné. Jejich položky vstupují do banky jako kandidáti pro odpovídají
 - **Změna v čase:** index spolehlivé změny (Jacobson a Truax), aby kouč
   nevykládal šum jako zlepšení.
 - **Nejistota:** u každé škály interval podle reliability, ne jen bod.
-- **Screening v reportu kouče není** v žádné podobě, ani jako informace, že
-  byl vyplněn.
+- **Duševní pohoda:** kouč nevidí body ani odpovědi, jen doporučení nabídnout
+  kontakt na odborníka a vodítko k rozhovoru; do PDF ani do týmového profilu
+  se nedostane nic (`02-screening.md`).
