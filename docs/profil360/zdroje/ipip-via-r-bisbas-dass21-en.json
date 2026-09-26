@@ -1,0 +1,1335 @@
+{
+ "ipip-via-r": {
+  "questions": [
+   {
+    "id": "ipip-via-r-1",
+    "en": "I feel it's important to live in a world of beauty",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-2",
+    "en": "I experience deep emotions when I see beautiful things",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-3",
+    "en": "I am rarely aware of the natural beauty in the environment",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-4",
+    "en": "I fail to notice beauty until others comment on it",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-5",
+    "en": "I know that there are people in my life who care as much for me as for themselves",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-6",
+    "en": "I can express love to someone else",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-7",
+    "en": "I do not easily share my feelings with others",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-8",
+    "en": "I have difficulty accepting love from anyone",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-9",
+    "en": "I am an extremely loyal person",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-10",
+    "en": "I support my teammates or fellow group members",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-11",
+    "en": "I am not good at working with a group",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-12",
+    "en": "I prefer to do everything alone",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-13",
+    "en": "I am excited by many different activities",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-14",
+    "en": "I can find something of interest in any situation",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-15",
+    "en": "I am not all that curious about the world",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-16",
+    "en": "I have few interests",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-17",
+    "en": "I treat all people equally",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-18",
+    "en": "I believe that everyone's rights are equally important",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-19",
+    "en": "I take advantage of others",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-20",
+    "en": "I treat others differently if I don't like them",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-21",
+    "en": "I try to respond with understanding when someone treats me badly",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-22",
+    "en": "I allow others to make a fresh start",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-23",
+    "en": "I hold grudges",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-24",
+    "en": "I find it hard to forgive others",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-25",
+    "en": "I express my thanks to those who care about me",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-26",
+    "en": "I am an extremely grateful person",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-27",
+    "en": "I feel no gratitude to others",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-28",
+    "en": "I find few things in my life to be grateful for",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-29",
+    "en": "I can find the positive in what seems negative to others",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-30",
+    "en": "I remain hopeful despite challenges",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-31",
+    "en": "I expect the worst",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-32",
+    "en": "I often think about the possibility of negative outcomes that are not likely to occur",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-33",
+    "en": "I use laughter to brighten the days of others",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-34",
+    "en": "I keep my sense of humor even in gloomy situations",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-35",
+    "en": "I am not known for my sense of humor",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-36",
+    "en": "I am not fun to be with",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-37",
+    "en": "I don't quit a task before it is finished",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-38",
+    "en": "I finish things despite obstacles in the way",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-39",
+    "en": "I don't finish what I start",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-40",
+    "en": "I give up easily",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-41",
+    "en": "I am trusted to keep secrets",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-42",
+    "en": "I keep my promises",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-43",
+    "en": "I lie to get myself out of trouble",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-44",
+    "en": "I cheat on people who have trusted me",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-45",
+    "en": "I weigh the pro's and the con's",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-46",
+    "en": "I am valued by my friends for my good judgment",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-47",
+    "en": "I don't tend to think things through critically",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-48",
+    "en": "I don't think about different possibilities when making decisions",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-49",
+    "en": "I am never too busy to help a friend",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-50",
+    "en": "I go out of my way to cheer up people who appear down",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-51",
+    "en": "I get impatient when others talk to me about their problems",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-52",
+    "en": "I am only kind to others if they have been kind to me",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-53",
+    "en": "I am good at helping people work well together",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-54",
+    "en": "I am told that I am a strong but fair leader",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-55",
+    "en": "I have difficulty getting others to work together",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-56",
+    "en": "I am not good at taking charge of a group",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-57",
+    "en": "I am a true life-long learner",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-58",
+    "en": "I am thrilled when I learn something new",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-59",
+    "en": "I don't like to learn new things",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-60",
+    "en": "I don't read nonfiction books for fun",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-61",
+    "en": "I don't brag about my accomplishments",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-62",
+    "en": "I would never be described as arrogant",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-63",
+    "en": "I like to stand out in a crowd",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-64",
+    "en": "I like to talk about myself",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-65",
+    "en": "I come up with new ways to do things",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-66",
+    "en": "I am an original thinker",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-67",
+    "en": "I am not considered to have new and different ideas",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-68",
+    "en": "I have no special urge to do something original",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-69",
+    "en": "I have a mature view on life",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-70",
+    "en": "I am considered to be a wise person",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-71",
+    "en": "I am not good at figuring out what really matters",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-72",
+    "en": "I am rarely consulted for advice by others",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-73",
+    "en": "I believe it is always better to be safe than sorry",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-74",
+    "en": "I make careful choices",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-75",
+    "en": "I act before thinking through the consequences",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-76",
+    "en": "I like taking risks",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-77",
+    "en": "I am a highly disciplined person",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-78",
+    "en": "I forego things that are bad for me in the long run even if they make me feel good in the short run",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-79",
+    "en": "I let myself be taken over by urges to spend or eat too much",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-80",
+    "en": "I give in to my urges",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-81",
+    "en": "I am good at sensing what others are feeling",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-82",
+    "en": "I know what to say to make people feel good",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-83",
+    "en": "I don't know how to handle myself in a new social situation",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-84",
+    "en": "I have trouble guessing how others will react",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-85",
+    "en": "I am a spiritual person",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-86",
+    "en": "I believe that each person has a purpose in life",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-87",
+    "en": "I feel that life has no meaning",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-88",
+    "en": "I do not believe in a universal power or a God",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-89",
+    "en": "I have taken frequent stands in the face of strong opposition",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-90",
+    "en": "I don't hesitate to express an unpopular opinion",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-91",
+    "en": "I do not stand up for my beliefs",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-92",
+    "en": "I don't speak my mind freely when there might be negative results",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-93",
+    "en": "I awaken with a sense of excitement about the day's possibilities",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-94",
+    "en": "I look forward to each new day",
+    "rev": false
+   },
+   {
+    "id": "ipip-via-r-95",
+    "en": "I am described as grumpy",
+    "rev": true
+   },
+   {
+    "id": "ipip-via-r-96",
+    "en": "I don't have much energy",
+    "rev": true
+   }
+  ],
+  "subscales": [
+   {
+    "id": "appreciation-of-beauty",
+    "label": {
+     "en": "Appreciation of beauty and excellence"
+    },
+    "questionIds": [
+     "ipip-via-r-1",
+     "ipip-via-r-2",
+     "ipip-via-r-3",
+     "ipip-via-r-4"
+    ]
+   },
+   {
+    "id": "capacity-for-love",
+    "label": {
+     "en": "Capacity for love"
+    },
+    "questionIds": [
+     "ipip-via-r-5",
+     "ipip-via-r-6",
+     "ipip-via-r-7",
+     "ipip-via-r-8"
+    ]
+   },
+   {
+    "id": "citizenship-teamwork",
+    "label": {
+     "en": "Citizenship / teamwork"
+    },
+    "questionIds": [
+     "ipip-via-r-9",
+     "ipip-via-r-10",
+     "ipip-via-r-11",
+     "ipip-via-r-12"
+    ]
+   },
+   {
+    "id": "curiosity",
+    "label": {
+     "en": "Curiosity"
+    },
+    "questionIds": [
+     "ipip-via-r-13",
+     "ipip-via-r-14",
+     "ipip-via-r-15",
+     "ipip-via-r-16"
+    ]
+   },
+   {
+    "id": "equity-fairness",
+    "label": {
+     "en": "Equity / fairness"
+    },
+    "questionIds": [
+     "ipip-via-r-17",
+     "ipip-via-r-18",
+     "ipip-via-r-19",
+     "ipip-via-r-20"
+    ]
+   },
+   {
+    "id": "forgiveness-mercy",
+    "label": {
+     "en": "Forgiveness / mercy"
+    },
+    "questionIds": [
+     "ipip-via-r-21",
+     "ipip-via-r-22",
+     "ipip-via-r-23",
+     "ipip-via-r-24"
+    ]
+   },
+   {
+    "id": "gratitude",
+    "label": {
+     "en": "Gratitude"
+    },
+    "questionIds": [
+     "ipip-via-r-25",
+     "ipip-via-r-26",
+     "ipip-via-r-27",
+     "ipip-via-r-28"
+    ]
+   },
+   {
+    "id": "hope-optimism",
+    "label": {
+     "en": "Hope / optimism"
+    },
+    "questionIds": [
+     "ipip-via-r-29",
+     "ipip-via-r-30",
+     "ipip-via-r-31",
+     "ipip-via-r-32"
+    ]
+   },
+   {
+    "id": "humor-playfulness",
+    "label": {
+     "en": "Humour / playfulness"
+    },
+    "questionIds": [
+     "ipip-via-r-33",
+     "ipip-via-r-34",
+     "ipip-via-r-35",
+     "ipip-via-r-36"
+    ]
+   },
+   {
+    "id": "perseverance",
+    "label": {
+     "en": "Industry / perseverance / persistence"
+    },
+    "questionIds": [
+     "ipip-via-r-37",
+     "ipip-via-r-38",
+     "ipip-via-r-39",
+     "ipip-via-r-40"
+    ]
+   },
+   {
+    "id": "integrity",
+    "label": {
+     "en": "Integrity / honesty / authenticity"
+    },
+    "questionIds": [
+     "ipip-via-r-41",
+     "ipip-via-r-42",
+     "ipip-via-r-43",
+     "ipip-via-r-44"
+    ]
+   },
+   {
+    "id": "judgment",
+    "label": {
+     "en": "Judgment / open-mindedness"
+    },
+    "questionIds": [
+     "ipip-via-r-45",
+     "ipip-via-r-46",
+     "ipip-via-r-47",
+     "ipip-via-r-48"
+    ]
+   },
+   {
+    "id": "kindness",
+    "label": {
+     "en": "Kindness / generosity"
+    },
+    "questionIds": [
+     "ipip-via-r-49",
+     "ipip-via-r-50",
+     "ipip-via-r-51",
+     "ipip-via-r-52"
+    ]
+   },
+   {
+    "id": "leadership",
+    "label": {
+     "en": "Leadership"
+    },
+    "questionIds": [
+     "ipip-via-r-53",
+     "ipip-via-r-54",
+     "ipip-via-r-55",
+     "ipip-via-r-56"
+    ]
+   },
+   {
+    "id": "love-of-learning",
+    "label": {
+     "en": "Love of learning"
+    },
+    "questionIds": [
+     "ipip-via-r-57",
+     "ipip-via-r-58",
+     "ipip-via-r-59",
+     "ipip-via-r-60"
+    ]
+   },
+   {
+    "id": "modesty-humility",
+    "label": {
+     "en": "Modesty / humility"
+    },
+    "questionIds": [
+     "ipip-via-r-61",
+     "ipip-via-r-62",
+     "ipip-via-r-63",
+     "ipip-via-r-64"
+    ]
+   },
+   {
+    "id": "creativity",
+    "label": {
+     "en": "Originality / creativity"
+    },
+    "questionIds": [
+     "ipip-via-r-65",
+     "ipip-via-r-66",
+     "ipip-via-r-67",
+     "ipip-via-r-68"
+    ]
+   },
+   {
+    "id": "perspective",
+    "label": {
+     "en": "Perspective / wisdom"
+    },
+    "questionIds": [
+     "ipip-via-r-69",
+     "ipip-via-r-70",
+     "ipip-via-r-71",
+     "ipip-via-r-72"
+    ]
+   },
+   {
+    "id": "prudence",
+    "label": {
+     "en": "Prudence"
+    },
+    "questionIds": [
+     "ipip-via-r-73",
+     "ipip-via-r-74",
+     "ipip-via-r-75",
+     "ipip-via-r-76"
+    ]
+   },
+   {
+    "id": "self-regulation",
+    "label": {
+     "en": "Self-regulation / self-control"
+    },
+    "questionIds": [
+     "ipip-via-r-77",
+     "ipip-via-r-78",
+     "ipip-via-r-79",
+     "ipip-via-r-80"
+    ]
+   },
+   {
+    "id": "social-intelligence",
+    "label": {
+     "en": "Social / personal / emotional intelligence"
+    },
+    "questionIds": [
+     "ipip-via-r-81",
+     "ipip-via-r-82",
+     "ipip-via-r-83",
+     "ipip-via-r-84"
+    ]
+   },
+   {
+    "id": "spirituality",
+    "label": {
+     "en": "Spirituality / religiousness"
+    },
+    "questionIds": [
+     "ipip-via-r-85",
+     "ipip-via-r-86",
+     "ipip-via-r-87",
+     "ipip-via-r-88"
+    ]
+   },
+   {
+    "id": "valor",
+    "label": {
+     "en": "Valour / bravery / courage"
+    },
+    "questionIds": [
+     "ipip-via-r-89",
+     "ipip-via-r-90",
+     "ipip-via-r-91",
+     "ipip-via-r-92"
+    ]
+   },
+   {
+    "id": "zest",
+    "label": {
+     "en": "Zest / enthusiasm / vitality"
+    },
+    "questionIds": [
+     "ipip-via-r-93",
+     "ipip-via-r-94",
+     "ipip-via-r-95",
+     "ipip-via-r-96"
+    ]
+   }
+  ],
+  "options": [
+   "Very inaccurate",
+   "Moderately inaccurate",
+   "Neither accurate nor inaccurate",
+   "Moderately accurate",
+   "Very accurate"
+  ]
+ },
+ "bis-bas": {
+  "questions": [
+   {
+    "id": "bis-bas-1",
+    "en": "I worry about what people think of me",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-2",
+    "en": "I am always worried about something",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-3",
+    "en": "I often worry about things that turn out to be unimportant",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-4",
+    "en": "I am afraid that I will do the wrong thing",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-5",
+    "en": "I am easily hurt",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-6",
+    "en": "I begin to panic when there is danger",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-7",
+    "en": "I become overwhelmed by events",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-8",
+    "en": "I get stressed out easily",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-9",
+    "en": "I rarely worry",
+    "rev": true
+   },
+   {
+    "id": "bis-bas-10",
+    "en": "I am not embarrassed easily",
+    "rev": true
+   },
+   {
+    "id": "bis-bas-11",
+    "en": "I like to behave spontaneously",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-12",
+    "en": "I have persuaded others to do something really adventurous or crazy",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-13",
+    "en": "I am willing to try anything once",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-14",
+    "en": "I like to act on a whim",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-15",
+    "en": "I prefer friends who are excitingly unpredictable",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-16",
+    "en": "I do crazy things",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-17",
+    "en": "I enjoy being reckless",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-18",
+    "en": "I would never go hang gliding or bungee jumping",
+    "rev": true
+   },
+   {
+    "id": "bis-bas-19",
+    "en": "I rarely enjoy behaving in a silly manner",
+    "rev": true
+   },
+   {
+    "id": "bis-bas-20",
+    "en": "I avoid dangerous situations",
+    "rev": true
+   },
+   {
+    "id": "bis-bas-21",
+    "en": "I want to be in charge",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-22",
+    "en": "I try to surpass others' accomplishments",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-23",
+    "en": "I like to show off my body",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-24",
+    "en": "I know how to get around the rules",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-25",
+    "en": "I have a strong need for power",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-26",
+    "en": "I take charge",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-27",
+    "en": "I push myself very hard to succeed",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-28",
+    "en": "I am not highly motivated to succeed",
+    "rev": true
+   },
+   {
+    "id": "bis-bas-29",
+    "en": "I am not an extraordinary person",
+    "rev": true
+   },
+   {
+    "id": "bis-bas-30",
+    "en": "I hate being the center of attention",
+    "rev": true
+   },
+   {
+    "id": "bis-bas-31",
+    "en": "I feel excited or happy for no apparent reason",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-32",
+    "en": "I get caught up in the excitement when others are celebrating",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-33",
+    "en": "I am eager to soothe hurt feelings",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-34",
+    "en": "I get so happy or energetic that I am almost giddy",
+    "rev": false
+   },
+   {
+    "id": "bis-bas-35",
+    "en": "I rarely get caught up in the excitement",
+    "rev": true
+   },
+   {
+    "id": "bis-bas-36",
+    "en": "I don't get excited about things",
+    "rev": true
+   }
+  ],
+  "subscales": [
+   {
+    "id": "bis-anxiety",
+    "label": {
+     "en": "BIS – Behavioural inhibition / anxiety"
+    },
+    "questionIds": [
+     "bis-bas-1",
+     "bis-bas-2",
+     "bis-bas-3",
+     "bis-bas-4",
+     "bis-bas-5",
+     "bis-bas-6",
+     "bis-bas-7",
+     "bis-bas-8",
+     "bis-bas-9",
+     "bis-bas-10"
+    ]
+   },
+   {
+    "id": "bas-fun-seeking",
+    "label": {
+     "en": "BAS – Fun-seeking"
+    },
+    "questionIds": [
+     "bis-bas-11",
+     "bis-bas-12",
+     "bis-bas-13",
+     "bis-bas-14",
+     "bis-bas-15",
+     "bis-bas-16",
+     "bis-bas-17",
+     "bis-bas-18",
+     "bis-bas-19",
+     "bis-bas-20"
+    ]
+   },
+   {
+    "id": "bas-drive",
+    "label": {
+     "en": "BAS – Drive"
+    },
+    "questionIds": [
+     "bis-bas-21",
+     "bis-bas-22",
+     "bis-bas-23",
+     "bis-bas-24",
+     "bis-bas-25",
+     "bis-bas-26",
+     "bis-bas-27",
+     "bis-bas-28",
+     "bis-bas-29",
+     "bis-bas-30"
+    ]
+   },
+   {
+    "id": "bas-reward-responsiveness",
+    "label": {
+     "en": "BAS – Reward responsiveness"
+    },
+    "questionIds": [
+     "bis-bas-31",
+     "bis-bas-32",
+     "bis-bas-33",
+     "bis-bas-34",
+     "bis-bas-35",
+     "bis-bas-36"
+    ]
+   }
+  ],
+  "options": [
+   "Very inaccurate",
+   "Moderately inaccurate",
+   "Neither accurate nor inaccurate",
+   "Moderately accurate",
+   "Very accurate"
+  ]
+ },
+ "dass21": {
+  "questions": [
+   {
+    "id": "dass21-1",
+    "en": "I found it hard to wind down",
+    "rev": false
+   },
+   {
+    "id": "dass21-2",
+    "en": "I was aware of dryness of my mouth",
+    "rev": false
+   },
+   {
+    "id": "dass21-3",
+    "en": "I couldn't seem to experience any positive feeling at all",
+    "rev": false
+   },
+   {
+    "id": "dass21-4",
+    "en": "I experienced breathing difficulty (e.g. excessively rapid breathing, breathlessness in the absence of physical exertion)",
+    "rev": false
+   },
+   {
+    "id": "dass21-5",
+    "en": "I found it difficult to work up the initiative to do things",
+    "rev": false
+   },
+   {
+    "id": "dass21-6",
+    "en": "I tended to over-react to situations",
+    "rev": false
+   },
+   {
+    "id": "dass21-7",
+    "en": "I experienced trembling (e.g. in the hands)",
+    "rev": false
+   },
+   {
+    "id": "dass21-8",
+    "en": "I felt that I was using a lot of nervous energy",
+    "rev": false
+   },
+   {
+    "id": "dass21-9",
+    "en": "I was worried about situations in which I might panic and make a fool of myself",
+    "rev": false
+   },
+   {
+    "id": "dass21-10",
+    "en": "I felt that I had nothing to look forward to",
+    "rev": false
+   },
+   {
+    "id": "dass21-11",
+    "en": "I found myself getting agitated",
+    "rev": false
+   },
+   {
+    "id": "dass21-12",
+    "en": "I found it difficult to relax",
+    "rev": false
+   },
+   {
+    "id": "dass21-13",
+    "en": "I felt down-hearted and blue",
+    "rev": false
+   },
+   {
+    "id": "dass21-14",
+    "en": "I was intolerant of anything that kept me from getting on with what I was doing",
+    "rev": false
+   },
+   {
+    "id": "dass21-15",
+    "en": "I felt I was close to panic",
+    "rev": false
+   },
+   {
+    "id": "dass21-16",
+    "en": "I was unable to become enthusiastic about anything",
+    "rev": false
+   },
+   {
+    "id": "dass21-17",
+    "en": "I felt I wasn't worth much as a person",
+    "rev": false
+   },
+   {
+    "id": "dass21-18",
+    "en": "I felt that I was rather touchy",
+    "rev": false
+   },
+   {
+    "id": "dass21-19",
+    "en": "I was aware of the action of my heart in the absence of physical exertion (e.g. sense of heart rate increase, heart missing a beat)",
+    "rev": false
+   },
+   {
+    "id": "dass21-20",
+    "en": "I felt scared without any good reason",
+    "rev": false
+   },
+   {
+    "id": "dass21-21",
+    "en": "I felt that life was meaningless",
+    "rev": false
+   }
+  ],
+  "subscales": [
+   {
+    "id": "depression",
+    "label": {
+     "en": "Depression"
+    },
+    "questionIds": [
+     "dass21-3",
+     "dass21-5",
+     "dass21-10",
+     "dass21-13",
+     "dass21-16",
+     "dass21-17",
+     "dass21-21"
+    ],
+    "multiplier": 2,
+    "bands": [
+     {
+      "id": "normal",
+      "min": 0,
+      "max": 9,
+      "label": {
+       "en": "Normal"
+      }
+     },
+     {
+      "id": "mild",
+      "min": 10,
+      "max": 13,
+      "label": {
+       "en": "Mild"
+      }
+     },
+     {
+      "id": "moderate",
+      "min": 14,
+      "max": 20,
+      "label": {
+       "en": "Moderate"
+      }
+     },
+     {
+      "id": "severe",
+      "min": 21,
+      "max": 27,
+      "label": {
+       "en": "Severe"
+      }
+     },
+     {
+      "id": "extremely-severe",
+      "min": 28,
+      "max": 42,
+      "label": {
+       "en": "Extremely severe"
+      }
+     }
+    ]
+   },
+   {
+    "id": "anxiety",
+    "label": {
+     "en": "Anxiety"
+    },
+    "questionIds": [
+     "dass21-2",
+     "dass21-4",
+     "dass21-7",
+     "dass21-9",
+     "dass21-15",
+     "dass21-19",
+     "dass21-20"
+    ],
+    "multiplier": 2,
+    "bands": [
+     {
+      "id": "normal",
+      "min": 0,
+      "max": 7,
+      "label": {
+       "en": "Normal"
+      }
+     },
+     {
+      "id": "mild",
+      "min": 8,
+      "max": 9,
+      "label": {
+       "en": "Mild"
+      }
+     },
+     {
+      "id": "moderate",
+      "min": 10,
+      "max": 14,
+      "label": {
+       "en": "Moderate"
+      }
+     },
+     {
+      "id": "severe",
+      "min": 15,
+      "max": 19,
+      "label": {
+       "en": "Severe"
+      }
+     },
+     {
+      "id": "extremely-severe",
+      "min": 20,
+      "max": 42,
+      "label": {
+       "en": "Extremely severe"
+      }
+     }
+    ]
+   },
+   {
+    "id": "stress",
+    "label": {
+     "en": "Stress"
+    },
+    "questionIds": [
+     "dass21-1",
+     "dass21-6",
+     "dass21-8",
+     "dass21-11",
+     "dass21-12",
+     "dass21-14",
+     "dass21-18"
+    ],
+    "multiplier": 2,
+    "bands": [
+     {
+      "id": "normal",
+      "min": 0,
+      "max": 14,
+      "label": {
+       "en": "Normal"
+      }
+     },
+     {
+      "id": "mild",
+      "min": 15,
+      "max": 18,
+      "label": {
+       "en": "Mild"
+      }
+     },
+     {
+      "id": "moderate",
+      "min": 19,
+      "max": 25,
+      "label": {
+       "en": "Moderate"
+      }
+     },
+     {
+      "id": "severe",
+      "min": 26,
+      "max": 33,
+      "label": {
+       "en": "Severe"
+      }
+     },
+     {
+      "id": "extremely-severe",
+      "min": 34,
+      "max": 42,
+      "label": {
+       "en": "Extremely severe"
+      }
+     }
+    ]
+   }
+  ],
+  "options": [
+   "Did not apply to me at all",
+   "Applied to me to some degree, or some of the time",
+   "Applied to me to a considerable degree, or a good part of the time",
+   "Applied to me very much, or most of the time"
+  ]
+ }
+}

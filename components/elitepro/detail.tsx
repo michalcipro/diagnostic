@@ -1,13 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import {
-  chybaText,
-  doporuceniOdbornika,
-  zaznamenejKontakt,
-  type ResultDetail,
-  type StavDoporuceni,
-} from "@/lib/diagnostic/remote"
+import { DoporuceniOdbornika } from "@/components/diagnostic/doporuceni-odbornika"
+import type { ResultDetail } from "@/lib/diagnostic/remote"
 import { KONTEXT_OTAZKY, SPANEK_OTAZKY } from "@/lib/elitepro/dotaznik"
 import { SPANEK_BUDIK, VELIKOST_FORMY } from "@/lib/elitepro/spolecne"
 
@@ -19,8 +13,6 @@ import { SPANEK_BUDIK, VELIKOST_FORMY } from "@/lib/elitepro/spolecne"
 // kontakt na odborníka. Body ani odpovědi z otázek na pohodu neexistují ani
 // v datech, takže je tu ukázat nejde.
 
-const DEN = 24 * 60 * 60 * 1000
-
 const cas = (min: unknown) =>
   typeof min === "number"
     ? `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`
@@ -30,34 +22,8 @@ const datum = (ms: number) =>
   new Date(ms).toLocaleDateString("cs-CZ", { day: "numeric", month: "long", year: "numeric" })
 
 export function EliteProDetail({ sessionToken, detail }: { sessionToken: string; detail: ResultDetail }) {
-  const [stav, setStav] = useState<StavDoporuceni | null>(null)
-  const [ukladam, setUkladam] = useState(false)
-  const [chyba, setChyba] = useState<string | null>(null)
-
-  useEffect(() => {
-    let aktivni = true
-    doporuceniOdbornika(sessionToken, detail.id)
-      .then((s) => aktivni && setStav(s))
-      .catch(() => aktivni && setStav({ doporuceno: false }))
-    return () => {
-      aktivni = false
-    }
-  }, [sessionToken, detail.id])
-
   const odp = detail.answers as unknown as Record<string, number>
   const odpoved = (id: number) => odp[String(id)]
-
-  const zaznamenej = async () => {
-    setUkladam(true)
-    setChyba(null)
-    try {
-      setStav(await zaznamenejKontakt(sessionToken, detail.id))
-    } catch (e) {
-      setChyba(chybaText(e, "Záznam se nepodařilo uložit."))
-    } finally {
-      setUkladam(false)
-    }
-  }
 
   const minut = detail.durationSec ? Math.round(detail.durationSec / 60) : null
 
@@ -92,40 +58,7 @@ export function EliteProDetail({ sessionToken, detail }: { sessionToken: string;
         </p>
       </section>
 
-      {stav?.doporuceno && (
-        <section className="diag-card p-6" style={{ borderColor: "var(--wm-orange)" }}>
-          <h2 className="text-[17px] font-bold tracking-tight">Doporučení: nabídni kontakt na odborníka</h2>
-          <p className="mt-2 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
-            Z dobrovolných otázek na duševní pohodu vyšlo, že by sportovci mohl pomoct rozhovor s odborníkem.
-            Není to diagnóza a body ani odpovědi nevidíš záměrně.
-          </p>
-          <ul className="mt-3 flex list-disc flex-col gap-1.5 pl-5 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
-            <li>Promluv si v klidu a mezi čtyřma očima, ne před týmem ani těsně před soutěží.</li>
-            <li>Začni tím, co vidíš a co tě zajímá: „Jak se teď máš mimo trénink?“ Neptej se na odpovědi v testu.</li>
-            <li>Nabídni volbu: odborníka, kterého doporučíme, nebo si sportovec najde vlastního.</li>
-            <li>U nezletilých domluv další postup i se zákonným zástupcem.</li>
-            <li>V akutní situaci patří člověk na linku 116 123, na 155 nebo 112, ne do dalšího tréninku.</li>
-          </ul>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            {stav.kontaktNabidnut ? (
-              <span className="text-[13px] font-medium text-[var(--wm-green)]">
-                Kontakt nabídnut {datum(stav.kontaktNabidnut)}
-                {Date.now() - stav.kontaktNabidnut > 30 * DEN ? " · zeptej se, jak to dopadlo" : ""}
-              </span>
-            ) : (
-              <button
-                type="button"
-                onClick={() => void zaznamenej()}
-                disabled={ukladam}
-                className="diag-press inline-flex h-9 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-40"
-              >
-                Označit: kontakt nabídnut
-              </button>
-            )}
-            {chyba && <span className="text-[13px] text-[var(--wm-red)]">{chyba}</span>}
-          </div>
-        </section>
-      )}
+      <DoporuceniOdbornika sessionToken={sessionToken} resultId={detail.id} />
 
       <section className="diag-card p-6">
         <h2 className="text-[17px] font-bold tracking-tight">Kontext</h2>

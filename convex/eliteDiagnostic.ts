@@ -7,6 +7,10 @@ import { vyhodnoceniHrace } from "./vyhodnoceniHrace"
 import { sestavFormu } from "../lib/elitepro/forma"
 import { ChybaOdeslani, zpracujOdpovedi } from "../lib/elitepro/odeslani"
 import {
+  ChybaOdeslani as ChybaProfilu,
+  zpracujOdpovedi as zpracujProfil,
+} from "../lib/profil360/odeslani"
+import {
   filtrViditelnosti,
   jeKlubovy,
   requireCoach,
@@ -44,6 +48,7 @@ const TEST_IDS = new Set([
   "archetypy",
   "archetypy-sport",
   "elitepro-sport",
+  "profil360",
 ])
 
 /**
@@ -207,6 +212,9 @@ export const createInvite = mutation({
     // český dotazník, a přesně to už jednou skončilo reklamací.
     if (args.testId.startsWith("elitepro") && args.lang !== "cs") {
       throw new ConvexError("ELITE Pro je zatím jen v češtině.")
+    }
+    if (args.testId === "profil360" && args.lang !== "cs") {
+      throw new ConvexError("Sportovní profil 360 je zatím jen v češtině.")
     }
     delka(args.clientName, MEZ.jmeno, "Jméno klienta")
     delka(args.note, MEZ.poznamka, "Poznámka")
@@ -415,6 +423,76 @@ async function odesliElitePro(
   return { ok: true }
 }
 
+/**
+ * Odeslání Profilu 360. Stejný postup jako u ELITE Pro: kontrola otázku po
+ * otázce, odpovědi na duševní pohodu se neukládají a zůstane z nich jen
+ * doporučení odborníka, když vyjde.
+ */
+async function odesliProfil360(
+  ctx: MutationCtx,
+  inv: Doc<"invitations">,
+  person: Doc<"eliteDiagnosticResults">["person"],
+  answersJson: string,
+  durationSecVstup: number | undefined,
+): Promise<{ ok: boolean }> {
+  let parsed: Record<string, unknown>
+  try {
+    parsed = JSON.parse(answersJson) as Record<string, unknown>
+  } catch {
+    throw new ConvexError("answers není validní JSON")
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new ConvexError("answers není validní JSON")
+  }
+  let z
+  try {
+    z = zpracujProfil(parsed)
+  } catch (e) {
+    if (e instanceof ChybaProfilu) throw new ConvexError(e.message)
+    throw e
+  }
+  const answers = JSON.stringify(z.ciste)
+  const now = Date.now()
+  const durationSec =
+    typeof durationSecVstup === "number" && durationSecVstup > 0 && durationSecVstup < 86400
+      ? Math.round(durationSecVstup)
+      : undefined
+  const klic = vymazovyKlic()
+  const resultId = await ctx.db.insert("eliteDiagnosticResults", {
+    testId: inv.testId,
+    model: "profil360",
+    variant: "sport",
+    lang: inv.lang,
+    person,
+    answers,
+    answeredCount: z.answeredCount,
+    complete: z.complete,
+    durationSec,
+    coachId: inv.coachId,
+    vymazovyKlic: klic,
+    createdAt: now,
+  })
+  await ctx.db.insert("normSamples", {
+    testId: inv.testId,
+    model: "profil360",
+    variant: "sport",
+    lang: inv.lang,
+    ageBand: ageBand(person.birthDate),
+    gender: person.gender,
+    role: shortRole(person.role),
+    answers,
+    answeredCount: z.answeredCount,
+    complete: z.complete,
+    durationSec,
+    collectedMonth: collectedMonth(now),
+    collectedQuarter: collectedQuarter(now),
+    vymazovyKlic: klic,
+  })
+  if (z.doporuceni) await ctx.db.insert("doporuceniOdbornika", { resultId, createdAt: now })
+  await ctx.db.patch(inv._id, { usedAt: now, resultId })
+  return { ok: true }
+}
+
 export const submitWithInvite = mutation({
   args: {
     token: v.string(),
@@ -455,6 +533,9 @@ export const submitWithInvite = mutation({
 
     if (inv.testId.startsWith("elitepro")) {
       return await odesliElitePro(ctx, inv, args.person, args.answers, args.durationSec)
+    }
+    if (inv.testId === "profil360") {
+      return await odesliProfil360(ctx, inv, args.person, args.answers, args.durationSec)
     }
 
     // Vzorce ani archetypy nemají variantu v tom smyslu jako ELITE (sport

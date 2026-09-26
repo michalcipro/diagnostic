@@ -47,6 +47,9 @@ const ZAKAZANE = {
   "lib/elitepro/klic.ts": "klíč ELITE Pro: škály, obrácené položky, klíč vinět, očekávané odpovědi kontrol",
   "lib/elitepro/forma.ts": "sestavení formy, sahá do klíče",
   "lib/elitepro/odeslani.ts": "kontrola odeslání a výpočet doporučení odborníka",
+  "lib/profil360/klic.ts": "klíč Profilu 360: škály, obrácené položky, kontroly a dvojice",
+  "lib/profil360/profil.ts": "výpočet a výklad sportovního profilu",
+  "lib/profil360/odeslani.ts": "kontrola odeslání a výpočet doporučení odborníka",
 }
 
 const PRIPONY = [".ts", ".tsx", ".json", "/index.ts", "/index.tsx"]
@@ -132,6 +135,8 @@ export { getStructure } from "../lib/diagnostic/structure"
 export { POCET_POLOZEK as VZORCE } from "../lib/vzorce/structure"
 export { POCET_POLOZEK as ARCHETYPY } from "../lib/archetypy/structure"
 export { sestavFormu, reakceFormy } from "../lib/elitepro/forma"
+export { VELIKOST as PROFIL360 } from "../lib/profil360/spolecne"
+export { SKALY as PROFIL360_SKALY, KONTROLNI as PROFIL360_KONTROLY } from "../lib/profil360/klic"
 `,
   )
   let M
@@ -150,7 +155,11 @@ export { sestavFormu, reakceFormy } from "../lib/elitepro/forma"
     let skutecne
     if (id.startsWith("vzorce")) skutecne = M.VZORCE
     else if (id.startsWith("archetypy")) skutecne = M.ARCHETYPY
-    else if (id.startsWith("elitepro")) {
+    else if (id === "profil360") {
+      // Všechny otázky na stupnici IPIP a DASS, spánek; bez dobrovolné pohody.
+      const cisla = new Set([...M.PROFIL360_SKALY.flatMap((s) => s.polozky), ...M.PROFIL360_KONTROLY.map((k) => k.id)])
+      skutecne = cisla.size + 5
+    } else if (id.startsWith("elitepro")) {
       const f = M.sestavFormu("kontrola")
       skutecne = f.polozky.length + M.reakceFormy(f).length
     }

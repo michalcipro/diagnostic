@@ -2,6 +2,7 @@ import type { TestId, TestModel, Variant } from "./types"
 import type { Varianta as VariantaVzorcu } from "../vzorce/types"
 import type { Varianta as VariantaArchetypu } from "../archetypy/types"
 import { VELIKOST_FORMY } from "../elitepro/spolecne"
+import { VELIKOST as VELIKOST_PROFILU } from "../profil360/spolecne"
 
 // Rozpoznání testu podle jeho id a počty položek.
 //
@@ -27,6 +28,7 @@ export const TEST_IDS: TestId[] = [
   "archetypy",
   "archetypy-sport",
   "elitepro-sport",
+  "profil360",
 ]
 
 export function jeVzorce(testId: string): boolean {
@@ -40,6 +42,11 @@ export function jeArchetypy(testId: string): boolean {
 /** ELITE Pro: nový test s vlastním dotazníkem, formou a pohledem kouče. */
 export function jeElitePro(testId: string): boolean {
   return testId.startsWith("elitepro")
+}
+
+/** Profil 360: veřejné dotazníky, vlastní dotazník a report. */
+export function jeProfil360(testId: string): boolean {
+  return testId === "profil360"
 }
 
 export function variantaArchetypu(testId: string): VariantaArchetypu {
@@ -78,4 +85,6 @@ export const POCET_POLOZEK: Record<TestId, number> = {
   "archetypy-sport": 96,
   // Pilotní forma, ne celá banka: každý dostane jen část položek.
   "elitepro-sport": VELIKOST_FORMY,
+  // Bez dobrovolných otázek na duševní pohodu.
+  profil360: VELIKOST_PROFILU,
 }

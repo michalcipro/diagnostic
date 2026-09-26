@@ -34,6 +34,8 @@ export type TestId =
   | "archetypy-sport"
   /** nový test ve vývoji; zatím pilotní verze, jen česky */
   | "elitepro-sport"
+  /** Profil 360: kombinace veřejných dotazníků do sportovního profilu, jen česky */
+  | "profil360"
 
 /**
  * Rod respondenta. Řídí gramatické tvary v českém vyhodnocení – žena nesmí

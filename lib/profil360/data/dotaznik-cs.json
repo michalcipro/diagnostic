@@ -1,0 +1,1017 @@
+{
+ "verze": "cs-1.0",
+ "polozky": {
+  "1": {
+   "t": "Nejsem {známý|známá} svým smyslem pro humor.",
+   "s": "A"
+  },
+  "2": {
+   "t": "Málokdy to s něčím přeháním.",
+   "s": "A"
+  },
+  "3": {
+   "t": "Cítím emoce druhých.",
+   "s": "A"
+  },
+  "4": {
+   "t": "Chci utěšit každého, koho něco zranilo.",
+   "s": "A"
+  },
+  "5": {
+   "t": "Často mám smutnou náladu.",
+   "s": "A"
+  },
+  "6": {
+   "t": "Pocity druhých jsou mi lhostejné.",
+   "s": "A"
+  },
+  "7": {
+   "t": "Ujímám se vedení.",
+   "s": "A"
+  },
+  "8": {
+   "t": "Vím, co říct, aby se lidé cítili dobře.",
+   "s": "A"
+  },
+  "9": {
+   "t": "Snadno si najdu přátele.",
+   "s": "A"
+  },
+  "10": {
+   "t": "Rozhoduji se ukvapeně.",
+   "s": "A"
+  },
+  "11": {
+   "t": "Často se trápím věcmi, které se nakonec ukážou jako nedůležité.",
+   "s": "A"
+  },
+  "12": {
+   "t": "Věřím, že je vždycky lepší jít na jistotu než potom litovat.",
+   "s": "A"
+  },
+  "13": {
+   "t": "Věřím, že práva každého člověka jsou stejně důležitá.",
+   "s": "A"
+  },
+  "14": {
+   "t": "Ve svém životě vidím málo důvodů k vděčnosti.",
+   "s": "A"
+  },
+  "15": {
+   "t": "Mám pocit, že věci nezvládám.",
+   "s": "A"
+  },
+  "16": {
+   "t": "Práce ve skupině mi nejde.",
+   "s": "A"
+  },
+  "17": {
+   "t": "Mám silnou potřebu moci.",
+   "s": "A"
+  },
+  "18": {
+   "t": "Nechávám své věci povalovat.",
+   "s": "A"
+  },
+  "19": {
+   "t": "Vím, jak obejít pravidla.",
+   "s": "A"
+  },
+  "20": {
+   "t": "Když mám problém, vylžu se z něj.",
+   "s": "A"
+  },
+  "21": {
+   "t": "Kazím druhým plány.",
+   "s": "A"
+  },
+  "22": {
+   "t": "Dokážu druhému projevit lásku.",
+   "s": "A"
+  },
+  "23": {
+   "t": "Naučné knihy pro radost nečtu.",
+   "s": "A"
+  },
+  "24": {
+   "t": "Tvrdě pracuji.",
+   "s": "A"
+  },
+  "25": {
+   "t": "Oplácím druhým, co mi udělali.",
+   "s": "A"
+  },
+  "26": {
+   "t": "Když ostatní slaví, strhne mě to.",
+   "s": "A"
+  },
+  "27": {
+   "t": "S lidmi, kteří mi nejsou sympatičtí, jednám jinak.",
+   "s": "A"
+  },
+  "28": {
+   "t": "Vymýšlím nové způsoby, jak věci dělat.",
+   "s": "A"
+  },
+  "29": {
+   "t": "Nadšení mě strhne jen málokdy.",
+   "s": "A"
+  },
+  "30": {
+   "t": "Raději trávím čas o samotě.",
+   "s": "A"
+  },
+  "31": {
+   "t": "Nechám se unést nutkáním utrácet nebo se přejídat.",
+   "s": "A"
+  },
+  "32": {
+   "t": "Rozhoduji se uvážlivě.",
+   "s": "A"
+  },
+  "33": {
+   "t": "Do své práce vkládám málo času a úsilí.",
+   "s": "A"
+  },
+  "34": {
+   "t": "Nechlubím se svými úspěchy.",
+   "s": "A"
+  },
+  "35": {
+   "t": "Vést skupinu mi nejde.",
+   "s": "A"
+  },
+  "36": {
+   "t": "Na život mám zralý pohled.",
+   "s": "A"
+  },
+  "37": {
+   "t": "Těším se na každý nový den.",
+   "s": "A"
+  },
+  "38": {
+   "t": "Věci mě nijak nenadchnou.",
+   "s": "A"
+  },
+  "39": {
+   "t": "Snadno mě něco podráždí.",
+   "s": "A"
+  },
+  "40": {
+   "t": "Vyhovuje mi brát věci v klidu.",
+   "s": "A"
+  },
+  "41": {
+   "t": "Vyhledávám dobrodružství.",
+   "s": "A"
+  },
+  "42": {
+   "t": "Vyhýbám se filozofickým debatám.",
+   "s": "A"
+  },
+  "43": {
+   "t": "Držím si lidi od těla.",
+   "s": "A"
+  },
+  "44": {
+   "t": "Pořád jsem v pohybu.",
+   "s": "A"
+  },
+  "45": {
+   "t": "Podvádím, když mi to pomůže dopředu.",
+   "s": "A"
+  },
+  "46": {
+   "t": "Smíchem zpříjemňuji druhým dny.",
+   "s": "A"
+  },
+  "47": {
+   "t": "Všechno raději dělám bez ostatních.",
+   "s": "A"
+  },
+  "48": {
+   "t": "Soucítím s lidmi bez domova.",
+   "s": "A"
+  },
+  "49": {
+   "t": "Dávám přednost kamarádům, kteří jsou vzrušujícím způsobem nepředvídatelní.",
+   "s": "A"
+  },
+  "50": {
+   "t": "Baví mě jednat podle momentální chuti.",
+   "s": "A"
+  },
+  "51": {
+   "t": "Dobře se cítím jen mezi přáteli.",
+   "s": "A"
+  },
+  "52": {
+   "t": "Přírodních krás kolem sebe si všímám jen zřídka.",
+   "s": "A"
+  },
+  "53": {
+   "t": "Nadchne mě, když se naučím něco nového.",
+   "s": "A"
+  },
+  "54": {
+   "t": "Osobně znám všechny sportovce na světě.",
+   "s": "A"
+  },
+  "55": {
+   "t": "Mám živou představivost.",
+   "s": "A"
+  },
+  "56": {
+   "t": "U této otázky zvol „vůbec mě nevystihuje“.",
+   "s": "A"
+  },
+  "57": {
+   "t": "Dobře vycítím, co druzí prožívají.",
+   "s": "A"
+  },
+  "58": {
+   "t": "Snadno se rozzlobím.",
+   "s": "A"
+  },
+  "59": {
+   "t": "Problémy druhých mě nezajímají.",
+   "s": "A"
+  },
+  "60": {
+   "t": "Učit se nové věci mě nebaví.",
+   "s": "A"
+  },
+  "61": {
+   "t": "Věci dokončím i přes překážky.",
+   "s": "A"
+  },
+  "62": {
+   "t": "U této otázky zvol „spíš mě vystihuje“.",
+   "s": "A"
+  },
+  "63": {
+   "t": "Raději se držím věcí, které znám.",
+   "s": "A"
+  },
+  "64": {
+   "t": "Dávám přednost změně před rutinou.",
+   "s": "A"
+  },
+  "65": {
+   "t": "Nikdo by mě nenazval {arogantním|arogantní}.",
+   "s": "A"
+  },
+  "66": {
+   "t": "Úkoly úspěšně dokončuji.",
+   "s": "A"
+  },
+  "67": {
+   "t": "Nevěřím v žádnou vyšší moc ani v Boha.",
+   "s": "A"
+  },
+  "68": {
+   "t": "Dávám druhým šanci začít znovu.",
+   "s": "A"
+  },
+  "69": {
+   "t": "Vždycky mám všechno připravené.",
+   "s": "A"
+  },
+  "70": {
+   "t": "Lidem nedůvěřuji.",
+   "s": "A"
+  },
+  "71": {
+   "t": "Umím druhé přemluvit k něčemu opravdu odvážnému nebo bláznivému.",
+   "s": "A"
+  },
+  "72": {
+   "t": "Když by to mohlo mít nepříjemné následky, neříkám otevřeně, co si myslím.",
+   "s": "A"
+  },
+  "73": {
+   "t": "Snadno se mě něco dotkne.",
+   "s": "A"
+  },
+  "74": {
+   "t": "Dodržuji sliby.",
+   "s": "A"
+  },
+  "75": {
+   "t": "Věci obvykle kriticky nepromýšlím.",
+   "s": "A"
+  },
+  "76": {
+   "t": "Cítím nadšení nebo radost bez zjevného důvodu.",
+   "s": "A"
+  },
+  "77": {
+   "t": "Často jsem psychicky na dně.",
+   "s": "A"
+  },
+  "78": {
+   "t": "Děkuji těm, kterým na mně záleží.",
+   "s": "A"
+  },
+  "79": {
+   "t": "Jsem velmi disciplinovaný člověk.",
+   "s": "A"
+  },
+  "80": {
+   "t": "Změny mi nejsou příjemné.",
+   "s": "A"
+  },
+  "81": {
+   "t": "Neudržím nervy.",
+   "s": "A"
+  },
+  "82": {
+   "t": "Teoretické debaty mě nezajímají.",
+   "s": "A"
+  },
+  "83": {
+   "t": "Snadno to vzdávám.",
+   "s": "A"
+  },
+  "84": {
+   "t": "Bojím se, že udělám něco špatně.",
+   "s": "A"
+  },
+  "85": {
+   "t": "Je pro mě důležité žít ve světě plném krásy.",
+   "s": "A"
+  },
+  "86": {
+   "t": "Jednám bez přemýšlení.",
+   "s": "A"
+  },
+  "87": {
+   "t": "Čekám, až cestu ukážou ostatní.",
+   "s": "A"
+  },
+  "88": {
+   "t": "Na pomoc kamarádovi mám vždycky čas.",
+   "s": "A"
+  },
+  "89": {
+   "t": "Jsem velmi vděčný člověk.",
+   "s": "A"
+  },
+  "90": {
+   "t": "Úkoly zvládám hladce.",
+   "s": "A"
+  },
+  "91": {
+   "t": "Vím, že mám v životě lidi, kterým na mně záleží stejně jako na nich samých.",
+   "s": "A"
+  },
+  "92": {
+   "t": "Snadno se dostanu do stresu.",
+   "s": "A"
+  },
+  "93": {
+   "t": "Lidé mě považují za moudrého člověka.",
+   "s": "A"
+  },
+  "94": {
+   "t": "Jednám se všemi lidmi stejně.",
+   "s": "A"
+  },
+  "95": {
+   "t": "Mám {rád|ráda} kolem sebe uklizeno.",
+   "s": "A"
+  },
+  "96": {
+   "t": "Nesnáším být středem pozornosti.",
+   "s": "A"
+  },
+  "97": {
+   "t": "V nové společenské situaci nevím, jak se chovat.",
+   "s": "A"
+  },
+  "98": {
+   "t": "Pod tlakem zůstávám v klidu.",
+   "s": "A"
+  },
+  "99": {
+   "t": "Svých emočních reakcí si všímám jen zřídka.",
+   "s": "A"
+  },
+  "100": {
+   "t": "Soucítím s těmi, kdo jsou na tom hůř než já.",
+   "s": "A"
+  },
+  "101": {
+   "t": "Ve volném čase toho dělám hodně.",
+   "s": "A"
+  },
+  "102": {
+   "t": "Cítím se se sebou dobře.",
+   "s": "A"
+  },
+  "103": {
+   "t": "Podporuji své spoluhráče a členy skupiny.",
+   "s": "A"
+  },
+  "104": {
+   "t": "Křičím na lidi.",
+   "s": "A"
+  },
+  "105": {
+   "t": "Prožívám své emoce intenzivně.",
+   "s": "A"
+  },
+  "106": {
+   "t": "Dělám si starosti.",
+   "s": "A"
+  },
+  "107": {
+   "t": "Je pro mě těžké přijmout od kohokoli lásku.",
+   "s": "A"
+  },
+  "108": {
+   "t": "Snadno mě zahltí to, co se kolem děje.",
+   "s": "A"
+  },
+  "109": {
+   "t": "Často se stavím proti silnému odporu.",
+   "s": "A"
+  },
+  "110": {
+   "t": "Nemám moc silnou motivaci uspět.",
+   "s": "A"
+  },
+  "111": {
+   "t": "Snažím se povzbudit lidi, kteří vypadají smutně.",
+   "s": "A"
+  },
+  "112": {
+   "t": "Pořádná hádka mě baví.",
+   "s": "A"
+  },
+  "113": {
+   "t": "Těžko poznávám, na čem opravdu záleží.",
+   "s": "A"
+  },
+  "114": {
+   "t": "Těžko se pouštím do úkolů.",
+   "s": "A"
+  },
+  "115": {
+   "t": "Dokážu najít pozitivní stránku i v tom, co druzí vidí negativně.",
+   "s": "A"
+  },
+  "116": {
+   "t": "Lidé o mně říkají, že vedu pevně, ale férově.",
+   "s": "A"
+  },
+  "117": {
+   "t": "Nemám moc energie.",
+   "s": "A"
+  },
+  "118": {
+   "t": "Vyzařuje ze mě radost.",
+   "s": "A"
+  },
+  "119": {
+   "t": "Nerozumím lidem, kteří se nechají unést emocemi.",
+   "s": "A"
+  },
+  "120": {
+   "t": "Baví mě mluvit o sobě.",
+   "s": "A"
+  },
+  "121": {
+   "t": "Zrazuji lidi, kteří mi důvěřovali.",
+   "s": "A"
+  },
+  "122": {
+   "t": "Lidé mě nepovažují za někoho s novými a neobvyklými nápady.",
+   "s": "A"
+  },
+  "123": {
+   "t": "Čekám to nejhorší.",
+   "s": "A"
+  },
+  "124": {
+   "t": "Nejsem nijak výjimečný člověk.",
+   "s": "A"
+  },
+  "125": {
+   "t": "Záleží mi na druhých.",
+   "s": "A"
+  },
+  "126": {
+   "t": "Umím pomoct lidem, aby spolu dobře spolupracovali.",
+   "s": "A"
+  },
+  "127": {
+   "t": "Snadno odolám pokušení.",
+   "s": "A"
+  },
+  "128": {
+   "t": "Své city druhým snadno neukazuji.",
+   "s": "A"
+  },
+  "129": {
+   "t": "Lpím na zavedených způsobech.",
+   "s": "A"
+  },
+  "130": {
+   "t": "Pořád mám z něčeho obavy.",
+   "s": "A"
+  },
+  "131": {
+   "t": "Baví mě riskovat.",
+   "s": "A"
+  },
+  "132": {
+   "t": "Poezie mě nebaví.",
+   "s": "A"
+  },
+  "133": {
+   "t": "Baví mě předvádět své tělo.",
+   "s": "A"
+  },
+  "134": {
+   "t": "Učení mě provází celý život.",
+   "s": "A"
+  },
+  "135": {
+   "t": "Věřím druhým.",
+   "s": "A"
+  },
+  "136": {
+   "t": "Ztrácím trpělivost, když mi druzí vyprávějí o svých problémech.",
+   "s": "A"
+  },
+  "137": {
+   "t": "Na večírcích mluvím s mnoha různými lidmi.",
+   "s": "A"
+  },
+  "138": {
+   "t": "Svět mě nijak zvlášť nezajímá.",
+   "s": "A"
+  },
+  "139": {
+   "t": "Věřím tomu, co lidé říkají.",
+   "s": "A"
+  },
+  "140": {
+   "t": "Krásy si všimnu, až když na ni upozorní ostatní.",
+   "s": "A"
+  },
+  "141": {
+   "t": "Mám málo zájmů.",
+   "s": "A"
+  },
+  "142": {
+   "t": "Když se ke mně někdo zachová špatně, snažím se reagovat s pochopením.",
+   "s": "A"
+  },
+  "143": {
+   "t": "Snadno propadnu panici.",
+   "s": "A"
+  },
+  "144": {
+   "t": "Druzí se na mě pro radu obracejí jen zřídka.",
+   "s": "A"
+  },
+  "145": {
+   "t": "Baví mě nechat se unášet fantazií.",
+   "s": "A"
+  },
+  "146": {
+   "t": "Snažím se vést ostatní.",
+   "s": "A"
+  },
+  "147": {
+   "t": "Nemám zvláštní potřebu dělat něco originálního.",
+   "s": "A"
+  },
+  "148": {
+   "t": "Chovám k lidem zášť.",
+   "s": "A"
+  },
+  "149": {
+   "t": "Laskavost oplácím jen těm, kdo byli laskaví ke mně.",
+   "s": "A"
+  },
+  "150": {
+   "t": "Bojím se na sebe upozornit.",
+   "s": "A"
+  },
+  "151": {
+   "t": "Beru věci do svých rukou.",
+   "s": "A"
+  },
+  "152": {
+   "t": "Tvrdě se ženu za úspěchem.",
+   "s": "A"
+  },
+  "153": {
+   "t": "Myslím originálně.",
+   "s": "A"
+  },
+  "154": {
+   "t": "Dívám se na život z té lepší stránky.",
+   "s": "A"
+  },
+  "155": {
+   "t": "Když vidím krásné věci, prožívám hluboké emoce.",
+   "s": "A"
+  },
+  "156": {
+   "t": "Miluji život.",
+   "s": "A"
+  },
+  "157": {
+   "t": "Baví mě snít s otevřenýma očima.",
+   "s": "A"
+  },
+  "158": {
+   "t": "Porušuji sliby.",
+   "s": "A"
+  },
+  "159": {
+   "t": "Baví mě číst náročné texty.",
+   "s": "A"
+  },
+  "160": {
+   "t": "Dělám víc, než se ode mě čeká.",
+   "s": "A"
+  },
+  "161": {
+   "t": "Udělám jen nutné minimum.",
+   "s": "A"
+  },
+  "162": {
+   "t": "Těžko odhaduji, jak budou druzí reagovat.",
+   "s": "A"
+  },
+  "163": {
+   "t": "Za svým přesvědčením si nestojím.",
+   "s": "A"
+  },
+  "164": {
+   "t": "Se mnou není legrace.",
+   "s": "A"
+  },
+  "165": {
+   "t": "Jen tak něco mě nerozčílí.",
+   "s": "A"
+  },
+  "166": {
+   "t": "Baví mě jednat spontánně.",
+   "s": "A"
+  },
+  "167": {
+   "t": "Často myslím na možné špatné konce, které pravděpodobně nenastanou.",
+   "s": "A"
+  },
+  "168": {
+   "t": "Nedokončuji, co začnu.",
+   "s": "A"
+  },
+  "169": {
+   "t": "Abstraktní myšlenky chápu těžko.",
+   "s": "A"
+  },
+  "170": {
+   "t": "Když hrozí nebezpečí, začínám panikařit.",
+   "s": "A"
+  },
+  "171": {
+   "t": "Využívám druhé pro své cíle.",
+   "s": "A"
+  },
+  "172": {
+   "t": "Vyhýbám se nebezpečným situacím.",
+   "s": "A"
+  },
+  "173": {
+   "t": "Úkol nevzdám, dokud není hotový.",
+   "s": "A"
+  },
+  "174": {
+   "t": "Je pro mě těžké druhým odpustit.",
+   "s": "A"
+  },
+  "175": {
+   "t": "Neváhám vyslovit nepopulární názor.",
+   "s": "A"
+  },
+  "176": {
+   "t": "Občas se v něčem utrhnu ze řetězu (jídlo, pití, utrácení).",
+   "s": "A"
+  },
+  "177": {
+   "t": "Jsem duchovně založený člověk.",
+   "s": "A"
+  },
+  "178": {
+   "t": "Bojím se mnoha věcí.",
+   "s": "A"
+  },
+  "179": {
+   "t": "Jen tak něco mě neuvede do rozpaků.",
+   "s": "A"
+  },
+  "180": {
+   "t": "Mluvím pravdu.",
+   "s": "A"
+  },
+  "181": {
+   "t": "Jednám dřív, než domyslím důsledky.",
+   "s": "A"
+  },
+  "182": {
+   "t": "Porušuji pravidla.",
+   "s": "A"
+  },
+  "183": {
+   "t": "Vím, jak věci dotáhnout.",
+   "s": "A"
+  },
+  "184": {
+   "t": "Lidé mi věří, že udržím tajemství.",
+   "s": "A"
+  },
+  "185": {
+   "t": "Často zapomínám vracet věci na své místo.",
+   "s": "A"
+  },
+  "186": {
+   "t": "Necítím k druhým vděčnost.",
+   "s": "A"
+  },
+  "187": {
+   "t": "Myslím si o sobě hodně.",
+   "s": "A"
+  },
+  "188": {
+   "t": "Lidé o mně říkají, že jsem {nevrlý|nevrlá}.",
+   "s": "A"
+  },
+  "189": {
+   "t": "Užívám si spoustu legrace.",
+   "s": "A"
+  },
+  "190": {
+   "t": "Věřím, že druzí mají dobré úmysly.",
+   "s": "A"
+  },
+  "191": {
+   "t": "Baví mě ponořit se do myšlenek.",
+   "s": "A"
+  },
+  "192": {
+   "t": "Přátelé si cení mého dobrého úsudku.",
+   "s": "A"
+  },
+  "193": {
+   "t": "Je pro mě těžké přimět ostatní ke spolupráci.",
+   "s": "A"
+  },
+  "194": {
+   "t": "Nemám se {rád|ráda}.",
+   "s": "A"
+  },
+  "195": {
+   "t": "Vrhám se do věcí po hlavě.",
+   "s": "A"
+  },
+  "196": {
+   "t": "Chovám se divoce a bláznivě.",
+   "s": "A"
+  },
+  "197": {
+   "t": "Každou noc spím přes čtrnáct hodin.",
+   "s": "A"
+  },
+  "198": {
+   "t": "V tom, co dělám, vynikám.",
+   "s": "A"
+  },
+  "199": {
+   "t": "Podléhám svým nutkáním.",
+   "s": "A"
+  },
+  "200": {
+   "t": "Vyhýbám se davům.",
+   "s": "A"
+  },
+  "201": {
+   "t": "Věřím, že jsem lepší než ostatní.",
+   "s": "A"
+  },
+  "202": {
+   "t": "Snažím se nemyslet na lidi v nouzi.",
+   "s": "A"
+  },
+  "203": {
+   "t": "Náročné společenské situace mi nevadí.",
+   "s": "A"
+  },
+  "204": {
+   "t": "Blbnutí mě málokdy baví.",
+   "s": "A"
+  },
+  "205": {
+   "t": "Chlubím se svými přednostmi.",
+   "s": "A"
+  },
+  "206": {
+   "t": "Bojím se nejhoršího.",
+   "s": "A"
+  },
+  "207": {
+   "t": "Pouštím se do věcí bez rozmyslu.",
+   "s": "A"
+  },
+  "208": {
+   "t": "Návštěvy galerií a muzeí umění mě nebaví.",
+   "s": "A"
+  },
+  "209": {
+   "t": "Miluji vzrušení.",
+   "s": "A"
+  },
+  "210": {
+   "t": "Jsem velmi loajální člověk.",
+   "s": "A"
+  },
+  "211": {
+   "t": "Smysl pro humor si udržím i v ponurých situacích.",
+   "s": "A"
+  },
+  "212": {
+   "t": "Zkusím cokoli aspoň jednou.",
+   "s": "A"
+  },
+  "213": {
+   "t": "Baví mě jednat bezhlavě.",
+   "s": "A"
+  },
+  "214": {
+   "t": "Pomáhat druhým mě těší.",
+   "s": "A"
+  },
+  "215": {
+   "t": "Věřím, že umění je důležité.",
+   "s": "A"
+  },
+  "216": {
+   "t": "Paragliding ani bungee jumping nejsou nic pro mě.",
+   "s": "A"
+  },
+  "217": {
+   "t": "Vidím krásu ve věcech, kterých si ostatní nemusí všimnout.",
+   "s": "A"
+  },
+  "218": {
+   "t": "Promrhávám čas.",
+   "s": "A"
+  },
+  "219": {
+   "t": "Mezi lidmi se cítím dobře.",
+   "s": "A"
+  },
+  "220": {
+   "t": "Nadchne mě spousta různých činností.",
+   "s": "A"
+  },
+  "221": {
+   "t": "Mám o sobě vysoké mínění.",
+   "s": "A"
+  },
+  "222": {
+   "t": "Vzdám se věcí, které mi dlouhodobě škodí, i když mi krátkodobě dělají dobře.",
+   "s": "A"
+  },
+  "223": {
+   "t": "Urážím lidi.",
+   "s": "A"
+  },
+  "224": {
+   "t": "Dělám bláznivé věci.",
+   "s": "A"
+  },
+  "225": {
+   "t": "V každé situaci najdu něco zajímavého.",
+   "s": "A"
+  },
+  "226": {
+   "t": "Je pro mě těžké oslovit druhé.",
+   "s": "A"
+  },
+  "227": {
+   "t": "Vyhýbám se kontaktu s ostatními.",
+   "s": "A"
+  },
+  "228": {
+   "t": "Dělám si starosti s tím, co si o mně lidé myslí.",
+   "s": "A"
+  },
+  "229": {
+   "t": "Věřím, že každý člověk má v životě nějaký smysl.",
+   "s": "A"
+  },
+  "230": {
+   "t": "Své plány uskutečním.",
+   "s": "A"
+  },
+  "231": {
+   "t": "Chci velet.",
+   "s": "A"
+  },
+  "232": {
+   "t": "Ráno se probouzím s nadšením z toho, co den přinese.",
+   "s": "A"
+  },
+  "233": {
+   "t": "Miluji velké oslavy a večírky.",
+   "s": "A"
+  },
+  "234": {
+   "t": "Při rozhodování nezvažuji různé možnosti.",
+   "s": "A"
+  },
+  "235": {
+   "t": "Na druhé si neudělám čas.",
+   "s": "A"
+  },
+  "236": {
+   "t": "Baví mě vyčnívat z davu.",
+   "s": "A"
+  },
+  "237": {
+   "t": "Vážím všechna pro a proti.",
+   "s": "A"
+  },
+  "238": {
+   "t": "Starosti si dělám jen málokdy.",
+   "s": "A"
+  },
+  "239": {
+   "t": "Mám pocit, že život nemá smysl.",
+   "s": "A"
+  },
+  "240": {
+   "t": "Využívám ostatních ve svůj prospěch.",
+   "s": "A"
+  },
+  "241": {
+   "t": "V pokoji nechávám nepořádek.",
+   "s": "A"
+  },
+  "242": {
+   "t": "Snažím se překonat výkony druhých.",
+   "s": "A"
+  },
+  "243": {
+   "t": "Mívám tolik radosti a energie, že se skoro nemůžu udržet.",
+   "s": "A"
+  },
+  "244": {
+   "t": "Umím ovládnout své chutě.",
+   "s": "A"
+  },
+  "245": {
+   "t": "Pořád mám co dělat.",
+   "s": "A"
+  },
+  "246": {
+   "t": "I přes obtíže si zachovávám naději.",
+   "s": "A"
+  },
+  "501": {
+   "t": "Těžko se mi zklidňovalo.",
+   "s": "D"
+  },
+  "502": {
+   "t": "Moje reakce na situace byly přehnané.",
+   "s": "D"
+  },
+  "503": {
+   "t": "Připadalo mi, že spotřebovávám hodně nervové energie.",
+   "s": "D"
+  },
+  "504": {
+   "t": "Snadno mě něco rozrušilo.",
+   "s": "D"
+  },
+  "505": {
+   "t": "Těžko se mi odpočívalo.",
+   "s": "D"
+  },
+  "506": {
+   "t": "Vadilo mi všechno, co mě zdržovalo od toho, co jsem {potřeboval|potřebovala} udělat.",
+   "s": "D"
+  },
+  "507": {
+   "t": "Snadno se mě něco dotklo.",
+   "s": "D"
+  }
+ }
+}

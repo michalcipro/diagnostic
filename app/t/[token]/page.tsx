@@ -7,8 +7,9 @@ import { JAZYKY_TYMU, SOUHLAS, nazevTestu } from "@/lib/diagnostic/nazvy"
 import { testMeta } from "@/lib/diagnostic/test-meta"
 import { applyGender } from "@/lib/diagnostic/gender"
 import { getItems, itemText, type Item } from "@/lib/diagnostic/items"
-import { jeElitePro, jeVzorce, parseTestId } from "@/lib/diagnostic/test-id"
+import { jeElitePro, jeProfil360, jeVzorce, parseTestId } from "@/lib/diagnostic/test-id"
 import { EliteProDotaznik } from "@/components/elitepro/dotaznik"
+import { Profil360Dotaznik } from "@/components/profil360/dotaznik"
 import { clearSession, loadSession, newSession, saveSession } from "@/lib/diagnostic/storage"
 import { fetchInvite, isRemoteEnabled, submitWithInvite, type Invite } from "@/lib/diagnostic/remote"
 import type { Answer, Lang, StoredSession, TestId } from "@/lib/diagnostic/types"
@@ -43,6 +44,9 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
   if (invite.status === "used") return <InviteProblem kind="used" lang={invite.lang} />
   if (invite.status === "expired") return <InviteProblem kind="expired" lang={invite.lang} />
 
+  if (invite.testId && jeProfil360(invite.testId)) {
+    return <Profil360Dotaznik token={token} clientName={invite.clientName ?? ""} />
+  }
   if (invite.testId && jeElitePro(invite.testId) && invite.forma) {
     return <EliteProDotaznik token={token} forma={invite.forma} clientName={invite.clientName ?? ""} />
   }

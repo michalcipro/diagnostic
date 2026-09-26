@@ -80,6 +80,11 @@ export const BAND_DESCRIPTIONS: Record<Lang, Record<BandKey, string>> = {
 }
 
 export const TEST_NAMES: Record<TestId, Record<Lang, string>> = {
+  profil360: {
+    cs: "Sportovní profil 360",
+    en: "Athlete Profile 360",
+    sk: "Športový profil 360",
+  },
   "elitepro-sport": {
     cs: "ELITE Pro · pilotní verze",
     en: "ELITE Pro · pilot version",

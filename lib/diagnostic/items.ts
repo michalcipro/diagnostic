@@ -84,6 +84,7 @@ const NACITACE: Record<TestId, () => Promise<ItemsFile>> = {
     ),
   // ELITE Pro má vlastní dotazník (components/elitepro) a sem nepatří.
   "elitepro-sport": async () => ({}),
+  profil360: async () => ({}),
 }
 
 export interface Item {

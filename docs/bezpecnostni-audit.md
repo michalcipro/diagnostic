@@ -688,6 +688,14 @@ jednoho příznaku a zahodí; neukládají se ani ve výsledku, ani v anonymním
 vzorku. Příznak vidí kouč, který vyplnění smí otevřít, a nikdy klubový kouč
 (`convex/pohoda.ts`). Maže se spolu s vyplněním.
 
+## Doplněk: Sportovní profil 360
+
+Stejná pravidla jako u ELITE Pro. Klíč (`lib/profil360/klic.ts`) a výklad
+(`lib/profil360/profil.ts`) jsou mimo dosah stránky s dotazníkem, hlídá to
+`audit-balicku.cjs`. Server přijme jen otázky a rozsahy, které test má;
+odpovědi PHQ-4 se neukládají, zůstane jen doporučení odborníka ve stejné
+tabulce jako u ELITE Pro, se stejnými pravidly přístupu a výmazu.
+
 ## Závěr
 
 Aplikace je na svoji velikost postavená nadprůměrně obezřetně: autorizace je
