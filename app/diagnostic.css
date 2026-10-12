@@ -181,7 +181,7 @@
 
 /* Tmavý režim: světlé podklady štítků nahradit poloprůhlednými, aby
    nesvítily na tmavém pozadí, a text zesvětlit. */
-@media (prefers-color-scheme: dark) {
+@media screen and (prefers-color-scheme: dark) {
   .diag-band-priority { --band-fg: #ff8078; --band-bg: rgba(255, 59, 48, 0.16); }
   .diag-band-stabilization { --band-fg: #ffb340; --band-bg: rgba(255, 149, 0, 0.16); }
   .diag-band-strong { --band-fg: #64b0ff; --band-bg: rgba(10, 132, 255, 0.18); }
@@ -271,21 +271,50 @@
 
 /* tisk */
 @media print {
+  /* Vyhodnocení se tiskne na výšku. Tlačítko Tisk v aplikaci tiskne hotové
+     PDF; tohle platí pro tisk stránky z nabídky prohlížeče. */
+  @page {
+    size: A4 portrait;
+    margin: 14mm 12mm;
+  }
   .diag-no-print {
     display: none !important;
   }
+  html,
+  body,
   .diag-root {
-    background: #fff;
+    background: #fff !important;
+  }
+  /* Pruhy a štítky jsou barevné pozadí. Bez tohohle je Chrome vytiskne jen se
+     zapnutou volbou „Grafika na pozadí“ a z grafů zbudou prázdná místa. */
+  .diag-root,
+  .diag-root * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Rozměry jsou dělané pro obrazovku; v plné velikosti mělo vyhodnocení
+     ELITE 200 na papíře přes dvacet stran. */
+  .diag-root {
+    zoom: 0.8;
+  }
+  .diag-container {
+    max-width: none;
+    padding: 0;
   }
   .diag-card {
     border: 1px solid #e5e5ea;
     box-shadow: none;
-    break-inside: avoid;
+  }
+  /* Velká karta se smí zlomit. Celá karta pohromadě nechávala před sebou
+     poloprázdnou stranu a nadpis oddílu osamocený na konci předchozí. */
+  .diag-root :is(h1, h2, h3, h4) {
+    break-after: avoid;
+  }
+  .diag-root :is(p, li) {
+    orphans: 3;
+    widows: 3;
   }
   .diag-print-break {
     break-before: page;
-  }
-  @page {
-    margin: 14mm;
   }
 }

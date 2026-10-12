@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import { applyGender } from "@/lib/diagnostic/gender"
 import { DoporuceniOdbornika } from "@/components/diagnostic/doporuceni-odbornika"
 import type { ResultDetail } from "@/lib/diagnostic/remote"
-import { KONTEXT_OTAZKY } from "@/lib/elitepro/dotaznik"
+import { popisKontextu } from "@/lib/profil360/kontext"
 import {
   CHRONOTYP_SLOVO,
   OBLASTI,
@@ -104,7 +104,7 @@ export function Profil360Report({ sessionToken, detail }: { sessionToken: string
   const nejsilnejsi = serazene.slice(0, 3)
   const nejslabsi = serazene.slice(-3).reverse()
   const minut = detail.durationSec ? Math.round(detail.durationSec / 60) : null
-  const kontext = KONTEXT_OTAZKY.map((o) => ({ o, x: odp[String(o.id)] })).filter((k) => typeof k.x === "number")
+  const kontext = popisKontextu(odp)
 
   const spolehlivostText =
     p.spolehlivost.celkem === "ok"
@@ -124,7 +124,7 @@ export function Profil360Report({ sessionToken, detail }: { sessionToken: string
         </p>
         {kontext.length > 0 && (
           <p className="mt-1 text-[13px] text-[var(--wm-text-3)]">
-            {kontext.map(({ o, x }) => o.moznosti[x - 1]).join(" · ")}
+            {kontext.join(" · ")}
           </p>
         )}
         <p
@@ -147,8 +147,8 @@ export function Profil360Report({ sessionToken, detail }: { sessionToken: string
       {p.typ && (
         <section className="diag-card p-6">
           <p className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text-3)]">TYP SPORTOVCE</p>
-          <h2 className="mt-2 text-[26px] font-bold tracking-tight">{p.typ.hlavni.nazev}</h2>
-          <p className="mt-1 text-[14px] text-[var(--wm-text-2)]">s rysy typu {p.typ.vedlejsi.nazev.toLowerCase()}</p>
+          <h2 className="mt-2 text-[26px] font-bold tracking-tight">{g(p.typ.hlavni.nazev)}</h2>
+          <p className="mt-1 text-[14px] text-[var(--wm-text-2)]">s rysy typu {g(p.typ.vedlejsi.nazev).toLowerCase()}</p>
           <p className="mt-4 text-[15px] leading-relaxed">{g(p.typ.hlavni.popis)}</p>
           <dl className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl bg-[var(--wm-surface-2)] p-4">
@@ -211,7 +211,7 @@ export function Profil360Report({ sessionToken, detail }: { sessionToken: string
             <ul className="flex flex-col gap-3">
               {p.rizika.map((r) => (
                 <li key={r.id} className="text-[14px] leading-relaxed">
-                  <span className="font-semibold">{r.nazev}.</span>{" "}
+                  <span className="font-semibold">{g(r.nazev)}.</span>{" "}
                   <span className="text-[var(--wm-text-2)]">{g(r.text)}</span>
                 </li>
               ))}
@@ -298,7 +298,7 @@ export function Profil360Report({ sessionToken, detail }: { sessionToken: string
 
       {/* stres a spánek */}
       <div className="grid gap-5 lg:grid-cols-2">
-        <Karta titul="Stres za poslední týden" podtitul="DASS-21, škála stresu.">
+        <Karta titul="Míra stresu za poslední týden" podtitul="DASS-21, škála stresu.">
           {p.stres ? (
             <>
               <p className="text-[24px] font-bold tracking-tight">{STRES_SLOVO[p.stres.pasmo]}</p>

@@ -1,5 +1,9 @@
 // Kontrola sazby všech exportů, které aplikace vydává klientovi z ruky.
 //
+// Vyhodnocení ELITE, vzorce, archetypy a Profil 360 se sázejí jako tisková
+// sestava (lib/diagnostic/pdf/sestava.ts) s užšími okraji než ostatní PDF;
+// kontrola okraje se proto řídí tím, ze kterého sazeče dokument je.
+//
 // Typová kontrola o rozvržení nic neví. Text může vytéct za okraj strany, dva
 // popisky se mohou překrýt a do dokumentu se může dostat výplň typu undefined.
 // Pozná se to až v ruce – a ELITE report, vzorce, archetypy, manuál i obě
@@ -35,9 +39,12 @@ const vstup = path.join(KOREN, "scripts", ".sazba-vstup.ts")
 const vystup = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "sazba-")), "sazba.cjs")
 fs.writeFileSync(
   vstup,
-  `export { buildReportPdf } from "../lib/diagnostic/pdf/report-pdf"
-export { buildVzorcePdf } from "../lib/vzorce/pdf"
-export { buildArchetypyPdf } from "../lib/archetypy/pdf"
+  `export { buildReportPdf, sestavReportPdf } from "../lib/diagnostic/pdf/report-pdf"
+export { buildVzorcePdf, sestavVzorcePdf } from "../lib/vzorce/pdf"
+export { buildArchetypyPdf, sestavArchetypyPdf } from "../lib/archetypy/pdf"
+export { buildProfil360Pdf, sestavProfil360Pdf } from "../lib/profil360/pdf"
+export { SESTAVA } from "../lib/diagnostic/pdf/sestava"
+export { SKALY, KONTROLNI } from "../lib/profil360/klic"
 export { buildManualPdf } from "../lib/diagnostic/manual-pdf"
 export { buildTymPdf } from "../lib/tym/pdf"
 export { buildHracPdf } from "../lib/tym/pdf-hrace"
@@ -82,7 +89,10 @@ function okrajeStrany(sirkaMm) {
     : { levy: M.OKRAJ.levy, pravy: PRAVY_KRAJ }
 }
 
-async function zmer(blob) {
+/** Okraje tiskové sestavy: vyhodnocení, která jdou na papír i do PDF. */
+const OKRAJE_SESTAVY = () => ({ levy: M.SESTAVA.okraj.levy, pravy: M.SESTAVA.sirkaStrany - M.SESTAVA.okraj.pravy })
+
+async function zmer(blob, kraje) {
   const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs")
   const data = new Uint8Array(await blob.arrayBuffer())
   const doc = await getDocument({ data, useSystemFonts: true }).promise
@@ -92,7 +102,7 @@ async function zmer(blob) {
   for (let i = 1; i <= doc.numPages; i++) {
     const stranka = await doc.getPage(i)
     const sirkaMm = stranka.view[2] * NA_MM
-    const kraj = okrajeStrany(sirkaMm)
+    const kraj = kraje ?? okrajeStrany(sirkaMm)
     const polozky = (await stranka.getTextContent()).items.filter((x) => x.str.trim())
     strany.push(polozky.map((x) => x.str).join(" "))
 
@@ -124,13 +134,14 @@ async function zmer(blob) {
   return { pocetStran: doc.numPages, zaOkrajem, prekryvy, vse: strany.join("\n") }
 }
 
-async function zkontroluj(popis, blob) {
-  const { pocetStran, zaOkrajem, prekryvy, vse } = await zmer(blob)
+async function zkontroluj(popis, blob, kraje) {
+  const { pocetStran, zaOkrajem, prekryvy, vse } = await zmer(blob, kraje)
   const vypln = VYPLN.filter(([vzor]) => vzor.test(vse)).map(([, p]) => p)
   const potize = []
   if (zaOkrajem.length) potize.push(`za okrajem: ${zaOkrajem.slice(0, 2).join("; ")}`)
   if (prekryvy.length) potize.push(`překryv: ${prekryvy.slice(0, 2).join("; ")}`)
   if (vypln.length) potize.push(`výplň: ${vypln.join(", ")}`)
+  if (vse.includes("\u2014")) potize.push("dlouhá pomlčka v textu")
   rekni(!potize.length, `${popis}: sazba drží (${pocetStran} stran)${potize.length ? ` – ${potize.join(" | ")}` : ""}`)
 }
 
@@ -177,49 +188,89 @@ const OSOBA = {
 
 const JAZYKY = ["cs", "sk", "en"]
 
+/**
+ * Obsah, který se nevešel na stranu. Sestava ho nezahodí, ale vysází přes
+ * spodní okraj; v PDF by to vypadalo jako text v zápatí. Hlídá se tady, na
+ * měření sazeče, protože z hotového PDF se to pozná hůř.
+ */
+function hlidejPreteceni(popis, sestava) {
+  rekni(
+    sestava.preteceni.length === 0,
+    `${popis}: vše se vešlo na strany${sestava.preteceni.length ? ` (přetéká ${JSON.stringify(sestava.preteceni)})` : ""}`,
+  )
+}
+
+/** Profil 360: všechny škály na dané úrovni 1 až 5, kontrolní otázky správně. */
+function profil360(uroven) {
+  const a = {}
+  for (const s of M.SKALY) {
+    for (const id of s.polozky) a[id] = s.kod === "DASS.stress" ? Math.min(3, uroven - 1) : s.obracene.includes(id) ? 6 - uroven : uroven
+  }
+  for (const k of M.KONTROLNI) a[k.id] = k.ocekavano[0]
+  Object.assign(a, { 4001: 23 * 60, 4002: 6 * 60 + 30, 4003: 60, 4004: 9 * 60, 4005: 2, 3001: 1, 3002: 2, 3003: 3, 3004: 2, 3005: 2, 3006: 3 })
+  return a
+}
+
 ;(async () => {
   console.log("– ELITE report –")
   for (const testId of ["elite200-sport", "elite200-business", "elite100-sport", "elite100-business"]) {
     const model = testId.startsWith("elite200") ? "elite200" : "elite100"
     for (const lang of JAZYKY) {
       const answers = elite(model, testId.includes("business") ? 3 : 0)
-      await zkontroluj(
-        `${testId} ${lang}`,
-        M.buildReportPdf({ testId, person: OSOBA[lang], answers, lang, durationSec: 2400 }),
-      )
+      for (const proKlienta of [false, true]) {
+        const vstup = { testId, person: OSOBA[lang], answers, lang, durationSec: 2400, proKlienta }
+        await zkontroluj(`${testId} ${lang}${proKlienta ? " + klient" : ""}`, M.buildReportPdf(vstup), OKRAJE_SESTAVY())
+        hlidejPreteceni(`${testId} ${lang}${proKlienta ? " + klient" : ""}`, M.sestavReportPdf(vstup))
+      }
     }
   }
 
   console.log("\n– emocionálně-destruktivní vzorce –")
   for (const testId of ["vzorce", "vzorce-sport-individual", "vzorce-sport-tym"]) {
     for (const lang of JAZYKY) {
-      await zkontroluj(
-        `${testId} ${lang}`,
-        M.buildVzorcePdf({
-          testId,
-          person: OSOBA[lang],
-          answers: sestibodove(110, testId === "vzorce" ? 0 : 2),
-          lang,
-          durationSec: 1500,
-        }),
-      )
+      const vstup = {
+        testId,
+        person: OSOBA[lang],
+        answers: sestibodove(110, testId === "vzorce" ? 0 : 2),
+        lang,
+        durationSec: 1500,
+        proKlienta: lang !== "sk",
+      }
+      await zkontroluj(`${testId} ${lang}`, M.buildVzorcePdf(vstup), OKRAJE_SESTAVY())
+      hlidejPreteceni(`${testId} ${lang}`, M.sestavVzorcePdf(vstup))
     }
   }
 
   console.log("\n– archetypy –")
   for (const testId of ["archetypy", "archetypy-sport"]) {
     for (const lang of JAZYKY) {
-      await zkontroluj(
-        `${testId} ${lang}`,
-        M.buildArchetypyPdf({
-          testId,
-          person: OSOBA[lang],
-          answers: sestibodove(96, testId === "archetypy" ? 1 : 4),
-          lang,
-          durationSec: 1200,
-        }),
-      )
+      const vstup = {
+        testId,
+        person: OSOBA[lang],
+        answers: sestibodove(96, testId === "archetypy" ? 1 : 4),
+        lang,
+        durationSec: 1200,
+        proKlienta: lang !== "sk",
+      }
+      await zkontroluj(`${testId} ${lang}`, M.buildArchetypyPdf(vstup), OKRAJE_SESTAVY())
+      hlidejPreteceni(`${testId} ${lang}`, M.sestavArchetypyPdf(vstup))
     }
+  }
+
+  console.log("\n– Sportovní profil 360 –")
+  for (const [popis, gender, uroven, proKlienta] of [
+    ["sportovkyně, střední odpovědi", "female", 3, true],
+    ["sportovec, vysoké odpovědi", "male", 4, false],
+    ["sportovkyně, nízké odpovědi", "female", 2, true],
+  ]) {
+    const vstup = {
+      person: { ...OSOBA.cs, gender },
+      answers: profil360(uroven),
+      durationSec: 2100,
+      proKlienta,
+    }
+    await zkontroluj(`Profil 360 ${popis}`, M.buildProfil360Pdf(vstup), OKRAJE_SESTAVY())
+    hlidejPreteceni(`Profil 360 ${popis}`, M.sestavProfil360Pdf(vstup))
   }
 
   console.log("\n– manuál pro kouče –")

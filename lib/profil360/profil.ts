@@ -131,6 +131,8 @@ interface OblastDef {
   rozvoj: string[]
   /** první krok ve druhé osobě, do shrnutí pro sportovce */
   rozvojSportovci: string
+  /** otázka do rozhovoru ve druhé osobě, do tiskové sestavy */
+  otazka: string
 }
 
 export const OBLASTI: OblastDef[] = [
@@ -141,6 +143,7 @@ export const OBLASTI: OblastDef[] = [
     slozky: [["N1", -1], ["N6", -1], ["N4", -1], ["bis-anxiety", -1], ["C1", 1], ["V.valor", 1]],
     silna: "V rozhodujících chvílích se o {něj|ni} dá opřít. Dej {mu|jí} odpovědnost v závěrech a zátěžové situace do tréninku, ať je nezažívá jen v zápase.",
     rozvojSportovci: "Zařaď do tréninku situace s tlakem a vytvoř si krátkou rutinu před startem: nádech, klíčové slovo, první úkol.",
+    otazka: "Co se v tobě děje, když jde o hodně, a co ti v tu chvíli pomáhá?",
     rozvoj: [
       "Trénuj pod tlakem: body, trest, publikum, časový limit. Tlak se má v tréninku objevovat pravidelně, ne poprvé v zápase.",
       "Předstartovní rutina (dech, klíčové slovo, první úkol) {mu|jí} dá něco, na co se soustředit místo obav.",
@@ -154,6 +157,7 @@ export const OBLASTI: OblastDef[] = [
     slozky: [["N3", -1], ["N2", -1], ["V.hope-optimism", 1], ["V.perseverance", 1], ["DASS.stress", -1]],
     silna: "Chyba {ho|ji} nerozhodí na dlouho. Dá se na {něm|ní} stavět v sériích a při otočkách zápasu.",
     rozvojSportovci: "Domluv se s trenérem na krátkém restartu po chybě (nádech, gesto, další úkol) a trénuj ho jako techniku.",
+    otazka: "Jak dlouho ti trvá, než se po chybě nebo prohře vrátíš, a co tě vrátí?",
     rozvoj: [
       "Naučte se spolu krátký restart po chybě (nádech, gesto, další úkol) a trénujte ho stejně jako techniku.",
       "Po prohře nech 24 hodin na emoce a teprve pak dělej rozbor; hned po zápase nálada převáží fakta.",
@@ -167,6 +171,7 @@ export const OBLASTI: OblastDef[] = [
     slozky: [["C4", 1], ["C5", 1], ["V.perseverance", 1], ["V.self-regulation", 1], ["C3", 1]],
     silna: "Na tréninku pracuje, i když se nikdo nedívá. Hlídej spíš přetížení než lenost.",
     rozvojSportovci: "Rozlož svůj cíl na krátké týdenní úkoly a odškrtávej si je; pokrok, který vidíš, drží motivaci.",
+    otazka: "Co ti nejčastěji brání dotáhnout, co začneš?",
     rozvoj: [
       "Rozlož velký cíl na krátké, měřitelné úkoly s termínem. Vidět pokrok týden po týdnu drží motivaci líp než vzdálený cíl.",
       "Domluvte pevný rámec (čas, místo, plán) a málo výjimek. Sebekázeň je snazší, když se nemusí pořád rozhodovat.",
@@ -180,6 +185,7 @@ export const OBLASTI: OblastDef[] = [
     slozky: [["bas-drive", 1], ["E3", 1], ["C4", 1], ["E4", 1]],
     silna: "Soutěživost {ho|ji} žene. Dej {mu|jí} jasné soupeře a měřitelné výzvy; nuda je pro {něj|ni} větší riziko než tlak.",
     rozvojSportovci: "Ujasni si, o co ti ve sportu opravdu jde, a dej si měřitelnou výzvu na nejbližší měsíc.",
+    otazka: "O co ti ve sportu opravdu jde, když odhlédneš od výsledků?",
     rozvoj: [
       "Najděte spolu, o co {mu|jí} ve sportu opravdu jde. Bez osobního důvodu se soutěživost nerozhoří.",
       "Soutěžní formy v tréninku (skóre, žebříčky, souboje) probouzejí chuť vyhrát i u klidnějších povah.",
@@ -192,6 +198,7 @@ export const OBLASTI: OblastDef[] = [
     slozky: [["C6", 1], ["V.self-regulation", 1], ["N5", -1], ["N2", -1], ["V.prudence", 1]],
     silna: "Drží se plánu a neudělá zbytečnou hloupost. Hodí se do rolí, kde rozhoduje disciplína a přesnost.",
     rozvojSportovci: "Domluv si s trenérem signál na zastavení, když se blíží výbuch nebo ukvapené rozhodnutí.",
+    otazka: "Kdy naposledy tě vztek nebo pokušení dostaly k něčemu, čeho jsi pak {litoval|litovala}?",
     rozvoj: [
       "Domluvte signál na zastavení (slovo, gesto), když se blíží výbuch nebo ukvapené rozhodnutí.",
       "Mimo hřiště pomáhají jasná pravidla k jídlu, spánku a alkoholu, dohodnutá předem, ne v okamžiku pokušení.",
@@ -205,6 +212,7 @@ export const OBLASTI: OblastDef[] = [
     slozky: [["V.citizenship-teamwork", 1], ["A4", 1], ["A1", 1], ["E1", 1], ["V.equity-fairness", 1], ["V.kindness", 1]],
     silna: "Drží partu pohromadě. Může být mostem mezi trenérem a týmem i oporou pro nováčky.",
     rozvojSportovci: "Vezmi si v týmu konkrétní úkol, na kterém závisí ostatní, a všímej si, co dělají dobře.",
+    otazka: "Kdy ses v týmu naposledy {cítil|cítila} opravdu součástí a kdy naopak stranou?",
     rozvoj: [
       "Dej {mu|jí} v týmu konkrétní roli, která závisí na ostatních (spoluzodpovědnost za rozcvičení, dvojice na tréninku).",
       "Oceňuj veřejně asistence a pomoc druhým, nejen vlastní body.",
@@ -218,6 +226,7 @@ export const OBLASTI: OblastDef[] = [
     slozky: [["V.leadership", 1], ["E3", 1], ["V.valor", 1], ["V.social-intelligence", 1], ["C1", 1]],
     silna: "Přirozeně bere vedení. Dej {mu|jí} prostor, ale i zpětnou vazbu, jak vede; vůdce se také učí.",
     rozvojSportovci: "Zkus vést malé věci: rozcvičení, krátký pokyn, slovo v kabině. Vedení se dá trénovat.",
+    otazka: "Kdy ses naposledy {ozval|ozvala}, když bylo potřeba, a co ti v tom jindy brání?",
     rozvoj: [
       "Vedení se dá trénovat po malých krocích: vést rozcvičení, promluvit v kabině, předat pokyn.",
       "Ne každý musí být kapitán. Tichý příklad výkonem je také vedení a má se tak ocenit.",
@@ -230,6 +239,7 @@ export const OBLASTI: OblastDef[] = [
     slozky: [["V.love-of-learning", 1], ["O5", 1], ["V.curiosity", 1], ["O4", 1], ["A5", 1], ["V.judgment", 1]],
     silna: "Učí se {rád|ráda} a nové věci přijímá rychle. Vysvětluj proč, nejen co; ocení to.",
     rozvojSportovci: "Vyber si jednu věc, kterou se chceš naučit, a zeptej se trenéra, proč a jak na ni.",
+    otazka: "Co ses v poslední době {naučil|naučila} nového a co tě k tomu přivedlo?",
     rozvoj: [
       "Novinky zaváděj po malých dávkách a s jasným důvodem. Odpor ke změně klesá, když je vidět smysl.",
       "Nech na {něm|ní}, ať {sám|sama} navrhne, co chce zlepšit; vlastní cíl se přijímá snáz než cizí.",
@@ -242,6 +252,7 @@ export const OBLASTI: OblastDef[] = [
     slozky: [["V.zest", 1], ["E6", 1], ["E4", 1], ["V.humor-playfulness", 1], ["DASS.stress", -1]],
     silna: "Nabíjí sebe i okolí. Pozor jen, aby si {nepřibíral|nepřibírala} víc, než unese.",
     rozvojSportovci: "Zkontroluj spánek a zátěž mimo sport; nízká energie bývá signál přetížení, ne lenosti.",
+    otazka: "Co ti teď bere energii a kdy tě sport naposledy opravdu bavil?",
     rozvoj: [
       "Zkontrolujte spánek, zotavení a zátěž mimo sport (škola, práce, vztahy). Nízká energie bývá signál přetížení, ne lenosti.",
       "Vraťte do tréninku hravost a radost; hra a soutěž s humorem obnovují chuť rychleji než další objem.",
@@ -265,7 +276,7 @@ interface TypDef {
 export const TYPY: TypDef[] = [
   {
     id: "finiser",
-    nazev: "Chladnokrevný finišer",
+    nazev: "{Chladnokrevný|Chladnokrevná} {finišer|finišerka}",
     oblasti: ["tlak", "ovladani", "navrat"],
     popis: "Nejlépe funguje, když jde o hodně. Drží hlavu v klidu a chybu rychle pustí.",
     potrebuje: "Odpovědnost v rozhodujících chvílích a důvěru, že ji dostane i po chybě.",
@@ -273,7 +284,7 @@ export const TYPY: TypDef[] = [
   },
   {
     id: "dric",
-    nazev: "Dříč",
+    nazev: "{Dříč|Dříčka}",
     oblasti: ["prace", "navrat", "ovladani"],
     popis: "Výkon staví na poctivé práci a vytrvalosti. Dotahuje, co začne.",
     potrebuje: "Jasný plán, měřitelný pokrok a uznání za úsilí.",
@@ -281,7 +292,7 @@ export const TYPY: TypDef[] = [
   },
   {
     id: "lidr",
-    nazev: "Lídr",
+    nazev: "{Lídr|Lídryně}",
     oblasti: ["vudce", "hlad", "tlak"],
     popis: "Bere vedení, strhne ostatní a nebojí se odpovědnosti.",
     potrebuje: "Prostor vést a partnera v trenérovi, ne jen nadřízeného.",
@@ -297,7 +308,7 @@ export const TYPY: TypDef[] = [
   },
   {
     id: "bojovnik",
-    nazev: "Bojovník",
+    nazev: "{Bojovník|Bojovnice}",
     oblasti: ["hlad", "energie", "prace"],
     popis: "{Soutěživý|Soutěživá}, {energický|energická}, chce vyhrávat a jde do toho naplno.",
     potrebuje: "Výzvy, soupeře a měřitelné cíle; nudu snáší hůř než tlak.",
@@ -305,7 +316,7 @@ export const TYPY: TypDef[] = [
   },
   {
     id: "strateg",
-    nazev: "Stratég",
+    nazev: "{Stratég|Stratéžka}",
     oblasti: ["ucenlivost", "ovladani", "prace"],
     popis: "Přemýšlí, učí se a hledá lepší řešení. Rozhoduje s rozvahou.",
     potrebuje: "Vysvětlení proč, prostor pro otázky a zapojení do plánování.",
@@ -648,14 +659,14 @@ export function vyhodnot(odp: Odpovedi, durationSec?: number, poradiIpip: number
     rizika.push({
       id: "stres",
       nazev: "Vysoká zátěž",
-      text: `Stres za poslední týden je ${STRES_SLOVO[stres.pasmo]}. Zjisti, co ho teď zatěžuje, a zvaž úpravu tréninkové zátěže.`,
+      text: `Míra stresu za poslední týden je ${STRES_SLOVO[stres.pasmo]}. Zjisti, co {ho|ji} teď zatěžuje, a zvaž úpravu tréninkové zátěže.`,
     })
   }
   if (nizsi("V.citizenship-teamwork", 40)) {
     rizika.push({
       id: "samotar",
-      nazev: "Samotář",
-      text: "Raději spoléhá sám na sebe. V týmu může působit odtažitě; u individuálního sportu hůř přijímá pomoc.",
+      nazev: "{Samotář|Samotářka}",
+      text: "Raději spoléhá {sám|sama} na sebe. V týmu může působit odtažitě; u individuálního sportu hůř přijímá pomoc.",
     })
   }
   if (nizsi("A5", 30) && vyssi("bas-drive", 70)) {

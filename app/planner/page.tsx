@@ -707,6 +707,10 @@ export default function PlannerPage() {
 
   return (
     <div className="pl-root" data-tema={tema}>
+      {/* Týdenní list se tiskne na šířku. Pravidlo @page platí pro celý
+          dokument, proto se vkládá jen tady, dokud je plánovač na stránce; ve
+          sdíleném CSS by na šířku otočilo i tisk vyhodnocení. */}
+      <style>{"@media print { @page { size: A4 landscape; margin: 8mm; } }"}</style>
       <header className="pl-topbar pl-noprint">
         <div className="pl-topbar-inner">
           <span className="pl-brand pl-top-brand">WINNING MINDS</span>

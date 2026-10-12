@@ -18,6 +18,7 @@ import { TEST_NAMES, UI } from "@/lib/diagnostic/i18n"
 import { JAZYKY } from "@/lib/diagnostic/lang"
 import { jeArchetypy, jeVzorce } from "@/lib/diagnostic/structure"
 import { jeElitePro, jeProfil360 } from "@/lib/diagnostic/test-id"
+import { otevriKartuProTisk, stahni, vytiskni, zpusobTisku } from "@/lib/diagnostic/tisk-pdf"
 import { testMeta } from "@/lib/diagnostic/test-meta"
 import {
   addCoach,
@@ -89,6 +90,10 @@ export default function CoachPage() {
   const [rows, setRows] = useState<ResultSummary[] | null>(null)
   const [detail, setDetail] = useState<ResultDetail | null>(null)
   const [detailLang, setDetailLang] = useState<Lang>("cs")
+  // Strana pro sportovce nebo klienta jde do tisku jen tehdy, když ji kouč
+  // zaškrtne. U každého otevřeného vyhodnocení začíná vypnutá.
+  const [proKlienta, setProKlienta] = useState(false)
+  const [pdfPracuje, setPdfPracuje] = useState<"tisk" | "pdf" | null>(null)
 
   const [tab, setTab] = useState<
     | "results"
@@ -324,6 +329,7 @@ export default function CoachPage() {
     if (d) {
       setDetail(d)
       setDetailLang(d.lang)
+      setProKlienta(false)
       window.scrollTo({ top: 0 })
     }
   }
@@ -423,34 +429,55 @@ export default function CoachPage() {
             ← {t.coachBack}
           </button>
           {/* Pilotní ELITE Pro nemá vyhodnocení, takže ani jazyk, tisk a PDF.
-              Profil 360 je jen česky a PDF zatím nemá; tisk ano. */}
-          {jeProfil360(detail.testId) && (
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="diag-press inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
-            >
-              {t.printButton}
-            </button>
-          )}
-          {!jeElitePro(detail.testId) && !jeProfil360(detail.testId) && (
-          <div className="flex items-center gap-2">
-            <LangToggle lang={detailLang} onChange={setDetailLang} />
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="diag-press inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)]"
-            >
-              {t.printButton}
-            </button>
-            <button
-              type="button"
-              onClick={() => void exportPdf(detail, detailLang)}
-              className="diag-press inline-flex h-9 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85"
-            >
-              {t.pdfButton}
-            </button>
-          </div>
+              Profil 360 je jen česky, proto bez přepínače jazyka. Tisk i PDF
+              dávají tentýž dokument, viz lib/diagnostic/pdf/sestava.ts. */}
+          {!jeElitePro(detail.testId) && (
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {!jeProfil360(detail.testId) && <LangToggle lang={detailLang} onChange={setDetailLang} />}
+              <label className="inline-flex h-9 cursor-pointer select-none items-center gap-2 rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-3.5 text-[13px] font-medium text-[var(--wm-text-2)]">
+                <input
+                  type="checkbox"
+                  checked={proKlienta}
+                  onChange={(e) => setProKlienta(e.target.checked)}
+                  className="h-4 w-4 accent-[var(--wm-brand)]"
+                />
+                {jeSportovni(detail.testId) ? t.clientPageSport : t.clientPageClient}
+              </label>
+              <button
+                type="button"
+                disabled={pdfPracuje !== null}
+                onClick={() => {
+                  // Karta pro Safari a Firefox se musí otevřít hned při kliknutí.
+                  const zpusob = zpusobTisku()
+                  const okno = otevriKartuProTisk(zpusob)
+                  setPdfPracuje("tisk")
+                  void sestavPdf(detail, detailLang, proKlienta)
+                    .then(({ blob, nazev }) => vytiskni(blob, nazev, zpusob, okno))
+                    .catch((e) => {
+                      okno?.close()
+                      console.error(e)
+                    })
+                    .finally(() => setPdfPracuje(null))
+                }}
+                className="diag-press inline-flex h-9 items-center rounded-full border border-[var(--wm-border)] bg-[var(--wm-surface)] px-4 text-[13px] font-semibold text-[var(--wm-text)] transition-colors hover:bg-[var(--wm-fill-4)] disabled:opacity-60"
+              >
+                {pdfPracuje === "tisk" ? "…" : t.printButton}
+              </button>
+              <button
+                type="button"
+                disabled={pdfPracuje !== null}
+                onClick={() => {
+                  setPdfPracuje("pdf")
+                  void sestavPdf(detail, detailLang, proKlienta)
+                    .then(({ blob, nazev }) => stahni(blob, nazev))
+                    .catch((e) => console.error(e))
+                    .finally(() => setPdfPracuje(null))
+                }}
+                className="diag-press inline-flex h-9 items-center rounded-full bg-[var(--wm-brand)] px-4 text-[13px] font-semibold text-[var(--wm-brand-fg)] transition-opacity hover:opacity-85 disabled:opacity-60"
+              >
+                {pdfPracuje === "pdf" ? "…" : t.pdfButton}
+              </button>
+            </div>
           )}
         </div>
         {jeProfil360(detail.testId) ? (
@@ -1131,51 +1158,39 @@ function NormsPanel({
   )
 }
 
-/**
- * Vyrobí skutečný soubor PDF a nabídne ho k uložení nebo odeslání.
- *
- * Tiskový dialog prohlížeče tudy nevede: na iPhonu z něj soubor uložit ani
- * poslat nejde. Proto se PDF skládá přímo v prohlížeči a pak se předá
- * systémovému sdílení, kde je „Uložit do souborů", Mail i WhatsApp. Kde
- * sdílení souborů není (běžný desktop), soubor se prostě stáhne.
- *
- * Knihovna se načítá až při kliknutí, aby nezdržovala první zobrazení stránky.
- */
-/** Předá hotové PDF uživateli: na iOS přes systémové sdílení, jinde stažením. */
-async function stahni(blob: Blob, nazev: string): Promise<void> {
-  const soubor = new File([blob], nazev, { type: "application/pdf" })
-
-  // iPhone i iPad: systémové sdílení se souborem.
-  if (typeof navigator.canShare === "function" && navigator.canShare({ files: [soubor] })) {
-    try {
-      await navigator.share({ files: [soubor], title: nazev })
-      return
-    } catch (e) {
-      // Uživatel sdílení zavřel – pak už nic dalšího nedělej.
-      if (e instanceof DOMException && e.name === "AbortError") return
-    }
-  }
-
-  // Ostatní prohlížeče: stažení souboru.
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement("a")
-  a.href = url
-  a.download = nazev
-  a.click()
-  // Odvolání až po chvíli, jinak stahování v Safari nestihne začít.
-  window.setTimeout(() => URL.revokeObjectURL(url), 10_000)
-}
-
 /** Manuál pro kouče jako PDF, ve stejném jazyce, jaký má zapnuté rozhraní. */
 async function exportManualPdf(lang: Lang): Promise<void> {
   const { buildManualPdf, manualPdfFileName } = await import("@/lib/diagnostic/manual-pdf")
   await stahni(buildManualPdf(lang), manualPdfFileName(lang))
 }
 
-async function exportPdf(detail: ResultDetail, lang: Lang): Promise<void> {
-  // Kazda rodina testu ma vlastni generator, ale stejnou sazbu.
-  let blob: Blob
-  let nazev: string
+/** Strana pro sportovce, nebo pro klienta: podle toho, pro koho test je. */
+function jeSportovni(testId: TestId): boolean {
+  return testId === "profil360" || testId.includes("sport")
+}
+
+/**
+ * Složí PDF vyhodnocení. Tisk i stažení používají tentýž dokument, takže
+ * papír a soubor se nikdy nerozejdou.
+ *
+ * Knihovna se načítá až při kliknutí, aby nezdržovala první zobrazení stránky.
+ */
+async function sestavPdf(
+  detail: ResultDetail,
+  lang: Lang,
+  proKlienta: boolean,
+): Promise<{ blob: Blob; nazev: string }> {
+  // Každá rodina testu má vlastní generátor, ale stejnou kostru.
+  if (jeProfil360(detail.testId)) {
+    const { buildProfil360Pdf, profil360PdfFileName } = await import("@/lib/profil360/pdf")
+    const vstup = {
+      person: detail.person,
+      answers: detail.answers as unknown as Record<string, number>,
+      durationSec: detail.durationSec,
+      proKlienta,
+    }
+    return { blob: buildProfil360Pdf(vstup), nazev: profil360PdfFileName(vstup) }
+  }
   if (jeArchetypy(detail.testId)) {
     const { buildArchetypyPdf, archetypyPdfFileName } = await import("@/lib/archetypy/pdf")
     const vstup = {
@@ -1186,10 +1201,11 @@ async function exportPdf(detail: ResultDetail, lang: Lang): Promise<void> {
       answers: detail.answers as unknown as OdpovediMapa,
       lang,
       durationSec: detail.durationSec,
+      proKlienta,
     }
-    blob = buildArchetypyPdf(vstup)
-    nazev = archetypyPdfFileName(vstup)
-  } else if (jeVzorce(detail.testId)) {
+    return { blob: buildArchetypyPdf(vstup), nazev: archetypyPdfFileName(vstup) }
+  }
+  if (jeVzorce(detail.testId)) {
     const { buildVzorcePdf, vzorcePdfFileName } = await import("@/lib/vzorce/pdf")
     const vstup = {
       testId: detail.testId,
@@ -1199,22 +1215,20 @@ async function exportPdf(detail: ResultDetail, lang: Lang): Promise<void> {
       answers: detail.answers as unknown as OdpovediMapa,
       lang,
       durationSec: detail.durationSec,
+      proKlienta,
     }
-    blob = buildVzorcePdf(vstup)
-    nazev = vzorcePdfFileName(vstup)
-  } else {
-    const { buildReportPdf, pdfFileName } = await import("@/lib/diagnostic/pdf/report-pdf")
-    const vstup = {
-      testId: detail.testId,
-      person: detail.person,
-      answers: detail.answers,
-      lang,
-      durationSec: detail.durationSec,
-    }
-    blob = buildReportPdf(vstup)
-    nazev = pdfFileName(vstup)
+    return { blob: buildVzorcePdf(vstup), nazev: vzorcePdfFileName(vstup) }
   }
-  await stahni(blob, nazev)
+  const { buildReportPdf, pdfFileName } = await import("@/lib/diagnostic/pdf/report-pdf")
+  const vstup = {
+    testId: detail.testId,
+    person: detail.person,
+    answers: detail.answers,
+    lang,
+    durationSec: detail.durationSec,
+    proKlienta,
+  }
+  return { blob: buildReportPdf(vstup), nazev: pdfFileName(vstup) }
 }
 
 /**

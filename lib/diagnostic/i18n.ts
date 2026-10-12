@@ -259,6 +259,9 @@ export interface UIStrings {
   disclaimer: string
   printButton: string
   pdfButton: string
+  /** zaškrtávátko u tisku: přidat stranu bez čísel, kterou kouč může předat */
+  clientPageSport: string
+  clientPageClient: string
   backToTest: string
   newTest: string
   personLabel: string
@@ -422,6 +425,8 @@ export const UI: Record<Lang, UIStrings> = {
       "Toto vyhodnocení je podkladem pro rozvojovou práci s certifikovaným koučem Winning Minds. Není klinickou ani zdravotnickou diagnózou.",
     printButton: "Tisk",
     pdfButton: "Exportovat PDF",
+    clientPageSport: "Přidat stranu pro sportovce",
+    clientPageClient: "Přidat stranu pro klienta",
     backToTest: "Zpět na dotazník",
     newTest: "Nová diagnostika",
     personLabel: "Respondent",
@@ -583,6 +588,8 @@ export const UI: Record<Lang, UIStrings> = {
       "This evaluation is a basis for development work with a certified Winning Minds coach. It is not a clinical or medical diagnosis.",
     printButton: "Print",
     pdfButton: "Export PDF",
+    clientPageSport: "Add a page for the athlete",
+    clientPageClient: "Add a page for the client",
     backToTest: "Back to the questionnaire",
     newTest: "New diagnostic",
     personLabel: "Respondent",
@@ -745,6 +752,8 @@ export const UI: Record<Lang, UIStrings> = {
       "Toto vyhodnotenie je podkladom pre rozvojovú prácu s certifikovaným koučom Winning Minds. Nie je klinickou ani zdravotníckou diagnózou.",
     printButton: "Tlač",
     pdfButton: "Exportovať PDF",
+    clientPageSport: "Pridať stranu pre športovca",
+    clientPageClient: "Pridať stranu pre klienta",
     backToTest: "Späť na dotazník",
     newTest: "Nová diagnostika",
     personLabel: "Respondent",

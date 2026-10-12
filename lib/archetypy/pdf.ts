@@ -1,115 +1,41 @@
 import { applyGender } from "../diagnostic/content"
-import {
-  BARVA,
-  OKRAJ,
-  SIRKA,
-  STITEK_NEUTRALNI,
-  Sazba,
-  datumLokalne,
-  novyDokument,
-} from "../diagnostic/pdf/sazba"
 import { TEST_NAMES, UI } from "../diagnostic/i18n"
-import type { Gender, Lang, PersonInfo, TestId } from "../diagnostic/types"
+import { vUvozovkach } from "../diagnostic/otazky"
+import { datumLokalne } from "../diagnostic/pdf/sazba"
+import {
+  PAPIR,
+  STYL,
+  Sestava,
+  type Blok,
+  type Hlavicka,
+  type MoznyBlok,
+  type RadekProfilu,
+  type Styl,
+} from "../diagnostic/pdf/sestava"
+import { TEXTY_SESTAVY } from "../diagnostic/pdf/sestava-texty"
 import { variantaArchetypu } from "../diagnostic/structure"
+import type { Gender, Lang, PersonInfo, TestId } from "../diagnostic/types"
 import { nazevArchetypu, obsahArchetypu } from "./content"
 import { UI_ARCHETYPY } from "./i18n"
 import { spojArchetypy } from "./kombinace"
 import { vyhodnotArchetypy } from "./scoring"
 import { NAZVY_MOTIVACI, POCET_POLOZEK, archetyp } from "./structure"
-import type { ArchetypSkore, Motivace, OdpovediMapa, Varianta } from "./types"
+import type { ArchetypSkore, Motivace, OdpovediMapa } from "./types"
 
-// PDF s vyhodnocením archetypů značky.
+// Tisková sestava archetypů značky. Stejná kostra jako ELITE:
 //
-// Drží stejnou sazbu jako ostatní vyhodnocení: sdílený sazeč, stejné pruhy,
-// stejné štítky, stejná patička. Prstence dostává primární a sekundární
-// archetyp, tedy dvojice, se kterou se dál pracuje.
+// 1 Přehled: profil všech dvanácti, motivační mapa, primární a sekundární
+//   archetyp s mottem a kde začít.
+// 2 Primární archetyp do hloubky, s návodem a místem na poznámky.
+// 3 Sekundární archetyp a jak spolu hrají.
+// 4 Strana pro klienta, jen když ji kouč zaškrtne. Je bez čísel.
+//
+// Archetypy nemají pásma: neměří, co je dobře nebo špatně, ale identitu.
+// Pruhy proto nemají rysky ani štítky, jen zvýrazněnou dvojici, se kterou
+// se dál pracuje.
 
 const OSA_MIN = 8
 const OSA_MAX = 48
-
-/** Podíl na ose 8 až 48, v procentech. */
-const procenta = (skore: number) => ((skore - OSA_MIN) / (OSA_MAX - OSA_MIN)) * 100
-
-/**
- * Prstenec s jednou hodnotou. jsPDF neumí oblouk, takže se kreslí jako
- * lomená čára s kulatými konci; při šedesáti krocích na celý kruh je
- * lom pod rozlišením tisku.
- */
-function prstenec(
-  s: Sazba,
-  stred: { x: number; y: number },
-  polomer: number,
-  podil: number,
-  skore: number,
-  popisSkaly: string,
-) {
-  const doc = s.doc
-  const tloustka = 3.4
-  doc.setLineCap("round")
-  doc.setLineJoin("round")
-  doc.setLineWidth(tloustka)
-
-  // dráha
-  doc.setDrawColor(BARVA.drazka[0], BARVA.drazka[1], BARVA.drazka[2])
-  doc.circle(stred.x, stred.y, polomer, "S")
-
-  // vyplněná část, od dvanácti hodin po směru hodinových ručiček
-  const kroku = Math.max(2, Math.round(60 * Math.max(0.02, podil)))
-  const bod = (k: number) => {
-    const uhel = -Math.PI / 2 + 2 * Math.PI * podil * (k / kroku)
-    return { x: stred.x + polomer * Math.cos(uhel), y: stred.y + polomer * Math.sin(uhel) }
-  }
-  const zacatek = bod(0)
-  const useky: [number, number][] = []
-  let predchozi = zacatek
-  for (let k = 1; k <= kroku; k++) {
-    const b = bod(k)
-    useky.push([b.x - predchozi.x, b.y - predchozi.y])
-    predchozi = b
-  }
-  doc.setDrawColor(BARVA.znacka[0], BARVA.znacka[1], BARVA.znacka[2])
-  doc.lines(useky, zacatek.x, zacatek.y, [1, 1], "S", false)
-
-  doc.setLineWidth(0.2)
-  doc.setLineCap("butt")
-
-  s.pismo(19, true, BARVA.text)
-  doc.text(String(skore), stred.x, stred.y + 1.4, { align: "center" })
-  s.pismo(7, false, BARVA.slaba)
-  doc.text(popisSkaly, stred.x, stred.y + 6, { align: "center" })
-}
-
-/** Dva prstence vedle sebe: primární a sekundární archetyp. */
-function dvojicePrstencu(s: Sazba, dvojice: ArchetypSkore[], lang: Lang, varianta: Varianta) {
-  const t = UI_ARCHETYPY[lang]
-  const popisy = [t.primarniTitulek, t.sekundarniTitulek]
-  const polomer = 13
-  const vyskaBloku = 2 * polomer + 22
-  s.misto(vyskaBloku + 4)
-  const horni = s.y
-  const sloupec = SIRKA / dvojice.length
-  dvojice.forEach((v, i) => {
-    const stredX = OKRAJ.levy + sloupec * (i + 0.5)
-    prstenec(
-      s,
-      { x: stredX, y: horni + polomer },
-      polomer,
-      (v.skore - OSA_MIN) / (OSA_MAX - OSA_MIN),
-      v.skore,
-      t.z48,
-    )
-    const zakladPopisku = horni + 2 * polomer + 6
-    s.pismo(6.8, true, BARVA.slaba)
-    s.doc.text(popisy[i].toUpperCase(), stredX, zakladPopisku, {
-      align: "center",
-      charSpace: 0.35,
-    })
-    s.pismo(9.6, true, BARVA.text)
-    const nazev = s.doc.splitTextToSize(nazevArchetypu(v.id, lang, varianta), sloupec - 6) as string[]
-    nazev.forEach((r, k) => s.doc.text(r, stredX, zakladPopisku + 5 + k * 4.6, { align: "center" }))
-  })
-  s.y = horni + vyskaBloku + 8
-}
 
 export interface ArchetypyPdfVstup {
   testId: TestId
@@ -117,16 +43,14 @@ export interface ArchetypyPdfVstup {
   answers: OdpovediMapa
   lang: Lang
   durationSec?: number
+  /** přidat stranu pro klienta; kouč ji zaškrtává před tiskem */
+  proKlienta?: boolean
 }
 
 /** Název souboru: test, klient, datum. Bez diakritiky, ať projde kdekoli. */
 export function archetypyPdfFileName(vstup: ArchetypyPdfVstup): string {
   return (
-    [
-      UI_ARCHETYPY[vstup.lang].nazevSouboru[variantaArchetypu(vstup.testId)],
-      vstup.person.name,
-      vstup.person.fillDate,
-    ]
+    [UI_ARCHETYPY[vstup.lang].nazevSouboru[variantaArchetypu(vstup.testId)], vstup.person.name, vstup.person.fillDate]
       .filter(Boolean)
       .join(" - ")
       .replace(/[/\\?%*:|"<>]/g, "-")
@@ -134,7 +58,7 @@ export function archetypyPdfFileName(vstup: ArchetypyPdfVstup): string {
   )
 }
 
-export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
+export function sestavArchetypyPdf(vstup: ArchetypyPdfVstup): Sestava {
   const { testId, person, answers, lang, durationSec } = vstup
   const varianta = variantaArchetypu(testId)
   const gender: Gender = person.gender ?? "male"
@@ -142,266 +66,243 @@ export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
   const v = vyhodnotArchetypy(answers, durationSec)
   const spojeni = spojArchetypy(v, lang, varianta)
   const t = UI_ARCHETYPY[lang]
-
-  const doc = novyDokument()
-  const s = new Sazba(doc)
-
-  // ---------- hlavička ----------
-  s.text(UI[lang].brand, {
-    velikost: 7.6,
-    tucne: true,
-    barva: BARVA.slaba,
-    prostrkani: 0.6,
+  const ui = UI[lang]
+  const ts = TEXTY_SESTAVY[lang]
+  const ss = new Sestava(lang)
+  const datum = datumLokalne(person.fillDate, lang)
+  const vnitrni = (sekce: string): Hlavicka => ({
+    vlevo: [person.name || "–", TEST_NAMES[testId][lang], datum].filter(Boolean).join(" · "),
+    vpravo: sekce,
   })
-  s.mezera(2.5)
-  s.text(`${TEST_NAMES[testId][lang]} · ${UI[lang].reportTitle}`, {
-    velikost: 18,
-    tucne: true,
-    radek: 8,
-  })
-  s.mezera(1.5)
-  s.text(t.podnadpis[varianta], {
-    velikost: 10,
-    barva: BARVA.text2,
-    radek: 5,
-  })
-  s.mezera(6)
-  s.linka()
-  s.mezera(7)
+  const naOse = (skore: number) => ((skore - OSA_MIN) / (OSA_MAX - OSA_MIN)) * 100
+  const motto = (x: ArchetypSkore) => vUvozovkach(g(obsahArchetypu(x.id, lang, varianta).motto), lang)
+  const cast = (titulek: string, obsah: string, st: Styl = STYL.textTmavy) =>
+    obsah.trim() ? ss.skupina([ss.h3(titulek), ss.mezera(1.2), ss.text(g(obsah), st)]) : null
 
-  s.mrizkaUdaju([
-    { popis: t.respondent, hodnota: person.name || "–" },
-    { popis: t.role[varianta], hodnota: person.role || "–" },
-    { popis: t.datum, hodnota: datumLokalne(person.fillDate, lang) },
-  ])
-  s.mezera(6)
-
-  if (!v.kompletni) {
-    s.ramecek(`${t.neuplnyTitulek(v.zodpovezeno, POCET_POLOZEK)} ${t.neuplnyPopis}`, {
-      velikost: 9,
-    })
-    s.mezera(3)
-  }
-
-  // ---------- profil všech dvanácti ----------
-  s.nadpis(t.profilTitulek)
-  s.text(t.profilPopisPdf[varianta], { velikost: 9, barva: BARVA.text2, radek: 4.4 })
-  s.mezera(5)
-
+  // ---------- 1 Přehled ----------
+  const minut = durationSec ? Math.round(durationSec / 60) : 0
   const vyzdvizene = new Set([v.primarni.id, v.sekundarni.id])
-  for (const x of v.vsechny) {
-    const nazev = nazevArchetypu(x.id, lang, varianta)
-    if (!x.vykazuje) {
-      s.radekChybi(nazev, t.zodpovezenoZ(x.zodpovezeno, x.celkem))
-      continue
-    }
-    const duraz = vyzdvizene.has(x.id)
-    const hodnota = x.silnychOdpovedi > 0 ? `${x.skore} (${x.silnychOdpovedi})` : String(x.skore)
-    s.radekSkore(nazev, hodnota, "", STITEK_NEUTRALNI, procenta(x.skore), {
-      tucne: duraz,
-      mezeraPo: 7,
-      barvaPruhu: duraz ? BARVA.znacka : BARVA.tlumena,
-    })
-  }
-  s.mezera(3)
-
-  // ---------- motivační mapa ----------
-  if (s.zbyva() < 60) s.zalom()
-  s.nadpis(t.motivaceTitulek)
-  s.text(t.motivacePopis, { velikost: 9, barva: BARVA.text2, radek: 4.4 })
-  s.mezera(5)
+  const profil = (mezera: number) =>
+    ss.profil(
+      v.vsechny.map((x): RadekProfilu => ({
+        nazev: nazevArchetypu(x.id, lang, varianta),
+        hodnota: x.vykazuje ? (x.silnychOdpovedi > 0 ? `${x.skore} (${x.silnychOdpovedi})` : String(x.skore)) : null,
+        procenta: naOse(x.skore),
+        pasmo: null,
+        stitek: x.vykazuje ? "" : ui.scaleNotReported,
+        duraz: vyzdvizene.has(x.id),
+        tlumeny: !vyzdvizene.has(x.id),
+      })),
+      null,
+      { mezera },
+    )
   const skupiny = (Object.entries(v.motivace) as [Motivace, number][])
     .map(([m, p]) => ({ m, p }))
     .sort((a, b) => b.p - a.p)
-  const nejvic = skupiny[0].p
-  for (const r of skupiny) {
-    s.radekSkore(NAZVY_MOTIVACI[lang][r.m], `${Math.round(r.p)} %`, "", STITEK_NEUTRALNI, r.p, {
-      tucne: r.p === nejvic,
-      mezeraPo: 7,
-      barvaPruhu: r.p === nejvic ? BARVA.znacka : BARVA.tlumena,
-    })
-  }
-  s.pismo(7.6, false, BARVA.slaba)
-  s.text(t.motivacePatka, { velikost: 7.6, barva: BARVA.slaba, radek: 3.8 })
-  s.mezera(3)
+  const nejvic = skupiny[0]?.p
+  const motivace = (mezera: number) =>
+    ss.skupina([
+      ss.text(t.motivaceTitulek, STYL.h2),
+      ss.mezera(1.2),
+      ss.text(t.motivacePopis, STYL.mala),
+      ss.mezera(3),
+      ss.profil(
+        skupiny.map((r) => ({
+          nazev: NAZVY_MOTIVACI[lang][r.m],
+          hodnota: `${Math.round(r.p)} %`,
+          procenta: r.p,
+          pasmo: null,
+          stitek: "",
+          duraz: r.p === nejvic,
+          tlumeny: r.p !== nejvic,
+        })),
+        null,
+        { mezera },
+      ),
+    ])
+  const archetypVBoxu = (x: ArchetypSkore, titulek: string) =>
+    ss.skupina([
+      ss.h3(titulek),
+      ss.mezera(1),
+      ss.text(`${nazevArchetypu(x.id, lang, varianta)} · ${x.skore}`, STYL.h2),
+      ss.mezera(0.8),
+      ss.text(motto(x)),
+    ])
+  const dvojice = ss.box(
+    ss.skupina([
+      ss.sloupce(
+        [
+          { blok: archetypVBoxu(v.primarni, t.primarniTitulek) },
+          { blok: archetypVBoxu(v.sekundarni, t.sekundarniTitulek) },
+        ],
+        6,
+      ),
+      ss.mezera(2.4),
+      ss.text(`${t.vyhraneniStitek[v.vyhraneni]} · ${g(spojeni.vyhraneni)}`, STYL.mala),
+    ]),
+  )
+  const stKdeZacit: Styl = { pt: 10.2, tucne: true, barva: PAPIR.inkoust, proklad: 1.45 }
+  const kdeZacit = ss.box(
+    ss.skupina([ss.h3(t.kdeZacitStitek), ss.mezera(1.6), ss.text(g(spojeni.kdeZacit), stKdeZacit)]),
+  )
 
-  // ---------- primární a sekundární ----------
-  s.zalom()
-  s.nadpis(`${t.primarniTitulek}: ${obsahArchetypu(v.primarni.id, lang, varianta).nazev}`, 15)
-  s.text(`${t.vyhraneniStitek[v.vyhraneni]} · ${g(spojeni.vyhraneni)}`, {
-    velikost: 9.4,
-    barva: BARVA.text2,
-    radek: 4.5,
-  })
-  s.mezera(6)
-  dvojicePrstencu(s, [v.primarni, v.sekundarni], lang, varianta)
-
-  const clanky: { skore: ArchetypSkore; stitek: string; plny: boolean }[] = [
-    { skore: v.primarni, stitek: t.primarniTitulek, plny: true },
-    { skore: v.sekundarni, stitek: t.sekundarniTitulek, plny: false },
+  const prehled = (mezeraProfilu: number): MoznyBlok[] => [
+    ss.uvod(TEST_NAMES[testId][lang], person.name, [
+      [person.role, ts.vyplneno(datum), minut ? ts.minut(minut) : ""].filter(Boolean).join(" · "),
+    ]),
+    !v.kompletni && ss.upozorneni(`${t.neuplnyTitulek(v.zodpovezeno, POCET_POLOZEK)} ${t.neuplnyPopis}`),
+    ss.skupina([
+      ss.text(t.profilTitulek, STYL.h1),
+      ss.mezera(1.2),
+      ss.text(t.profilPopisPdf[varianta], STYL.mala),
+      ss.mezera(3.6),
+      profil(mezeraProfilu),
+    ]),
+    motivace(mezeraProfilu * 0.8),
+    dvojice,
+    kdeZacit,
   ]
+  const ROZVRZENI = [
+    { strana: 5.8, profil: 3.2 },
+    { strana: 5, profil: 2.7 },
+    { strana: 4.2, profil: 2.2 },
+  ]
+  ss.stranaVeVariantach(
+    { vlevo: ui.brand, vpravo: ts.proKouce, znacka: true },
+    ROZVRZENI.map((x) => ({ bloky: prehled(x.profil), mezera: x.strana })),
+  )
 
-  for (const { skore, stitek, plny } of clanky) {
-    const o = obsahArchetypu(skore.id, lang, varianta)
-    const skupina = NAZVY_MOTIVACI[lang][archetyp(skore.id).motivace]
-    s.misto(60)
-    s.mezera(2)
-    s.linka()
-    s.mezera(7)
-    s.text(`${stitek.toUpperCase()} · ${skupina.toUpperCase()}`, {
-      velikost: 7,
-      tucne: true,
-      barva: BARVA.slaba,
-      prostrkani: 0.4,
-      radek: 4,
-    })
-    s.mezera(1.5)
-    s.text(o.nazev, { velikost: 13, tucne: true, radek: 6 })
-    s.mezera(1)
-    s.text(`${t.vKnize}: ${o.puvodni}`, { velikost: 8.8, barva: BARVA.slaba, radek: 4.1 })
-    s.mezera(4)
-
-    s.radekSkore("", `${skore.skore}/48`, "", STITEK_NEUTRALNI, procenta(skore.skore), {
-      tucne: true,
-      mezeraPo: 6.5,
-    })
-
-    s.text(`„${g(o.motto)}“`, { velikost: 11, tucne: true, radek: 5.4 })
-    s.mezera(4)
-
-    s.ramecek(
-      `${t.touhaStitek}: ${g(o.touha)}. ${t.strachStitek}: ${g(o.strach)}. ${t.darStitek[varianta]}: ${g(o.dar)}.`,
-      { velikost: 9.2 },
-    )
-    s.mezera(4)
-
-    // Sportovní varianta má navíc roli a tření s trenérem; v byznysové jsou
-    // tahle pole prázdná a z výpisu vypadnou.
-    const oddily = (
-      plny
-        ? [
-            [t.podstataTitulek, o.podstata, false],
-            [t.vPodnikaniTitulek[varianta], o.vPodnikani, false],
-            [t.roleTitulek, o.role ?? "", false],
-            [t.stinTitulek, o.stin, false],
-            [t.sTreneremTitulek, o.sTrenerem ?? "", false],
-            [t.pastiTitulek[varianta], o.pasti, true],
-          ]
-        : [
-            [t.sekundarniRoleStitek, o.sekundarniRole, false],
-            [t.roleTitulek, o.role ?? "", false],
-            [t.stinTitulek, o.stin, true],
-          ]
-    ).filter((radek) => String(radek[1]).trim() !== "") as [string, string, boolean][]
-
-    for (const [titulek, obsah, tlumeny] of oddily) {
-      s.misto(20)
-      s.text(titulek.toUpperCase(), {
-        velikost: 7,
-        tucne: true,
-        barva: BARVA.slaba,
-        prostrkani: 0.4,
-        radek: 4,
-      })
-      s.mezera(1.5)
-      s.text(g(obsah), {
-        velikost: 9.6,
-        radek: 4.8,
-        barva: tlumeny ? BARVA.text2 : BARVA.text,
-      })
-      s.mezera(4.5)
-    }
-
-    if (plny) {
-      s.misto(24)
-      s.text(t.navodTitulek[varianta].toUpperCase(), {
-        velikost: 7,
-        tucne: true,
-        barva: BARVA.slaba,
-        prostrkani: 0.4,
-        radek: 4,
-      })
-      s.mezera(2.5)
-      o.navod.forEach((krok, i) => {
-        s.ramecek(`${i + 1}. ${g(krok)}`, { velikost: 9.2 })
-        s.mezera(2.5)
-      })
-      if (o.znacka) {
-        s.misto(20)
-        s.text(t.znackaTitulek.toUpperCase(), {
-          velikost: 7,
-          tucne: true,
-          barva: BARVA.slaba,
-          prostrkani: 0.4,
-          radek: 4,
-        })
-        s.mezera(1.5)
-        s.text(g(o.znacka), { velikost: 9.6, radek: 4.8, barva: BARVA.text2 })
-        s.mezera(4.5)
-      }
-
-      s.mezera(2)
-      s.text(`${t.prikladyStitek[varianta]}: ${o.priklady}`, {
-        velikost: 8.6,
-        barva: BARVA.slaba,
-        radek: 4.2,
-      })
-      s.mezera(2)
-    }
+  // ---------- 2 a 3 Primární a sekundární archetyp ----------
+  const hlavaArchetypu = (x: ArchetypSkore, stitek: string, pravy: Blok, priklady = false) => {
+    const o = obsahArchetypu(x.id, lang, varianta)
+    const skupina = NAZVY_MOTIVACI[lang][archetyp(x.id).motivace]
+    return [
+      ss.skupina([
+        ss.h3(`${stitek} · ${skupina}`, STYL.eyebrow),
+        ss.mezera(1),
+        ss.text(o.nazev, STYL.h1),
+        ss.mezera(0.8),
+        ss.text(`${t.vKnize}: ${o.puvodni}`, STYL.meta),
+        priklady && o.priklady.trim() && ss.text(`${t.prikladyStitek[varianta]}: ${o.priklady}`, STYL.mala),
+      ]),
+      ss.oddil(
+        ss.sloupce(
+          [
+            {
+              sirka: 60,
+              blok: ss.skore(String(x.skore), ts.zeMax(OSA_MAX)),
+            },
+            { blok: pravy },
+          ],
+          6,
+        ),
+        3.4,
+      ),
+    ]
   }
 
-  // ---------- jak spolu hrají ----------
-  if (s.zbyva() < 60) s.zalom()
-  s.mezera(2)
-  s.nadpis(t.kombinaceTitulek)
-  s.text(t.kombinacePopis[varianta], { velikost: 9.4, barva: BARVA.text2, radek: 4.5 })
-  s.mezera(5)
-  s.text(g(spojeni.kombinace), { velikost: 9.6, radek: 4.8 })
-  s.mezera(5)
-  s.text(t.potlacenyTitulek.toUpperCase(), {
-    velikost: 7,
-    tucne: true,
-    barva: BARVA.slaba,
-    prostrkani: 0.4,
-    radek: 4,
-  })
-  s.mezera(2.5)
-  s.ramecek(g(spojeni.potlaceny), { velikost: 9.4 })
-  s.mezera(3)
+  const p = obsahArchetypu(v.primarni.id, lang, varianta)
+  const trojice = (o: typeof p) =>
+    ss.sloupce(
+      [
+        { blok: ss.skupina([ss.h3(t.touhaStitek), ss.mezera(0.8), ss.text(g(o.touha))]) },
+        { blok: ss.skupina([ss.h3(t.strachStitek), ss.mezera(0.8), ss.text(g(o.strach))]) },
+        { blok: ss.skupina([ss.h3(t.darStitek[varianta]), ss.mezera(0.8), ss.text(g(o.dar))]) },
+      ],
+      5,
+    )
+  ss.tok(
+    vnitrni(t.primarniTitulek),
+    [
+      ...hlavaArchetypu(
+        v.primarni,
+        t.primarniTitulek,
+        ss.skupina([ss.text(motto(v.primarni), { pt: 12, tucne: true, proklad: 1.35 }), ss.mezera(2.4), trojice(p)]),
+        true,
+      ),
+      cast(t.podstataTitulek, p.podstata),
+      cast(t.vPodnikaniTitulek[varianta], p.vPodnikani),
+      cast(t.roleTitulek, p.role ?? ""),
+      cast(t.stinTitulek, p.stin),
+      cast(t.sTreneremTitulek, p.sTrenerem ?? ""),
+      cast(t.pastiTitulek[varianta], p.pasti, STYL.text),
+      ss.skupina([
+        ss.h3(t.navodTitulek[varianta]),
+        ss.mezera(1.6),
+        ss.seznam(p.navod.map(g), STYL.textTmavy, { mezera: 1.4 }),
+      ]),
+      cast(t.znackaTitulek, p.znacka ?? "", STYL.text),
+    ],
+    { poznamky: ss.zapis(ts.poznamkyZRozhovoru, 2) },
+  )
 
-  // ---------- shrnutí pro klienta ----------
-  // Shrnutí je pro klienta to nejdůležitější a musí držet pohromadě.
-  s.zalom()
-  s.text(t.souhrnTitulek, {
-    velikost: 16,
-    tucne: true,
-    barva: BARVA.znacka,
-    radek: 7.5,
-  })
-  s.mezera(1.5)
-  s.text(t.souhrnPopis[varianta], { velikost: 9, barva: BARVA.slaba, radek: 4.4 })
-  s.mezera(3)
-  s.linka()
-  s.mezera(7)
+  const s = obsahArchetypu(v.sekundarni.id, lang, varianta)
+  ss.tok(
+    vnitrni(t.sekundarniTitulek),
+    [
+      ...hlavaArchetypu(
+        v.sekundarni,
+        t.sekundarniTitulek,
+        ss.skupina([
+          ss.text(motto(v.sekundarni), { pt: 12, tucne: true, proklad: 1.35 }),
+          ss.mezera(2.4),
+          ss.h3(t.sekundarniRoleStitek),
+          ss.mezera(0.8),
+          ss.text(g(s.sekundarniRole)),
+        ]),
+      ),
+      cast(t.roleTitulek, s.role ?? ""),
+      cast(t.stinTitulek, s.stin, STYL.text),
+      ss.skupina([
+        ss.text(t.kombinaceTitulek, STYL.h2),
+        ss.mezera(1.2),
+        ss.text(t.kombinacePopis[varianta], STYL.mala),
+        ss.mezera(2.4),
+        ss.text(g(spojeni.kombinace), STYL.textTmavy),
+      ]),
+      ss.skupina([ss.h3(t.potlacenyTitulek), ss.mezera(1.6), ss.box(ss.text(g(spojeni.potlaceny), STYL.textTmavy))]),
+      ss.text(t.zaverPdf[varianta], STYL.mala),
+    ],
+    { poznamky: ss.zapis(ts.poznamkyZRozhovoru, 2) },
+  )
 
-  s.text(g(spojeni.souhrn), { velikost: 10.2, radek: 5.1 })
-  s.mezera(6)
+  // ---------- 4 Pro klienta ----------
+  if (vstup.proKlienta) {
+    const stOdstavec: Styl = { pt: 10.6, barva: PAPIR.inkoust, proklad: 1.5 }
+    ss.stranaVeVariantach(
+      { vlevo: ui.brand, vpravo: g(ts.proKlienta[varianta]), znacka: true },
+      [5.8, 4.6, 3.8].map((mezera) => ({
+        mezera,
+        bloky: [
+          ss.uvod(`${ts.shrnuti} · ${datum}`, person.name, [ts.shrnutiUvod], 22),
+          ss.body(
+            [
+              {
+                titulek: `${t.primarniTitulek}: ${nazevArchetypu(v.primarni.id, lang, varianta)}`,
+                text: motto(v.primarni),
+              },
+              {
+                titulek: `${t.sekundarniTitulek}: ${nazevArchetypu(v.sekundarni.id, lang, varianta)}`,
+                text: motto(v.sekundarni),
+              },
+            ],
+            { odrazky: true, mezera: 1.6 },
+          ),
+          ss.text(g(spojeni.souhrn), stOdstavec),
+          ss.box(ss.skupina([ss.h3(t.kdeZacitStitek), ss.mezera(1.6), ss.text(g(spojeni.kdeZacit), stOdstavec)])),
+          ss.zapis(ts.mojeJednaVec, 2, 4),
+          ss.zapis(ts.podleCehoPoznam, 1, 3),
+          ss.zapis(ts.kdoMiPomuze, 1, 2),
+          ss.podpisy([ts.kouc, g(ts.klient[varianta]), ts.datumRozhovoru]),
+        ],
+      })),
+      { paticka: g(ts.patickaProKlienta[varianta]) },
+    )
+  }
 
-  s.text(t.kdeZacitStitek.toUpperCase(), {
-    velikost: 7,
-    tucne: true,
-    barva: BARVA.slaba,
-    prostrkani: 0.4,
-    radek: 4,
-  })
-  s.mezera(3)
-  s.ramecek(g(spojeni.kdeZacit), { velikost: 10.2, tucne: true })
+  return ss
+}
 
-  // ---------- poznámka na závěr ----------
-  s.mezera(6)
-  s.text(t.zaverPdf[varianta], { velikost: 8.6, barva: BARVA.slaba, radek: 4.2 })
-
-  s.paticka(UI[lang].confidential)
-
-  return doc.output("blob")
+export function buildArchetypyPdf(vstup: ArchetypyPdfVstup): Blob {
+  return sestavArchetypyPdf(vstup).dokonci(UI[vstup.lang].confidential)
 }

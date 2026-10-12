@@ -72,7 +72,7 @@
   --el-btn-akcent-od-hover: #14ab78;
   --el-btn-akcent-do-hover: #0b7f57;
 }
-@media (prefers-color-scheme: dark) {
+@media screen and (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --el-akcent: #2fe6a6;
     --el-akcent-text: #2fe6a6;
@@ -1401,10 +1401,9 @@ textarea.pl-cell {
    stránku, světlý podklad a mřížka jako v tisku. Tmavé téma obrazovky by na
    papíře vypilo toner a nepřineslo nic. */
 @media print {
-  @page {
-    size: A4 landscape;
-    margin: 8mm;
-  }
+  /* @page na šířku tu není schválně: CSS se načítá pro celou aplikaci a
+     otočilo by na šířku i tisk vyhodnocení. Plánovač si ho vkládá sám,
+     viz app/planner/page.tsx. */
   .pl-root,
   .pl-root[data-tema="tmave"] {
     background: #ffffff;

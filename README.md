@@ -56,7 +56,7 @@ convex/                  # backend: schema + eliteDiagnostic (diagnostika)
 | Role | Přístup |
 | --- | --- |
 | Respondent | vyplní dotazník na přímém odkazu, po odeslání vidí **pouze potvrzení** |
-| Kouč | `/kouc` – po přihlášení seznam vyplnění, kompletní vyhodnocení, tisk do PDF, tvorba pozvánek |
+| Kouč | `/kouc` – po přihlášení seznam vyplnění, kompletní vyhodnocení, tisková sestava a PDF, tvorba pozvánek |
 | Master | navíc správa účtů koučů a zakládání deníků |
 | Klient s deníkem | `/planner` – vlastní zápisky a statistiky; kolik z nich vidí kouč, **klient vždycky ví** |
 
@@ -176,10 +176,19 @@ Na Vercelu nastav proměnnou `CONVEX_DEPLOY_KEY` (produkční deploy key z Conve
 a build command na `npx convex deploy --cmd 'npm run build'` – ten při každém
 nasazení nahraje Convex funkce a sám doplní `NEXT_PUBLIC_CONVEX_URL`.
 
-## Export do PDF
+## Export do PDF a tisk
 
-Vyhodnocení má dvě tlačítka: **Tisk** (tiskový dialog prohlížeče) a
-**Exportovat PDF**, které vyrobí skutečný soubor přímo v prohlížeči.
+Vyhodnocení má dvě tlačítka, **Tisk** a **Exportovat PDF**, a obě dávají tentýž
+dokument: tiskovou sestavu na A4 na výšku (`lib/diagnostic/pdf/sestava.ts`).
+Tisk ji pošle rovnou na tiskárnu (Chrome a Edge ze skrytého rámu, Safari
+a Firefox přes novou kartu, telefon přes systémové sdílení), PDF ji uloží.
+
+Sestava má u všech testů stejnou kostru: přehled na první straně s otázkami
+do rozhovoru, oblasti do hloubky s místem na poznámky, plán rozvoje s políčky
+na 12 týdnů a stranu pro sportovce nebo klienta bez čísel. Tu kouč přidá jen
+zaškrtnutím u tlačítek, výchozí je bez ní. Otázky do rozhovoru jsou
+v `lib/diagnostic/otazky.ts`; obsah sestav hlídá `scripts/test-sestava.cjs`,
+sazbu `scripts/test-sazba.cjs`.
 
 Proč se PDF neskládá přes tiskový dialog: na iPhonu z něj soubor nejde uložit
 ani odeslat. Takto vznikne opravdový soubor, který se na mobilu předá

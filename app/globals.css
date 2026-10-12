@@ -57,7 +57,9 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
+/* Jen pro obrazovku. Tisk z počítače v tmavém režimu by jinak dostal světlé
+   písmo určené pro tmavé pozadí a na bílém papíře by bylo vybledlé. */
+@media screen and (prefers-color-scheme: dark) {
   :root {
     --wm-bg: #000000;
     --wm-surface: #1c1c1e;
