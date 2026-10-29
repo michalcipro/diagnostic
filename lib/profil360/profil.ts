@@ -135,6 +135,12 @@ interface OblastDef {
   otazka: string
 }
 
+// Stres z DASS-21 do oblastí nepatří. Je to škála příznaků za poslední týden
+// s nulou jako nejčastější odpovědí, ne povahový rys se středem uprostřed jako
+// IPIP. Jako „100 − stres" sedí u většiny sportovců mezi 70 a 100 a oblasti,
+// do kterých se přidával (návrat po nezdaru, energie), tím uměle zvedal;
+// typ „Týmový tmel", který na nich stojí, pak vycházel dvakrát častěji, než by
+// měl. Stres má v profilu vlastní místo: pásmo, kartu a riziko „Vysoká zátěž".
 export const OBLASTI: OblastDef[] = [
   {
     id: "tlak",
@@ -154,7 +160,7 @@ export const OBLASTI: OblastDef[] = [
     id: "navrat",
     nazev: "Návrat po nezdaru",
     popis: "jak rychle se zvedne po chybě, prohře a horším období",
-    slozky: [["N3", -1], ["N2", -1], ["V.hope-optimism", 1], ["V.perseverance", 1], ["DASS.stress", -1]],
+    slozky: [["N3", -1], ["N2", -1], ["V.hope-optimism", 1], ["V.perseverance", 1]],
     silna: "Chyba {ho|ji} nerozhodí na dlouho. Dá se na {něm|ní} stavět v sériích a při otočkách zápasu.",
     rozvojSportovci: "Domluv se s trenérem na krátkém restartu po chybě (nádech, gesto, další úkol) a trénuj ho jako techniku.",
     otazka: "Jak dlouho ti trvá, než se po chybě nebo prohře vrátíš, a co tě vrátí?",
@@ -248,8 +254,8 @@ export const OBLASTI: OblastDef[] = [
   {
     id: "energie",
     nazev: "Energie a radost",
-    popis: "elán, dobrá nálada a zátěž, kterou teď nese",
-    slozky: [["V.zest", 1], ["E6", 1], ["E4", 1], ["V.humor-playfulness", 1], ["DASS.stress", -1]],
+    popis: "elán, dobrá nálada a hravost",
+    slozky: [["V.zest", 1], ["E6", 1], ["E4", 1], ["V.humor-playfulness", 1]],
     silna: "Nabíjí sebe i okolí. Pozor jen, aby si {nepřibíral|nepřibírala} víc, než unese.",
     rozvojSportovci: "Zkontroluj spánek a zátěž mimo sport; nízká energie bývá signál přetížení, ne lenosti.",
     otazka: "Co ti teď bere energii a kdy tě sport naposledy opravdu bavil?",
@@ -271,6 +277,8 @@ interface TypDef {
   popis: string
   potrebuje: string
   pozor: string
+  /** rizika, která popisu typu odporují; když se ozve, typ se nepoužije */
+  vylucuje: string[]
 }
 
 export const TYPY: TypDef[] = [
@@ -281,6 +289,7 @@ export const TYPY: TypDef[] = [
     popis: "Nejlépe funguje, když jde o hodně. Drží hlavu v klidu a chybu rychle pustí.",
     potrebuje: "Odpovědnost v rozhodujících chvílích a důvěru, že ji dostane i po chybě.",
     pozor: "Klid navenek neznamená, že nic neprožívá. Ptej se, jak se má.",
+    vylucuje: ["obavy", "vztek"],
   },
   {
     id: "dric",
@@ -289,6 +298,7 @@ export const TYPY: TypDef[] = [
     popis: "Výkon staví na poctivé práci a vytrvalosti. Dotahuje, co začne.",
     potrebuje: "Jasný plán, měřitelný pokrok a uznání za úsilí.",
     pozor: "Sklon přetrénovat a nepřiznat únavu. Hlídej zotavení.",
+    vylucuje: ["disciplina"],
   },
   {
     id: "lidr",
@@ -297,6 +307,7 @@ export const TYPY: TypDef[] = [
     popis: "Bere vedení, strhne ostatní a nebojí se odpovědnosti.",
     potrebuje: "Prostor vést a partnera v trenérovi, ne jen nadřízeného.",
     pozor: "Dominance může přehlušit ostatní. Dávej zpětnou vazbu i k tomu, jak vede.",
+    vylucuje: ["obavy"],
   },
   {
     id: "tmel",
@@ -305,6 +316,7 @@ export const TYPY: TypDef[] = [
     popis: "Drží partu pohromadě, dodává energii a pomáhá druhým.",
     potrebuje: "Dobré vztahy v týmu a pocit, že {jeho|její} přínos je vidět.",
     pozor: "Může upozadit vlastní výkon a potřeby. Ptej se i na {jeho|její} cíle.",
+    vylucuje: ["samotar"],
   },
   {
     id: "bojovnik",
@@ -313,6 +325,7 @@ export const TYPY: TypDef[] = [
     popis: "{Soutěživý|Soutěživá}, {energický|energická}, chce vyhrávat a jde do toho naplno.",
     potrebuje: "Výzvy, soupeře a měřitelné cíle; nudu snáší hůř než tlak.",
     pozor: "Vztek a zbrklost po neúspěchu. Pracujte na restartu po chybě.",
+    vylucuje: [],
   },
   {
     id: "strateg",
@@ -321,6 +334,7 @@ export const TYPY: TypDef[] = [
     popis: "Přemýšlí, učí se a hledá lepší řešení. Rozhoduje s rozvahou.",
     potrebuje: "Vysvětlení proč, prostor pro otázky a zapojení do plánování.",
     pozor: "Přemýšlení v akci může zdržet rozhodnutí. Trénujte i rychlé volby.",
+    vylucuje: ["riskovani"],
   },
 ]
 
@@ -557,12 +571,22 @@ export interface Profil360 {
   silneStranky: { kod: string; nazev: string; hodnota: number | null }[]
   motivace: { kod: string; nazev: string; popis: string; hodnota: number | null }[]
   vzruseni: number | null
-  typ: { hlavni: TypDef; vedlejsi: TypDef } | null
+  /** null, když žádná kombinace oblastí nevyčnívá natolik, aby šla pojmenovat */
+  typ: { hlavni: TypDef; vedlejsi: TypDef | null } | null
   rizika: Riziko[]
   stres: { pasmo: StresPasmo; body: number } | null
   chronotyp: Chronotyp | null
   spolehlivost: Spolehlivost
 }
+
+/** Co se ukáže místo typu, když žádná kombinace oblastí nevyčnívá. */
+export const BEZ_TYPU =
+  "Žádná kombinace oblastí nevyčnívá natolik, aby šla pojmenovat jako typ. Profil se čte po oblastech."
+
+/** Nejnižší průměr oblastí typu, od kterého se typ jmenuje; 50 je střed škály. */
+const TYP_MIN = 55
+/** Žádná oblast typu nesmí být nízko (pásmo pod 40). */
+const OBLAST_TYPU_MIN = 40
 
 const prumerNeNull = (xs: (number | null)[]) => {
   const h = xs.filter((x): x is number => x !== null)
@@ -601,13 +625,6 @@ export function vyhodnot(odp: Odpovedi, durationSec?: number, poradiIpip: number
   const motivace = Object.keys(MOTIVACE).map((k) => ({ kod: k, ...MOTIVACE[k], hodnota: h(k) }))
 
   const vzruseni = prumerNeNull([h("E5"), h("bas-fun-seeking"), h("V.prudence") === null ? null : 100 - h("V.prudence")!])
-
-  // Typ: průměr jeho oblastí; hlavní je nejvyšší, vedlejší druhý.
-  const oblastH = (id: OblastId) => oblasti.find((o) => o.id === id)?.hodnota ?? null
-  const typySkore = TYPY.map((t) => ({ t, x: prumerNeNull(t.oblasti.map(oblastH)) }))
-    .filter((x): x is { t: TypDef; x: number } => x.x !== null)
-    .sort((a, b) => b.x - a.x)
-  const typ = typySkore.length >= 2 ? { hlavni: typySkore[0].t, vedlejsi: typySkore[1].t } : null
 
   const stres = stresPasmo(odp)
   const rizika: Riziko[] = []
@@ -684,6 +701,26 @@ export function vyhodnot(odp: Odpovedi, durationSec?: number, poradiIpip: number
     })
   }
 
+  // Typ: průměr jeho oblastí; hlavní je nejvyšší, vedlejší druhý.
+  //
+  // Typ pojmenovává to, na čem sportovec stojí, takže se jmenuje, jen když na
+  // tom opravdu stojí: průměr oblastí typu je nad středem škály, žádná z nich
+  // není nízko a profil zároveň nehlásí riziko, které popisu typu odporuje.
+  // Dřív se typ vybíral jen podle pořadí, a sportovec s nízkou spoluprací
+  // dostal v jednom reportu „Týmový tmel" i riziko „Samotář".
+  const oblastH = (id: OblastId) => oblasti.find((o) => o.id === id)?.hodnota ?? null
+  const hlasenaRizika = new Set(rizika.map((r) => r.id))
+  const typySkore = TYPY.map((t) => ({ t, x: prumerNeNull(t.oblasti.map(oblastH)) }))
+    .filter((x): x is { t: TypDef; x: number } => x.x !== null)
+    .filter(
+      ({ t, x }) =>
+        x >= TYP_MIN &&
+        t.oblasti.every((id) => (oblastH(id) ?? 0) >= OBLAST_TYPU_MIN) &&
+        !t.vylucuje.some((r) => hlasenaRizika.has(r)),
+    )
+    .sort((a, b) => b.x - a.x)
+  const typ = typySkore.length ? { hlavni: typySkore[0].t, vedlejsi: typySkore[1]?.t ?? null } : null
+
   const poradi = poradiIpip.length ? poradiIpip : Object.keys(odp).map(Number).filter((id) => id < 500).sort((a, b) => a - b)
 
   return {
@@ -710,7 +747,9 @@ export function shrnuti(p: Profil360): string[] {
   const serazene = p.oblasti.filter((o) => o.hodnota !== null).sort((a, b) => b.hodnota! - a.hodnota!)
   if (p.typ) {
     odstavce.push(
-      `Tvůj profil nejvíc odpovídá typu „${p.typ.hlavni.nazev}“, s rysy typu „${p.typ.vedlejsi.nazev}“.`,
+      p.typ.vedlejsi
+        ? `Tvůj profil nejvíc odpovídá typu „${p.typ.hlavni.nazev}“, s rysy typu „${p.typ.vedlejsi.nazev}“.`
+        : `Tvůj profil nejvíc odpovídá typu „${p.typ.hlavni.nazev}“.`,
     )
   }
   if (serazene.length >= 2) {

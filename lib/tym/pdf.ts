@@ -8,7 +8,7 @@ import {
   type RGB,
 } from "../diagnostic/pdf/sazba"
 import { TYM, type TymLang } from "./obsah"
-import { CASTI, KRATCE, MAPA, shodaKratce, slovoUrovne } from "./slova"
+import { CASTI, KRATCE, MAPA, duvodTrhliny, shodaKratce, slovoUrovne } from "./slova"
 import {
   MAPA_ROZSAH,
   krokSkaly,
@@ -446,9 +446,14 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
     s.ramecek(`${t.maloDatTitul}. ${t.maloDat}`, { velikost: 9.4 })
     s.mezera(4)
   }
-  if (data.odevzdano > data.zapocteno) {
-    const kolik = data.odevzdano - data.zapocteno
-    s.ramecek(`${t.nezapoctenoTitul}. ${t.nezapocteno(kolik, data.zapocteno)}`, { velikost: 9.4 })
+  const cekajicich = data.vynechano ?? 0
+  const neplatnych = Math.max(0, data.odevzdano - data.zapocteno - cekajicich)
+  if (neplatnych > 0) {
+    s.ramecek(`${t.nezapoctenoTitul}. ${t.nezapocteno(neplatnych, data.zapocteno)}`, { velikost: 9.4 })
+    s.mezera(4)
+  }
+  if (cekajicich > 0) {
+    s.ramecek(`${t.vynechanoTitul}. ${t.vynechano(cekajicich)}`, { velikost: 9.4 })
     s.mezera(4)
   }
 
@@ -524,7 +529,7 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
         s.pismo(7.6, true, ORANZOVA)
         s.doc.text(KRATCE[lang][o.id as DimensionId] ?? o.id, PRAVY_KRAJ, zacatek, { align: "right" })
         s.mezera(1)
-        s.text(m.trhlinaVeta(Math.round(o.prumer), Math.round(c.prumer), rozdil), {
+        s.text(m.trhlinaVeta(Math.round(o.prumer), Math.round(c.prumer), rozdil, duvodTrhliny(o, c)), {
           velikost: 9.2,
           barva: BARVA.text2,
           radek: 4.4,
@@ -748,7 +753,7 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
   // =========================================================================
   s.mezera(3)
   s.nadpis(r.planTitul)
-  s.text(r.planUvod, { velikost: 9.8, barva: BARVA.text2, radek: 4.8 })
+  s.text(plan[0]?.udrzba ? r.planUvodUdrzba : r.planUvod, { velikost: 9.8, barva: BARVA.text2, radek: 4.8 })
   s.mezera(6)
 
   for (const faze of plan) {
@@ -796,8 +801,11 @@ export function buildTymPdf(data: TymPdfVstup, lang: TymLang): Blob {
 
   popisek(s, r.rozhovoryOtazkyTitul)
   s.mezera(1)
+  // Stejný výběr jako na obrazovce. Dřív PDF vypisovalo otázky ke všem sedmi
+  // oblastem a kouč měl v ruce jiný dokument, než viděl na monitoru.
+  const kOtazkam = new Set(oblastiKOtazkam(data))
   for (const id of PORADI) {
-    if (!podleId.has(id)) continue
+    if (!podleId.has(id) || !kOtazkam.has(id)) continue
     s.misto(16)
     s.text(nazevOblasti(id), { velikost: 9.6, tucne: true, radek: 4.4 })
     s.mezera(0.8)

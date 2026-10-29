@@ -56,7 +56,9 @@ export const HRAC: Record<"cs" | "en", HracTexty> = {
       "Sedm oblastí, které dotazník sleduje. Není to známka ani nálepka: je to " +
       "obrázek toho, jak to máš teď nastavené, a ten se dá měnit.",
     hotovo: "Odesláno",
-    hotovoPopis: "Výsledky jsi sdílel{|a} se svým koučem.",
+    // Bez rodu: obrazovka po odeslání rod hráče nezná a značka se dřív
+    // vypisovala doslova („sdílel{|a}").
+    hotovoPopis: "Výsledky máš sdílené se svým koučem.",
     nesdilenoPopis:
       "Kouč tvoje výsledky neuvidí. Do profilu celého týmu se tvoje odpovědi " +
       "započítaly anonymně, jak jsme psali před odesláním.",

@@ -36,7 +36,6 @@ export interface RamecTexty {
     prace: string
     znaky: string
   }
-  rozsahTymu: (min: number, max: number) => string
   rozlozeni: string
   /** názvy pásem pro řádek s rozložením kádru */
   pasma: { priority: string; stabilization: string; strong: string; elite: string }
@@ -49,10 +48,24 @@ export interface RamecTexty {
   planKroky: string
   planZnaky: string
   fazeNazvy: [string, string, string]
+  /** plán pro tým, kde žádná oblast nepotřebuje opravu */
+  planUvodUdrzba: string
+  fazeNazvyUdrzba: [string, string, string]
   fazeDuvod: {
     zlom: (oblast: string) => string
+    /** druhá rozdělená oblast; „tohle je proto první" by tu nebyla pravda */
+    zlomDruhy: (oblast: string) => string
     plosna: (oblast: string) => string
+    /** jen když je oblast opravdu nejníž a zároveň potřebuje práci */
     nejnizsi: (oblast: string) => string
+    /** potřebuje práci, ale není nejníž */
+    slaba: (oblast: string) => string
+    prumerna: (oblast: string) => string
+    rozptyl: (oblast: string) => string
+    /** udržovací plán: první a druhá fáze */
+    udrzeni: (oblast: string, poradi: 1 | 2) => string
+    /** druhá fáze, když práci potřebuje jen jedna oblast */
+    rezerva: (oblast: string) => string
     upevneni: (oblast: string) => string
     opora: (oblast: string) => string
   }
@@ -124,7 +137,6 @@ const CS: RamecTexty = {
     prace: "Co s tím",
     znaky: "Podle čeho poznáš, že se to hýbe",
   },
-  rozsahTymu: (min, max) => `Nejnižší hráč ${min}, nejvyšší ${max}.`,
   rozlozeni: "Rozložení kádru",
   pasma: {
     priority: "priorita",
@@ -143,11 +155,19 @@ const CS: RamecTexty = {
   planKroky: "Co dělat",
   planZnaky: "Jak poznáš, že to funguje",
   fazeNazvy: ["Odstranit to, co brzdí", "Postavit dovednost", "Upevnit a zatížit"],
+  planUvodUdrzba:
+    "Tři fáze po čtyřech týdnech. Žádná oblast nepotřebuje opravu, a tak plán " +
+    "neodstraňuje brzdy, ale hlídá oblasti s nejmenší rezervou a končí zátěží. " +
+    "I silný profil se bez péče rozpadá, jen pomalu a nenápadně.",
+  fazeNazvyUdrzba: ["Hlídat nejmenší rezervu", "Rozšířit náskok", "Upevnit a zatížit"],
   fazeDuvod: {
     zlom: (oblast) =>
       `Tým se v oblasti ${oblast} dělí na dvě skupiny. Dokud to trvá, nemá smysl ` +
       "zavádět cokoli plošně, protože každá skupina potřebuje něco jiného. Tohle " +
       "je proto první.",
+    zlomDruhy: (oblast) =>
+      `Na dvě skupiny se tým dělí i v oblasti ${oblast}. I tady platí, že plošné ` +
+      "opatření nepomůže: pracuje se po skupinách a každá dostane něco jiného.",
     plosna: (oblast) =>
       `Oblast ${oblast} chybí rovnoměrně celému kádru. To je věc prostředí a plánu, ` +
       "ne jednotlivců, a řeší se rychleji než cokoli individuálního, protože se mění " +
@@ -155,6 +175,23 @@ const CS: RamecTexty = {
     nejnizsi: (oblast) =>
       `${oblast} je nejnižší oblast profilu. Dokud je takhle nízko, drží zpátky ` +
       "i oblasti, které vypadají dobře.",
+    slaba: (oblast) =>
+      `Oblast ${oblast} patří k místům, kde tým potřebuje práci: příliš mnoho hráčů ` +
+      "je v ní pod silným pásmem testu nebo úplně dole. Pod tlakem tady tým povolí mezi prvními.",
+    prumerna: (oblast) =>
+      `Oblast ${oblast} je v týmu průměrná: silná je jen část kádru a celý tým se o ni ` +
+      "pod tlakem opřít nemůže. Tady je nejblíž k tomu posunout tým o stupeň výš.",
+    rozptyl: (oblast) =>
+      `V oblasti ${oblast} se hráči hodně liší, i když jako celek tým nevypadá špatně. ` +
+      "Práce tu začíná rozhovory s těmi, kdo jsou nejdál od zbytku, ne poradou s celým mužstvem.",
+    udrzeni: (oblast, poradi) =>
+      poradi === 1
+        ? "Žádná oblast nepotřebuje opravu: všechny jsou silné a tým se v nich nerozchází. " +
+          `Plán proto udržuje a rozšiřuje náskok. ${oblast} má ze všech nejmenší rezervu, tak začni u ní.`
+        : `${oblast} má druhou nejmenší rezervu. Udržet ji silnou je levnější než ji později zachraňovat.`,
+    rezerva: (oblast) =>
+      `Jinde tým práci nepotřebuje. ${oblast} má z ostatních oblastí nejmenší rezervu, ` +
+      "a tak se vyplatí ji ve druhé fázi posílit dřív, než začne povolovat.",
     upevneni: (oblast) =>
       `Poslední čtyři týdny patří zátěži: to, co se postavilo, se ověří v ostrém ` +
       `provozu. U oblasti ${oblast} to znamená vědomě přidat tlak, ne ubrat.`,
@@ -254,7 +291,6 @@ const EN: RamecTexty = {
     prace: "What to do about it",
     znaky: "How you will know it is moving",
   },
-  rozsahTymu: (min, max) => `Lowest player ${min}, highest ${max}.`,
   rozlozeni: "Distribution across the squad",
   pasma: {
     priority: "priority",
@@ -273,11 +309,19 @@ const EN: RamecTexty = {
   planKroky: "What to do",
   planZnaky: "How you will know it is working",
   fazeNazvy: ["Remove what blocks", "Build the skill", "Consolidate under load"],
+  planUvodUdrzba:
+    "Three phases of four weeks. No area needs fixing, so the plan does not remove " +
+    "blockers; it guards the areas with the smallest margin and ends under load. Even a " +
+    "strong profile falls apart without care, only slowly and quietly.",
+  fazeNazvyUdrzba: ["Guard the smallest margin", "Extend the lead", "Consolidate under load"],
   fazeDuvod: {
     zlom: (oblast) =>
       `The team divides into two groups in ${oblast}. While that lasts there is no point ` +
       "introducing anything squad-wide, because each group needs something different. " +
       "That is why this comes first.",
+    zlomDruhy: (oblast) =>
+      `The team also divides into two groups in ${oblast}. Here too a squad-wide measure ` +
+      "will not help: work in groups, each getting something different.",
     plosna: (oblast) =>
       `${oblast} is missing evenly across the whole roster. That is a matter of ` +
       "environment and scheduling rather than individuals, and it moves faster than " +
@@ -285,6 +329,23 @@ const EN: RamecTexty = {
     nejnizsi: (oblast) =>
       `${oblast} is the lowest area in the profile. While it sits this low it holds back ` +
       "areas that look healthy.",
+    slaba: (oblast) =>
+      `${oblast} is one of the places where the team needs work: too many players sit ` +
+      "below the strong band of the test or right at the bottom. Under pressure this is among the first things to give.",
+    prumerna: (oblast) =>
+      `${oblast} is average for this team: only part of the squad is strong in it, so the ` +
+      "whole team cannot lean on it under pressure. This is where moving the team up a level is closest.",
+    rozptyl: (oblast) =>
+      `Players differ a lot in ${oblast}, even though the team as a whole does not look bad. ` +
+      "Work here starts with conversations with those furthest from the rest, not with a squad meeting.",
+    udrzeni: (oblast, poradi) =>
+      poradi === 1
+        ? "No area needs fixing: all are strong and the team does not split in any of them. " +
+          `The plan therefore maintains and extends the lead. ${oblast} has the smallest margin of all, so start there.`
+        : `${oblast} has the second smallest margin. Keeping it strong is cheaper than rescuing it later.`,
+    rezerva: (oblast) =>
+      `Nothing else needs work. Of the remaining areas ${oblast} has the smallest margin, ` +
+      "so it pays to strengthen it in the second phase before it starts to give.",
     upevneni: (oblast) =>
       "The last four weeks belong to load: what was built gets tested in live conditions. " +
       `For ${oblast} that means deliberately adding pressure, not easing it.`,

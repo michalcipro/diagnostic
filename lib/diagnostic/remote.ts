@@ -581,8 +581,6 @@ export interface TeamReport {
     id: string
     prumer: number
     smodch: number
-    min: number
-    max: number
     pasma: { priority: number; stabilization: number; strong: number; elite: number }
     /** úroveň oblasti v týmu; počítá ji server z rozdělení kádru po pásmech */
     uroven: "spicka" | "silne" | "prumerne" | "potrebuje-praci"
@@ -595,8 +593,6 @@ export interface TeamReport {
     oblast: string
     prumer: number
     smodch: number
-    min: number
-    max: number
     pasma: { priority: number; stabilization: number; strong: number; elite: number }
     riziko: boolean
   }[]
@@ -606,6 +602,13 @@ export interface TeamReport {
   zlomy: string[]
   nalezy: { kod: string; sila: "vysoka" | "stredni"; oblasti: string[] }[]
   maloDat: boolean
+  /**
+   * Platná vyplnění, která čekají, až se doplní trojice; viz lib/tym/soukromi.ts.
+   * Starší backend pole nevrací.
+   */
+  vynechano?: number
+  /** profil se neukazuje, protože by se započítalo méně než pět vyplnění */
+  zamceno?: boolean
 }
 
 export async function createTeam(

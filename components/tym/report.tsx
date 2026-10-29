@@ -14,6 +14,7 @@ import {
   urovenKlic,
 } from "@/lib/tym/plan"
 import type { NalezKod } from "@/lib/tym/typy"
+import { MIN_V_PROFILU } from "@/lib/tym/prahy"
 import type { TeamReport } from "@/lib/diagnostic/remote"
 import type { DimensionId } from "@/lib/diagnostic/types"
 
@@ -31,9 +32,46 @@ import type { DimensionId } from "@/lib/diagnostic/types"
 const POSLOUPNOST: DimensionId[] = ["A", "B", "C", "D", "E", "F", "G"]
 
 export function TymReport({ data, lang }: { data: TeamReport; lang: TymLang }) {
+  if (data.zamceno) return <ZamcenyReport data={data} lang={lang} />
+  return <CelyReport data={data} lang={lang} />
+}
+
+/**
+ * Profil, který server kvůli soukromí nevrátil: započítat by se dalo méně
+ * než pět vyplnění. Kouč vidí, kolik jich je a proč profil chybí.
+ */
+function ZamcenyReport({ data, lang }: { data: TeamReport; lang: TymLang }) {
+  const t = TYM[lang]
+  return (
+    <div className="max-w-[62rem]">
+      <header className="mb-8">
+        <div className="h-[3px] w-[52px] rounded-full bg-[var(--wm-blue)]" />
+        <h1 className="mt-4 text-[30px] font-bold leading-tight tracking-tight">{data.nazev}</h1>
+        <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--wm-text-3)]">
+          {t.titul}
+        </p>
+        <p className="mt-3 text-[13.5px] text-[var(--wm-text-3)]">{t.pocty(data.odevzdano, data.pozvano)}</p>
+      </header>
+      <div className="diag-card border-l-[3px] border-l-[var(--wm-blue)] p-5">
+        <h2 className="text-[15px] font-bold tracking-tight">{t.zamcenoTitul}</h2>
+        <p className="mt-1.5 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
+          {t.zamceno(data.zapocteno, MIN_V_PROFILU)}
+        </p>
+        {(data.vynechano ?? 0) > 0 && (
+          <p className="mt-3 text-[14px] leading-relaxed text-[var(--wm-text-2)]">{t.vynechano(data.vynechano ?? 0)}</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function CelyReport({ data, lang }: { data: TeamReport; lang: TymLang }) {
   const t = TYM[lang]
   const r = RAMEC[lang]
   const v = VYKLAD[lang]
+  // Starší backend pole `vynechano` nevrací; pak se nic nevynechává.
+  const cekajicich = data.vynechano ?? 0
+  const neplatnych = Math.max(0, data.odevzdano - data.zapocteno - cekajicich)
   const oblasti = new Map(data.oblasti.map((o) => [o.id, o]))
   const prvni = data.nalezy[0]
   const shrnuti = sestavShrnuti(data, lang)
@@ -67,12 +105,19 @@ export function TymReport({ data, lang }: { data: TeamReport; lang: TymLang }) {
         </div>
       )}
 
-      {data.odevzdano > data.zapocteno && (
+      {neplatnych > 0 && (
         <div className="diag-card mb-8 border-l-[3px] border-l-[var(--wm-orange)] p-5">
           <h2 className="text-[15px] font-bold tracking-tight">{t.nezapoctenoTitul}</h2>
           <p className="mt-1.5 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
-            {t.nezapocteno(data.odevzdano - data.zapocteno, data.zapocteno)}
+            {t.nezapocteno(neplatnych, data.zapocteno)}
           </p>
+        </div>
+      )}
+
+      {cekajicich > 0 && (
+        <div className="diag-card mb-8 border-l-[3px] border-l-[var(--wm-blue)] p-5">
+          <h2 className="text-[15px] font-bold tracking-tight">{t.vynechanoTitul}</h2>
+          <p className="mt-1.5 text-[14px] leading-relaxed text-[var(--wm-text-2)]">{t.vynechano(cekajicich)}</p>
         </div>
       )}
 
@@ -196,7 +241,7 @@ export function TymReport({ data, lang }: { data: TeamReport; lang: TymLang }) {
       <section className="mt-10">
         <Nadpis>{r.planTitul}</Nadpis>
         <p className="mb-5 max-w-[46rem] text-[14.5px] leading-relaxed text-[var(--wm-text-2)]">
-          {r.planUvod}
+          {plan[0]?.udrzba ? r.planUvodUdrzba : r.planUvod}
         </p>
         <div className="space-y-5">
           {plan.map((faze) => (
@@ -540,14 +585,16 @@ function OblastRadek({
         />
       </div>
 
-      {/* rozpětí od nejslabšího po nejsilnějšího hráče */}
+      {/* Kde je většina kádru: průměr plus minus odchylka. Dřív tu byl
+          nejslabší a nejsilnější hráč, jenže krajní hodnota je skóre jednoho
+          konkrétního člověka a server ji kvůli soukromí nevrací. */}
       <div className="relative mt-2 h-[10px] w-full">
         <div className="absolute inset-x-0 top-[4px] h-[2px] rounded-full bg-[var(--wm-border-light)]" />
         <div
           className="absolute top-[3px] h-[4px] rounded-full"
           style={{
-            left: `${Math.max(0, o.min)}%`,
-            width: `${Math.max(1, o.max - o.min)}%`,
+            left: `${Math.max(0, o.prumer - o.smodch)}%`,
+            width: `${Math.max(1, Math.min(100, o.prumer + o.smodch) - Math.max(0, o.prumer - o.smodch))}%`,
             background: o.rozkol ? "var(--wm-red)" : "var(--wm-bar-muted)",
           }}
         />
@@ -561,7 +608,6 @@ function OblastRadek({
             <Pasmo n={o.pasma.strong} barva="var(--wm-blue)" />
             <Pasmo n={o.pasma.elite} barva="var(--wm-green)" />
           </span>
-          <span>{r.rozsahTymu(Math.round(o.min), Math.round(o.max))}</span>
         </div>
       )}
 

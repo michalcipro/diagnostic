@@ -1,8 +1,8 @@
 {
   "1": {
-    "cs": "Mám jasnou představu o tom, jakým sportovcem se chci stát, a to nejen výsledkově, ale i charakterově.",
+    "cs": "Mám jasnou představu o tom, {jakým sportovcem|jakou sportovkyní} se chci stát, a to nejen výsledkově, ale i charakterově.",
     "en": "I have a clear idea of the athlete I want to become, not only in terms of results but also in terms of character.",
-    "sk": "Mám jasnú predstavu o tom, akým športovcom sa chcem stať, a to nielen výsledkovo, ale aj charakterovo."
+    "sk": "Mám jasnú predstavu o tom, {akým športovcom|akou športovkyňou} sa chcem stať, a to nielen výsledkovo, ale aj charakterovo."
   },
   "2": {
     "cs": "Před důležitým výkonem věřím, že mám na to uspět.",
@@ -60,9 +60,9 @@
     "sk": "Dokážem pracovať na cieli celé mesiace aj bez okamžite viditeľného pokroku."
   },
   "13": {
-    "cs": "Nikdy jsem o žádném soupeři neřekl nic negativního.",
+    "cs": "Nikdy jsem o žádném soupeři {neřekl|neřekla} nic negativního.",
     "en": "I have never said anything negative about any opponent.",
-    "sk": "Nikdy som o žiadnom súperovi nepovedal nič negatívne."
+    "sk": "Nikdy som o žiadnom súperovi {nepovedal|nepovedala} nič negatívne."
   },
   "14": {
     "cs": "Spánek a regeneraci plánuji stejně vážně jako trénink.",
@@ -140,9 +140,9 @@
     "sk": "Neúspech beriem predovšetkým ako informáciu pre ďalší rozvoj, nie ako dôkaz neschopnosti."
   },
   "29": {
-    "cs": "Dokážu zůstat disciplinovaný i tehdy, když mě nikdo nekontroluje.",
+    "cs": "Dokážu zůstat {disciplinovaný|disciplinovaná} i tehdy, když mě nikdo nekontroluje.",
     "en": "I can stay disciplined even when no one is checking on me.",
-    "sk": "Dokážem zostať disciplinovaný aj vtedy, keď ma nikto nekontroluje."
+    "sk": "Dokážem zostať {disciplinovaný|disciplinovaná} aj vtedy, keď ma nikto nekontroluje."
   },
   "30": {
     "cs": "V napětí nebo konfliktu v týmu dokážu komunikovat věcně a klidně.",
@@ -150,9 +150,9 @@
     "sk": "V napätí alebo konflikte v tíme dokážem komunikovať vecne a pokojne."
   },
   "31": {
-    "cs": "I kdyby mě nikdo nechválil, trénoval bych se stejným nasazením.",
+    "cs": "I kdyby mě nikdo nechválil, {trénoval|trénovala} bych se stejným nasazením.",
     "en": "Even if no one praised me, I would still train with the same commitment.",
-    "sk": "Aj keby ma nikto nechválil, trénoval by som s rovnakým nasadením."
+    "sk": "Aj keby ma nikto nechválil, {trénoval|trénovala} by som s rovnakým nasadením."
   },
   "32": {
     "cs": "Dokážu vědomě nahradit negativní myšlenku konkrétní pomocnou instrukcí.",
@@ -165,14 +165,14 @@
     "sk": "Mám konkrétnu rutinu, ktorú používam na návrat do plného sústredenia."
   },
   "34": {
-    "cs": "Občas se během dne cítím unavený.",
+    "cs": "Občas se během dne cítím {unavený|unavená}.",
     "en": "I sometimes feel tired during the day.",
-    "sk": "Občas sa počas dňa cítim unavený."
+    "sk": "Občas sa počas dňa cítim {unavený|unavená}."
   },
   "35": {
-    "cs": "Umím záměrně zvýšit svou energii a aktivaci, když cítím, že jsem příliš vlažný.",
+    "cs": "Umím záměrně zvýšit svou energii a aktivaci, když cítím, že jsem příliš {vlažný|vlažná}.",
     "en": "I know how to deliberately raise my energy and arousal when I feel I am too flat.",
-    "sk": "Viem zámerne zvýšiť svoju energiu a aktiváciu, keď cítim, že som príliš vlažný."
+    "sk": "Viem zámerne zvýšiť svoju energiu a aktiváciu, keď cítim, že som príliš {vlažný|vlažná}."
   },
   "36": {
     "cs": "Když ostatní pochybují o mé cestě, dokážu si udržet vlastní směr.",
@@ -190,19 +190,19 @@
     "sk": "Negatívne komentáre okolia ovplyvňujú moju sebadôveru ešte dlho potom."
   },
   "39": {
-    "cs": "Po porážce se cítím méněcenný i jako člověk, ne jen jako sportovec.",
+    "cs": "Po porážce se cítím {méněcenný|méněcenná} i jako člověk, ne jen jako {sportovec|sportovkyně}.",
     "en": "After a defeat, I feel inferior as a person, not just as an athlete.",
-    "sk": "Po prehre sa cítim menejcenný aj ako človek, nielen ako športovec."
+    "sk": "Po prehre sa cítim {menejcenný|menejcenná} aj ako človek, nielen ako {športovec|športovkyňa}."
   },
   "40": {
-    "cs": "K sobě samému jsem stejně férový jako k dobrému spoluhráči.",
+    "cs": "K sobě {samému|samé} jsem stejně {férový|férová} jako k dobrému spoluhráči.",
     "en": "I am as fair to myself as I am to a good teammate.",
-    "sk": "K sebe samému som rovnako férový ako k dobrému spoluhráčovi."
+    "sk": "K sebe {samému|samej} som rovnako {férový|férová} ako k dobrému spoluhráčovi."
   },
   "41": {
-    "cs": "Nikdy jsem nepocítil závist vůči úspěchu jiného sportovce.",
+    "cs": "Nikdy jsem {nepocítil|nepocítila} závist vůči úspěchu jiného sportovce.",
     "en": "I have never felt envy at another athlete's success.",
-    "sk": "Nikdy som nepocítil závisť voči úspechu iného športovca."
+    "sk": "Nikdy som {nepocítil|nepocítila} závisť voči úspechu iného športovca."
   },
   "42": {
     "cs": "Během výkonu jsem myšlenkami převážně tady a teď, ne v minulosti nebo budoucnosti.",
@@ -270,9 +270,9 @@
     "sk": "Pred trénerom radšej zamlčím, že niečo nezvládam."
   },
   "55": {
-    "cs": "Kdyby zmizely žebříčky a výsledky, ztratil bych chuť trénovat.",
+    "cs": "Kdyby zmizely žebříčky a výsledky, {ztratil|ztratila} bych chuť trénovat.",
     "en": "If rankings and results disappeared, I would lose my desire to train.",
-    "sk": "Keby zmizli rebríčky a výsledky, stratil by som chuť trénovať."
+    "sk": "Keby zmizli rebríčky a výsledky, {stratil|stratila} by som chuť trénovať."
   },
   "56": {
     "cs": "Každou svou chybu přiznám okamžitě, vždy a bez výmluv.",
@@ -280,9 +280,9 @@
     "sk": "Každú svoju chybu priznám okamžite, vždy a bez výhovoriek."
   },
   "57": {
-    "cs": "Během výkonu se kritizuji slovy, která bych nikdy neřekl spoluhráči.",
+    "cs": "Během výkonu se kritizuji slovy, která bych nikdy {neřekl|neřekla} spoluhráči.",
     "en": "During a performance, I criticize myself in words I would never say to a teammate.",
-    "sk": "Počas výkonu sa kritizujem slovami, ktoré by som nikdy nepovedal spoluhráčovi."
+    "sk": "Počas výkonu sa kritizujem slovami, ktoré by som nikdy {nepovedal|nepovedala} spoluhráčovi."
   },
   "58": {
     "cs": "Po chybě se dokážu do třiceti sekund vrátit plnou pozorností do hry.",
@@ -345,14 +345,14 @@
     "sk": "Viem, aký typ prostredia mi pomáha podávať najlepšie výkony."
   },
   "70": {
-    "cs": "Když mám popsat, kdo jsem jako sportovec a za čím si stojím, hledám slova jen obtížně.",
+    "cs": "Když mám popsat, kdo jsem jako {sportovec|sportovkyně} a za čím si stojím, hledám slova jen obtížně.",
     "en": "When I have to describe who I am as an athlete and what I stand for, I struggle to find the words.",
-    "sk": "Keď mám opísať, kto som ako športovec a za čím si stojím, hľadám slová len ťažko."
+    "sk": "Keď mám opísať, kto som ako {športovec|športovkyňa} a za čím si stojím, hľadám slová len ťažko."
   },
   "71": {
-    "cs": "Nikdy jsem neporušil žádné pravidlo, ani drobné.",
+    "cs": "Nikdy jsem {neporušil|neporušila} žádné pravidlo, ani drobné.",
     "en": "I have never broken any rule, not even a small one.",
-    "sk": "Nikdy som neporušil žiadne pravidlo, ani drobné."
+    "sk": "Nikdy som {neporušil|neporušila} žiadne pravidlo, ani drobné."
   },
   "72": {
     "cs": "Když čelím silnějšímu soupeři, soustředím se na svůj výkon, ne na jeho reputaci.",
@@ -415,9 +415,9 @@
     "sk": "Dlhodobé ciele mi vydržia, aj keď sa objavia nové prekážky."
   },
   "84": {
-    "cs": "Odpočinek považuji za ztrátu času, který bych mohl věnovat tréninku.",
+    "cs": "Odpočinek považuji za ztrátu času, který bych {mohl|mohla} věnovat tréninku.",
     "en": "I consider rest a waste of time that I could be devoting to training.",
-    "sk": "Odpočinok považujem za stratu času, ktorý by som mohol venovať tréningu."
+    "sk": "Odpočinok považujem za stratu času, ktorý by som {mohol|mohla} venovať tréningu."
   },
   "85": {
     "cs": "Dokážu oddělit svůj výkon od mediálního nebo veřejného obrazu.",
@@ -425,9 +425,9 @@
     "sk": "Dokážem oddeliť svoj výkon od mediálneho alebo verejného obrazu."
   },
   "86": {
-    "cs": "Nikdy nemám myšlenky, za které bych se styděl.",
+    "cs": "Nikdy nemám myšlenky, za které bych se {styděl|styděla}.",
     "en": "I never have thoughts I would be ashamed of.",
-    "sk": "Nikdy nemám myšlienky, za ktoré by som sa hanbil."
+    "sk": "Nikdy nemám myšlienky, za ktoré by som sa {hanbil|hanbila}."
   },
   "87": {
     "cs": "Když se mi delší dobu nedaří, pochybuji o tom, jestli má smysl ve sportu pokračovat.",
@@ -440,7 +440,7 @@
     "sk": "Za chyby sa pred sebou hanbím ešte dlho po súťaži."
   },
   "89": {
-    "cs": "Umím vnímat své myšlenky s odstupem, aniž bych se jimi nechal strhnout.",
+    "cs": "Umím vnímat své myšlenky s odstupem, aniž bych se jimi {nechal|nechala} strhnout.",
     "en": "I can observe my thoughts from a distance without getting carried away by them.",
     "sk": "Viem vnímať svoje myšlienky s odstupom bez toho, aby ma strhli."
   },
@@ -470,9 +470,9 @@
     "sk": "Viem, aký štýl hry alebo prejavu je pre mňa prirodzený a autentický."
   },
   "95": {
-    "cs": "Věřím, že zvládnu i situace, které jsem dosud netrénoval.",
+    "cs": "Věřím, že zvládnu i situace, které jsem dosud {netrénoval|netrénovala}.",
     "en": "I believe I can handle even situations I have not yet trained for.",
-    "sk": "Verím, že zvládnem aj situácie, ktoré som doteraz netrénoval."
+    "sk": "Verím, že zvládnem aj situácie, ktoré som doteraz {netrénoval|netrénovala}."
   },
   "96": {
     "cs": "Dokážu odfiltrovat vnitřní rozptýlení, jako jsou vzpomínky na předchozí chybu.",
@@ -550,9 +550,9 @@
     "sk": "Viem, že mám hodnotu aj mimo športu, napríklad vo vzťahoch alebo v ďalších oblastiach života."
   },
   "111": {
-    "cs": "Dokážu k sobě být laskavý i v období, kdy se mi nedaří.",
+    "cs": "Dokážu k sobě být {laskavý|laskavá} i v období, kdy se mi nedaří.",
     "en": "I can be kind to myself even in periods when things are not going well.",
-    "sk": "Dokážem byť k sebe láskavý aj v období, keď sa mi nedarí."
+    "sk": "Dokážem byť k sebe {láskavý|láskavá} aj v období, keď sa mi nedarí."
   },
   "112": {
     "cs": "Při výkonu často přemýšlím o tom, co bude, až skončí.",
@@ -575,9 +575,9 @@
     "sk": "Mám jasne nastavené priority medzi športom, školou alebo prácou a osobným životom."
   },
   "116": {
-    "cs": "Nikdy jsem neměl chuť žádný trénink vynechat.",
+    "cs": "Nikdy jsem {neměl|neměla} chuť žádný trénink vynechat.",
     "en": "I have never felt like skipping a single training session.",
-    "sk": "Nikdy som nemal chuť vynechať žiadny tréning."
+    "sk": "Nikdy som {nemal|nemala} chuť vynechať žiadny tréning."
   },
   "117": {
     "cs": "Srovnávání s ostatními na sociálních sítích mi bere energii a klid.",
@@ -615,9 +615,9 @@
     "sk": "Viem, ktoré návyky ma oslabujú, a aktívne ich obmedzujem."
   },
   "124": {
-    "cs": "Ještě nikdy v životě jsem neudělal žádné rozhodnutí.",
+    "cs": "Ještě nikdy v životě jsem {neudělal|neudělala} žádné rozhodnutí.",
     "en": "I have never made a single decision in my entire life.",
-    "sk": "Ešte nikdy v živote som neurobil žiadne rozhodnutie."
+    "sk": "Ešte nikdy v živote som {neurobil|neurobila} žiadne rozhodnutie."
   },
   "125": {
     "cs": "Když s něčím nesouhlasím, dokážu to říct s respektem a včas.",
@@ -650,9 +650,9 @@
     "sk": "Dokážem dlhodobo fungovať aj bez okamžitej pochvaly alebo odmeny."
   },
   "131": {
-    "cs": "Ještě nikdy jsem nikomu nic nezatajil.",
+    "cs": "Ještě nikdy jsem nikomu nic {nezatajil|nezatajila}.",
     "en": "I have never concealed anything from anyone.",
-    "sk": "Ešte nikdy som nikomu nič nezatajil."
+    "sk": "Ešte nikdy som nikomu nič {nezatajil|nezatajila}."
   },
   "132": {
     "cs": "Průběžně vnímám své celkové zatížení a poznám, kdy se blížím přetížení.",
@@ -665,9 +665,9 @@
     "sk": "Tlak očakávaní okolia, napríklad rodičov alebo klubu, viem otvorene pomenovať a riešiť."
   },
   "134": {
-    "cs": "Špatný výsledek dokážu vnímat jako událost, ne jako soud nad sebou samým.",
+    "cs": "Špatný výsledek dokážu vnímat jako událost, ne jako soud nad sebou {samým|samou}.",
     "en": "I can see a bad result as an event, not as a verdict on myself.",
-    "sk": "Zlý výsledok dokážem vnímať ako udalosť, nie ako súd nad sebou samým."
+    "sk": "Zlý výsledok dokážem vnímať ako udalosť, nie ako súd nad sebou {samým|samou}."
   },
   "135": {
     "cs": "Jedna velká chyba dokáže zbořit moji důvěru na zbytek soutěže.",
@@ -695,9 +695,9 @@
     "sk": "Energiu počas dňa si vedome strážim a rozdeľujem."
   },
   "140": {
-    "cs": "Úspěchem ostatních se dokážu inspirovat, místo abych se s nimi neustále srovnával.",
+    "cs": "Úspěchem ostatních se dokážu inspirovat, místo abych se s nimi neustále {srovnával|srovnávala}.",
     "en": "I can draw inspiration from other people's success instead of constantly comparing myself with them.",
-    "sk": "Úspechom ostatných sa dokážem inšpirovať namiesto toho, aby som sa s nimi neustále porovnával."
+    "sk": "Úspechom ostatných sa dokážem inšpirovať namiesto toho, aby som sa s nimi neustále {porovnával|porovnávala}."
   },
   "141": {
     "cs": "Zásadní sportovní rozhodnutí, například změnu klubu nebo trenéra, opírám o jasná osobní kritéria.",
@@ -740,9 +740,9 @@
     "sk": "Nepríjemným rozhovorom sa vyhýbam, kým to ide."
   },
   "149": {
-    "cs": "Své cíle si stanovuji sám, nejsou mi pouze určovány okolím.",
+    "cs": "Své cíle si stanovuji {sám|sama}, nejsou mi pouze určovány okolím.",
     "en": "I set my goals myself; they are not simply dictated to me by those around me.",
-    "sk": "Svoje ciele si stanovujem sám, nie sú mi len určované okolím."
+    "sk": "Svoje ciele si stanovujem {sám|sama}, nie sú mi len určované okolím."
   },
   "150": {
     "cs": "Tato položka ověřuje pozornost při čtení. Zaškrtni prosím možnost číslo 1.",
@@ -800,14 +800,14 @@
     "sk": "V kľúčových bodoch zápasu sa teším na to, že môžem ukázať, čo viem."
   },
   "161": {
-    "cs": "Nikdy jsem neudělal rozhodnutí, kterého bych litoval.",
+    "cs": "Nikdy jsem {neudělal|neudělala} rozhodnutí, kterého bych {litoval|litovala}.",
     "en": "I have never made a decision I regretted.",
-    "sk": "Nikdy som neurobil rozhodnutie, ktoré by som ľutoval."
+    "sk": "Nikdy som {neurobil|neurobila} rozhodnutie, ktoré by som {ľutoval|ľutovala}."
   },
   "162": {
-    "cs": "Po úspěchu zůstávám pokorný a zaměřený na další proces.",
+    "cs": "Po úspěchu zůstávám {pokorný|pokorná} a {zaměřený|zaměřená} na další proces.",
     "en": "After a success, I remain humble and focused on the process ahead.",
-    "sk": "Po úspechu zostávam pokorný a zameraný na ďalší proces."
+    "sk": "Po úspechu zostávam {pokorný|pokorná} a {zameraný|zameraná} na ďalší proces."
   },
   "163": {
     "cs": "Sladkosti, energetické nápoje nebo fastfood tvoří běžnou část mého dne.",
@@ -815,9 +815,9 @@
     "sk": "Sladkosti, energetické nápoje alebo rýchle občerstvenie tvoria bežnú súčasť môjho dňa."
   },
   "164": {
-    "cs": "Ve svém okolí se cítím spíš osamocený, málokdo mé úsilí chápe.",
+    "cs": "Ve svém okolí se cítím spíš {osamocený|osamocená}, málokdo mé úsilí chápe.",
     "en": "I feel rather alone among the people around me; few of them understand my effort.",
-    "sk": "Vo svojom okolí sa cítim skôr osamotený, málokto moje úsilie chápe."
+    "sk": "Vo svojom okolí sa cítim skôr {osamotený|osamotená}, málokto moje úsilie chápe."
   },
   "165": {
     "cs": "Často mám pocit, že jen plním představy, které o mně mají ostatní.",
@@ -840,9 +840,9 @@
     "sk": "Viem opísať, kde v tele sa u mňa stres prejavuje najskôr."
   },
   "169": {
-    "cs": "Nikdy v životě jsem nepocítil žádnou emoci.",
+    "cs": "Nikdy v životě jsem {nepocítil|nepocítila} žádnou emoci.",
     "en": "I have never felt any emotion in my entire life.",
-    "sk": "Nikdy v živote som nepocítil žiadnu emóciu."
+    "sk": "Nikdy v živote som {nepocítil|nepocítila} žiadnu emóciu."
   },
   "170": {
     "cs": "Chyby soupeřů i vlastní beru jako studijní materiál.",
@@ -890,9 +890,9 @@
     "sk": "Moje nasadenie v tréningu nezávisí od toho, či ma niekto ocení alebo pochváli."
   },
   "179": {
-    "cs": "Když je cesta k cíli delší, než jsem čekal, obvykle to vzdám.",
+    "cs": "Když je cesta k cíli delší, než jsem {čekal|čekala}, obvykle to vzdám.",
     "en": "When the road to a goal turns out to be longer than I expected, I usually give up.",
-    "sk": "Keď je cesta k cieľu dlhšia, než som čakal, obvykle to vzdám."
+    "sk": "Keď je cesta k cieľu dlhšia, než som {čakal|čakala}, obvykle to vzdám."
   },
   "180": {
     "cs": "I v hlučném a rušivém prostředí udržím pozornost tam, kde ji právě potřebuji.",
@@ -990,9 +990,9 @@
     "sk": "Priamo počas výkonu viem pomocou overeného postupu znížiť svoje napätie."
   },
   "199": {
-    "cs": "Nepříjemnou zpětnou vazbu dokážu přijmout, aniž bych se cítil ohrožený.",
+    "cs": "Nepříjemnou zpětnou vazbu dokážu přijmout, aniž bych se {cítil|cítila} {ohrožený|ohrožená}.",
     "en": "I can accept unpleasant feedback without feeling threatened.",
-    "sk": "Nepríjemnú spätnú väzbu dokážem prijať bez toho, aby som sa cítil ohrozený."
+    "sk": "Nepríjemnú spätnú väzbu dokážem prijať bez toho, aby som sa {cítil|cítila} {ohrozený|ohrozená}."
   },
   "200": {
     "cs": "Regeneraci a spánku dávám v plánování stejnou váhu jako tréninku.",

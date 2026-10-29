@@ -42,6 +42,8 @@ export interface Podily {
   priority: number
   /** cokoli pod pásmem „silné" */
   podPrahem: number
+  /** jen špičkové pásmo testu */
+  elite: number
 }
 
 export function podily(pasma: Record<BandKey, number>): Podily {
@@ -50,8 +52,38 @@ export function podily(pasma: Record<BandKey, number>): Podily {
     silni: (pasma.strong + pasma.elite) / n,
     priority: pasma.priority / n,
     podPrahem: (pasma.priority + pasma.stabilization) / n,
+    elite: pasma.elite / n,
   }
 }
+
+/**
+ * Kolik kádru musí být ve špičkovém pásmu testu, aby se oblast jmenovala
+ * špičkovou. Dřív stačilo osm silných z deseti, takže deset hráčů v silném
+ * pásmu a nikdo ve špičkovém vyšlo jako „špičkové" hned pod legendou, která
+ * špičku kreslí nad 82 body.
+ */
+export const PODIL_SPICKA = 0.3
+
+// ---------------------------------------------------------------------------
+// Rozptyl: jedna stupnice pro celý report
+//
+// Slova u oblasti („jednotné", „velké rozdíly"), mapa, plošná slabina i velký
+// rozptyl dřív počítaly každé s vlastními hranicemi (9, 12, 15, 18, 19), a tak
+// o téže oblasti stálo „silné, velké rozdíly" a o řádek níž „v týmu podobné".
+// Teď jsou hranice dvě a čtou je všichni.
+// ---------------------------------------------------------------------------
+
+/** Směrodatná odchylka v bodech, pod kterou jsou na tom hráči podobně. */
+export const SD_SHODA = 12
+
+/** Od téhle odchylky se hráči liší výrazně: velký rozptyl oblasti, rozchod v části. */
+export const SD_ROZDILNE = 18
+
+/** O kolik bodů musí být část pod svojí oblastí, aby to byla skrytá trhlina. */
+export const TRHLINA_ROZDIL_U = 6
+
+/** Nebo o kolik bodů odchylky musí být rozkolísanější než oblast. */
+export const TRHLINA_ROZDIL_SD = 8
 
 /**
  * Úroveň oblasti z rozdělení kádru po pásmech.
@@ -70,7 +102,7 @@ export function urovenTymu(pasma: Record<BandKey, number>): UrovenTymu {
   // silných hráčů neudělá ze slabé oblasti silnou, když jsou pod nimi dva,
   // kteří ji v zápase stejně otevřou.
   if (p.priority >= 0.2 || p.podPrahem >= 0.7) return "potrebuje-praci"
-  if (p.silni >= 0.8 && p.priority === 0) return "spicka"
+  if (p.silni >= 0.8 && p.priority === 0 && p.elite >= PODIL_SPICKA) return "spicka"
   if (p.silni >= 0.6 && p.priority <= 0.1) return "silne"
   return "prumerne"
 }
@@ -80,3 +112,13 @@ export const PORADI_UROVNI: UrovenTymu[] = ["potrebuje-praci", "prumerne", "siln
 
 export const jeSilna = (u: UrovenTymu) => u === "silne" || u === "spicka"
 export const jeSlaba = (u: UrovenTymu) => u === "potrebuje-praci"
+
+/**
+ * Pod tolik započtenými vyplněními se profil týmu neukazuje. Proč, viz
+ * lib/tym/soukromi.ts; tady je kvůli obrazovce, která to kouči vysvětluje
+ * a do souboru s agregací sahat nemá.
+ */
+export const MIN_V_PROFILU = 5
+
+/** Po kolika vstupují do profilu vyplnění, která prohlížející nevidí jednotlivě. */
+export const SKUPINA_SKRYTYCH = 3

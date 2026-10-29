@@ -576,6 +576,13 @@ export const submitWithInvite = mutation({
         answeredCount++
       }
     }
+    // Aplikace neúplný dotazník neodešle: chybějící položky ukáže a počká.
+    // Neúplné odpovědi sem tak můžou přijít jen mimo ni, a vyhodnocení s nimi
+    // dřív vymýšlelo výsledky (archetypy z jediného vyplněného archetypu)
+    // nebo padalo (propojení vzorců). Proto se odmítnou hned tady.
+    if (answeredCount !== itemCount) {
+      throw new ConvexError(`Dotazník není vyplněný celý (${answeredCount} z ${itemCount} odpovědí).`)
+    }
     const answers = JSON.stringify(ciste)
 
     const now = Date.now()

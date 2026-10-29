@@ -6,6 +6,7 @@ import { DoporuceniOdbornika } from "@/components/diagnostic/doporuceni-odbornik
 import type { ResultDetail } from "@/lib/diagnostic/remote"
 import { popisKontextu } from "@/lib/profil360/kontext"
 import {
+  BEZ_TYPU,
   CHRONOTYP_SLOVO,
   OBLASTI,
   PASMO_SLOVO,
@@ -148,7 +149,9 @@ export function Profil360Report({ sessionToken, detail }: { sessionToken: string
         <section className="diag-card p-6">
           <p className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text-3)]">TYP SPORTOVCE</p>
           <h2 className="mt-2 text-[26px] font-bold tracking-tight">{g(p.typ.hlavni.nazev)}</h2>
-          <p className="mt-1 text-[14px] text-[var(--wm-text-2)]">s rysy typu {g(p.typ.vedlejsi.nazev).toLowerCase()}</p>
+          {p.typ.vedlejsi && (
+            <p className="mt-1 text-[14px] text-[var(--wm-text-2)]">s rysy typu {g(p.typ.vedlejsi.nazev).toLowerCase()}</p>
+          )}
           <p className="mt-4 text-[15px] leading-relaxed">{g(p.typ.hlavni.popis)}</p>
           <dl className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl bg-[var(--wm-surface-2)] p-4">
@@ -160,6 +163,13 @@ export function Profil360Report({ sessionToken, detail }: { sessionToken: string
               <dd className="mt-1.5 text-[14px] leading-relaxed">{g(p.typ.hlavni.pozor)}</dd>
             </div>
           </dl>
+        </section>
+      )}
+
+      {!p.typ && (
+        <section className="diag-card p-6">
+          <p className="text-[12px] font-bold tracking-[0.18em] text-[var(--wm-text-3)]">TYP SPORTOVCE</p>
+          <p className="mt-2 text-[15px] leading-relaxed">{BEZ_TYPU}</p>
         </section>
       )}
 

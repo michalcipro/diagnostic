@@ -275,19 +275,22 @@ export function sestavArchetypyPdf(vstup: ArchetypyPdfVstup): Sestava {
         mezera,
         bloky: [
           ss.uvod(`${ts.shrnuti} · ${datum}`, person.name, [ts.shrnutiUvod], 22),
-          ss.body(
-            [
-              {
-                titulek: `${t.primarniTitulek}: ${nazevArchetypu(v.primarni.id, lang, varianta)}`,
-                text: motto(v.primarni),
-              },
-              {
-                titulek: `${t.sekundarniTitulek}: ${nazevArchetypu(v.sekundarni.id, lang, varianta)}`,
-                text: motto(v.sekundarni),
-              },
-            ],
-            { odrazky: true, mezera: 1.6 },
-          ),
+          // U plochého profilu by „primární" a „sekundární" tvrdily pořadí,
+          // které z odpovědí nevychází; shrnutí pod tím říká proč.
+          v.vyhraneni !== "plochy" &&
+            ss.body(
+              [
+                {
+                  titulek: `${t.primarniTitulek}: ${nazevArchetypu(v.primarni.id, lang, varianta)}`,
+                  text: motto(v.primarni),
+                },
+                {
+                  titulek: `${t.sekundarniTitulek}: ${nazevArchetypu(v.sekundarni.id, lang, varianta)}`,
+                  text: motto(v.sekundarni),
+                },
+              ],
+              { odrazky: true, mezera: 1.6 },
+            ),
           ss.text(g(spojeni.souhrn), stOdstavec),
           ss.box(ss.skupina([ss.h3(t.kdeZacitStitek), ss.mezera(1.6), ss.text(g(spojeni.kdeZacit), stOdstavec)])),
           ss.zapis(ts.mojeJednaVec, 2, 4),

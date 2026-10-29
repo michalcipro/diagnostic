@@ -34,6 +34,8 @@ interface Texty {
     vyrovnany: string
     /** rozdíl mezi nejlepší a nejhorší oblastí je 30 procentních bodů a víc */
     nevyrovnany: string
+    /** stejně velký rozdíl, ale ani nejlepší oblast nedosahuje horních dvou pásem */
+    nevyrovnanyBezSilnych: string
     /** žádná oblast nedosahuje horních dvou pásem */
     bezSilnych: string
     /** obvyklý tvar: něco drží, něco ne */
@@ -61,6 +63,8 @@ const TEXTY: Record<Lang, Texty> = {
         "Celkově jde o velmi vyrovnaný a silný profil. Většina oblastí funguje spolehlivě i tehdy, když je pod tlakem, a mezi nimi nejsou propady, které by výkon srážely.",
       nevyrovnany:
         "Profil je výrazně nevyrovnaný. Některé oblasti patří k tvým jasným přednostem, jiné za nimi zaostávají natolik, že výsledný výkon táhnou dolů. Právě tenhle rozdíl je zajímavější než jakékoli jednotlivé číslo.",
+      nevyrovnanyBezSilnych:
+        "Profil je výrazně nevyrovnaný. Některé oblasti jsou na tom zřetelně lépe než jiné, ale ani ty nejlepší zatím nedrží tak, aby vydržely tlak. Ty nejslabší táhnou výsledný výkon dolů, a proto se vyplatí začít u nich.",
       bezSilnych:
         "Profil ukazuje, že základ je položený, ale zatím nikde nedrží tak, aby vydržel tlak. Není to slabost, je to fáze: dovednosti existují, chybí jim spolehlivost.",
       vyvazeny:
@@ -93,6 +97,8 @@ const TEXTY: Record<Lang, Texty> = {
         "Celkovo ide o veľmi vyrovnaný a silný profil. Väčšina oblastí funguje spoľahlivo aj vtedy, keď je pod tlakom, a medzi nimi nie sú prepady, ktoré by výkon zrážali.",
       nevyrovnany:
         "Profil je výrazne nevyrovnaný. Niektoré oblasti patria k tvojim jasným prednostiam, iné za nimi zaostávajú natoľko, že výsledný výkon ťahajú dole. Práve tento rozdiel je zaujímavejší než akékoľvek jednotlivé číslo.",
+      nevyrovnanyBezSilnych:
+        "Profil je výrazne nevyrovnaný. Niektoré oblasti sú na tom zreteľne lepšie ako iné, ale ani tie najlepšie zatiaľ nedržia tak, aby vydržali tlak. Tie najslabšie ťahajú výsledný výkon dole, a preto sa oplatí začať pri nich.",
       bezSilnych:
         "Profil ukazuje, že základ je položený, ale zatiaľ nikde nedrží tak, aby vydržal tlak. Nie je to slabosť, je to fáza: schopnosti existujú, chýba im spoľahlivosť.",
       vyvazeny:
@@ -125,6 +131,8 @@ const TEXTY: Record<Lang, Texty> = {
         "Overall this is a very even and strong profile. Most areas hold up reliably even under pressure, and there are no gaps pulling performance down.",
       nevyrovnany:
         "The profile is markedly uneven. Some areas are clear strengths, while others lag far enough behind to drag the overall result down. That gap matters more than any single number.",
+      nevyrovnanyBezSilnych:
+        "The profile is markedly uneven. Some areas are clearly ahead of others, but even the best of them do not yet hold up under pressure. The weakest ones drag the overall result down, which is why they are the place to start.",
       bezSilnych:
         "The profile shows a foundation that is in place but not yet solid enough to hold under pressure. That is not weakness, it is a stage: the skills exist, what they lack is reliability.",
       vyvazeny:
@@ -168,28 +176,42 @@ function nazev(d: DimensionScore, lang: Lang): string {
   return n.charAt(0).toLowerCase() + n.slice(1)
 }
 
+/** Pod tolik vykázanými dimenzemi se tvar profilu nepopisuje. */
+const MIN_DIMENZI = 3
+/** Rozdíl nejlepší a nejhorší dimenze v procentních bodech, od kterého je profil nevyrovnaný. */
+const ROZPETI_NEVYROVNANY = 30
+
 export function buildSummary(result: DiagnosticResult, lang: Lang): Summary {
   const dims = result.dimensions.filter((d) => d.reported)
   const serazene = [...dims].sort((a, b) => b.percent - a.percent)
   const silne = serazene.filter((d) => d.band === "elite" || d.band === "strong")
   const slabe = serazene.filter((d) => d.band === "priority" || d.band === "stabilization").reverse()
 
-  const nejsilnejsi = serazene.slice(0, 2)
-  const nejslabsi = slabe.slice(0, 2).length ? slabe.slice(0, 2) : serazene.slice(-2).reverse()
+  // Ze dvou vykázaných dimenzí se tvar profilu popsat nedá: silné a slabé
+  // stránky by se překrývaly a „vyrovnaný" by vyšel pokaždé.
+  const dost = dims.length >= MIN_DIMENZI
+  const nejsilnejsi = dost ? serazene.slice(0, 2) : []
+  const nejslabsi = !dost ? [] : slabe.length ? slabe.slice(0, 2) : serazene.slice(-2).reverse()
 
   const txt = TEXTY[lang]
 
   // ---- celkový tvar profilu ----
+  // Pořadí podmínek rozhoduje. Rozpětí se ptá první: velký propad mezi
+  // nejlepší a nejhorší oblastí je to hlavní, co o profilu platí, i když je
+  // většina oblastí silná. Dřív tu jako první stála podmínka „silné všechny
+  // kromě jedné", a profil se šesti silnými oblastmi a jednou v rozvojové
+  // prioritě dostal větu o tom, že v něm nejsou propady.
   let overall: string
   const rozpeti = dims.length ? serazene[0].percent - serazene[serazene.length - 1].percent : 0
-  if (!dims.length) {
+  const nejakaPriorita = dims.some((d) => d.band === "priority")
+  if (!dost) {
     overall = txt.overall.nevyplneno
-  } else if (silne.length >= dims.length - 1) {
-    overall = txt.overall.vyrovnany
-  } else if (rozpeti >= 30) {
-    overall = txt.overall.nevyrovnany
+  } else if (rozpeti >= ROZPETI_NEVYROVNANY) {
+    overall = silne.length ? txt.overall.nevyrovnany : txt.overall.nevyrovnanyBezSilnych
   } else if (silne.length === 0) {
     overall = txt.overall.bezSilnych
+  } else if (silne.length >= dims.length - 1 && !nejakaPriorita) {
+    overall = txt.overall.vyrovnany
   } else {
     overall = txt.overall.vyvazeny
   }

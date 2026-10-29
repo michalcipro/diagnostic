@@ -1,6 +1,16 @@
 import type { BandKey, DimensionId, DiagnosticResult } from "../diagnostic/types"
 import type { CastProfil, Nalez, NalezKod, OblastProfil, Sila, TymovyProfil } from "./typy"
-import { PASMO_CASTI, jeSilna, jeSlaba, podily, urovenTymu } from "./prahy"
+import {
+  PASMO_CASTI,
+  SD_ROZDILNE,
+  SD_SHODA,
+  TRHLINA_ROZDIL_SD,
+  TRHLINA_ROZDIL_U,
+  jeSilna,
+  jeSlaba,
+  podily,
+  urovenTymu,
+} from "./prahy"
 
 // Z profilů jednotlivců udělá profil skupiny.
 //
@@ -18,9 +28,6 @@ const OBLASTI: DimensionId[] = ["A", "B", "C", "D", "E", "F", "G"]
 /** Kolik hráčů nejmíň, aby se profil nedal číst jako profil jednotlivce. */
 const MALO_DAT_POD = 5
 
-/** Nad tímhle rozptylem je oblast nevyrovnaná, i když mezera není zřetelná. */
-const VYSOKY_ROZPTYL = 18
-
 /**
  * Kolik kádru musí být v části v rozvojové prioritě, aby to byl nález.
  *
@@ -30,15 +37,6 @@ const VYSOKY_ROZPTYL = 18
  * ne o průměru.
  */
 const CAST_PODIL_PRIORIT = 0.25
-
-/** Nad tímhle rozptylem se v části tým rozchází natolik, že průměr neplatí. */
-const CAST_ROZCHOD = 18
-
-/** O kolik musí být část pod svojí oblastí, aby to byl nález, a ne šum. */
-const TRHLINA_ROZDIL_U = 6
-
-/** Nebo o kolik musí být rozkolísanější než oblast, ve které leží. */
-const TRHLINA_ROZDIL_SD = 8
 
 /** Mezera mezi dvěma skupinami, od které to je zlomová linie, v bodech. */
 const MEZERA_ZLOMU = 18
@@ -98,20 +96,13 @@ function oblastProfil(id: DimensionId, vysledky: DiagnosticResult[]): OblastProf
     // Průměr je jedno číslo za skupinu a umí zakrýt, že půlka kádru propadá.
     uroven: urovenTymu(pasma),
     rozkol,
-    rozptyl: !rozkol && smodch >= VYSOKY_ROZPTYL,
+    rozptyl: !rozkol && smodch >= SD_ROZDILNE,
     // Plošná slabina: skoro nikdo v silném pásmu a zároveň malý rozptyl.
     // To není součet problémů jednotlivců, to je věc kultury a vedení.
-    plosna: p.podPrahem >= 0.75 && smodch < 12,
+    // Rozdělená oblast plošná být nemůže: dvě skupiny s mezerou mezi sebou
+    // jsou opak rovnoměrné slabiny a report by o ní tvrdil obojí naráz.
+    plosna: !rozkol && p.podPrahem >= 0.75 && smodch < SD_SHODA,
   }
-}
-
-/** Průměr procentního skóre fazety napříč týmem; chybí, když ji nikdo nevykázal. */
-function fazeta(id: string, vysledky: DiagnosticResult[]): number | null {
-  const hodnoty = vysledky
-    .flatMap((r) => r.facets ?? [])
-    .filter((f) => f.id === id && f.reported)
-    .map((f) => f.percent)
-    return hodnoty.length ? prumer(hodnoty) : null
 }
 
 /**
@@ -157,7 +148,7 @@ function castiProfil(vysledky: DiagnosticResult[]): CastProfil[] {
       min: Math.min(...hodnoty),
       max: Math.max(...hodnoty),
       pasma,
-      riziko: podily(pasma).priority >= CAST_PODIL_PRIORIT || sd >= CAST_ROZCHOD,
+      riziko: podily(pasma).priority >= CAST_PODIL_PRIORIT || sd >= SD_ROZDILNE,
     }
   })
 }
@@ -201,13 +192,15 @@ function najdiNalezy(
   }
 
   /**
-   * Slabá část. Stejné pravidlo jako u vlaječky v mřížce, aby nález a mřížka
-   * neříkaly každý něco jiného: buď je v nejnižším pásmu aspoň čtvrtina kádru,
-   * nebo je průměr části pod hranicí silného pásma a někdo v prioritě je.
+   * Slabá část. Musí mít vlaječku v mřížce, jinak by nález jmenoval část,
+   * kterou mřížka o stránku dál ukazuje jako v pořádku. A k vlaječce ještě
+   * slabost: v nejnižším pásmu je aspoň čtvrtina kádru, nebo je průměr části
+   * pod hranicí silného pásma a někdo v prioritě je. Samotný rozchod hráčů
+   * bez nikoho dole slabost není.
    */
   const slabaCast = (id: string) => {
     const c = casti.find((x) => x.id === id)
-    if (!c) return false
+    if (!c || !c.riziko) return false
     const p = podily(c.pasma)
     return p.priority >= CAST_PODIL_PRIORIT || (c.prumer < PASMO_CASTI.silne && p.priority > 0)
   }
@@ -232,7 +225,7 @@ function najdiNalezy(
   if (slabaCast("A3")) pridej("nalada-podle-vysledku", "vysoka", ["A"])
 
   // Velký rozptyl v hranicích: pár lidí nese náklad za všechny a vyhoří dřív.
-  if (g2rozptyl >= VYSOKY_ROZPTYL) pridej("par-nese-naklad", "stredni", ["G"])
+  if (g2rozptyl >= SD_ROZDILNE) pridej("par-nese-naklad", "stredni", ["G"])
 
   // Zlomová linie pod tlakem.
   if (o.get("D")?.rozkol) pridej("zlom-pod-tlakem", "vysoka", ["D"])
@@ -258,11 +251,14 @@ function najdiNalezy(
   // který má sebejistou a přitom tichou kabinu, vyrovnaný není, i když mu
   // žádná oblast nepropadla. Bez téhle podmínky by dobrá zpráva stála vedle
   // rizika a kouč by nevěděl, čemu věřit.
+  // Navíc nesmí mít vlaječku žádná část: oblast se slušným číslem a s částí,
+  // která pokulhává (skrytá trhlina), vyrovnaná není, i když to průměr tvrdí.
   const vsechny = [...o.values()]
   if (
     !out.length &&
     vsechny.length === OBLASTI.length &&
-    vsechny.every((x) => !jeSlaba(x.uroven) && !x.rozkol && !x.rozptyl)
+    vsechny.every((x) => !jeSlaba(x.uroven) && !x.rozkol && !x.rozptyl) &&
+    casti.every((c) => !c.riziko)
   ) {
     pridej("vyrovnany-zaklad", "stredni", [])
   }
@@ -289,7 +285,7 @@ function najdiTrhliny(
     // Hlásí se jen tam, kde oblast vypadá klidně. Rozdělenou ani slabou oblast
     // report pojmenuje sám a trenér se na ni dívá tak jako tak.
     if (o.rozkol || o.rozptyl || o.plosna || jeSlaba(o.uroven)) continue
-    if (o.smodch >= CAST_ROZCHOD) continue
+    if (o.smodch >= SD_ROZDILNE) continue
     const spatne = casti
       .filter(
         (c) =>
@@ -327,6 +323,10 @@ export function tymovyProfil(
   )
   const mapa = new Map(oblasti.map((x) => [x.id, x]))
   const casti = castiProfil(vysledky)
+  // Oblast, ve které některá část pokulhává, oporou není. Dřív report na první
+  // straně psal „tým si věří i po chybě" a o dvě strany dál hlásil, že po chybě
+  // je na sebe tvrdý, protože opora se četla jen z celé oblasti.
+  const sVlajeckou = new Set(casti.filter((c) => c.riziko).map((c) => c.oblast))
 
   return {
     nazev,
@@ -341,7 +341,7 @@ export function tymovyProfil(
     // oporou není, protože pod tlakem se rozpadne, a rozdělená oblast už
     // vůbec ne, i kdyby jí vyšel hezký průměr.
     opory: oblasti
-      .filter((x) => jeSilna(x.uroven) && !x.rozkol && !x.rozptyl)
+      .filter((x) => jeSilna(x.uroven) && !x.rozkol && !x.rozptyl && !sVlajeckou.has(x.id))
       .sort((a, b) => b.prumer - a.prumer)
       .slice(0, 3)
       .map((x) => x.id),

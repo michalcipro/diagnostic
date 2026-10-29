@@ -215,7 +215,7 @@ export function VzorceReport({
           <h2 className="text-[22px] font-bold tracking-tight">{t.spojeniTitulek}</h2>
           <p className="mt-1 max-w-[74ch] text-[13px] text-[var(--wm-text-3)]">{t.spojeniPopis}</p>
 
-          <p className="mt-4 max-w-[74ch] text-[15px] leading-relaxed">{g(spojeni.domeny)}</p>
+          {spojeni.domeny && <p className="mt-4 max-w-[74ch] text-[15px] leading-relaxed">{g(spojeni.domeny)}</p>}
 
           <h4 className="mt-5 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--wm-text-3)]">
             {t.kdeSeZivi}

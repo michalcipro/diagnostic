@@ -13,7 +13,7 @@ import { MEZ, PLATNOST_POZVANKY_DNI, delka } from "./eliteDiagnostic"
 import { makeToken } from "./nahoda"
 import { evaluate } from "../lib/diagnostic/scoring"
 import { getStructure } from "../lib/diagnostic/structure"
-import { tymovyProfil } from "../lib/tym/agregace"
+import { profilProKouce } from "../lib/tym/soukromi"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Týmy a kluby.
@@ -567,6 +567,11 @@ export const listPlayers = query({
 //
 // Do souhrnu vstupují všechna odevzdaná vyplnění včetně těch, u kterých hráč
 // odmítl sdílení s koučem. Hráč o tom před odesláním ví.
+//
+// Ta, která prohlížející nevidí jednotlivě, ale vstupují po trojicích, profil
+// se ukazuje až od pěti započtených a čísla odcházejí zaokrouhlená a bez
+// minima a maxima. Jinak by šel hráč, který nesdílel, dopočítat odečtením
+// těch, kteří sdílejí. Podrobně v lib/tym/soukromi.ts.
 
 const pasmaValidator = v.object({
   priority: v.number(),
@@ -586,8 +591,6 @@ const oblastProfilValidator = v.object({
   id: v.string(),
   prumer: v.number(),
   smodch: v.number(),
-  min: v.number(),
-  max: v.number(),
   pasma: pasmaValidator,
   uroven: urovenValidator,
   rozkol: v.boolean(),
@@ -600,8 +603,6 @@ const castProfilValidator = v.object({
   oblast: v.string(),
   prumer: v.number(),
   smodch: v.number(),
-  min: v.number(),
-  max: v.number(),
   pasma: pasmaValidator,
   riziko: v.boolean(),
 })
@@ -629,13 +630,18 @@ export const teamReport = query({
         }),
       ),
       maloDat: v.boolean(),
+      /** platná vyplnění, která čekají, až se doplní trojice */
+      vynechano: v.number(),
+      /** profil se neukazuje, protože by se započítalo méně než pět vyplnění */
+      zamceno: v.boolean(),
     }),
   ),
   handler: async (ctx, args) => {
     const me = await requireCoach(ctx, args.sessionToken)
     const tym = await ctx.db.get(args.teamId)
     if (!tym) return null
-    if (String(tym.coachId) !== String(me._id) && me.role !== "master") {
+    const jeKouc = String(tym.coachId) === String(me._id)
+    if (!jeKouc && me.role !== "master") {
       throw new ConvexError("Tenhle tým nevedeš.")
     }
 
@@ -644,9 +650,17 @@ export const teamReport = query({
       .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
       .collect()
 
+    const pozvanky = await ctx.db
+      .query("invitations")
+      .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
+      .collect()
+    const zPozvanek = new Set(pozvanky.filter((p) => p.resultId).map((p) => String(p.resultId)))
+
     const struktura = getStructure("elite200")
     const vysledky = []
     for (const d of vyplneni) {
+      // Profil se počítá jen z elite200; jiný test by ho tiše zkreslil.
+      if (d.model !== "elite200") continue
       let odpovedi: Record<string, number>
       try {
         odpovedi = JSON.parse(d.answers) as Record<string, number>
@@ -657,21 +671,20 @@ export const teamReport = query({
       for (const [k, val] of Object.entries(odpovedi)) {
         mapa[Number(k)] = val as 1 | 2 | 3 | 4 | 5
       }
-      // Neplatná vyplnění se z profilu vyřadí až v tymovyProfil, aby to
-      // pravidlo platilo pro každého, kdo profil počítá, a dalo se testovat.
-      vysledky.push(evaluate(struktura, mapa, { durationSec: d.durationSec }))
+      vysledky.push({
+        vysledek: evaluate(struktura, mapa, { durationSec: d.durationSec }),
+        // Jednotlivě vidí jen kouč týmu a jen hráče, kteří přišli přes pozvánku
+        // a sdílení nevypnuli. Master nevidí jednotlivě nikoho, dopočítané
+        // klienty klubový kouč taky ne.
+        viditelne: jeKouc && zPozvanek.has(String(d._id)) && d.sdilet !== false,
+        odevzdano: d.createdAt,
+      })
     }
-
-    const pozvanky = await ctx.db
-      .query("invitations")
-      .withIndex("by_team", (q) => q.eq("teamId", args.teamId))
-      .collect()
 
     // Dopočítaní hráči pozvánku nemají, ale odevzdáno za ně je. Bez nich by
     // report hlásil „odevzdáno deset z nuly rozeslaných".
-    const zPozvanek = new Set(pozvanky.filter((p) => p.resultId).map((p) => String(p.resultId)))
     const dopocitanych = vyplneni.filter((d) => !zPozvanek.has(String(d._id))).length
 
-    return tymovyProfil(tym.nazev, pozvanky.length + dopocitanych, vyplneni.length, vysledky)
+    return profilProKouce(tym.nazev, pozvanky.length + dopocitanych, vyplneni.length, vysledky)
   },
 })

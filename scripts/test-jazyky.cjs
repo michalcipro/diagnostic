@@ -120,6 +120,18 @@ const SHODNE_ZAMERNE = new Set([
   "G/facets/G2/name",
 ])
 
+/**
+ * Položky, kde má slovenština rodových značek méně než čeština schválně.
+ *
+ * Patří sem jen věta, kterou slovenština staví bez rodového tvaru, takže
+ * není co označit. Nový přírůstek jen po přečtení obou znění, ne proto,
+ * že skript hlásí chybu.
+ */
+const MENE_ZNACEK_ZAMERNE = new Set([
+  // „Jsem {přitahován|přitahována} k lidem…" × „Priťahujú ma ľudia…"
+  "vzorce/66",
+])
+
 /** Projde rekurzivně strukturu a vrátí dvojice [cesta, přeložený řetězec]. */
 function prelozene(uzel, cesta = "") {
   if (uzel === null || typeof uzel !== "object") return []
@@ -178,7 +190,7 @@ for (const [test, csPath, skPath] of PAROVANE) {
   const shodne = Object.keys(cs).filter((k) => sk[k] === cs[k] && !SHODNE_ZAMERNE.has(`${test}/${k}`))
   const ceske = Object.entries(sk).filter(([, v]) => CESKA_PISMENA.test(String(v)))
   const rozdilneZnacky = Object.keys(cs).filter(
-    (k) => sk[k] && pocetZnacek(sk[k]) < pocetZnacek(cs[k]),
+    (k) => sk[k] && pocetZnacek(sk[k]) < pocetZnacek(cs[k]) && !MENE_ZNACEK_ZAMERNE.has(`${test}/${k}`),
   )
   rekni(
     Object.keys(cs).length === Object.keys(sk).length && !chybi.length,

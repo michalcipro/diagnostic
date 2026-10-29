@@ -83,13 +83,13 @@ rekni(
   vsechnyOtazky.every((o) => celaSlova(o.cs) && celaSlova(o.sk) && !MA_ZNACKU.test(o.en)),
   "rodové značky jen česky a slovensky, celá slova",
 )
-rekni(!JSON.stringify(vsechnyOtazky).includes("—"), "otázky bez dlouhé pomlčky")
+rekni(!JSON.stringify(vsechnyOtazky).includes("\u2014"), "otázky bez dlouhé pomlčky")
 rekni(
   M.OBLASTI.every((o) => o.otazka?.trim().endsWith("?") && celaSlova(o.otazka)),
   "Profil 360: otázka ke každé z 9 oblastí",
 )
 const textySestavy = JSON.stringify(M.TEXTY_SESTAVY)
-rekni(!textySestavy.includes("—"), "texty sestavy bez dlouhé pomlčky")
+rekni(!textySestavy.includes("\u2014"), "texty sestavy bez dlouhé pomlčky")
 rekni(
   JAZYKY.every((l) => celaSlova(JSON.stringify(M.TEXTY_SESTAVY[l]))) &&
     !MA_ZNACKU.test(JSON.stringify(M.TEXTY_SESTAVY.en)),
@@ -113,7 +113,7 @@ const VYPLN = [
   [/NaN/, "NaN"],
   [/\[object /, "[object Object]"],
   [/\{[^}]*\|[^}]*\}/, "nerozvinutá značka rodu"],
-  [/—/, "dlouhá pomlčka"],
+  [/\u2014/, "dlouhá pomlčka"],
 ]
 
 async function strany(blob) {

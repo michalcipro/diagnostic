@@ -50,7 +50,7 @@ const CS: Sablony = {
   domenyDve: (domena, potreba, druha) =>
     `Dva ze tří nejaktivnějších vzorců spadají do oblasti, kterou je ${domena}, tedy k tématu, jímž je ${potreba}. Třetí přichází odjinud, z oblasti, kterou je ${druha}. Právě tenhle třetí bývá tím, co celek drží v chodu, protože nabízí zdánlivé řešení prvních dvou.`,
   domenyProvazane:
-    "Tvoje tři nejaktivnější vzorce pocházejí ze tří různých oblastí potřeb, ale to neznamená tři oddělené problémy. Naopak: každá z těch tří dvojic tvoří známou a dobře popsanou kombinaci, takže spolu pracují jako jeden systém. Právě proto se profil zvenčí čte snadno, zatímco zevnitř bývá těžké rozeznat, kde končí jeden vzorec a začíná druhý.",
+    "Tvoje tři nejaktivnější vzorce pocházejí ze tří různých oblastí potřeb, ale to neznamená tři oddělené problémy. Naopak: nejméně dvě ze tří dvojic mezi nimi tvoří známou a dobře popsanou kombinaci, takže spolu pracují jako jeden systém. Právě proto se profil zvenčí čte snadno, zatímco zevnitř bývá těžké rozeznat, kde končí jeden vzorec a začíná druhý.",
   domenyPestre:
     "Tvoje tři nejaktivnější vzorce pocházejí ze tří různých oblastí. Znamená to, že se nespouštějí naráz, ale každý v jiném typu situace. Profil je tím pestřejší a zároveň hůř čitelný: v jedné situaci se chováš jinak než v druhé, a zvenčí to působí nekonzistentně, i když uvnitř má každá reakce svou logiku.",
   souhrnTri: (nejsilnejsi) =>
@@ -73,7 +73,7 @@ const SK: Sablony = {
   domenyDve: (domena, potreba, druha) =>
     `Dva z troch najaktívnejších vzorcov spadajú do oblasti, ktorou je ${domena}, teda k téme, ktorou je ${potreba}. Tretí prichádza odinakiaľ, z oblasti, ktorou je ${druha}. Práve tento tretí býva tým, čo celok drží v chode, pretože ponúka zdanlivé riešenie prvých dvoch.`,
   domenyProvazane:
-    "Tvoje tri najaktívnejšie vzorce pochádzajú z troch rôznych oblastí potrieb, ale to neznamená tri oddelené problémy. Naopak: každá z tých troch dvojíc tvorí známu a dobre opísanú kombináciu, takže spolu pracujú ako jeden systém. Práve preto sa profil zvonku číta ľahko, zatiaľ čo zvnútra býva ťažké rozoznať, kde končí jeden vzorec a začína druhý.",
+    "Tvoje tri najaktívnejšie vzorce pochádzajú z troch rôznych oblastí potrieb, ale to neznamená tri oddelené problémy. Naopak: najmenej dve z troch dvojíc medzi nimi tvoria známu a dobre opísanú kombináciu, takže spolu pracujú ako jeden systém. Práve preto sa profil zvonku číta ľahko, zatiaľ čo zvnútra býva ťažké rozoznať, kde končí jeden vzorec a začína druhý.",
   domenyPestre:
     "Tvoje tri najaktívnejšie vzorce pochádzajú z troch rôznych oblastí. Znamená to, že sa nespúšťajú naraz, ale každý v inom type situácie. Profil je tým pestrejší a zároveň horšie čitateľný: v jednej situácii sa správaš inak než v druhej, a zvonku to pôsobí nekonzistentne, aj keď vnútri má každá reakcia svoju logiku.",
   souhrnTri: (nejsilnejsi) =>
@@ -96,7 +96,7 @@ const EN: Sablony = {
   domenyDve: (domena, potreba, druha) =>
     `Two of the three most active patterns fall into the area of ${domena}, that is, the theme of ${potreba}. The third comes from elsewhere, from the area of ${druha}. It is usually that third one that keeps the whole thing running, because it offers an apparent solution to the first two.`,
   domenyProvazane:
-    "Your three most active patterns come from three different areas of need, but that does not mean three separate problems. Quite the opposite: each of those three pairs forms a known and well-described combination, so they work together as one system. That is why the profile reads easily from the outside, while from the inside it is hard to tell where one pattern ends and the next begins.",
+    "Your three most active patterns come from three different areas of need, but that does not mean three separate problems. Quite the opposite: at least two of the three pairs among them form a known and well-described combination, so they work together as one system. That is why the profile reads easily from the outside, while from the inside it is hard to tell where one pattern ends and the next begins.",
   domenyPestre:
     "Your three most active patterns come from three different areas. It means they do not fire together, but each in a different kind of situation. That makes the profile more varied and at the same time harder to read: you behave one way in one situation and differently in another, and from the outside it looks inconsistent, even though every reaction has its own logic on the inside.",
   souhrnTri: (nejsilnejsi) =>
@@ -182,10 +182,15 @@ export function propoj(
         )
           .reduce((x: number, y: number) => x + y, 0)
       : 0
-  const vsechnyDvojicePopsane = top.length >= 3 && dvojicVlastnich >= 2
+  const vetsinaDvojicPopsana = top.length >= 3 && dvojicVlastnich >= 2
 
+  // Věty o oblastech mluví o trojici. Když se dají vykázat jen jeden nebo dva
+  // vzorce, nic z nich neplatí a dřív to u dvou vzorců z jedné oblasti
+  // vyhodnocení i PDF shodilo (druhá oblast neexistovala).
   let domeny: string
-  if (vzorceDomeny.length === 3) {
+  if (top.length < 3) {
+    domeny = ""
+  } else if (vzorceDomeny.length === 3) {
     domeny = s.domenyVsechny(nazvyDomen[hlavniDomena].toLowerCase(), potreba[hlavniDomena])
   } else if (vzorceDomeny.length === 2) {
     const zbytek = serazeneDomeny[1][0]
@@ -194,7 +199,7 @@ export function propoj(
       potreba[hlavniDomena],
       nazvyDomen[zbytek].toLowerCase(),
     )
-  } else if (vsechnyDvojicePopsane) {
+  } else if (vetsinaDvojicPopsana) {
     domeny = s.domenyProvazane
   } else {
     domeny = s.domenyPestre

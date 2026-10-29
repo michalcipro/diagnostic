@@ -262,7 +262,7 @@ export function sestavVzorcePdf(vstup: VzorcePdfVstup): Sestava {
           ss.mezera(1.2),
           ss.text(t.spojeniPopis),
           ss.mezera(3),
-          ss.text(g(spojeni.domeny), STYL.textTmavy),
+          spojeni.domeny && ss.text(g(spojeni.domeny), STYL.textTmavy),
         ]),
       spojeni &&
         spojeni.mechanismy.length > 0 &&

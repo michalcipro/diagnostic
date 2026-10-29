@@ -36,6 +36,12 @@ export interface TymTexty {
   /** hlásí se jen tehdy, když nějaké vyplnění neprošlo kontrolou spolehlivosti */
   nezapoctenoTitul: string
   nezapocteno: (kolik: number, zapocteno: number) => string
+  /** profil se neukazuje, protože by se započítalo méně než `min` vyplnění */
+  zamcenoTitul: string
+  zamceno: (zapocteno: number, min: number) => string
+  /** vyplnění, která čekají, až se doplní trojice */
+  vynechanoTitul: string
+  vynechano: (kolik: number) => string
 
   oblastiTitul: string
   oblastiUvod: string
@@ -79,6 +85,26 @@ const CS: TymTexty = {
     "usuzovat na konkrétní hráče. Hráčům, kteří si nepřáli sdílet své vyhodnocení, " +
     "jsme slíbili opak, tak s tím podle toho zacházej. Vypovídací hodnota roste " +
     "výrazně zhruba od osmi odevzdaných dotazníků.",
+  zamcenoTitul: "Profil týmu se zatím neukazuje",
+  zamceno: (zapocteno, min) =>
+    `Do profilu se zatím dá započítat ${zapocteno} ${zapocteno === 1 ? "dotazník" : zapocteno >= 2 && zapocteno <= 4 ? "dotazníky" : "dotazníků"}, ` +
+    `potřeba je aspoň ${min}. Při menším počtu by se z profilu dalo usuzovat na ` +
+    "konkrétní hráče, a hráčům, kteří své výsledky nesdílejí, jsme slíbili, že se " +
+    "to nestane. Profil se ukáže sám, jakmile se dotazníků sejde dost.",
+  vynechanoTitul: "Některé dotazníky čekají na započtení",
+  vynechano: (kolik) => {
+    const veta =
+      kolik === 1
+        ? "Jeden odevzdaný dotazník zatím do profilu nevstupuje."
+        : kolik < 5
+          ? `${kolik} odevzdané dotazníky zatím do profilu nevstupují.`
+          : `${kolik} odevzdaných dotazníků zatím do profilu nevstupuje.`
+    return (
+      `${veta} Dotazníky hráčů, jejichž výsledky nevidíš, se do profilu přidávají ` +
+      "po trojicích. Kdyby vstupovaly po jednom, šlo by odečtením ostatních zjistit, " +
+      "jak odpověděl konkrétní hráč. Jakmile se trojice doplní, profil se přepočítá sám."
+    )
+  },
   nezapoctenoTitul: "Některé dotazníky se do profilu nepočítají",
   nezapocteno: (kolik, zapocteno) => {
     // Čeština rozlišuje jedna, dva až čtyři a pět a víc. Bez toho by v reportu
@@ -384,6 +410,18 @@ const EN: TymTexty = {
     "be read back to particular players. Players who chose not to share their own " +
     "results were promised the opposite, so handle it accordingly. The profile " +
     "becomes meaningfully robust from roughly eight completed surveys.",
+  zamcenoTitul: "The team profile is not shown yet",
+  zamceno: (zapocteno, min) =>
+    `So far ${zapocteno} ${zapocteno === 1 ? "survey" : "surveys"} can be counted in the profile; ` +
+    `at least ${min} are needed. With fewer, the profile could be read back to particular ` +
+    "players, and we promised the players who keep their results to themselves that this " +
+    "would not happen. The profile appears on its own once enough surveys are in.",
+  vynechanoTitul: "Some surveys are waiting to be counted",
+  vynechano: (kolik) =>
+    `${kolik === 1 ? "One completed survey is" : `${kolik} completed surveys are`} not in the ` +
+    "profile yet. Surveys from players whose results you cannot see enter the profile in " +
+    "threes. If they came in one at a time, subtracting everyone else would reveal how a " +
+    "particular player answered. Once a group of three is complete, the profile updates on its own.",
   nezapoctenoTitul: "Some surveys are not counted in the profile",
   nezapocteno: (kolik, zapocteno) =>
     `${kolik === 1 ? "One completed survey did" : `${kolik} completed surveys did`} not pass ` +

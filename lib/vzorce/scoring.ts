@@ -1,5 +1,5 @@
 import { MIN_POKRYTI, POCET_POLOZEK, SILNYCH_PRO_SITUACNI, VZORCE, pasmoProSkore } from "./structure"
-import type { OdpovediMapa, VysledekVzorcu, VzorecSkore } from "./types"
+import type { OdpovediMapa, Pasmo, VysledekVzorcu, VzorecSkore } from "./types"
 
 // Skórování emocionálně-destruktivních vzorců.
 //
@@ -42,6 +42,9 @@ function skoreVzorce(polozky: number[], odpovedi: OdpovediMapa): Omit<VzorecSkor
   }
 }
 
+/** Pásma, ve kterých je vzorec aktivní trvale, ne jen situačně. */
+const TRVALE_AKTIVNI: Pasmo[] = ["vysoka", "dominantni"]
+
 export function vyhodnot(odpovedi: OdpovediMapa, dobaSek?: number): VysledekVzorcu {
   const vsechny: VzorecSkore[] = VZORCE.map((v) => ({
     id: v.id,
@@ -59,8 +62,12 @@ export function vyhodnot(odpovedi: OdpovediMapa, dobaSek?: number): VysledekVzor
 
   // Vzorce mimo trojici, kde přesto svítí jednotlivé silné odpovědi. Zdroj na
   // ně výslovně upozorňuje: říkají něco i tehdy, když součet vysoký není.
+  //
+  // Jen pod vysokým pásmem. Text u seznamu říká, že se vzorec neaktivuje
+  // trvale, jen v konkrétních situacích, a to o vysokém nebo dominantním
+  // vzorci neplatí. Ten je v profilu vidět se svým pásmem i tak.
   const situacni = vykazatelne.filter(
-    (v) => !vBoji.has(v.id) && v.silnychOdpovedi >= SILNYCH_PRO_SITUACNI,
+    (v) => !vBoji.has(v.id) && v.silnychOdpovedi >= SILNYCH_PRO_SITUACNI && !TRVALE_AKTIVNI.includes(v.pasmo),
   )
 
   const zodpovezeno = Array.from({ length: POCET_POLOZEK }, (_, i) => odpovedi[i + 1]).filter(

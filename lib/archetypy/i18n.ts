@@ -127,6 +127,7 @@ const CS: ArchetypyUI = {
     vyhraneny: "vyhraněný profil",
     zretelny: "zřetelný profil",
     tesny: "těsný profil",
+    plochy: "plochý profil",
   },
 
   z48: "ze 48",
@@ -257,6 +258,7 @@ const SK: ArchetypyUI = {
     vyhraneny: "vyhranený profil",
     zretelny: "zreteľný profil",
     tesny: "tesný profil",
+    plochy: "plochý profil",
   },
 
   z48: "zo 48",
@@ -388,6 +390,7 @@ const EN: ArchetypyUI = {
     vyhraneny: "sharply defined profile",
     zretelny: "clearly defined profile",
     tesny: "close profile",
+    plochy: "flat profile",
   },
 
   z48: "of 48",

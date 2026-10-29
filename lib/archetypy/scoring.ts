@@ -76,13 +76,29 @@ export function vyhodnotArchetypy(odpovedi: OdpovediMapa, dobaSek?: number): Vys
   const sekundarni = pouzitelne[1]
   const potlaceny = pouzitelne[pouzitelne.length - 1]
   const odstup = primarni.skore - sekundarni.skore
+  const rozpeti = primarni.skore - potlaceny.skore
+  // Shody se řadí podle silných odpovědí a pak podle pořadí v registru, ať je
+  // výsledek stabilní. Výklad ale nesmí tvrdit, že jeden archetyp vede nebo
+  // zaostává, když má stejné skóre jako jiný. Proto se shody nesou dál.
+  const naCele = pouzitelne.filter((a) => a.skore === primarni.skore)
+  const naKonci = pouzitelne.filter((a) => a.skore === potlaceny.skore)
   const vyhraneni: Vyhraneni =
-    odstup >= ODSTUP_VYHRANENY ? "vyhraneny" : odstup <= ODSTUP_TESNY ? "tesny" : "zretelny"
+    rozpeti <= ODSTUP_TESNY
+      ? "plochy"
+      : odstup >= ODSTUP_VYHRANENY
+        ? "vyhraneny"
+        : odstup <= ODSTUP_TESNY
+          ? "tesny"
+          : "zretelny"
 
+  // Průměr skupiny jen z vykázaných archetypů. Nevykázaný archetyp má
+  // dosazené minimum škály a skupinu by srazil k nule.
   const motivace = {} as Record<Motivace, number>
   for (const m of ["nezavislost", "mistrovstvi", "sounalezitost", "rad"] as Motivace[]) {
-    const clenove = vsechny.filter((s) => ARCHETYPY.find((a) => a.id === s.id)!.motivace === m)
-    motivace[m] = Math.round((clenove.reduce((a, b) => a + b.procenta, 0) / clenove.length) * 10) / 10
+    const clenove = vsechny.filter((s) => s.vykazuje && ARCHETYPY.find((a) => a.id === s.id)!.motivace === m)
+    motivace[m] = clenove.length
+      ? Math.round((clenove.reduce((a, b) => a + b.procenta, 0) / clenove.length) * 10) / 10
+      : 0
   }
 
   const zodpovezeno = Array.from({ length: POCET_POLOZEK }, (_, i) => odpovedi[i + 1]).filter(
@@ -95,6 +111,9 @@ export function vyhodnotArchetypy(odpovedi: OdpovediMapa, dobaSek?: number): Vys
     sekundarni,
     potlaceny,
     odstup,
+    naCele,
+    naKonci,
+    rozpeti,
     vyhraneni,
     motivace,
     zodpovezeno,

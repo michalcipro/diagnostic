@@ -10,6 +10,7 @@ import {
   shodaDlouze,
   slovoUrovne,
   vetaOblasti,
+  duvodTrhliny,
 } from "@/lib/tym/slova"
 import {
   MAPA_ROZSAH,
@@ -65,6 +66,8 @@ export function MapaTymu({ data, lang }: { data: TeamReport; lang: TymLang }) {
     (o): o is Oblast => o !== undefined,
   )
   const castiOblasti = (id: string) => casti.filter((c) => c.oblast === id)
+  // Opora se bere ze stejného seznamu jako v reportu, ne z vlastních prahů.
+  const opory = new Set<string>(data.opory)
   const nazev = (id: string) => KRATCE[lang][id as DimensionId] ?? id
   const nazevCasti = (id: string) => CASTI[lang][id] ?? id
 
@@ -137,7 +140,7 @@ export function MapaTymu({ data, lang }: { data: TeamReport; lang: TymLang }) {
                   key={o.id}
                   type="button"
                   {...vazba(o.id as DimensionId)}
-                  title={vetaOblasti(o, lang)}
+                  title={vetaOblasti(o, lang, opory.has(o.id))}
                   // Proužek vlevo se kreslí vnitřním stínem, ne rámečkem:
                   // rámeček by řádek posunul a lišta by při najíždění poskakovala.
                   className={`grid w-full grid-cols-[1fr_auto] items-start gap-2 rounded-lg border-t border-[var(--wm-border-light)] p-2 pl-3 text-left transition-colors first:border-t-0 ${
@@ -157,7 +160,7 @@ export function MapaTymu({ data, lang }: { data: TeamReport; lang: TymLang }) {
                   </span>
                   <span className="flex flex-col items-end gap-1.5">
                     <b className="text-[17px] tabular-nums">{Math.round(o.prumer)}</b>
-                    <Stitek o={o} t={t} />
+                    <Stitek o={o} t={t} opora={opory.has(o.id)} />
                   </span>
                 </button>
               ))}
@@ -201,7 +204,7 @@ export function MapaTymu({ data, lang }: { data: TeamReport; lang: TymLang }) {
                     </span>
                   </div>
                   <p className="mt-2 text-[14px] leading-relaxed text-[var(--wm-text-2)]">
-                    {t.trhlinaVeta(Math.round(o.prumer), Math.round(c.prumer), rozdil)}
+                    {t.trhlinaVeta(Math.round(o.prumer), Math.round(c.prumer), rozdil, duvodTrhliny(o, c))}
                   </p>
                 </div>
               )
@@ -345,7 +348,7 @@ function Hlavicka({ kicker, titul, uvod }: { kicker: string; titul: string; uvod
   )
 }
 
-function Stitek({ o, t }: { o: Oblast; t: (typeof MAPA)[TymLang] }) {
+function Stitek({ o, t, opora }: { o: Oblast; t: (typeof MAPA)[TymLang]; opora: boolean }) {
   if (o.rozkol) {
     return (
       <span className="rounded-full bg-[var(--wm-red-light)] px-2 py-0.5 text-[11px] font-bold text-[var(--wm-invalid-fg)]">
@@ -360,7 +363,7 @@ function Stitek({ o, t }: { o: Oblast; t: (typeof MAPA)[TymLang] }) {
       </span>
     )
   }
-  if (o.prumer >= 70 && o.smodch < 12) {
+  if (opora) {
     return (
       <span className="rounded-full bg-[var(--wm-green-light)] px-2 py-0.5 text-[11px] font-bold text-[var(--wm-ok-fg)]">
         {t.stitky.opora}

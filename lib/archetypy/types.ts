@@ -55,7 +55,14 @@ export interface ArchetypSkore {
 }
 
 /** Jak vyhraněný profil je; řídí tón interpretace. */
-export type Vyhraneni = "vyhraneny" | "zretelny" | "tesny"
+/**
+ * Jak výrazně profil vede.
+ *
+ * Prvních tři hodnoty popisují odstup prvních dvou archetypů. Plochý profil
+ * je zvláštní případ: celých dvanáct archetypů leží v pásu pár bodů, takže
+ * pořadí nic neříká a nejde z něj vyčíst ani první, ani poslední archetyp.
+ */
+export type Vyhraneni = "vyhraneny" | "zretelny" | "tesny" | "plochy"
 
 export interface VysledekArchetypu {
   /** všech dvanáct seřazených podle skóre sestupně */
@@ -66,8 +73,14 @@ export interface VysledekArchetypu {
   potlaceny: ArchetypSkore
   /** odstup primárního od sekundárního v bodech */
   odstup: number
+  /** všechny archetypy se stejným skóre jako primární, včetně něj */
+  naCele: ArchetypSkore[]
+  /** všechny archetypy se stejným skóre jako potlačený, včetně něj */
+  naKonci: ArchetypSkore[]
+  /** rozdíl nejvyššího a nejnižšího vykázaného archetypu v bodech */
+  rozpeti: number
   vyhraneni: Vyhraneni
-  /** průměrná procenta tří archetypů každé motivační skupiny */
+  /** průměrná procenta vykázaných archetypů každé motivační skupiny */
   motivace: Record<Motivace, number>
   zodpovezeno: number
   kompletni: boolean

@@ -1,6 +1,6 @@
 import type { DimensionId } from "../diagnostic/types"
 import type { TymLang } from "./obsah"
-import type { UrovenTymu } from "./prahy"
+import { SD_ROZDILNE, SD_SHODA, TRHLINA_ROZDIL_SD, TRHLINA_ROZDIL_U, jeSilna, type UrovenTymu } from "./prahy"
 
 // Jazyk mapy týmu.
 //
@@ -108,57 +108,114 @@ export function slovoUrovne(u: UrovenTymu, lang: TymLang): string {
  * právě tahle informace rozhoduje o tom, jestli pomůže společné cvičení,
  * nebo jeden rozhovor, takže musí být čitelná na první pohled.
  */
+//
+// Hranice jsou tytéž, podle kterých report hlásí velký rozptyl a kreslí mapu
+// (prahy.ts). Dřív tu byly vlastní (9, 15, 19) a oblast se tak jmenovala
+// „velké rozdíly" a o řádek níž „v týmu podobná".
 export function shodaDlouze(sd: number, lang: TymLang): string {
   const cs =
-    sd < 9 ? "všichni na tom jsou podobně"
-    : sd < 15 ? "menší rozdíly mezi hráči"
-    : sd < 19 ? "velké rozdíly mezi hráči"
-    : "hráči jsou jeden od druhého úplně jinde"
+    sd < SD_SHODA ? "všichni na tom jsou podobně"
+    : sd < SD_ROZDILNE ? "menší rozdíly mezi hráči"
+    : "velké rozdíly mezi hráči"
   const en =
-    sd < 9 ? "everyone is in a similar place"
-    : sd < 15 ? "smaller differences between players"
-    : sd < 19 ? "large differences between players"
-    : "players are in completely different places"
+    sd < SD_SHODA ? "everyone is in a similar place"
+    : sd < SD_ROZDILNE ? "smaller differences between players"
+    : "large differences between players"
   return lang === "cs" ? cs : en
 }
 
 /** Totéž na dvě slova, do dlaždice a do seznamu. */
 export function shodaKratce(sd: number, lang: TymLang): string {
-  const cs = sd < 9 ? "jednotné" : sd < 15 ? "menší rozdíly" : sd < 19 ? "velké rozdíly" : "velmi rozdílné"
-  const en = sd < 9 ? "united" : sd < 15 ? "some differences" : sd < 19 ? "large differences" : "very mixed"
+  const cs = sd < SD_SHODA ? "jednotné" : sd < SD_ROZDILNE ? "menší rozdíly" : "velké rozdíly"
+  const en = sd < SD_SHODA ? "united" : sd < SD_ROZDILNE ? "some differences" : "large differences"
   return lang === "cs" ? cs : en
 }
 
 /**
  * Jedna věta k oblasti.
  *
- * Větu řídí tvar rozdělení, ne samotné číslo. Dvě skupiny, jeden člověk mimo
- * a rovnoměrná slabina vypadají v tabulce podobně a řeší se každá jinak;
- * kdyby větu řídil průměr, report by radil špatně.
+ * Větu řídí tvar rozdělení a úroveň, ne samotné číslo. Dvě skupiny, velké
+ * rozdíly a rovnoměrná slabina vypadají v tabulce podobně a řeší se každá
+ * jinak. Dřív větu řídil průměr s vlastními prahy (60 a 70), a oblast, kterou
+ * report o kus výš vypsal mezi oporami, tu dostala „ani se o to zatím nedá
+ * opřít". Teď se opora bere ze stejného seznamu jako v reportu.
  */
 export function vetaOblasti(
-  o: { prumer: number; smodch: number; rozkol: boolean; rozptyl: boolean; plosna: boolean },
+  o: { uroven: UrovenTymu; rozkol: boolean; rozptyl: boolean; plosna: boolean },
   lang: TymLang,
+  opora: boolean,
 ): string {
-  const cs = o.rozkol
-    ? "Tým se dělí na dvě skupiny. Jedna část si poradí, druhá ne, a mezi nimi je velká mezera. Společné cvičení tady nepomůže, protože každé skupině pomáhá něco jiného."
+  const klic = o.rozkol
+    ? "rozkol"
     : o.rozptyl
-      ? "Jeden hráč je úplně jinde než zbytek týmu. Není to věc porady s celým mužstvem, je to věc jednoho rozhovoru."
-      : o.plosna || o.prumer < 60
-        ? "Chybí to celému týmu podobně. Když je slabina rovnoměrná, není to o hráčích, ale o tom, co a jak se trénuje."
-        : o.prumer >= 70 && o.smodch < 12
-          ? "Silná stránka, na kterou se dá spolehnout i ve vypjatém zápase. Tady se dá stavět, když se pracuje jinde."
-          : "Slušný průměr bez velkých výkyvů. Nic tu nehoří, ale ani se o to zatím nedá opřít."
-  const en = o.rozkol
-    ? "The squad splits into two groups. One part copes, the other does not, and there is a wide gap between them. A shared drill will not help here, because each group needs something different."
-    : o.rozptyl
-      ? "One player is in a completely different place from the rest. This is not a team meeting matter; it is one conversation."
-      : o.plosna || o.prumer < 60
-        ? "The whole squad is missing it to a similar degree. An even weakness is not about the players; it is about what gets trained and how."
-        : o.prumer >= 70 && o.smodch < 12
-          ? "A strength you can lean on even in a tight match. This is where you build from while you work on something harder."
-          : "A decent average without big swings. Nothing is on fire, but there is nothing to lean on yet either."
-  return lang === "cs" ? cs : en
+      ? "rozptyl"
+      : o.plosna
+        ? "plosna"
+        : o.uroven === "potrebuje-praci"
+          ? "slaba"
+          : opora
+            ? "opora"
+            : jeSilna(o.uroven)
+              ? "silnaBezOpory"
+              : "prumerna"
+  return VETY_OBLASTI[lang][klic]
+}
+
+const VETY_OBLASTI: Record<
+  TymLang,
+  Record<"rozkol" | "rozptyl" | "plosna" | "slaba" | "opora" | "silnaBezOpory" | "prumerna", string>
+> = {
+  cs: {
+    rozkol:
+      "Tým se dělí na dvě skupiny. Jedna část si poradí, druhá ne, a mezi nimi je velká mezera. Společné cvičení tady nepomůže, protože každé skupině pomáhá něco jiného.",
+    rozptyl:
+      "Hráči se tady hodně liší, ale na dvě skupiny se nedělí. Často za tím stojí jeden nebo dva lidé daleko od zbytku; pak je to věc rozhovoru s nimi, ne porady s celým mužstvem.",
+    plosna:
+      "Chybí to celému týmu podobně. Když je slabina rovnoměrná, není to o hráčích, ale o tom, co a jak se trénuje.",
+    slaba:
+      "Velká část kádru je tady pod silným pásmem. Tohle je místo, kde je práce potřeba nejvíc.",
+    opora:
+      "Silná stránka, na kterou se dá spolehnout i ve vypjatém zápase. Tady se dá stavět, když se pracuje jinde.",
+    silnaBezOpory:
+      "Oblast je jako celek silná, ale některá její část pokulhává. Než se o ni opřeš, podívej se níž, která to je.",
+    prumerna:
+      "Slušný stav bez velkých výkyvů. Nic tu nehoří, ale ani se o to zatím nedá opřít.",
+  },
+  en: {
+    rozkol:
+      "The squad splits into two groups. One part copes, the other does not, and there is a wide gap between them. A shared drill will not help here, because each group needs something different.",
+    rozptyl:
+      "Players differ a lot here, but they do not split into two groups. Often one or two people sit far from the rest; then it is a matter of talking with them, not of a squad meeting.",
+    plosna:
+      "The whole squad is missing it to a similar degree. An even weakness is not about the players; it is about what gets trained and how.",
+    slaba:
+      "A large part of the squad sits below the strong band here. This is where work is needed most.",
+    opora:
+      "A strength you can lean on even in a tight match. This is where you build from while you work on something harder.",
+    silnaBezOpory:
+      "The area is strong as a whole, but one of its parts lags. Before you lean on it, look further down to see which one.",
+    prumerna:
+      "A decent state without big swings. Nothing is on fire, but there is nothing to lean on yet either.",
+  },
+}
+
+/**
+ * Proč se skrytá trhlina hlásí: část je výrazně níž než oblast, výrazně
+ * rozkolísanější, nebo obojí. Dřív věta tvrdila vždycky obojí a u části,
+ * která byla jen rozkolísaná, psala „o -3 body míň".
+ *
+ * Server posílá zaokrouhlená čísla, takže se tu počítá s rezervou jednoho
+ * bodu. Kdyby zaokrouhlení na hranici shodilo obě podmínky, platí aspoň ta,
+ * která odpovídá směru rozdílu; trhlina se hlásí, takže jedna platit musí.
+ */
+export function duvodTrhliny(
+  o: { prumer: number; smodch: number },
+  c: { prumer: number; smodch: number },
+): { nizsi: boolean; rozkolisana: boolean } {
+  const nizsi = o.prumer - c.prumer >= TRHLINA_ROZDIL_U - 1
+  const rozkolisana = c.smodch - o.smodch >= TRHLINA_ROZDIL_SD - 1
+  if (!nizsi && !rozkolisana) return { nizsi: o.prumer > c.prumer, rozkolisana: o.prumer <= c.prumer }
+  return { nizsi, rozkolisana }
 }
 
 export interface MapaTexty {
@@ -189,7 +246,8 @@ export interface MapaTexty {
   trhlinyKicker: string
   trhlinyTitul: string
   trhlinyUvod: string
-  trhlinaVeta: (celek: number, cast: number, rozdil: number) => string
+  /** `duvod` říká, proč se trhlina hlásí: nižší průměr, větší rozptyl, nebo obojí */
+  trhlinaVeta: (celek: number, cast: number, rozdil: number, duvod: { nizsi: boolean; rozkolisana: boolean }) => string
   bezTrhlin: string
 
   castiKicker: string
@@ -219,11 +277,14 @@ const CS: MapaTexty = {
   osaXVpravo: "silnější",
   osaYNahore: "hráči stejně",
   osaYDole: "hráči rozdílně",
+  // Rohy popisují polohu, ne verdikt. Úroveň oblasti se čte z rozdělení
+  // kádru po pásmech a s průměrem na vodorovné ose se může rozejít; verdikt
+  // v rohu by pak odporoval slovu u oblasti.
   rohy: [
-    { titul: "chybí to všem", popis: "řeší se tréninkem pro celý tým" },
-    { titul: "na tohle se dá spolehnout", popis: "drží to i pod tlakem" },
-    { titul: "nejnaléhavější", popis: "slabé a k tomu rozdělené" },
-    { titul: "vypadá dobře, ale nedrží", popis: "průměr táhne pár hráčů" },
+    { titul: "níž a podobně", popis: "pracuje se s celým týmem" },
+    { titul: "výš a podobně", popis: "tady je na čem stavět" },
+    { titul: "níž a rozdílně", popis: "nejvíc práce, každý potřebuje něco jiného" },
+    { titul: "výš, ale rozdílně", popis: "průměr táhne část hráčů" },
   ],
   prikladTitul: "Příklad čtení",
   prikladVeta: (oblast, cast) =>
@@ -233,7 +294,7 @@ const CS: MapaTexty = {
   legenda: ["celá oblast", "část oblasti, v pořádku", "část, která potřebuje pozornost"],
   seznamTitul: "Sedm oblastí",
   seznamNapoveda: "Najeď na řádek a ukáže se, co to znamená.",
-  stitky: { zlom: "dělí se na dvě skupiny", rozptyl: "jeden hráč mimo", opora: "opora" },
+  stitky: { zlom: "dělí se na dvě skupiny", rozptyl: "velké rozdíly", opora: "opora" },
 
   cislaKicker: "Nejdřív jedna věc",
   cislaTitul: "Co znamenají čísla",
@@ -249,20 +310,36 @@ const CS: MapaTexty = {
   ],
   cislaPoznamka:
     "Tohle jsou pásma testu a platí pro jednoho hráče. Slovo u oblasti se ale nečte " +
-    "z průměru: oblast se jmenuje silnou tehdy, když je v silném pásmu aspoň polovina " +
-    "kádru a zároveň skoro nikdo nepropadá. Průměr sám totiž umí zakrýt, že půlka týmu " +
-    "je dole. Vedle čísla je proto vždycky ještě druhá informace: jestli jsou na tom " +
-    "hráči podobně, nebo úplně jinak.",
+    "z průměru: oblast se jmenuje silnou tehdy, když je v silném nebo špičkovém pásmu " +
+    "aspoň šest hráčů z deseti a v rozvojové prioritě nanejvýš jeden. Špičkovou, když " +
+    "je tam aspoň osm z deseti, nikdo dole a aspoň tři ve špičkovém pásmu. Průměr sám " +
+    "totiž umí zakrýt, že půlka týmu je dole. Vedle čísla je proto vždycky ještě druhá " +
+    "informace: jestli jsou na tom hráči podobně, nebo úplně jinak.",
 
   trhlinyKicker: "To, co by v průměru zapadlo",
   trhlinyTitul: "Kde se problém schoval",
   trhlinyUvod:
     "Oblast může mít slušné číslo a přitom v ní jedna konkrétní věc silně pokulhává. " +
     "Průměr to zamaskuje. Tady jsou takové případy vypsané.",
-  trhlinaVeta: (celek, cast, rozdil) =>
-    `Celá oblast má ${celek} bodů a vypadá klidně. Tahle jedna věc uvnitř má ale jen ` +
-    `${cast}, tedy o ${rozdil} ${rozdil === 1 ? "bod" : rozdil < 5 ? "body" : "bodů"} míň, ` +
-    "a navíc se v ní hráči hodně liší. Průměr celé oblasti to schová.",
+  trhlinaVeta: (celek, cast, rozdil, duvod) => {
+    const body = rozdil === 1 ? "bod" : rozdil >= 2 && rozdil <= 4 ? "body" : "bodů"
+    const zacatek = `Celá oblast má ${celek} bodů a vypadá klidně. `
+    if (duvod.nizsi && duvod.rozkolisana) {
+      return (
+        zacatek +
+        `Tahle jedna věc uvnitř má ale jen ${cast}, tedy o ${rozdil} ${body} míň, ` +
+        "a navíc se v ní hráči hodně liší. Průměr celé oblasti to schová."
+      )
+    }
+    if (duvod.nizsi) {
+      return zacatek + `Tahle jedna věc uvnitř má ale jen ${cast}, tedy o ${rozdil} ${body} míň. Průměr celé oblasti to schová.`
+    }
+    return (
+      zacatek +
+      `Tahle jedna věc uvnitř má ${cast} bodů, ale hráči se v ní liší mnohem víc než ve zbytku ` +
+      "oblasti: někomu jde výborně, někomu vůbec. Průměr celé oblasti to schová."
+    )
+  },
   bezTrhlin: "Žádná oblast neschovává uvnitř věc, která by výrazně pokulhávala.",
 
   castiKicker: "Rozpad na konkrétní věci",
@@ -295,10 +372,10 @@ const EN: MapaTexty = {
   osaYNahore: "players alike",
   osaYDole: "players differ",
   rohy: [
-    { titul: "everyone is missing it", popis: "fixed by training the whole squad" },
-    { titul: "you can rely on this", popis: "it holds under pressure too" },
-    { titul: "most urgent", popis: "weak and divided on top of it" },
-    { titul: "looks fine, will not hold", popis: "a few players carry the average" },
+    { titul: "lower and alike", popis: "work with the whole squad" },
+    { titul: "higher and alike", popis: "something to build on" },
+    { titul: "lower and divided", popis: "most work, everyone needs something else" },
+    { titul: "higher, but divided", popis: "part of the squad carries the average" },
   ],
   prikladTitul: "Worked example",
   prikladVeta: (oblast, cast) =>
@@ -308,7 +385,7 @@ const EN: MapaTexty = {
   legenda: ["whole area", "part of an area, fine", "part that needs attention"],
   seznamTitul: "The seven areas",
   seznamNapoveda: "Hover a row to see what it means.",
-  stitky: { zlom: "splits into two groups", rozptyl: "one player apart", opora: "anchor" },
+  stitky: { zlom: "splits into two groups", rozptyl: "large differences", opora: "anchor" },
 
   cislaKicker: "One thing first",
   cislaTitul: "What the numbers mean",
@@ -324,21 +401,37 @@ const EN: MapaTexty = {
   ],
   cislaPoznamka:
     "These are the bands of the test and they describe one player. The word next to an area " +
-    "is not read off the average, though: an area counts as strong when at least half the " +
-    "squad sits in the strong band and almost nobody is falling behind. An average on its own " +
-    "can hide that half the team is down there. That is why the number always comes with a " +
-    "second piece of information: whether players are in a similar place or somewhere else " +
-    "entirely.",
+    "is not read off the average, though: an area counts as strong when at least six players " +
+    "in ten sit in the strong or elite band and at most one is a development priority; as " +
+    "elite when at least eight in ten do, nobody is at the bottom and at least three are in " +
+    "the elite band. An average on its own can hide that half the team is down there. That is " +
+    "why the number always comes with a second piece of information: whether players are in a " +
+    "similar place or somewhere else entirely.",
 
   trhlinyKicker: "What an average would swallow",
   trhlinyTitul: "Where the problem hid",
   trhlinyUvod:
     "An area can carry a decent number while one specific thing inside it lags badly. " +
     "The average masks it. Those cases are listed here.",
-  trhlinaVeta: (celek, cast, rozdil) =>
-    `The area as a whole sits at ${celek} points and looks calm. This one thing inside it ` +
-    `is at only ${cast}, that is ${rozdil} ${rozdil === 1 ? "point" : "points"} lower, and on ` +
-    "top of that players differ a lot in it. The area average hides it.",
+  trhlinaVeta: (celek, cast, rozdil, duvod) => {
+    const body = rozdil === 1 ? "point" : "points"
+    const zacatek = `The area as a whole sits at ${celek} points and looks calm. `
+    if (duvod.nizsi && duvod.rozkolisana) {
+      return (
+        zacatek +
+        `This one thing inside it is at only ${cast}, that is ${rozdil} ${body} lower, and on ` +
+        "top of that players differ a lot in it. The area average hides it."
+      )
+    }
+    if (duvod.nizsi) {
+      return zacatek + `This one thing inside it is at only ${cast}, that is ${rozdil} ${body} lower. The area average hides it.`
+    }
+    return (
+      zacatek +
+      `This one thing inside it is at ${cast} points, but players differ in it far more than ` +
+      "in the rest of the area: some do very well, some not at all. The area average hides it."
+    )
+  },
   bezTrhlin: "No area is hiding a part that lags badly behind it.",
 
   castiKicker: "Broken down into concrete things",

@@ -32,7 +32,13 @@ function shrnuti(
   gender: Gender,
 ): string[] {
   const o = OBSAH_HRACE[lang]
-  const jmena = (ids: DimensionId[]) => ids.map((id) => o[id].nazev.toLowerCase()).join(lang === "cs" ? " a " : " and ")
+  // Názvy oblastí samy obsahují „a" („Identita a vnitřní motivace"), takže
+  // holý výčet spojený dalším „a" se nedal přečíst. V uvozovkách a po slově
+  // „oblast" zůstávají v prvním pádě a česká věta nemusí názvy skloňovat.
+  const jmena = (ids: DimensionId[]) =>
+    ids
+      .map((id) => (lang === "cs" ? `„${o[id].nazev.toLowerCase()}“` : `“${o[id].nazev.toLowerCase()}”`))
+      .join(lang === "cs" ? " a " : " and ")
   if (lang === "en") {
     return [
       `Your profile holds up best in ${jmena(nejsilnejsi)}. That is what you can lean on when things get hard, and it is worth knowing that about yourself before you need it.`,
@@ -41,10 +47,10 @@ function shrnuti(
     ]
   }
   return [
-    `Nejlíp ti drží ${jmena(nejsilnejsi)}. O tohle se dá opřít, když je zle, a vyplatí se to o sobě vědět dřív, než to budeš potřebovat.`,
-    `Nejvíc prostoru je v ${jmena(kProci)}. Není to ortel: zrovna tyhle části se hýbou nejrychleji, jakmile na nich někdo cíleně pracuje.`,
+    `Nejlíp ti drží ${nejsilnejsi.length > 1 ? "oblasti" : "oblast"} ${jmena(nejsilnejsi)}. O tohle se dá opřít, když je zle, a vyplatí se to o sobě vědět dřív, než to budeš potřebovat.`,
+    `Nejvíc prostoru máš v ${kProci.length > 1 ? "oblastech" : "oblasti"} ${jmena(kProci)}. Není to ortel: zrovna tyhle části se hýbou nejrychleji, jakmile na nich někdo cíleně pracuje.`,
     applyGender(
-      "Všechno tady popisuje, jak to máš nastavené teď, ne jaký{|á} jsi. Když stejný dotazník vyplníš po sezoně práce, vypadá to obvykle jinak.",
+      "Všechno tady popisuje, jak to máš nastavené teď, ne {jaký|jaká} jsi. Když stejný dotazník vyplníš po sezoně práce, vypadá to obvykle jinak.",
       gender,
     ),
   ]
@@ -80,7 +86,11 @@ export function vyhodnoceniHrace(
     }
   })
 
-  const podleSily = [...oblasti].filter((x) => x.percent > 0).sort((a, b) => b.percent - a.percent)
+  // Řadí se jen vykázané oblasti. Dřív se poznávaly podle procent nad nulou,
+  // jenže oblast se všemi odpověďmi na nejhorším konci má skutečných 0 %
+  // a z „kde je prostor" vypadla, přestože tam patří nejvíc.
+  const vykazane = new Set(vysledek.dimensions.filter((d) => d.reported).map((d) => d.id))
+  const podleSily = [...oblasti].filter((x) => vykazane.has(x.id)).sort((a, b) => b.percent - a.percent)
   const nejsilnejsi = podleSily.slice(0, KOLIK).map((x) => x.id)
   const kProci = podleSily.slice(-KOLIK).reverse().map((x) => x.id)
 

@@ -1,4 +1,4 @@
-import { PASMO_OBLASTI } from "./prahy"
+import { PASMO_OBLASTI, SD_SHODA } from "./prahy"
 
 // Rozvržení mapy týmu.
 //
@@ -23,8 +23,8 @@ export const MAPA_ROZSAH = {
   xDel: PASMO_OBLASTI.silne,
   /** svisle: jak moc se hráči liší; 0 nahoře, největší rozdíly dole */
   yMax: 28,
-  /** hranice mezi „hráči na tom jsou podobně" a „hodně se liší" */
-  yDel: 12,
+  /** hranice mezi „hráči na tom jsou podobně" a „liší se"; táž jako ve slovech u oblasti */
+  yDel: SD_SHODA,
 } as const
 
 const orez = (x: number) => Math.min(1, Math.max(0, x))

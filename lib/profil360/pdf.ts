@@ -17,7 +17,7 @@ import {
 import { TEXTY_SESTAVY } from "../diagnostic/pdf/sestava-texty"
 import type { PersonInfo } from "../diagnostic/types"
 import { popisKontextu } from "./kontext"
-import { CHRONOTYP_SLOVO, OBLASTI, PASMO_SLOVO, STRES_SLOVO, shrnuti, vyhodnot, type Stav } from "./profil"
+import { BEZ_TYPU, CHRONOTYP_SLOVO, OBLASTI, PASMO_SLOVO, STRES_SLOVO, shrnuti, vyhodnot, type Stav } from "./profil"
 
 // Tisková sestava Sportovního profilu 360. Stejná kostra jako ELITE:
 //
@@ -103,9 +103,9 @@ export function sestavProfil360Pdf(vstup: Profil360PdfVstup): Sestava {
     },
   ]
 
-  const typ =
-    p.typ &&
-    ss.box(
+  const typ = !p.typ
+    ? ss.skupina([ss.h3("Typ sportovce"), ss.mezera(1), ss.text(BEZ_TYPU)])
+    : ss.box(
       ss.sloupce(
         [
           {
@@ -114,8 +114,8 @@ export function sestavProfil360Pdf(vstup: Profil360PdfVstup): Sestava {
               ss.h3("Typ sportovce"),
               ss.mezera(1),
               ss.text(g(p.typ.hlavni.nazev), { pt: 20, tucne: true, proklad: 1.1 }),
-              ss.mezera(1),
-              ss.text(`s rysy typu ${g(p.typ.vedlejsi.nazev).toLowerCase()}`),
+              p.typ.vedlejsi && ss.mezera(1),
+              p.typ.vedlejsi && ss.text(`s rysy typu ${g(p.typ.vedlejsi.nazev).toLowerCase()}`),
             ]),
           },
           {

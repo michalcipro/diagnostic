@@ -1,7 +1,7 @@
 import type { DimensionId } from "../diagnostic/types"
 import { TYM, type TymLang } from "./obsah"
 import { RAMEC } from "./ramec"
-import { jeSilna, type UrovenTymu } from "./prahy"
+import { PORADI_UROVNI, jeSilna, type UrovenTymu } from "./prahy"
 import { VYKLAD, type TvarKlic, type UrovenKlic } from "./vyklad"
 
 // Z profilu se odvodí shrnutí a plán práce.
@@ -15,8 +15,6 @@ export interface OblastProCteni {
   id: string
   prumer: number
   smodch: number
-  min: number
-  max: number
   pasma: { priority: number; stabilization: number; strong: number; elite: number }
   uroven: UrovenTymu
   rozkol: boolean
@@ -30,8 +28,6 @@ export interface CastProCteni {
   oblast: string
   prumer: number
   smodch: number
-  min: number
-  max: number
   pasma: { priority: number; stabilization: number; strong: number; elite: number }
   riziko: boolean
 }
@@ -48,6 +44,8 @@ export interface ProfilProCteni {
   odevzdano: number
   zapocteno: number
   maloDat: boolean
+  vynechano?: number
+  zamceno?: boolean
 }
 
 /**
@@ -85,6 +83,8 @@ export interface FazePlanu {
   duvod: string
   kroky: string[]
   znaky: string[]
+  /** udržovací plán: žádná oblast nepotřebuje opravu */
+  udrzba: boolean
 }
 
 const jeOblast = (x: string): x is DimensionId => "ABCDEFG".includes(x) && x.length === 1
@@ -94,17 +94,26 @@ const jeOblast = (x: string): x is DimensionId => "ABCDEFG".includes(x) && x.len
  *
  * Vybírá se to, co nejvíc omezuje všechno ostatní. Zlomová linie je první,
  * protože dokud tým drží dvě skupiny, nemá plošné opatření komu pomoct.
- * Potom plošná slabina, protože ta se mění nejrychleji. Teprve pak nejnižší
- * oblast. Poslední fáze nepřidává nic nového; ověřuje pod zátěží to, co se
+ * Potom plošná slabina, protože ta se mění nejrychleji. Teprve pak oblast
+ * s nejhorší úrovní, při stejné úrovni ta s nižším průměrem. Když práci
+ * nepotřebuje žádná oblast, plán je udržovací. Poslední fáze nepřidává nic nového; ověřuje pod zátěží to, co se
  * postavilo, protože dovednost, která neprošla tlakem, v zápase není.
  */
 export function sestavPlan(profil: ProfilProCteni, lang: TymLang): FazePlanu[] {
   const r = RAMEC[lang]
   const t = TYM[lang]
-  const podleId = new Map(profil.oblasti.map((o) => [o.id, o]))
   const nazev = (id: string) => t.oblasti[id as DimensionId] ?? id
+  if (!profil.oblasti.length) return []
 
-  const serazene = [...profil.oblasti].sort((a, b) => a.prumer - b.prumer)
+  // Fáze se vybírají jen z oblastí, které práci potřebují, a podle úrovně,
+  // ne podle průměru. Dřív se brala nejnižší čísla bez ohledu na úroveň a plán
+  // pak začínal u oblasti, kterou report o stránku dřív jmenoval silnou, a psal
+  // o ní, že je nejnižší, i když nebyla.
+  const naleha = (a: OblastProCteni, b: OblastProCteni) =>
+    PORADI_UROVNI.indexOf(a.uroven) - PORADI_UROVNI.indexOf(b.uroven) || a.prumer - b.prumer
+  const sPraci = profil.oblasti.filter(potrebujePraci).sort(naleha)
+  const udrzba = sPraci.length === 0
+  const nejnizsi = [...profil.oblasti].sort((a, b) => a.prumer - b.prumer)[0]
   const pouzite = new Set<string>()
 
   const vezmi = (kandidati: (OblastProCteni | undefined)[]): OblastProCteni | null => {
@@ -112,69 +121,72 @@ export function sestavPlan(profil: ProfilProCteni, lang: TymLang): FazePlanu[] {
     return null
   }
 
-  // ---- fáze 1 ----
-  // Když se tým dělí ve víc oblastech, bere se ta nejníž položená. Pořadí
-  // písmen je dané strukturou dotazníku a o naléhavosti neříká nic.
-  const zlom = profil.zlomy
-    .map((id) => podleId.get(id))
-    .filter((o): o is OblastProCteni => o !== undefined)
-    .sort((a, b) => a.prumer - b.prumer)[0]
-  const plosna = serazene.find((o) => o.plosna)
-  const prvni = vezmi([zlom, plosna, serazene[0]])
-  if (prvni) pouzite.add(prvni.id)
-
-  // ---- fáze 2 ----
-  const druha = vezmi([
-    ...profil.priority.map((id) => podleId.get(id)),
-    ...serazene,
-  ])
+  let prvni: OblastProCteni | null
+  let druha: OblastProCteni | null
+  if (!udrzba) {
+    // ---- fáze 1 ----
+    // Když se tým dělí ve víc oblastech, bere se ta nejníž položená. Pořadí
+    // písmen je dané strukturou dotazníku a o naléhavosti neříká nic.
+    const zlom = sPraci.filter((o) => o.rozkol).sort((a, b) => a.prumer - b.prumer)[0]
+    const plosna = sPraci.find((o) => o.plosna)
+    prvni = vezmi([zlom, plosna, sPraci[0]])
+    if (prvni) pouzite.add(prvni.id)
+    // ---- fáze 2 ----
+    // Když práci potřebuje jen jedna oblast, druhá fáze posílí tu s nejmenší
+    // rezervou a řekne to rovnou, ne že je nejnižší.
+    druha = vezmi(sPraci) ?? vezmi([...profil.oblasti].sort((a, b) => a.prumer - b.prumer))
+  } else {
+    // Udržovací plán: nic nehoří, fáze míří na oblasti s nejmenší rezervou.
+    const podleRezervy = [...profil.oblasti].sort((a, b) => a.prumer - b.prumer)
+    prvni = vezmi(podleRezervy)
+    if (prvni) pouzite.add(prvni.id)
+    druha = vezmi(podleRezervy)
+  }
   if (druha) pouzite.add(druha.id)
 
   // ---- fáze 3 ----
   const oporaId = profil.opory[0]
-  const opora = oporaId ? podleId.get(oporaId) : undefined
+  const opora = oporaId ? profil.oblasti.find((o) => o.id === oporaId) : undefined
   const treti = druha ?? prvni
 
-  const duvodPrvni = (o: OblastProCteni): string => {
-    if (o.rozkol) return r.fazeDuvod.zlom(nazev(o.id))
-    if (o.plosna) return r.fazeDuvod.plosna(nazev(o.id))
-    return r.fazeDuvod.nejnizsi(nazev(o.id))
+  // Důvod říká jen to, co o oblasti opravdu platí.
+  const duvod = (o: OblastProCteni, poradi: 1 | 2): string => {
+    const n = nazev(o.id)
+    if (udrzba) return r.fazeDuvod.udrzeni(n, poradi)
+    if (!potrebujePraci(o)) return r.fazeDuvod.rezerva(n)
+    if (o.rozkol) return poradi === 1 ? r.fazeDuvod.zlom(n) : r.fazeDuvod.zlomDruhy(n)
+    if (o.plosna) return r.fazeDuvod.plosna(n)
+    if (o.uroven === "potrebuje-praci") {
+      return o.id === nejnizsi.id ? r.fazeDuvod.nejnizsi(n) : r.fazeDuvod.slaba(n)
+    }
+    if (o.rozptyl) return r.fazeDuvod.rozptyl(n)
+    return r.fazeDuvod.prumerna(n)
   }
 
+  const nazvyFazi = udrzba ? r.fazeNazvyUdrzba : r.fazeNazvy
   const faze: FazePlanu[] = []
-  const pridej = (
-    poradi: 1 | 2 | 3,
-    odTydne: number,
-    o: OblastProCteni | null,
-    duvod: string,
-  ) => {
+  const pridej = (poradi: 1 | 2 | 3, odTydne: number, o: OblastProCteni | null, text: string) => {
     const id = o && jeOblast(o.id) ? o.id : null
     faze.push({
       poradi,
       odTydne,
       doTydne: odTydne + 3,
-      nazev: r.fazeNazvy[poradi - 1],
+      nazev: nazvyFazi[poradi - 1],
       oblast: id,
       nazevOblasti: o ? nazev(o.id) : "",
-      duvod,
+      duvod: text,
       kroky: id ? VYKLAD[lang][id].prace : [],
       znaky: id ? VYKLAD[lang][id].znaky : [],
+      udrzba,
     })
   }
 
-  if (prvni) pridej(1, 1, prvni, duvodPrvni(prvni))
-  if (druha) {
-    pridej(
-      2,
-      5,
-      druha,
-      druha.plosna ? r.fazeDuvod.plosna(nazev(druha.id)) : r.fazeDuvod.nejnizsi(nazev(druha.id)),
-    )
-  }
+  if (prvni) pridej(1, 1, prvni, duvod(prvni, 1))
+  if (druha) pridej(2, 5, druha, duvod(druha, 2))
   if (treti) {
-    const duvod =
+    const text =
       r.fazeDuvod.upevneni(nazev(treti.id)) + (opora ? ` ${r.fazeDuvod.opora(nazev(opora.id))}` : "")
-    pridej(3, 9, treti, duvod)
+    pridej(3, 9, treti, text)
   }
   return faze
 }

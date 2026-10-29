@@ -142,7 +142,7 @@ const jeji = M.vyhodnoceniHrace(ODPOVEDI[jejiIndex], {
   lang: JAZYK,
   tym: NAZEV,
   jmeno: nesdileji.stitek,
-  gender: "zena",
+  gender: "female",
   datum: "2026-08-25",
 })
 console.log()

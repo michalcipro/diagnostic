@@ -1,8 +1,8 @@
 {
   "1": {
-    "cs": "Mám jasnou představu o tom, jakým sportovcem se chci stát, a to nejen výsledkově, ale i charakterově.",
+    "cs": "Mám jasnou představu o tom, {jakým sportovcem|jakou sportovkyní} se chci stát, a to nejen výsledkově, ale i charakterově.",
     "en": "I have a clear idea of the athlete I want to become, not only in terms of results but also in terms of character.",
-    "sk": "Mám jasnú predstavu o tom, akým športovcom sa chcem stať, a to nielen výsledkovo, ale aj charakterovo."
+    "sk": "Mám jasnú predstavu o tom, {akým športovcom|akou športovkyňou} sa chcem stať, a to nielen výsledkovo, ale aj charakterovo."
   },
   "2": {
     "cs": "Před důležitým výkonem věřím, že mám na to uspět.",
@@ -45,9 +45,9 @@
     "sk": "Moja sebadôvera vychádza z kvality mojej prípravy, nie iba z posledného výsledku."
   },
   "10": {
-    "cs": "Nikdy jsem o žádném soupeři neřekl nic negativního.",
+    "cs": "Nikdy jsem o žádném soupeři {neřekl|neřekla} nic negativního.",
     "en": "I have never said anything negative about any opponent.",
-    "sk": "Nikdy som o žiadnom súperovi nepovedal nič negatívne."
+    "sk": "Nikdy som o žiadnom súperovi {nepovedal|nepovedala} nič negatívne."
   },
   "11": {
     "cs": "Vím přesně, na co se má moje pozornost soustředit v jednotlivých fázích výkonu.",
@@ -155,9 +155,9 @@
     "sk": "Moja hodnota ako človeka nezávisí od môjho posledného výsledku."
   },
   "32": {
-    "cs": "Nikdy jsem nepocítil závist vůči úspěchu jiného sportovce.",
+    "cs": "Nikdy jsem {nepocítil|nepocítila} závist vůči úspěchu jiného sportovce.",
     "en": "I have never felt envy toward another athlete's success.",
-    "sk": "Nikdy som nepocítil závisť voči úspechu iného športovca."
+    "sk": "Nikdy som {nepocítil|nepocítila} závisť voči úspechu iného športovca."
   },
   "33": {
     "cs": "Dokážu vědomě nahradit negativní myšlenku konkrétní pomocnou instrukcí.",
@@ -200,9 +200,9 @@
     "sk": "Viem, čo chcem v športe dokázať v horizonte dvoch až piatich rokov."
   },
   "41": {
-    "cs": "Během výkonu se kritizuji slovy, která bych nikdy neřekl spoluhráči.",
+    "cs": "Během výkonu se kritizuji slovy, která bych nikdy {neřekl|neřekla} spoluhráči.",
     "en": "During a performance, I criticize myself with words I would never say to a teammate.",
-    "sk": "Počas výkonu sa kritizujem slovami, ktoré by som nikdy nepovedal spoluhráčovi."
+    "sk": "Počas výkonu sa kritizujem slovami, ktoré by som nikdy {nepovedal|nepovedala} spoluhráčovi."
   },
   "42": {
     "cs": "Rozhodčí, diváci nebo chování soupeře mě snadno vyvedou z koncentrace.",
@@ -270,9 +270,9 @@
     "sk": "Porovnávanie s ostatnými na sociálnych sieťach mi berie energiu a pokoj."
   },
   "55": {
-    "cs": "Nikdy jsem neporušil žádné pravidlo, ani drobné.",
+    "cs": "Nikdy jsem {neporušil|neporušila} žádné pravidlo, ani drobné.",
     "en": "I have never broken any rule, not even a minor one.",
-    "sk": "Nikdy som neporušil žiadne pravidlo, ani drobné."
+    "sk": "Nikdy som {neporušil|neporušila} žiadne pravidlo, ani drobné."
   },
   "56": {
     "cs": "Cítím, že sport, který dělám, je v souladu s tím, kdo jsem.",
@@ -300,9 +300,9 @@
     "sk": "Keď ostatní pochybujú o mojej ceste, dokážem si udržať vlastný smer."
   },
   "61": {
-    "cs": "Dokážu zůstat disciplinovaný i tehdy, když mě nikdo nekontroluje.",
+    "cs": "Dokážu zůstat {disciplinovaný|disciplinovaná} i tehdy, když mě nikdo nekontroluje.",
     "en": "I can stay disciplined even when no one is checking up on me.",
-    "sk": "Dokážem zostať disciplinovaný aj vtedy, keď ma nikto nekontroluje."
+    "sk": "Dokážem zostať {disciplinovaný|disciplinovaná} aj vtedy, keď ma nikto nekontroluje."
   },
   "62": {
     "cs": "Aktivně si vytvářím prostředí, které podporuje můj růst.",
@@ -310,9 +310,9 @@
     "sk": "Aktívne si vytváram prostredie, ktoré podporuje môj rast."
   },
   "63": {
-    "cs": "I kdyby mě nikdo nechválil, trénoval bych se stejným nasazením.",
+    "cs": "I kdyby mě nikdo nechválil, {trénoval|trénovala} bych se stejným nasazením.",
     "en": "Even if no one praised me, I would still train with the same effort.",
-    "sk": "Aj keby ma nikto nechválil, trénoval by som s rovnakým nasadením."
+    "sk": "Aj keby ma nikto nechválil, {trénoval|trénovala} by som s rovnakým nasadením."
   },
   "64": {
     "cs": "Před výkonem si častěji představuji, co se může pokazit, než to, co chci předvést.",
@@ -325,9 +325,9 @@
     "sk": "Na tréningu sa pristihnem, že idem len na autopilota, bez konkrétneho zámeru."
   },
   "66": {
-    "cs": "Nikdy nemám myšlenky, za které bych se styděl.",
+    "cs": "Nikdy nemám myšlenky, za které bych se {styděl|styděla}.",
     "en": "I never have thoughts that I would be ashamed of.",
-    "sk": "Nikdy nemám myšlienky, za ktoré by som sa hanbil."
+    "sk": "Nikdy nemám myšlienky, za ktoré by som sa {hanbil|hanbila}."
   },
   "67": {
     "cs": "Při vedení nebo výhodě si udržím stejnou intenzitu a disciplínu.",
@@ -350,9 +350,9 @@
     "sk": "Viem otvorene hovoriť o svojich obavách s niekým, komu dôverujem."
   },
   "71": {
-    "cs": "Kdyby zmizely žebříčky a výsledky, ztratil bych chuť trénovat.",
+    "cs": "Kdyby zmizely žebříčky a výsledky, {ztratil|ztratila} bych chuť trénovat.",
     "en": "If rankings and results disappeared, I would lose my desire to train.",
-    "sk": "Keby zmizli rebríčky a výsledky, stratil by som chuť trénovať."
+    "sk": "Keby zmizli rebríčky a výsledky, {stratil|stratila} by som chuť trénovať."
   },
   "72": {
     "cs": "Umím si připomenout minulé úspěchy ve chvíli, kdy potřebuji podpořit důvěru.",
@@ -400,9 +400,9 @@
     "sk": "Dokážem jednou alebo dvoma vetami vysvetliť, prečo robím práve svoj šport."
   },
   "81": {
-    "cs": "Věřím, že zvládnu i situace, které jsem dosud netrénoval.",
+    "cs": "Věřím, že zvládnu i situace, které jsem dosud {netrénoval|netrénovala}.",
     "en": "I believe I can handle even situations I haven't trained for yet.",
-    "sk": "Verím, že zvládnem aj situácie, ktoré som doteraz netrénoval."
+    "sk": "Verím, že zvládnem aj situácie, ktoré som doteraz {netrénoval|netrénovala}."
   },
   "82": {
     "cs": "V klíčových momentech se dokážu soustředit na proces, ne na výsledek.",
@@ -410,19 +410,19 @@
     "sk": "V kľúčových momentoch sa dokážem sústrediť na proces, nie na výsledok."
   },
   "83": {
-    "cs": "Frustraci dokážu pojmenovat a pracovat s ní, místo abych ji potlačoval nebo ventiloval.",
+    "cs": "Frustraci dokážu pojmenovat a pracovat s ní, místo abych ji {potlačoval|potlačovala} nebo {ventiloval|ventilovala}.",
     "en": "I can name my frustration and work with it, instead of suppressing it or venting it.",
-    "sk": "Frustráciu dokážem pomenovať a pracovať s ňou namiesto toho, aby som ju potláčal alebo ventiloval."
+    "sk": "Frustráciu dokážem pomenovať a pracovať s ňou namiesto toho, aby som ju {potláčal|potláčala} alebo {ventiloval|ventilovala}."
   },
   "84": {
-    "cs": "Po úspěchu zůstávám pokorný a zaměřený na další proces.",
+    "cs": "Po úspěchu zůstávám {pokorný|pokorná} a {zaměřený|zaměřená} na další proces.",
     "en": "After success, I stay humble and focused on the process ahead.",
-    "sk": "Po úspechu zostávam pokorný a zameraný na ďalší proces."
+    "sk": "Po úspechu zostávam {pokorný|pokorná} a {zameraný|zameraná} na ďalší proces."
   },
   "85": {
-    "cs": "Odpočinek považuji za ztrátu času, který bych mohl věnovat tréninku.",
+    "cs": "Odpočinek považuji za ztrátu času, který bych {mohl|mohla} věnovat tréninku.",
     "en": "I see rest as a waste of time that I could be spending on training.",
-    "sk": "Odpočinok považujem za stratu času, ktorý by som mohol venovať tréningu."
+    "sk": "Odpočinok považujem za stratu času, ktorý by som {mohol|mohla} venovať tréningu."
   },
   "86": {
     "cs": "Před trenérem raději zamlčím, že něco nezvládám.",
@@ -430,9 +430,9 @@
     "sk": "Pred trénerom radšej zamlčím, že niečo nezvládam."
   },
   "87": {
-    "cs": "Své cíle si stanovuji sám, nejsou mi pouze určovány okolím.",
+    "cs": "Své cíle si stanovuji {sám|sama}, nejsou mi pouze určovány okolím.",
     "en": "I set my own goals; they are not simply dictated to me by others.",
-    "sk": "Svoje ciele si stanovujem sám, nie sú mi len určované okolím."
+    "sk": "Svoje ciele si stanovujem {sám|sama}, nie sú mi len určované okolím."
   },
   "88": {
     "cs": "Po sérii chyb dokážu vstoupit do další akce se stejnou důvěrou.",
@@ -440,9 +440,9 @@
     "sk": "Po sérii chýb dokážem vstúpiť do ďalšej akcie s rovnakou dôverou."
   },
   "89": {
-    "cs": "Nikdy jsem neměl chuť žádný trénink vynechat.",
+    "cs": "Nikdy jsem {neměl|neměla} chuť žádný trénink vynechat.",
     "en": "I have never felt like skipping a single training session.",
-    "sk": "Nikdy som nemal chuť vynechať žiadny tréning."
+    "sk": "Nikdy som {nemal|nemala} chuť vynechať žiadny tréning."
   },
   "90": {
     "cs": "Dokážu odfiltrovat vnitřní rozptýlení, jako jsou vzpomínky na předchozí chybu.",
@@ -450,9 +450,9 @@
     "sk": "Dokážem odfiltrovať vnútorné rozptýlenie, ako sú spomienky na predchádzajúcu chybu."
   },
   "91": {
-    "cs": "Umím záměrně zvýšit svou aktivaci, když cítím, že jsem příliš vlažný.",
+    "cs": "Umím záměrně zvýšit svou aktivaci, když cítím, že jsem příliš {vlažný|vlažná}.",
     "en": "I can deliberately increase my activation when I feel I'm too flat.",
-    "sk": "Viem zámerne zvýšiť svoju aktiváciu, keď cítim, že som príliš vlažný."
+    "sk": "Viem zámerne zvýšiť svoju aktiváciu, keď cítim, že som príliš {vlažný|vlažná}."
   },
   "92": {
     "cs": "Zodpovědnost za své chyby přijímám bez obviňování okolí.",
@@ -465,9 +465,9 @@
     "sk": "Priebežne vnímam svoje celkové zaťaženie a rozpoznám, kedy sa blížim k preťaženiu."
   },
   "94": {
-    "cs": "Úspěchem ostatních se dokážu inspirovat, místo abych se s nimi neustále srovnával.",
+    "cs": "Úspěchem ostatních se dokážu inspirovat, místo abych se s nimi neustále {srovnával|srovnávala}.",
     "en": "I can draw inspiration from others' success instead of constantly comparing myself to them.",
-    "sk": "Úspechom ostatných sa dokážem inšpirovať namiesto toho, aby som sa s nimi neustále porovnával."
+    "sk": "Úspechom ostatných sa dokážem inšpirovať namiesto toho, aby som sa s nimi neustále {porovnával|porovnávala}."
   },
   "95": {
     "cs": "Moje nasazení v tréninku nezávisí na tom, jestli mě někdo ocení nebo pochválí.",
