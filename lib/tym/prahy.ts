@@ -1,3 +1,4 @@
+import { hraniceVProcentech } from "../diagnostic/normy"
 import type { BandKey } from "../diagnostic/types"
 
 // Prahy týmového vyhodnocení.
@@ -20,11 +21,27 @@ import type { BandKey } from "../diagnostic/types"
 // silný tehdy, když je silná většina a zároveň nikdo nepropadá, ne když
 // mu vyjde hezký průměr.
 
-/** Hranice pásem oblasti v procentech, odvozené z elite200. */
+/**
+ * Pevné hranice pásem oblasti v procentech, odvozené z elite200.
+ *
+ * Od norem (lib/diagnostic/normy.ts) se pásmo hráče čte z toho, kde stojí
+ * mezi sportovci, a hranice má každá oblast i část jinou. Tyhle pevné
+ * hranice zůstávají jen jako záloha pro škálu bez normy; ve výpočtech se
+ * bere `hraniceSilne`.
+ */
 export const PASMO_OBLASTI = { priorita: 31.2, silne: 61.5, spicka: 82.3 }
 
-/** Hranice pásem části v procentech, odvozené z elite200. */
+/** Pevné hranice pásem části v procentech, odvozené z elite200; záloha jako výš. */
 export const PASMO_CASTI = { priorita: 31.2, silne: 62.5, spicka: 84.4 }
+
+/**
+ * Hranice silného pásma oblasti nebo části v procentech škály: medián
+ * sportovců podle normy. Oblasti nejsou stejně těžké, takže u Koncentrace
+ * leží kolem 60 a u Odolnosti kolem 75.
+ */
+export function hraniceSilne(id: string): number {
+  return hraniceVProcentech("elite200", id)?.silne ?? (id.length === 1 ? PASMO_OBLASTI.silne : PASMO_CASTI.silne)
+}
 
 /**
  * Úroveň oblasti v týmu.

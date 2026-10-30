@@ -1,11 +1,11 @@
 import type { BandKey, DimensionId, DiagnosticResult } from "../diagnostic/types"
 import type { CastProfil, Nalez, NalezKod, OblastProfil, Sila, TymovyProfil } from "./typy"
 import {
-  PASMO_CASTI,
   SD_ROZDILNE,
   SD_SHODA,
   TRHLINA_ROZDIL_SD,
   TRHLINA_ROZDIL_U,
+  hraniceSilne,
   jeSilna,
   jeSlaba,
   podily,
@@ -202,7 +202,7 @@ function najdiNalezy(
     const c = casti.find((x) => x.id === id)
     if (!c || !c.riziko) return false
     const p = podily(c.pasma)
-    return p.priority >= CAST_PODIL_PRIORIT || (c.prumer < PASMO_CASTI.silne && p.priority > 0)
+    return p.priority >= CAST_PODIL_PRIORIT || (c.prumer < hraniceSilne(c.id) && p.priority > 0)
   }
 
   const g2rozptyl = fazetaRozptyl("G2", vysledky) // hranice a asertivita

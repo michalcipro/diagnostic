@@ -201,6 +201,11 @@ export interface ScaleScore {
   min: number
   max: number
   percent: number // 0–100, (raw − min) / (max − min) × 100
+  /**
+   * Percentil vůči normě (lib/diagnostic/normy.ts), 0–100. Z něj se bere
+   * pásmo. Chybí jen u škály, ke které norma není; pak platí pevné hranice.
+   */
+  percentil?: number
   band: BandKey
   answered: number
   total: number
@@ -227,6 +232,12 @@ export interface DiagnosticResult {
   facets?: FacetScore[]
   strongest: ScaleScore[] // top fazety (200) / dimenze (100)
   weakest: ScaleScore[]
+  /**
+   * Dvě oblasti, ve kterých klient stojí vůči normě nejníž, bez ohledu na
+   * pásmo. Kdo má všechny oblasti silné, má i tak kde začít: tady je jeho
+   * největší rezerva vůči vlastnímu profilu.
+   */
+  relativeWeaknesses: DimensionId[]
   /** elite100: rozpětí dimenzí a příznak nevyváženého profilu */
   dimensionSpread?: number
   imbalanced?: boolean

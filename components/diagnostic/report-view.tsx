@@ -126,6 +126,7 @@ export function ReportView({
   )
   const t = UI[lang]
   const v = result.validity
+  const relativni = new Set<string>(result.relativeWeaknesses ?? [])
   const summary = useMemo(() => buildSummary(result, lang), [result, lang])
   const heading = summaryHeading(lang, gender)
 
@@ -227,6 +228,9 @@ export function ReportView({
                 min={d.min}
                 max={d.max}
                 percent={d.percent}
+                percentil={d.percentil}
+                poloha={d.percentil !== undefined ? t.polohaVNorme(d.percentil) : undefined}
+                oznaceni={relativni.has(d.id) ? t.relativniSlabina : undefined}
                 band={d.band}
                 lang={lang}
               />
@@ -296,9 +300,9 @@ export function ReportView({
       </section>
 
       {/*
-        Bez norem je pořadí škál ipsativní – říká, se kterými výroky respondent
-        souhlasil nejvíc, ne v čem je nadprůměrný. Report to musí přiznat,
-        jinak by tvrdil víc, než na co má podklady.
+        Pásma stojí na normě sportovců, a ta je zatím malá. Report musí říct,
+        s kým se klient srovnává a jak pevné ty hranice jsou, jinak by tvrdil
+        víc, než na co má podklady.
       */}
       <p className="mt-3 text-[13px] leading-relaxed text-[var(--wm-text-3)]">{applyGender(t.normativeCaveat, gender)}</p>
 
@@ -320,7 +324,8 @@ export function ReportView({
                       <>
                         <div className="text-[22px] font-bold tabular-nums">{d.raw}</div>
                         <div className="text-[12px] text-[var(--wm-text-3)]">
-                          {d.min}–{d.max} · {fmtNum(d.percent, lang)} %
+                          {d.min}–{d.max} ·{" "}
+                          {d.percentil !== undefined ? t.polohaVNorme(d.percentil) : `${fmtNum(d.percent, lang)} %`}
                         </div>
                       </>
                     ) : (
@@ -342,6 +347,7 @@ export function ReportView({
                         min={d.min}
                         max={d.max}
                         percent={d.percent}
+                        percentil={d.percentil}
                         band={d.band}
                         lang={lang}
                         compact
@@ -381,6 +387,7 @@ export function ReportView({
                                 min={f.min}
                                 max={f.max}
                                 percent={f.percent}
+                                percentil={f.percentil}
                                 band={f.band}
                                 lang={lang}
                                 compact

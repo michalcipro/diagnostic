@@ -27,6 +27,9 @@ export function ScoreRow({
   min,
   max,
   percent,
+  percentil,
+  poloha,
+  oznaceni,
   band,
   lang,
   compact,
@@ -36,6 +39,12 @@ export function ScoreRow({
   min: number
   max: number
   percent: number
+  /** percentil vůči normě; když je, pruh ukazuje ten, ne procento rozsahu */
+  percentil?: number
+  /** slovy, kde klient vůči normě stojí; píše se pod pruh */
+  poloha?: string
+  /** doplňkový štítek, třeba „relativní slabina" */
+  oznaceni?: string
   band: BandKey
   lang: Lang
   compact?: boolean
@@ -66,10 +75,16 @@ export function ScoreRow({
             {raw}
             <span className="font-normal text-[var(--wm-text-3)]">/{max}</span>
           </span>
+          {oznaceni && (
+            <span className="rounded-full border border-[var(--wm-border)] px-2 py-0.5 text-[11.5px] font-semibold text-[var(--wm-text-2)]">
+              {oznaceni}
+            </span>
+          )}
           <BandChip band={band} lang={lang} />
         </span>
       </div>
-      <ScoreBar percent={percent} band={band} />
+      <ScoreBar percent={percentil ?? percent} band={band} />
+      {poloha && <p className="mt-1.5 text-[12px] text-[var(--wm-text-3)]">{poloha}</p>}
     </div>
   )
 }

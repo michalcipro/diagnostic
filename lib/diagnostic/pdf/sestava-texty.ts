@@ -19,6 +19,8 @@ export interface TextySestavy {
   stylizace: Record<ValidityStatus, string>
   tempoHodnota: (sekund: string) => string
   stupnice: (min: number, max: number) => string
+  /** popis osy profilu, když pruh ukazuje pozici vůči normě */
+  osaNorem: string
   /** krátké popisky pásem na ose pod profilem */
   pasmaOsy: Record<BandKey, string>
   vsechnyFazety: (pocet: number, min: number, max: number) => string
@@ -78,6 +80,7 @@ export const TEXTY_SESTAVY: Record<Lang, TextySestavy> = {
     stylizace: { ok: "bez stylizace", caution: "mírná stylizace", invalid: "výrazná stylizace" },
     tempoHodnota: (s) => `${s} s na otázku`,
     stupnice: (min, max) => `stupnice ${min} až ${max}`,
+    osaNorem: "pruh ukazuje pozici mezi sportovci, kteří test vyplnili",
     pasmaOsy: { priority: "priorita", stabilization: "stabilizace", strong: "silná", elite: "elitní" },
     vsechnyFazety: (n, min, max) => `Všech ${n} dílčích oblastí · ${min} až ${max}`,
     naCemStavet: "Na čem stavět",
@@ -135,6 +138,7 @@ export const TEXTY_SESTAVY: Record<Lang, TextySestavy> = {
     stylizace: { ok: "bez štylizácie", caution: "mierna štylizácia", invalid: "výrazná štylizácia" },
     tempoHodnota: (s) => `${s} s na otázku`,
     stupnice: (min, max) => `stupnica ${min} až ${max}`,
+    osaNorem: "pruh ukazuje pozíciu medzi športovcami, ktorí test vyplnili",
     pasmaOsy: { priority: "priorita", stabilization: "stabilizácia", strong: "silná", elite: "elitná" },
     vsechnyFazety: (n, min, max) => `Všetkých ${n} čiastkových oblastí · ${min} až ${max}`,
     naCemStavet: "Na čom stavať",
@@ -192,6 +196,7 @@ export const TEXTY_SESTAVY: Record<Lang, TextySestavy> = {
     stylizace: { ok: "no idealisation", caution: "slight idealisation", invalid: "strong idealisation" },
     tempoHodnota: (s) => `${s} s per item`,
     stupnice: (min, max) => `scale ${min} to ${max}`,
+    osaNorem: "the bar shows the position among athletes who took the test",
     pasmaOsy: { priority: "priority", stabilization: "stabilisation", strong: "strong", elite: "elite" },
     vsechnyFazety: (n, min, max) => `All ${n} facets · ${min} to ${max}`,
     naCemStavet: "What to build on",

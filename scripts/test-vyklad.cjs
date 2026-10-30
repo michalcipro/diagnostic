@@ -424,6 +424,51 @@ for (const lang of ["cs", "en"]) {
 }
 
 // ---------------------------------------------------------------------------
+// ELITE: pásma podle norem a relativní slabiny
+// ---------------------------------------------------------------------------
+
+sekce("ELITE normy")
+
+{
+  const S = M.getStructure("elite200")
+  // Typický klient odpovídá v průměru kolem 3,7. S pevnými hranicemi (silné od
+  // 3,46) vyšel silně ve všech sedmi oblastech; vůči normě ne.
+  const typicky = M.evaluate(S, odpovediElite({}, 3.7), { durationSec: 2400 })
+  rekni(typicky.dimensions.every((d) => d.percent >= 61.5), "typický klient by s pevnými hranicemi byl všude silný")
+  const pod = typicky.dimensions.filter((d) => d.band === "priority" || d.band === "stabilization")
+  rekni(pod.length >= 2, `vůči normě má typický klient oblasti k práci (${pod.map((d) => d.id).join(", ")})`)
+  rekni(typicky.dimensions.every((d) => typeof d.percentil === "number"), "každá oblast má percentil")
+
+  // Kdo všude „spíše souhlasí", je nad mediánem všude. I tak dostane dvě
+  // relativní slabiny a shrnutí je pojmenuje.
+  const souhlasi = M.evaluate(S, odpovediElite({}, 4), { durationSec: 2400 })
+  rekni(
+    souhlasi.dimensions.every((d) => d.band === "strong" || d.band === "elite"),
+    "kdo všude spíše souhlasí, je nad mediánem všude",
+  )
+  rekni(souhlasi.relativeWeaknesses.length === 2, "i silný profil má dvě relativní slabiny")
+  const sh = M.buildSummary(souhlasi, "cs")
+  rekni(sh.priorities.startsWith("Žádná oblast nevyšla pod polovinou"), "shrnutí silného profilu mluví o relativních slabinách")
+  rekni(sh.nextStep.length > 0, "silný profil má nejbližší krok")
+  // Nejslabší fazety se řadí podle normy: u plochého profilu to nesmějí být
+  // pořád ty nejtěžší (vnitřní dialog B2, regulace aktivace D2).
+  rekni(
+    !souhlasi.weakest.some((f) => f.id === "B2" || f.id === "D2"),
+    `nejslabší fazety plochého profilu nejsou automaticky ty nejtěžší (${souhlasi.weakest.map((f) => f.id).join(", ")})`,
+  )
+
+  // Výrazná stylizace: shrnutí řekne, že čísla budou nadsazená.
+  const odp = odpovediElite({}, 4)
+  S.validity.honesty.items.forEach((p, i) => (odp[p] = i < 10 ? 4 : 3))
+  const stylizuje = M.evaluate(S, odp, { durationSec: 2400 })
+  rekni(stylizuje.validity.honesty.score === 46 && stylizuje.validity.honesty.status === "invalid", "index 46 je výrazná stylizace")
+  rekni(M.buildSummary(stylizuje, "cs").caveat.includes("v dobrém světle"), "shrnutí u výrazné stylizace upozorní na nadsazená čísla")
+  S.validity.honesty.items.forEach((p, i) => (odp[p] = i < 3 ? 4 : 3))
+  const bezne = M.evaluate(S, odp, { durationSec: 2400 })
+  rekni(bezne.validity.honesty.score === 39 && bezne.validity.honesty.status === "ok", "index 39 je ještě bez stylizace")
+}
+
+// ---------------------------------------------------------------------------
 // Týmový report: soukromí, plán a jednotné prahy
 // ---------------------------------------------------------------------------
 
@@ -524,11 +569,13 @@ sekce("tým: plán")
   // A je silná (šest z deseti silných), ale s nejnižším průměrem; D potřebuje
   // práci (dva propadlíci), i když průměr má vysoký. Dřív plán začal u A
   // a nazval ji „nejnižší oblastí, která drží zpátky".
+  // Pásma se čtou z normy: u A je silné od průměrné odpovědi 3,93,
+  // stabilizace od 3,53.
   const tym = [
     ...Array.from({ length: 6 }, () => hrac({ A: 4, D: 5 }, 5)),
-    ...Array.from({ length: 2 }, () => hrac({ A: 3.5, D: 5 }, 5)),
-    hrac({ A: 3, D: 1 }, 5),
-    hrac({ A: 2.75, D: 1 }, 5),
+    ...Array.from({ length: 2 }, () => hrac({ A: 3.6, D: 5 }, 5)),
+    hrac({ A: 3.6, D: 1 }, 5),
+    hrac({ A: 3.3, D: 1 }, 5),
   ]
   const p = M.tymovyProfil("Tým", 10, 10, tym)
   const a = p.oblasti.find((o) => o.id === "A")

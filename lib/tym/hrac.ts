@@ -15,7 +15,7 @@ export interface HracOblast {
   nazev: string
   uvod: string
   band: BandKey
-  /** 0 až 100; kde v pásmu oblast leží */
+  /** 0 až 100; percentil vůči normě sportovců, ze kterého je i pásmo */
   percent: number
   vyklad: string
 }

@@ -14,8 +14,11 @@ import {
 } from "@/lib/tym/slova"
 import {
   MAPA_ROZSAH,
+  SVISLE_CARY,
   krokSkaly,
   podilX,
+  polohaX,
+  popisCary,
   podilY,
   rozestrkej,
   rozprostri,
@@ -242,7 +245,7 @@ export function MapaTymu({ data, lang }: { data: TeamReport; lang: TymLang }) {
                       </span>
                     </div>
                     {castiOblasti(o.id).map((c) => {
-                      const k = krokSkaly(c.prumer)
+                      const k = krokSkaly(polohaX(c.id, c.prumer))
                       return (
                         <button
                           key={c.id}
@@ -423,7 +426,7 @@ function Plocha({
   const Y = (sd: number) => OKRAJ.t + podilY(sd) * (H - OKRAJ.t - OKRAJ.b)
   const { xMin, xMax, xDel, yMax, yDel } = MAPA_ROZSAH
 
-  const svisleCary = [55, 60, 65, 70, 75, 80]
+  const svisleCary = SVISLE_CARY
   const rohy: [number, number, "start" | "end", { titul: string; popis: string }][] = [
     [X(xMin) + 8, OKRAJ.t + 15, "start", t.rohy[0]],
     [X(xMax) - 8, OKRAJ.t + 15, "end", t.rohy[1]],
@@ -439,7 +442,7 @@ function Plocha({
 
   const znacky = rozprostri<Oblast>(
     oblasti.map((o) => {
-      const x = X(o.prumer)
+      const x = X(polohaX(o.id, o.prumer))
       const sirka = nazev(o.id).length * 5.7
       return { data: o, x, y: Y(o.smodch), ty: Y(o.smodch), sirka, vpravo: x + 16 + sirka < W - OKRAJ.r }
     }),
@@ -488,7 +491,7 @@ function Plocha({
             fontSize="10.5"
             textAnchor="middle"
           >
-            {v}
+            {popisCary(v)}
           </text>
         </g>
       ))}
@@ -573,7 +576,7 @@ function Plocha({
                   key={c.id}
                   x1={p.x}
                   y1={p.y}
-                  x2={X(c.prumer)}
+                  x2={X(polohaX(c.id, c.prumer))}
                   y2={Y(c.smodch)}
                   stroke={zvyraznit ? "var(--wm-blue)" : "var(--wm-text-3)"}
                   strokeWidth="1"
@@ -583,7 +586,7 @@ function Plocha({
             {casti
               .filter((c) => c.oblast === o.id)
               .map((c) => {
-                const fx = X(c.prumer)
+                const fx = X(polohaX(c.id, c.prumer))
                 const fy = Y(c.smodch)
                 return (
                   <g key={c.id}>
@@ -644,9 +647,9 @@ function Plocha({
         // Čárka vede od kroužku oblasti k té části, která od ní utekla.
         // Vysvětlení stojí pod grafem, kde je vždycky čitelné a jmenuje obojí.
         <line
-          x1={X(ukazka.oblast.prumer)}
+          x1={X(polohaX(ukazka.oblast.id, ukazka.oblast.prumer))}
           y1={Y(ukazka.oblast.smodch) + 11}
-          x2={X(ukazka.cast.prumer)}
+          x2={X(polohaX(ukazka.cast.id, ukazka.cast.prumer))}
           y2={Y(ukazka.cast.smodch) - 7}
           stroke="var(--wm-orange)"
           strokeWidth="1.4"

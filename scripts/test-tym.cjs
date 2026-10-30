@@ -41,9 +41,10 @@ export { TYM } from "../lib/tym/obsah"
 export { VYKLAD } from "../lib/tym/vyklad"
 export { RAMEC } from "../lib/tym/ramec"
 export { sestavPlan, sestavShrnuti, urovenKlic } from "../lib/tym/plan"
-export { PASMO_OBLASTI, PASMO_CASTI, urovenTymu } from "../lib/tym/prahy"
+export { PASMO_OBLASTI, PASMO_CASTI, urovenTymu, hraniceSilne } from "../lib/tym/prahy"
 export { slovoUrovne } from "../lib/tym/slova"
-export { MAPA_ROZSAH } from "../lib/tym/mapa-geometrie"
+export { MAPA_ROZSAH, polohaX } from "../lib/tym/mapa-geometrie"
+export { normaSkaly, percentilZNormy, pasmoZPercentilu } from "../lib/diagnostic/normy"
 `,
 )
 let M
@@ -147,10 +148,24 @@ console.log("\n– prahy odpovídají pásmům testu –")
       sedi(M.PASMO_CASTI.spicka, cast.spicka),
     `hranice částí sedí s testem (${cast.priorita} / ${cast.silne} / ${cast.spicka})`,
   )
-  rekni(
-    M.MAPA_ROZSAH.xDel === M.PASMO_OBLASTI.silne,
-    "dělicí čára v mapě leží na hranici silného pásma, ne na odhadu",
-  )
+}
+
+{
+  // Od norem má každá oblast i část hranici silného pásma jinde (medián
+  // sportovců). Mapa kreslí vzdálenost od ní a dělicí čára leží na nule.
+  // Hranice musí sedět s tím, jak pásmo hráči přiřazuje skórování: hráč těsně
+  // nad hranicí je silný, těsně pod ní ve stabilizaci.
+  rekni(M.MAPA_ROZSAH.xDel === 0, "dělicí čára v mapě leží na hranici silného pásma")
+  const skaly = [...S200.dimensions.map((d) => d.id), ...S200.facets.map((f) => f.id)]
+  const spatne = skaly.filter((id) => {
+    const h = M.hraniceSilne(id)
+    const norma = M.normaSkaly("elite200", id)
+    const naPolozku = (procenta) => 1 + (procenta / 100) * 4
+    const nad = M.pasmoZPercentilu(M.percentilZNormy(norma, naPolozku(h + 0.2)))
+    const pod = M.pasmoZPercentilu(M.percentilZNormy(norma, naPolozku(h - 0.2)))
+    return nad !== "strong" || pod !== "stabilization" || M.polohaX(id, h) !== 0
+  })
+  rekni(!spatne.length, `hranice silného pásma sedí s normou u všech oblastí a částí${spatne.length ? ` (${spatne.join(", ")})` : ""}`)
 }
 
 // ---------------------------------------------------------------------------

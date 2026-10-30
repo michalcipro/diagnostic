@@ -11,8 +11,11 @@ import { TYM, type TymLang } from "./obsah"
 import { CASTI, KRATCE, MAPA, duvodTrhliny, shodaKratce, slovoUrovne } from "./slova"
 import {
   MAPA_ROZSAH,
+  SVISLE_CARY,
   krokSkaly,
   podilX,
+  polohaX,
+  popisCary,
   podilY,
   rozestrkej,
   rozprostri,
@@ -183,10 +186,10 @@ function nakresliMapu(s: Sazba, data: TymPdfVstup, t: (typeof MAPA)[TymLang], la
 
   s.doc.setLineWidth(0.15)
   s.doc.setDrawColor(BARVA.linka[0], BARVA.linka[1], BARVA.linka[2])
-  for (const v of [55, 60, 65, 70, 75, 80]) {
+  for (const v of SVISLE_CARY) {
     s.doc.line(X(v), Y(0), X(v), Y(yMax))
     s.pismo(6.6, false, BARVA.slaba)
-    s.doc.text(String(v), X(v), Y(yMax) + 4, { align: "center" })
+    s.doc.text(popisCary(v), X(v), Y(yMax) + 4, { align: "center" })
   }
   s.doc.setDrawColor(BARVA.slaba[0], BARVA.slaba[1], BARVA.slaba[2])
   s.doc.setLineDashPattern([0.8, 0.8], 0)
@@ -227,7 +230,7 @@ function nakresliMapu(s: Sazba, data: TymPdfVstup, t: (typeof MAPA)[TymLang], la
   const popisky = rozestrkej(
     rozprostri(
       data.oblasti.map((o) => {
-      const x = X(o.prumer)
+      const x = X(polohaX(o.id, o.prumer))
       const sirka = s.sirkaTextu(nazev(o.id), 7.4, true) + 3
         return { data: o, x, y: Y(o.smodch), ty: Y(o.smodch), sirka, vpravo: x + sirka < X(xMax) }
       }),
@@ -242,12 +245,12 @@ function nakresliMapu(s: Sazba, data: TymPdfVstup, t: (typeof MAPA)[TymLang], la
   s.doc.setDrawColor(200, 200, 206)
   for (const p of popisky) {
     for (const c of data.casti.filter((x) => x.oblast === p.data.id)) {
-      s.doc.line(p.x, p.y, X(c.prumer), Y(c.smodch))
+      s.doc.line(p.x, p.y, X(polohaX(c.id, c.prumer)), Y(c.smodch))
     }
   }
 
   for (const c of data.casti) {
-    const cx = X(c.prumer)
+    const cx = X(polohaX(c.id, c.prumer))
     const cy = Y(c.smodch)
     if (c.riziko) {
       const d = 1.5
@@ -279,9 +282,9 @@ function nakresliMapu(s: Sazba, data: TymPdfVstup, t: (typeof MAPA)[TymLang], la
   // Ukázka čtení na skutečném případu. V PDF si čtenář nemůže na nic najet,
   // takže je tenhle jeden vysvětlený případ to jediné, co ho naučí mapu číst.
   if (ukazka) {
-    const ox = X(ukazka.oblast.prumer)
+    const ox = X(polohaX(ukazka.oblast.id, ukazka.oblast.prumer))
     const oy = Y(ukazka.oblast.smodch)
-    const cx = X(ukazka.cast.prumer)
+    const cx = X(polohaX(ukazka.cast.id, ukazka.cast.prumer))
     const cy = Y(ukazka.cast.smodch)
     s.doc.setDrawColor(ORANZOVA[0], ORANZOVA[1], ORANZOVA[2])
     s.doc.setLineWidth(0.3)
@@ -377,7 +380,7 @@ function nakresliCasti(s: Sazba, data: TymPdfVstup, t: (typeof MAPA)[TymLang], l
 
     casti.forEach((c, i) => {
       const x = OKRAJ.levy + SLOUPEC_NAZVU + i * (sirkaDlazdice + MEZERA)
-      const k = krokSkaly(c.prumer) - 1
+      const k = krokSkaly(polohaX(c.id, c.prumer)) - 1
       const b = SKALA[k]
       const tb = SKALA_TEXT[k]
       s.doc.setFillColor(b[0], b[1], b[2])

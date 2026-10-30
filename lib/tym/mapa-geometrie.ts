@@ -1,4 +1,4 @@
-import { PASMO_OBLASTI, SD_SHODA } from "./prahy"
+import { SD_SHODA, hraniceSilne } from "./prahy"
 
 // Rozvržení mapy týmu.
 //
@@ -8,24 +8,43 @@ import { PASMO_OBLASTI, SD_SHODA } from "./prahy"
 // a obě sazby z něj berou podíly, ne pixely.
 
 /**
+ * Poloha oblasti nebo části na vodorovné ose: o kolik bodů škály je tým nad
+ * hranicí silného pásma (kladně), nebo pod ní (záporně).
+ *
+ * Hranice silného pásma se čte z normy a každá oblast ji má jinde: medián
+ * sportovců u Koncentrace leží kolem 60 bodů, u Odolnosti kolem 75. Kdyby
+ * mapa kreslila hrubé číslo proti jedné společné čáře, ležela by Odolnost
+ * vpravo i u týmu, který je v ní slabší než jiné týmy, a Koncentrace vlevo
+ * i u silného týmu. Proto se kreslí vzdálenost od vlastní hranice.
+ */
+export function polohaX(id: string, prumer: number): number {
+  return prumer - hraniceSilne(id)
+}
+
+/**
  * Výřez mapy a dělicí linie mezi kvadranty.
  *
- * Svislá dělicí čára není odhad: je to spodní hranice silného pásma testu.
- * Bere se z prahy.ts, aby se nemohla rozejít se slovy, kterými report tytéž
- * oblasti popisuje. Dřív tady stálo 65 a mapa tak kreslila hranici jinde, než
- * kde ji měl test.
+ * Svislá dělicí čára je hranice silného pásma, tedy nula na ose polohy.
+ * Vodorovná je hranice „hráči na tom jsou podobně", táž jako ve slovech
+ * u oblasti (prahy.ts).
  */
 export const MAPA_ROZSAH = {
-  /** vodorovně: úroveň oblasti; pod 50 a nad 82 se v praxi průměry nepohybují */
-  xMin: 50,
-  xMax: 82,
-  /** hranice silného pásma testu */
-  xDel: PASMO_OBLASTI.silne,
+  /** vodorovně: body pod a nad hranicí silného pásma */
+  xMin: -16,
+  xMax: 16,
+  /** hranice silného pásma */
+  xDel: 0,
   /** svisle: jak moc se hráči liší; 0 nahoře, největší rozdíly dole */
   yMax: 28,
   /** hranice mezi „hráči na tom jsou podobně" a „liší se"; táž jako ve slovech u oblasti */
   yDel: SD_SHODA,
 } as const
+
+/** Pomocné svislé čáry a jejich popisky. */
+export const SVISLE_CARY = [-12, -8, -4, 4, 8, 12] as const
+
+/** Popisek svislé čáry: „+8", „−4". */
+export const popisCary = (v: number) => (v > 0 ? `+${v}` : `\u2212${Math.abs(v)}`)
 
 const orez = (x: number) => Math.min(1, Math.max(0, x))
 
@@ -172,7 +191,7 @@ export function vyberUkazku<
 >(oblasti: O[], casti: C[], nejmensiRozdil = 6): { oblast: O; cast: C } | null {
   const { xDel, yDel } = MAPA_ROZSAH
   const kandidati = oblasti
-    .filter((o) => o.prumer >= xDel && o.smodch < yDel)
+    .filter((o) => polohaX(o.id, o.prumer) >= xDel && o.smodch < yDel)
     .map((o) => ({
       oblast: o,
       cast: casti
@@ -183,7 +202,7 @@ export function vyberUkazku<
   // Nejnázornější je ta, která leží v pravém horním rohu nejhlouběji. Oblast
   // těsně na hranici by popisku „vpravo nahoře" odpovídala jen formálně a
   // čtenář by hledal, o čem je řeč.
-  const hloubka = (o: O) => o.prumer - xDel + (yDel - o.smodch)
+  const hloubka = (o: O) => polohaX(o.id, o.prumer) - xDel + (yDel - o.smodch)
   return (
     kandidati.sort(
       (a, b) =>
@@ -193,8 +212,12 @@ export function vyberUkazku<
   )
 }
 
-/** Krok pětistupňové škály pro číslo 0 až 100. */
-export function krokSkaly(uroven: number): 1 | 2 | 3 | 4 | 5 {
-  const i = Math.min(4, Math.max(0, Math.floor((uroven - 45) / 9)))
+/**
+ * Krok pětistupňové škály pro polohu vůči hranici silného pásma
+ * (`polohaX`). Třetí krok začíná o 7,5 bodu pod hranicí, čtvrtý 1,5 bodu nad
+ * ní; dřív totéž platilo pro hrubé číslo proti společné hranici 61,5.
+ */
+export function krokSkaly(poloha: number): 1 | 2 | 3 | 4 | 5 {
+  const i = Math.min(4, Math.max(0, Math.floor((poloha + 16.5) / 9)))
   return (i + 1) as 1 | 2 | 3 | 4 | 5
 }

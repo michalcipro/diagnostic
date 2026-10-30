@@ -1,6 +1,7 @@
 import { applyGender, getDimensionContent, getFacetContent, vt } from "../content"
 import { BAND_LABELS, TEST_NAMES, UI, fmtNum } from "../i18n"
 import { OTAZKY_DIMENZI, OTAZKY_FAZET, vUvozovkach } from "../otazky"
+import { PERCENTILY_PASEM } from "../normy"
 import { evaluate } from "../scoring"
 import { getStructure, parseTestId } from "../structure"
 import { buildSummary, summaryHeading } from "../summary"
@@ -87,6 +88,7 @@ export function sestavReportPdf(vstup: PdfVstup): Sestava {
   const pasmaDimenzi = structure.scoring.dimensionBands
   const minDim = pasmaDimenzi[0].min
   const maxDim = pasmaDimenzi[pasmaDimenzi.length - 1].max
+  const jeNormovano = result.dimensions.every((d) => d.percentil !== undefined)
   const pasmaFazet = structure.scoring.facetBands
   const minFazety = pasmaFazet?.[0].min ?? 0
   const maxFazety = pasmaFazet?.[pasmaFazet.length - 1].max ?? 0
@@ -127,13 +129,17 @@ export function sestavReportPdf(vstup: PdfVstup): Sestava {
       result.dimensions.map((d) => ({
         nazev: getDimensionContent(d.id).name[lang],
         hodnota: d.reported ? String(d.raw) : null,
-        procenta: d.percent,
+        procenta: d.percentil ?? d.percent,
         pasmo: d.reported ? d.band : null,
         stitek: d.reported ? BAND_LABELS[lang][d.band] : t.scaleNotReported,
       })),
       {
-        popis: ts.stupnice(minDim, maxDim),
-        hranice: hranicePasem(pasmaDimenzi, minDim, maxDim),
+        // Pruh ukazuje percentil vůči normě a hranice pásem jsou proto pro
+        // všechny oblasti stejné. Hrubé skóre zůstává číslem u řádku.
+        popis: jeNormovano ? ts.osaNorem : ts.stupnice(minDim, maxDim),
+        hranice: jeNormovano
+          ? [PERCENTILY_PASEM.stabilization, PERCENTILY_PASEM.strong, PERCENTILY_PASEM.elite]
+          : hranicePasem(pasmaDimenzi, minDim, maxDim),
         popisky: PORADI_PASEM.map((p) => ts.pasmaOsy[p]),
       },
       { mezera },
@@ -203,7 +209,7 @@ export function sestavReportPdf(vstup: PdfVstup): Sestava {
       ss.fazeta(
         nazevSkaly(f.id),
         f.reported ? String(f.raw) : "–",
-        f.reported ? f.percent : 0,
+        f.reported ? (f.percentil ?? f.percent) : 0,
         f.reported ? f.band : null,
       ),
     )

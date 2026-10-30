@@ -13,6 +13,7 @@ import type {
   ValidityStatus,
 } from "./types"
 import { contentItems } from "./structure"
+import { normaSkaly, pasmoZPercentilu, percentilZNormy } from "./normy"
 
 // Skórování dle vyhodnocovacích klíčů ELITE 200™ / ELITE 100™.
 // Pořadí dle klíče: nejdřív validita, teprve potom skóry.
@@ -209,6 +210,7 @@ export function evaluateValidity(
  * zodpovězených položek a při příliš velkém výpadku se nevykazuje vůbec.
  */
 function scoreScale(
+  model: StructureDef["model"],
   id: string,
   items: number[],
   answers: AnswerMap,
@@ -227,18 +229,26 @@ function scoreScale(
   const max = total * 5
   const raw =
     answered === 0 ? min : Math.round((values.reduce((sum, v) => sum + v, 0) / answered) * total)
+  // Pásmo se čte z normy, tedy z toho, kde klient stojí mezi sportovci, kteří
+  // test vyplnili. Pevné hranice zůstávají jen pro škálu, ke které norma není.
+  const norma = normaSkaly(model, id)
+  const percentil = norma ? percentilZNormy(norma, raw / total) : undefined
   return {
     id,
     raw,
     min,
     max,
     percent: percent(raw, min, max),
-    band: bandFor(raw, bands),
+    percentil,
+    band: percentil !== undefined ? pasmoZPercentilu(percentil) : bandFor(raw, bands),
     answered,
     total,
     reported: answered / total >= minCoverage,
   }
 }
+
+/** Poloha škály pro řazení: percentil, a kde chybí, procento rozsahu. */
+const poloha = (x: ScaleScore) => x.percentil ?? x.percent
 
 export function evaluate(
   s: StructureDef,
@@ -256,7 +266,7 @@ export function evaluate(
     // ELITE 200: fazety 8–40, dimenze 24–120
     const facetBands = s.scoring.facetBands!
     facets = s.facets.map((f) => ({
-      ...scoreScale(f.id, f.items, answers, reversedSet, facetBands, cover),
+      ...scoreScale(s.model, f.id, f.items, answers, reversedSet, facetBands, cover),
       dimension: f.dimension,
     }))
     dimensions = s.dimensions.map((d) => {
@@ -264,7 +274,7 @@ export function evaluate(
       // Dimenze se počítá přímo ze svých 24 položek, ne součtem fazetových
       // skóre – při chybějících odpovědích je dopočet z celé sady přesnější.
       const dimItems = dimFacets.flatMap((f) => s.facets!.find((x) => x.id === f.id)!.items)
-      const base = scoreScale(d.id, dimItems, answers, reversedSet, s.scoring.dimensionBands, cover)
+      const base = scoreScale(s.model, d.id, dimItems, answers, reversedSet, s.scoring.dimensionBands, cover)
       // Heterogenitu má smysl číst jen tehdy, když jsou všechny tři fazety
       // vykazatelné – jinak by rozpětí míchalo skóre s mírou chybějících dat.
       const allReported = dimFacets.every((f) => f.reported)
@@ -283,16 +293,28 @@ export function evaluate(
   } else {
     // ELITE 100: dimenze = 12 položek, 12–60
     dimensions = s.dimensions.map((d) => ({
-      ...scoreScale(d.id, d.items!, answers, reversedSet, s.scoring.dimensionBands, cover),
+      ...scoreScale(s.model, d.id, d.items!, answers, reversedSet, s.scoring.dimensionBands, cover),
       id: d.id,
     }))
   }
 
   // Nejsilnější / nejslabší škály – jen z těch, které se vykazují.
+  //
+  // Řadí se podle polohy vůči normě, ne podle hrubého skóre. Fazety nejsou
+  // stejně těžké (průměrná odpověď u vnitřního dialogu je 3,1, u růstového
+  // přesvědčení 4,1), takže podle hrubého skóre by mezi nejslabšími stály
+  // pořád tytéž fazety u všech klientů.
   const pool: ScaleScore[] = (facets ?? dimensions).filter((x) => x.reported)
-  const sorted = [...pool].sort((a, b) => b.raw - a.raw || a.id.localeCompare(b.id))
+  const sorted = [...pool].sort((a, b) => poloha(b) - poloha(a) || a.id.localeCompare(b.id))
   const strongest = sorted.slice(0, s.scoring.topCount)
-  const weakest = pool.length > s.scoring.topCount ? sorted.slice(-s.scoring.topCount).reverse() : []
+  // Nejslabší se nesmějí překrývat s nejsilnějšími.
+  const weakest = pool.length >= 2 * s.scoring.topCount ? sorted.slice(-s.scoring.topCount).reverse() : []
+
+  const relativeWeaknesses = dimensions
+    .filter((d) => d.reported)
+    .sort((a, b) => poloha(a) - poloha(b) || a.id.localeCompare(b.id))
+    .slice(0, 2)
+    .map((d) => d.id)
 
   const reportedDims = dimensions.filter((d) => d.reported)
   const dimensionSpread =
@@ -311,6 +333,7 @@ export function evaluate(
     facets,
     strongest,
     weakest,
+    relativeWeaknesses,
     dimensionSpread,
     imbalanced:
       s.scoring.imbalanceThreshold !== undefined && dimensionSpread !== undefined

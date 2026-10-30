@@ -89,15 +89,26 @@ Sedm oblastí, každá ze tří fazet po osmi položkách. Škála 1–5.
 | metrika | hodnota | poznámka |
 |---|---|---|
 | skóre oblasti a fazety | 0–100 % | vykazuje se od 75 % zodpovězených položek |
-| pásmo | rozvojová priorita · stabilizace · silné · špičkové | hranice 31 / 61 / 82 % |
+| percentil vůči normě | 0–100 | kde klient stojí mezi sportovci, kteří ELITE vyplnili; norma v `lib/diagnostic/normy.ts` |
+| pásmo | rozvojová priorita · stabilizace · silné · špičkové | podle percentilu: spodních 20 % / do mediánu / nad mediánem / horních 15 % |
+| relativní slabiny | dvě oblasti | nejnižší percentil v profilu; jmenují se i tehdy, když vyšly silně |
 | heterogenita oblasti | ano / ne | rozpětí fazet nad prahem; oblast se pak čte po fazetách |
-| nejsilnější a nejslabší fazety | tři a tři | |
+| nejsilnější a nejslabší fazety | tři a tři | řazené podle percentilu, ne podle hrubého skóre |
+
+**Normy (říjen 2026).** 47 úplných vyplnění ELITE 200 (36 sport, 11 business).
+Průměrná odpověď na položku po otočení obrácených položek je 3,68 ± 0,55,
+oblasti se liší (odolnost 4,0, koncentrace 3,4). Percentil se počítá
+z normálního rozdělení s průměrem a odchylkou každé oblasti a fazety.
+Spolehlivost (alfa) oblastí 0,82–0,87, fazet 0,48–0,83. Dřív stála pásma na
+pevných hranicích 31 / 61 / 82 % rozsahu a silné vycházelo u dvou třetin
+oblastí; třetina klientů neměla v reportu nic k práci. Přepočítat při zhruba
+150 vyplněních.
 
 ### ELITE 100 (v aplikaci)
 
 | metrika | hodnota |
 |---|---|
-| skóre sedmi oblastí | 0–100 %, pásmo |
+| skóre sedmi oblastí | 0–100 %, percentil a pásmo podle norem ELITE 200 na položku |
 | rozpětí oblastí | rozdíl nejvyšší a nejnižší |
 | nevyvážený profil | ano / ne |
 
@@ -299,7 +310,7 @@ to prodat.
 | infrekvence | počet signálů | tvrdý |
 | konzistence | průměrný rozdíl v párech, páry nad 3 | tvrdý |
 | tempo | sekundy na položku | tvrdý |
-| upřímnost | skóre proti prahům | měkký; nejvýš „opatrně" |
+| upřímnost | skóre proti prahům | měkký; nejvýš „opatrně"; prahy 39 a 45 (ELITE 200) podle vzorku, dřív 33 a 44 a varování dostávalo 62 % klientů |
 | odpověďový styl | podíl souhlasů, nesouhlasů, krajních odpovědí; nejdelší řada | měkký |
 | **verdikt** | v pořádku · opatrně · neplatné | |
 

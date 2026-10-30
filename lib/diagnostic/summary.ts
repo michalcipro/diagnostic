@@ -43,11 +43,15 @@ interface Texty {
   }
   strengths: (oblasti: string) => string
   priorities: (oblasti: string) => string
+  /** žádná oblast pod mediánem: kde je i tak největší rezerva */
+  prioritiesRelativni: (oblasti: string) => string
   caveat: {
     /** kontrolní mechanismy vyplnění zamítly */
     neplatne: string
     /** kontrolní mechanismy doporučují opatrnost */
     opatrne: string
+    /** výrazná snaha ukázat se v dobrém světle; čísla budou spíš nadsazená */
+    stylizace: string
     /** dotazník není vyplněný celý */
     nedokoncene: string
   }
@@ -74,11 +78,15 @@ const TEXTY: Record<Lang, Texty> = {
       `Nejpevněji stojíš tady: ${oblasti}. Tohle je tvoje zázemí. Když se něco jiného rozkolísá, odsud se dá vyjít. Stojí za to o tyhle oblasti vědomě pečovat, ne je brát jako samozřejmost.`,
     priorities: (oblasti) =>
       `Největší prostor ke zlepšení je tady: ${oblasti}. Neznamená to, že tam něco nefunguje, ale že to zatím není spolehlivé v okamžiku, kdy jde o hodně. Sem se vyplatí dát energii jako první, protože se to promítne i do ostatních oblastí.`,
+    prioritiesRelativni: (oblasti) =>
+      `Žádná oblast nevyšla pod polovinou sportovců, kteří test vyplnili. I silný profil má ale svou rezervu: vůči ostatním oblastem stojíš nejníž tady: ${oblasti}. Tam je nejblíž k dalšímu posunu, a proto začni právě tady.`,
     caveat: {
       neplatne:
         "Jedna věc je ale potřeba říct na rovinu: kontrolní mechanismy ukazují, že tohle vyplnění pravděpodobně neodráží skutečnost. Ber proto celý profil jako orientační a dotazník si v klidu zopakuj.",
       opatrne:
         "Malá poznámka na okraj: některé kontrolní ukazatele doporučují opatrnost. Nic to neruší, jen si u každého závěru ověř, jestli sedí na konkrétní situace z posledních týdnů.",
+      stylizace:
+        "Jedna poznámka k číslům: odpovědi ukazují výraznou snahu ukázat se v dobrém světle. To je lidské, ale skutečný stav bude spíš o kus níž, než ukazují pásma. Víc proto řekne pořadí oblastí než jejich výška, a to, kde začít, platí beze změny.",
       nedokoncene:
         "Dotazník nebyl vyplněn celý, takže část profilu stojí na menším počtu odpovědí, než by bylo ideální.",
     },
@@ -108,11 +116,15 @@ const TEXTY: Record<Lang, Texty> = {
       `Najpevnejšie stojíš tu: ${oblasti}. Toto je tvoje zázemie. Keď sa niečo iné rozkolíše, odtiaľto sa dá vyjsť. Stojí za to o tieto oblasti vedome dbať, nie ich brať ako samozrejmosť.`,
     priorities: (oblasti) =>
       `Najväčší priestor na zlepšenie je tu: ${oblasti}. Neznamená to, že tam niečo nefunguje, ale že to zatiaľ nie je spoľahlivé v okamihu, keď ide o veľa. Sem sa vyplatí dať energiu ako prvú, pretože sa to prenesie aj do ostatných oblastí.`,
+    prioritiesRelativni: (oblasti) =>
+      `Žiadna oblasť nevyšla pod polovicou športovcov, ktorí test vyplnili. Aj silný profil má však svoju rezervu: voči ostatným oblastiam stojíš najnižšie tu: ${oblasti}. Tam je najbližšie k ďalšiemu posunu, a preto začni práve tu.`,
     caveat: {
       neplatne:
         "Jednu vec je však potrebné povedať na rovinu: kontrolné mechanizmy ukazujú, že toto vyplnenie pravdepodobne neodráža skutočnosť. Ber preto celý profil ako orientačný a dotazník si v pokoji zopakuj.",
       opatrne:
         "Malá poznámka na okraj: niektoré kontrolné ukazovatele odporúčajú opatrnosť. Nič to neruší, len si pri každom závere over, či sedí na konkrétne situácie z posledných týždňov.",
+      stylizace:
+        "Jedna poznámka k číslam: odpovede ukazujú výraznú snahu ukázať sa v dobrom svetle. To je ľudské, ale skutočný stav bude skôr o kus nižšie, než ukazujú pásma. Viac preto povie poradie oblastí než ich výška, a to, kde začať, platí bez zmeny.",
       nedokoncene:
         "Dotazník nebol vyplnený celý, takže časť profilu stojí na menšom počte odpovedí, než by bolo ideálne.",
     },
@@ -142,11 +154,15 @@ const TEXTY: Record<Lang, Texty> = {
       `Your firmest ground is here: ${oblasti}. This is your base. When something else wobbles, this is where you start from. It is worth tending these areas deliberately rather than taking them for granted.`,
     priorities: (oblasti) =>
       `The most room for improvement is here: ${oblasti}. It does not mean something is broken there, only that it is not yet dependable when the stakes are high. This is where energy pays off first, because it carries over into the other areas.`,
+    prioritiesRelativni: (oblasti) =>
+      `No area came out below half of the athletes who have taken the test. Even a strong profile has its margin, though: compared with your other areas you stand lowest here: ${oblasti}. That is where the next step is closest, so start here.`,
     caveat: {
       neplatne:
         "One thing needs saying plainly: the control checks suggest this session probably does not reflect reality. Treat the whole profile as indicative only and take the questionnaire again when you have the calm for it.",
       opatrne:
         "A small note: some control indicators suggest caution. Nothing here is invalid, just check each conclusion against concrete situations from the past few weeks.",
+      stylizace:
+        "One note on the numbers: the answers show a marked wish to come across well. That is human, but the real picture is likely to sit somewhat lower than the bands suggest. The order of the areas therefore says more than their height, and where to start stays the same.",
       nedokoncene:
         "The questionnaire was not fully completed, so part of the profile rests on fewer answers than would be ideal.",
     },
@@ -183,7 +199,9 @@ const ROZPETI_NEVYROVNANY = 30
 
 export function buildSummary(result: DiagnosticResult, lang: Lang): Summary {
   const dims = result.dimensions.filter((d) => d.reported)
-  const serazene = [...dims].sort((a, b) => b.percent - a.percent)
+  // Řadí se podle polohy vůči normě; bez normy podle procenta rozsahu.
+  const poloha = (d: DimensionScore) => d.percentil ?? d.percent
+  const serazene = [...dims].sort((a, b) => poloha(b) - poloha(a))
   const silne = serazene.filter((d) => d.band === "elite" || d.band === "strong")
   const slabe = serazene.filter((d) => d.band === "priority" || d.band === "stabilization").reverse()
 
@@ -191,7 +209,21 @@ export function buildSummary(result: DiagnosticResult, lang: Lang): Summary {
   // stránky by se překrývaly a „vyrovnaný" by vyšel pokaždé.
   const dost = dims.length >= MIN_DIMENZI
   const nejsilnejsi = dost ? serazene.slice(0, 2) : []
-  const nejslabsi = !dost ? [] : slabe.length ? slabe.slice(0, 2) : serazene.slice(-2).reverse()
+  // Kde začít: oblasti v nejnižších dvou pásmech, a když žádná není, dvě
+  // oblasti, kde klient stojí vůči normě nejníž. Dřív tady klient se silnými
+  // pásmy všude dostal jen obecné „nejnižší dvě", které report nikde
+  // nevysvětlil, a kouč pak četl, že klient nemá co řešit.
+  const relativni = (result.relativeWeaknesses ?? [])
+    .map((id) => dims.find((d) => d.id === id))
+    .filter((d): d is DimensionScore => d !== undefined)
+  const jenRelativni = dost && !slabe.length
+  const nejslabsi = !dost
+    ? []
+    : slabe.length
+      ? slabe.slice(0, 2)
+      : relativni.length
+        ? relativni
+        : serazene.slice(-2).reverse()
 
   const txt = TEXTY[lang]
 
@@ -224,12 +256,16 @@ export function buildSummary(result: DiagnosticResult, lang: Lang): Summary {
   // ---- co řešit jako první ----
   const priorities = !nejslabsi.length
     ? ""
-    : txt.priorities(spoj(nejslabsi.map((d) => nazev(d, lang))))
+    : (jenRelativni ? txt.prioritiesRelativni : txt.priorities)(spoj(nejslabsi.map((d) => nazev(d, lang))))
 
   // ---- poznámka k důvěryhodnosti ----
   let caveat = ""
   if (result.validity.overall === "invalid") {
     caveat = txt.caveat.neplatne
+  } else if (result.validity.honesty?.status === "invalid") {
+    // Výrazná stylizace sama verdikt „neplatné" nedává, ale čte se jinak než
+    // obecná opatrnost: čísla budou nejspíš nadsazená, pořadí oblastí platí.
+    caveat = txt.caveat.stylizace
   } else if (result.validity.overall === "caution") {
     caveat = txt.caveat.opatrne
   } else if (!result.complete) {

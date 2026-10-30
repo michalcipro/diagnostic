@@ -245,6 +245,10 @@ export interface UIStrings {
   proratedNote: string
   /** pořadí škál není srovnání s populací */
   normativeCaveat: string
+  /** kde klient stojí vůči normě, k pruhu oblasti */
+  polohaVNorme: (percentil: number) => string
+  /** štítek u dvou oblastí, kde klient stojí vůči normě nejníž */
+  relativniSlabina: string
   strengthsTitle: string
   prioritiesTitle: string
   developmentTitle: string
@@ -406,7 +410,9 @@ export const UI: Record<Lang, UIStrings> = {
     proratedNote:
       "U škál s chybějícími odpověďmi je skóre dopočítané z průměru zodpovězených položek. Škály, kde chybí víc než čtvrtina odpovědí, se nevykazují vůbec.",
     normativeCaveat:
-      "Pořadí škál vychází z hrubých skóre, ne ze srovnání s populací – normy zatím nejsou k dispozici. Čti je jako „s těmito výroky {souhlasil|souhlasila} nejvíc“, ne jako „v tomhle je {nadprůměrný|nadprůměrná}“.",
+      "Pásma ukazují, kde klient stojí mezi sportovci, kteří ELITE vyplnili: rozvojová priorita je spodních 20 %, stabilizace sahá k mediánu, silné je nad mediánem a špičkové horních 15 %. Norma zatím stojí na 47 vyplněních, proto ber hranice jako orientační. Dvě oblasti označené jako relativní slabina jsou ty, kde je klient vůči normě nejníž; jsou to místa, kde začít, i když vyšla silně.",
+    polohaVNorme: (p) => `výš než ${Math.round(p)} % sportovců`,
+    relativniSlabina: "relativní slabina",
     strengthsTitle: "Opěrné body profilu",
     prioritiesTitle: "Rozvojové priority",
     developmentTitle: "Doporučení pro rozvoj (8–12 týdnů)",
@@ -569,7 +575,9 @@ export const UI: Record<Lang, UIStrings> = {
     proratedNote:
       "For scales with missing answers the score is estimated from the mean of the answered items. Scales missing more than a quarter of their answers are not reported at all.",
     normativeCaveat:
-      "The ranking of scales comes from raw scores, not from a comparison with a population – norms are not available yet. Read it as “agreed with these statements most”, not as “is above average in this”.",
+      "The bands show where the client stands among the athletes who have taken ELITE: development priority is the bottom 20 %, stabilisation runs up to the median, strong is above the median and elite is the top 15 %. The norm currently rests on 47 completed surveys, so treat the boundaries as a guide. The two areas marked as a relative weakness are where the client stands lowest against the norm; they are the place to start even when they came out strong.",
+    polohaVNorme: (p) => `higher than ${Math.round(p)} % of athletes`,
+    relativniSlabina: "relative weakness",
     strengthsTitle: "Anchors of the profile",
     prioritiesTitle: "Development priorities",
     developmentTitle: "Development recommendations (8–12 weeks)",
@@ -733,7 +741,9 @@ export const UI: Record<Lang, UIStrings> = {
     proratedNote:
       "Pri škálach s chýbajúcimi odpoveďami je skóre dopočítané z priemeru zodpovedaných položiek. Škály, kde chýba viac než štvrtina odpovedí, sa nevykazujú vôbec.",
     normativeCaveat:
-      "Poradie škál vychádza z hrubých skóre, nie z porovnania s populáciou – normy zatiaľ nie sú k dispozícii. Čítaj ich ako „s týmito výrokmi {súhlasil|súhlasila} najviac“, nie ako „v tomto je {nadpriemerný|nadpriemerná}“.",
+      "Pásma ukazujú, kde klient stojí medzi športovcami, ktorí ELITE vyplnili: rozvojová priorita je spodných 20 %, stabilizácia siaha k mediánu, silné je nad mediánom a špičkové horných 15 %. Norma zatiaľ stojí na 47 vyplneniach, preto ber hranice ako orientačné. Dve oblasti označené ako relatívna slabina sú tie, kde je klient voči norme najnižšie; sú to miesta, kde začať, aj keď vyšli silno.",
+    polohaVNorme: (p) => `vyššie ako ${Math.round(p)} % športovcov`,
+    relativniSlabina: "relatívna slabina",
     strengthsTitle: "Oporné body profilu",
     prioritiesTitle: "Rozvojové priority",
     developmentTitle: "Odporúčania pre rozvoj (8–12 týždňov)",

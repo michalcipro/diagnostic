@@ -76,7 +76,10 @@ export const ELITE200: StructureDef = {
     attention: { 50: 2, 100: 4, 150: 1, 188: 3 },
     attentionThresholds: { caution: 2, invalid: 3 },
     infrequency: { expectAgree: [34, 79], expectDisagree: [124, 169] },
-    honesty: { items: [13, 27, 41, 56, 71, 86, 101, 116, 131, 146, 161, 176], thresholds: [33, 44] },
+    // Hranice podle vzorku 47 vyplnění (říjen 2026): 39 je 75. percentil,
+    // nad 45 je zhruba horních 10 %. Dřív stály na 33 a 44 a varování dostalo
+    // 62 % klientů, takže přestalo cokoli rozlišovat. Medián vzorku je 35.
+    honesty: { items: [13, 27, 41, 56, 71, 86, 101, 116, 131, 146, 161, 176], thresholds: [39, 45] },
     consistency: {
       pairs: [
         { a: 31, b: 178, type: "agree" },
@@ -153,7 +156,9 @@ export const ELITE100: StructureDef = {
     // Kontroly jsou jen dvě, takže shovívavější práh než u ELITE 200 nejde –
     // jedna minutá kontrola z dvou už je polovina.
     attentionThresholds: { caution: 1, invalid: 2 },
-    honesty: { items: [10, 21, 32, 44, 55, 66, 78, 89], thresholds: [22, 29] },
+    // Vlastní vzorek ELITE 100 je malý; hranice jsou ty z ELITE 200
+    // přepočtené na osm položek (3,25 a 3,75 bodu na položku).
+    honesty: { items: [10, 21, 32, 44, 55, 66, 78, 89], thresholds: [26, 30] },
     consistency: {
       pairs: [
         { a: 63, b: 95, type: "agree" },

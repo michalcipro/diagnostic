@@ -81,7 +81,10 @@ export function vyhodnoceniHrace(
       nazev: o[id].nazev,
       uvod: applyGender(o[id].uvod, opts.gender),
       band,
-      percent: d?.reported ? d.percent : 0,
+      // Délka pruhu i pořadí „kde jsi nejsilnější" stojí na poloze vůči
+      // normě, stejně jako pásmo. Podle hrubého procenta by mezi nejslabšími
+      // stálo u každého hráče soustředění, protože je to nejtěžší oblast.
+      percent: d?.reported ? (d.percentil ?? d.percent) : 0,
       vyklad: applyGender(o[id].pasma[band], opts.gender),
     }
   })

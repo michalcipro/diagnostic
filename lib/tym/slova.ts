@@ -272,7 +272,7 @@ const CS: MapaTexty = {
     "Shora dolů: nahoře jsou hráči na tom podobně, dole se hodně liší.",
     "Levý dolní roh je nejhorší kombinace: slabé a k tomu rozdělené.",
   ],
-  osaX: "jak je na tom tým",
+  osaX: "body nad hranicí silného pásma, nebo pod ní",
   osaXVlevo: "slabší",
   osaXVpravo: "silnější",
   osaYNahore: "hráči stejně",
@@ -300,21 +300,24 @@ const CS: MapaTexty = {
   cislaTitul: "Co znamenají čísla",
   cislaUvod:
     "Každá oblast má jedno číslo od 0 do 100. Není to procento úspěšnosti ani známka. " +
-    "Je to poloha na škále, kterou používáme u všech týmů, takže se dá porovnávat mezi " +
-    "sezonami i mezi mužstvy.",
+    "Je to poloha na škále dotazníku (0 jsou samé nejhorší odpovědi, 100 samé nejlepší), " +
+    "takže se dá porovnávat mezi sezonami i mezi mužstvy. Pásmo hráče se ale určuje " +
+    "podle toho, kde stojí mezi sportovci, kteří test vyplnili:",
   pasma: [
-    { rozsah: "Pod 31", popis: "Rozvojová priorita. Chybí základ, na kterém se dá stavět." },
-    { rozsah: "31 až 61", popis: "Stabilizace. V klidu to drží, pod tlakem ne." },
-    { rozsah: "61 až 82", popis: "Silné. Dá se na tom stavět." },
-    { rozsah: "Nad 82", popis: "Špičkové. Konkurenční výhoda." },
+    { rozsah: "Spodních 20 %", popis: "Rozvojová priorita. Chybí základ, na kterém se dá stavět." },
+    { rozsah: "20 až 50 %", popis: "Stabilizace. V klidu to drží, pod tlakem ne." },
+    { rozsah: "50 až 85 %", popis: "Silné. Nad polovinou sportovců, dá se na tom stavět." },
+    { rozsah: "Horních 15 %", popis: "Špičkové. Konkurenční výhoda." },
   ],
   cislaPoznamka:
-    "Tohle jsou pásma testu a platí pro jednoho hráče. Slovo u oblasti se ale nečte " +
-    "z průměru: oblast se jmenuje silnou tehdy, když je v silném nebo špičkovém pásmu " +
-    "aspoň šest hráčů z deseti a v rozvojové prioritě nanejvýš jeden. Špičkovou, když " +
-    "je tam aspoň osm z deseti, nikdo dole a aspoň tři ve špičkovém pásmu. Průměr sám " +
-    "totiž umí zakrýt, že půlka týmu je dole. Vedle čísla je proto vždycky ještě druhá " +
-    "informace: jestli jsou na tom hráči podobně, nebo úplně jinak.",
+    "Oblasti nejsou stejně těžké: medián sportovců leží u soustředění kolem 60 bodů, " +
+    "u zvládání neúspěchu kolem 75. Mapa proto ukazuje, o kolik bodů je tým nad hranicí silného " +
+    "pásma dané oblasti, nebo pod ní. Slovo u oblasti se nečte z průměru: oblast se " +
+    "jmenuje silnou tehdy, když je v silném nebo špičkovém pásmu aspoň šest hráčů z deseti " +
+    "a v rozvojové prioritě nanejvýš jeden. Špičkovou, když je tam aspoň osm z deseti, " +
+    "nikdo dole a aspoň tři ve špičkovém pásmu. Průměr sám totiž umí zakrýt, že půlka " +
+    "týmu je dole. Vedle čísla je proto vždycky ještě druhá informace: jestli jsou na tom " +
+    "hráči podobně, nebo úplně jinak.",
 
   trhlinyKicker: "To, co by v průměru zapadlo",
   trhlinyTitul: "Kde se problém schoval",
@@ -366,7 +369,7 @@ const EN: MapaTexty = {
     "Top to bottom: at the top players are in a similar place, at the bottom they differ a lot.",
     "The bottom left corner is the worst combination: weak and divided on top of it.",
   ],
-  osaX: "where the squad stands",
+  osaX: "points above or below the strong-band line",
   osaXVlevo: "weaker",
   osaXVpravo: "stronger",
   osaYNahore: "players alike",
@@ -391,22 +394,25 @@ const EN: MapaTexty = {
   cislaTitul: "What the numbers mean",
   cislaUvod:
     "Each area carries one number from 0 to 100. It is not a success rate and not a grade. " +
-    "It is a position on a scale we use with every squad, so it can be compared across " +
-    "seasons and across teams.",
+    "It is a position on the questionnaire's scale (0 means all the lowest answers, 100 all " +
+    "the highest), so it can be compared across seasons and across teams. A player's band, " +
+    "though, is set by where they stand among the athletes who have taken the test:",
   pasma: [
-    { rozsah: "Below 31", popis: "Development priority. The base to build on is missing." },
-    { rozsah: "31 to 61", popis: "Stabilisation. Holds when calm, not under pressure." },
-    { rozsah: "61 to 82", popis: "Strong. Something to build on." },
-    { rozsah: "Above 82", popis: "Elite. A competitive advantage." },
+    { rozsah: "Bottom 20 %", popis: "Development priority. The base to build on is missing." },
+    { rozsah: "20 to 50 %", popis: "Stabilisation. Holds when calm, not under pressure." },
+    { rozsah: "50 to 85 %", popis: "Strong. Above half of the athletes, something to build on." },
+    { rozsah: "Top 15 %", popis: "Elite. A competitive advantage." },
   ],
   cislaPoznamka:
-    "These are the bands of the test and they describe one player. The word next to an area " +
-    "is not read off the average, though: an area counts as strong when at least six players " +
-    "in ten sit in the strong or elite band and at most one is a development priority; as " +
-    "elite when at least eight in ten do, nobody is at the bottom and at least three are in " +
-    "the elite band. An average on its own can hide that half the team is down there. That is " +
-    "why the number always comes with a second piece of information: whether players are in a " +
-    "similar place or somewhere else entirely.",
+    "The areas are not equally hard: the athletes' median sits around 60 points for focus " +
+    "and around 75 for how players take failure. The map therefore shows how many points the team sits above " +
+    "or below the strong-band line of each area. The word next to an area is not read off the " +
+    "average: an area counts as strong when at least six players in ten sit in the strong or " +
+    "elite band and at most one is a development priority; as elite when at least eight in ten " +
+    "do, nobody is at the bottom and at least three are in the elite band. An average on its " +
+    "own can hide that half the team is down there. That is why the number always comes with " +
+    "a second piece of information: whether players are in a similar place or somewhere else " +
+    "entirely.",
 
   trhlinyKicker: "What an average would swallow",
   trhlinyTitul: "Where the problem hid",
